@@ -1,0 +1,48 @@
+# Drumee UI-plugin image — webpack-builds a frontend plugin bundle and, at
+# container start, publishes it into the shared `plugins` volume so the proxy
+# serves it at /-/plugins/<name>/ and bootstrap.plugin resolves it at runtime.
+#
+#   docker buildx build -f deploy/docker/Dockerfile.plugin-ui \
+#     --build-context helpers=deploy/docker \
+#     --build-arg INSTALL_DEPS=0 --build-arg PLUGIN_NAME=signin \
+#     -t drumee/signin-ui:<tag> /path/to/signin
+#
+# The bundle is built with BUILD_TARGET=<name> and PUBLIC_PATH=/-/plugins/<name>/
+# so chunk/asset URLs resolve under the proxy's plugin route. An index.json
+# ({ "entry": "<name>.js" }) is emitted next to the bundle for bootstrap.plugin.
+ARG INSTALL_DEPS=0
+ARG PLUGIN_NAME=plugin
+
+# ---------- build stage ----------
+FROM node:20-bookworm AS build
+ARG INSTALL_DEPS
+ARG PLUGIN_NAME
+ENV UI_BUILD_MODE=production \
+    UI_BUILD_PATH=/out \
+    UI_SRC_PATH=/app \
+    ENDPOINT=main
+# No OUTPUT_FILENAME override -> webpack.js defaults to "[name]-[fullhash].js",
+# so the entry bundle is content-hashed (e.g. backup-<hash>.js). bootstrap.plugin
+# reads index.json server-side and returns the hashed path, so the browser always
+# fetches the current build (cache-busts automatically; no hard refresh needed).
+ENV BUILD_TARGET=${PLUGIN_NAME} \
+    PUBLIC_PATH=/-/plugins/${PLUGIN_NAME}/
+WORKDIR /app
+COPY . /app
+RUN if [ "$INSTALL_DEPS" = "1" ]; then npm ci || npm install; fi \
+    && npx webpack --config webpack.js \
+    && rm -f "/out/${PLUGIN_NAME}/stats.json" \
+    && entry=$(cd "/out/${PLUGIN_NAME}" && ls "${PLUGIN_NAME}"-*.js 2>/dev/null | grep -vE '\.(map|txt)$' | head -1) \
+    && [ -n "$entry" ] || { echo "ERROR: no hashed entry bundle for ${PLUGIN_NAME}" >&2; exit 1; } \
+    && printf '{ "entry": "%s" }\n' "$entry" > "/out/${PLUGIN_NAME}/index.json" \
+    && echo "plugin entry -> $entry"
+
+# ---------- runtime stage (one-shot publisher) ----------
+FROM alpine:3 AS runtime
+ARG PLUGIN_NAME
+ENV PLUGIN_NAME=${PLUGIN_NAME} \
+    PLUGIN_ENDPOINT=main
+COPY --from=build /out/ /payload/
+COPY --from=helpers plugin-ui-entrypoint.sh /usr/local/bin/drumee-plugin-ui
+RUN chmod +x /usr/local/bin/drumee-plugin-ui
+ENTRYPOINT ["drumee-plugin-ui"]

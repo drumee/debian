@@ -1,0 +1,38 @@
+# Drumee server-plugin image — a run-once publisher for one backend plugin.
+#
+# Build context is the plugin source repo (e.g. loby); helper scripts come from a
+# named build context so they need not live in the plugin tree:
+#
+#   docker buildx build -f deploy/docker/Dockerfile.plugin-server \
+#     --build-context helpers=deploy/docker \
+#     --build-arg INSTALL_DEPS=0 \           # 0 = reuse the repo's node_modules
+#     -t drumee/<name>:<tag> /path/to/<plugin-source>
+#
+# At container start the entrypoint: (1) copies the plugin into the shared
+# `plugins` volume at /srv/drumee/runtime/plugins/server/<endpoint>/<name>,
+# (2) loads its schemas/{tables,procedures}/*.sql into the hub template + every
+# entity DB, (3) registers it in /etc/drumee/conf.d/plugins/<endpoint>.json.
+# server-pod then loads it via Acl.loadPlugins() on startup.
+#
+# The plugin ships its own node_modules (which include @drumee/server-core), so
+# it is self-contained — no symlink into the server image is required.
+ARG INSTALL_DEPS=0
+FROM node:20-slim
+ARG INSTALL_DEPS
+WORKDIR /payload
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      mariadb-client ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY . /payload
+RUN if [ "$INSTALL_DEPS" = "1" ]; then npm ci || npm install; fi \
+    && rm -rf /payload/.git
+# Per-plugin extra OS packages: the plugin declares them in its own package.json
+# (drumee.apt), e.g. a backup plugin needs restic. This keeps plugin-specific
+# tools in the plugin's OWN image — the generic builder + server-pod stay clean.
+RUN APT="$(node -e "process.stdout.write((require('/payload/package.json').drumee?.apt||[]).join(' '))")"; \
+    if [ -n "$APT" ]; then apt-get update && apt-get install -y --no-install-recommends $APT \
+      && rm -rf /var/lib/apt/lists/*; fi
+COPY --from=helpers plugin-server-entrypoint.sh /usr/local/bin/drumee-plugin-init
+RUN chmod +x /usr/local/bin/drumee-plugin-init
+ENV PLUGIN_ENDPOINT=main
+ENTRYPOINT ["drumee-plugin-init"]

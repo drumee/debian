@@ -72,5 +72,41 @@ else
   say "Skipping drumee/infra-init (no setup-infra source at $SETUP_INFRA_SRC)"
 fi
 
+# ---- server plugins ----
+# Build each declared server plugin as drumee/<name>:$TAG from its source repo.
+# Override the list with SERVER_PLUGINS="name:/path/to/src name2:/path2 ...".
+for spec in ${SERVER_PLUGINS:-loby:$HOME/loby}; do
+  name="${spec%%:*}"; src="${spec#*:}"
+  if [ -d "$src" ]; then
+    say "Building drumee/$name:$TAG (server plugin) from $src"
+    # Surface the plugin's own worker declaration (package.json drumee.worker) as
+    # an image label so the renderer can give it a long-running worker service —
+    # without anyone hardcoding the plugin or editing the instance config.
+    worker="$(node -e "process.stdout.write(require('$src/package.json').drumee?.worker||'')" 2>/dev/null || true)"
+    docker buildx build -f "$root/deploy/docker/Dockerfile.plugin-server" \
+      --build-context "helpers=$root/deploy/docker" --build-arg INSTALL_DEPS=0 \
+      --label "drumee.worker=$worker" \
+      -t "drumee/$name:$TAG" --load "$src"
+  else
+    say "Skipping server plugin '$name' (no source at $src)"
+  fi
+done
+
+# ---- ui plugins ----
+# Build each declared UI plugin as drumee/<name>-ui:$TAG (webpack bundle).
+# Override the list with UI_PLUGINS="name:/path/to/src ...".
+for spec in ${UI_PLUGINS:-}; do
+  name="${spec%%:*}"; src="${spec#*:}"
+  if [ -d "$src" ]; then
+    say "Building drumee/$name-ui:$TAG (ui plugin) from $src"
+    docker buildx build -f "$root/deploy/docker/Dockerfile.plugin-ui" \
+      --build-context "helpers=$root/deploy/docker" --build-arg INSTALL_DEPS=0 \
+      --build-arg "PLUGIN_NAME=$name" \
+      -t "drumee/$name-ui:$TAG" --load "$src"
+  else
+    say "Skipping ui plugin '$name' (no source at $src)"
+  fi
+done
+
 say "Done. Images:"
 docker image ls --format '  {{.Repository}}:{{.Tag}}  {{.Size}}' | grep "drumee/.*:$TAG" || true

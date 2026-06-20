@@ -116,6 +116,16 @@
       "properties": {
         "registry": { "type": "string", "default": "drumee", "description": "Image namespace/registry prefix for the drumee/* images." }
       }
+    },
+    "plugins": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional Drumee plugins to ship with the instance. Each name maps to image <registry>/<name>:<plugins tag> and is loaded for the 'main' endpoint. Server plugins add backend services (acl+service+schema); UI plugins add dynamically-loaded frontend bundles.",
+      "properties": {
+        "server": { "type": "array", "items": { "type": "string" }, "default": [], "description": "Server plugin names, e.g. [loby]. Each adds backend services; its schema is loaded into the hub template + existing entity DBs and it is registered in conf.d/plugins/<endpoint>.json." },
+        "ui": { "type": "array", "items": { "type": "string" }, "default": [], "description": "UI plugin names, e.g. [signin, signup]. Each publishes a webpack bundle the proxy serves at /-/plugins/<name>/, resolved at runtime by bootstrap.plugin." },
+        "tag": { "type": "string", "default": "latest", "description": "Image tag for plugin images (separate from core component versions)." }
+      }
     }
   }
 }

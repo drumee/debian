@@ -52,9 +52,14 @@ COPY --from=helpers entrypoint.sh /usr/local/bin/drumee-entrypoint
 COPY --from=helpers ecosystem.config.js $DRUMEE_SERVER_HOME/ecosystem.config.js
 # Only the small writable dirs are created/chowned here — never `chown -R` over
 # the app tree (it would duplicate the entire layer).
+# conf.d (and conf.d/plugins) are pre-created + owned by www-data so the
+# entrypoint can write its config there even when a plugins volume is mounted at
+# the conf.d/plugins subdir (a subdir volume mount would otherwise create the
+# conf.d parent as root, breaking the www-data entrypoint writes).
 RUN chmod +x /usr/local/bin/drumee-entrypoint \
-    && mkdir -p /data /etc/drumee/credential $DRUMEE_UI_HOME/main \
+    && mkdir -p /data /etc/drumee/credential /etc/drumee/conf.d/plugins $DRUMEE_UI_HOME/main \
     && chown www-data:www-data /data /etc/drumee /etc/drumee/credential \
+         /etc/drumee/conf.d /etc/drumee/conf.d/plugins \
          /srv/drumee /srv/drumee/runtime $DRUMEE_SERVER_HOME $DRUMEE_UI_HOME $DRUMEE_UI_HOME/main
 
 USER www-data

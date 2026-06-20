@@ -70,3 +70,19 @@ versions:
   ui: 3.2.49
   schemas: 2.6.99
   static: 1.0.3
+
+plugins:
+  # Optional plugins shipped with the instance, loaded for the 'main' endpoint.
+  # Each name N maps to image <images.registry>/N:<plugins.tag> (UI: N-ui).
+  # Build them with scripts/build-images-local.sh (SERVER_PLUGINS/UI_PLUGINS=...).
+  #
+  # server: backend plugins. A one-shot plugin-<N> container publishes the plugin
+  #   into the shared plugins volume, loads its schemas/{tables,procedures} into
+  #   the hub template + entity DBs, and registers it in conf.d/plugins/main.json;
+  #   server-pod then loads it via Acl.loadPlugins().  e.g. loby (SSO/onboarding).
+  # ui: frontend plugins. A one-shot plugin-ui-<N> container publishes the webpack
+  #   bundle the proxy serves at /-/plugins/<N>/; bootstrap.plugin resolves it at
+  #   runtime (loaded on demand as #@plugins/<N>).  e.g. signin, signup.
+  server: []               # e.g. [loby]
+  ui: []                   # e.g. [signin, signup]
+  tag: latest
