@@ -30,8 +30,20 @@ RUN if [ "$INSTALL_DEPS" = "1" ]; then npm ci || npm install; fi \
 # (drumee.apt), e.g. a backup plugin needs restic. This keeps plugin-specific
 # tools in the plugin's OWN image — the generic builder + server-pod stay clean.
 RUN APT="$(node -e "process.stdout.write((require('/payload/package.json').drumee?.apt||[]).join(' '))")"; \
-    if [ -n "$APT" ]; then apt-get update && apt-get install -y --no-install-recommends $APT \
-      && rm -rf /var/lib/apt/lists/*; fi
+    if [ -n "$APT" ]; then \
+      apt-get update && apt-get install -y --no-install-recommends $APT && rm -rf /var/lib/apt/lists/*; \
+      # The plugin's SERVICE code runs inside the generic server-pod (no apt
+      # tools there). Bundle each apt package's executables into the plugin's own
+      # bin/ so they ride the plugins volume and are reachable wherever the plugin
+      # loads. (Works for self-contained binaries like restic; tools needing
+      # shared libs would need a fuller copy.)
+      mkdir -p /payload/bin; \
+      for p in $APT; do \
+        for f in $(dpkg -L "$p" 2>/dev/null | grep -E '/(bin|sbin)/[^/]+$' || true); do \
+          if [ -f "$f" ] && [ -x "$f" ]; then cp -a "$f" /payload/bin/ 2>/dev/null || true; fi; \
+        done; \
+      done; \
+    fi
 COPY --from=helpers plugin-server-entrypoint.sh /usr/local/bin/drumee-plugin-init
 RUN chmod +x /usr/local/bin/drumee-plugin-init
 ENV PLUGIN_ENDPOINT=main

@@ -27,6 +27,7 @@ function parseArgs(argv) {
     if (a === '--config') opts.config = rest[++i];
     else if (a === '--out') opts.out = rest[++i];
     else if (a === '--out-dir') opts.outDir = rest[++i];
+    else if (a === '--portable') opts.portable = true; // named volumes (blank-box DR bundle)
     else die(`unknown argument: ${a}`);
   }
   return { command, opts };
@@ -316,7 +317,15 @@ ${pluginRoute}	handle /-/svc/* {
 //   - the UI is a build artifact, not a service: ui-build runs once, publishes
 //     assets into a shared volume that server-pod serves from $DRUMEE_UI_HOME
 //   - the proxy routes everything to server-pod (/-/* = REST, else = pages)
-function renderCompose(cfg) {
+function renderCompose(cfg, opts = {}) {
+  // Portable mode: use named volumes for the data + DB trees instead of host
+  // bind mounts, so the SAME compose runs on a blank recovery box (the deploy
+  // bundle that ships inside a backup). Everything else — plugins included — is
+  // identical, so there is no separate hand-maintained DR compose.
+  const portable = !!opts.portable;
+  const dataMount = portable ? 'app_data:/data' : '${DRUMEE_DATA_DIR}:/data';
+  const dbMount = portable ? 'db_data:/var/lib/mysql' : '${DRUMEE_DB_DIR}:/var/lib/mysql';
+  const portableVols = portable ? '  app_data: {}\n  db_data: {}\n' : '';
   const redisCmd = cfg.redis.password
     ? `command: ["redis-server", "--requirepass", "$\{REDIS_PASSWORD}"]` : 'command: ["redis-server"]';
 
@@ -368,7 +377,7 @@ function renderCompose(cfg) {
   // names a plugin and the generic server-pod image stays clean; loading the
   // plugin is enough for its worker to run. Best-effort: if the image is not
   // built / docker is unavailable, the plugin simply gets no worker.
-  const pluginWorkerSvc = (name, script) =>
+  const pluginWorkerSvc = (name, script, wantsSocket) =>
 `  ${name}-worker:
     image: \${IMAGE_REGISTRY}/${name}:\${PLUGIN_TAG}
     restart: unless-stopped
@@ -388,23 +397,29 @@ function renderCompose(cfg) {
       DRUMEE_DATA_DIR: /data
       WORKER_NAME: "${name}-worker-1"
     volumes:
-      - \${DRUMEE_DATA_DIR}:/data
+      - ${dataMount}
       - drumee_cred:/etc/drumee/credential
       - plugins:/srv/drumee/runtime/plugins
-      - confd_plugins:/etc/drumee/conf.d/plugins
+      - confd_plugins:/etc/drumee/conf.d/plugins${wantsSocket ? `
+      # plugin declared drumee.docker_socket: its worker talks to the Docker
+      # daemon (e.g. saving the node's runtime images for a self-contained backup)
+      - /var/run/docker.sock:/var/run/docker.sock` : ''}
 `;
-  const workerOf = (name) => {
+  // Read a build-time image label set from the plugin's OWN package.json. Used to
+  // discover the worker script (drumee.worker) and whether the worker needs the
+  // Docker socket (drumee.docker_socket) — without the renderer naming any plugin.
+  const labelOf = (name, label) => {
     try {
       return execSync(
-        `docker image inspect --format '{{index .Config.Labels "drumee.worker"}}' ${cfg.images.registry}/${name}:${cfg.plugins.tag}`,
+        `docker image inspect --format '{{index .Config.Labels "${label}"}}' ${cfg.images.registry}/${name}:${cfg.plugins.tag}`,
         { stdio: ['ignore', 'pipe', 'ignore'] },
       ).toString().trim();
     } catch { return ''; }
   };
   const pluginWorkerServices = sPlugins
-    .map((name) => [name, workerOf(name)])
+    .map((name) => [name, labelOf(name, 'drumee.worker'), labelOf(name, 'drumee.docker_socket') === 'true'])
     .filter(([, w]) => w)
-    .map(([name, w]) => pluginWorkerSvc(name, w))
+    .map(([name, w, sock]) => pluginWorkerSvc(name, w, sock))
     .join('');
 
   const pluginServices =
@@ -435,7 +450,7 @@ volumes:
   infra_jitsi: {}
   infra_mail: {}
   infra_dns: {}
-${pluginVolumes}
+${pluginVolumes}${portableVols}
 services:
   mariadb:
     image: mariadb:11
@@ -448,7 +463,7 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
     volumes:
-      - \${DRUMEE_DB_DIR}:/var/lib/mysql
+      - ${dbMount}
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -514,7 +529,7 @@ services:
       POOL_COUNT: "\${POOL_COUNT:-10}"
       ADMIN_PASSWORD: "\${ADMIN_PASSWORD:-}"
     volumes:
-      - \${DRUMEE_DATA_DIR}:/data
+      - ${dataMount}
       - drumee_cred:/etc/drumee/credential
     restart: "no"
 
@@ -535,7 +550,7 @@ services:
       POOL_WATERMARK: "\${POOL_WATERMARK:-10}"
       POOL_INTERVAL: "\${POOL_INTERVAL:-30}"
     volumes:
-      - \${DRUMEE_DATA_DIR}:/data
+      - ${dataMount}
       - drumee_cred:/etc/drumee/credential
     # Override the HTTP healthcheck inherited from the server-pod base image:
     # the factory is a headless daemon with no listening port, so probe that the
@@ -566,7 +581,7 @@ ${podPluginDeps}    env_file: [.env]
     environment:
       DRUMEE_DATA_DIR: /data
     volumes:
-      - \${DRUMEE_DATA_DIR}:/data
+      - ${dataMount}
       - ui_assets:/srv/drumee/runtime/ui:ro
       - drumee_cred:/etc/drumee/credential
 ${podPluginVolumes}
@@ -666,7 +681,17 @@ switch (command) {
     break;
   }
   case 'env': { emit(renderEnv(withSecrets(load(opts))), opts.out); break; }
-  case 'compose': { emit(renderCompose(load(opts)), opts.out); break; }
+  case 'compose': { emit(renderCompose(load(opts), { portable: opts.portable }), opts.out); break; }
+  // Portable, blank-box deploy bundle: the compose that ships INSIDE a backup so
+  // a recovery box brings the node up (plugins included) with no registry.
+  case 'dr-bundle': {
+    const cfg = withSecrets(load(opts));
+    const dir = opts.outDir;
+    emit(renderEnv(cfg), join(dir, '.env'));
+    chmodSync(join(dir, '.env'), 0o600);
+    emit(renderCompose(cfg, { portable: true }), join(dir, 'docker-compose.yml'));
+    break;
+  }
   case 'caddyfile': { emit(renderCaddyfile(load(opts)), opts.out); break; }
   case 'debconf': { emit(renderDebconf(load(opts)), opts.out); break; }
   case 'all': {

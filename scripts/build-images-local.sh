@@ -83,9 +83,13 @@ for spec in ${SERVER_PLUGINS:-loby:$HOME/loby}; do
     # an image label so the renderer can give it a long-running worker service —
     # without anyone hardcoding the plugin or editing the instance config.
     worker="$(node -e "process.stdout.write(require('$src/package.json').drumee?.worker||'')" 2>/dev/null || true)"
+    # A plugin may also declare drumee.docker_socket — its worker needs the Docker
+    # daemon (e.g. a backup plugin that saves the node's runtime images). Surfaced
+    # as a label so the renderer mounts the socket without naming the plugin.
+    sock="$(node -e "process.stdout.write(require('$src/package.json').drumee?.docker_socket?'true':'')" 2>/dev/null || true)"
     docker buildx build -f "$root/deploy/docker/Dockerfile.plugin-server" \
       --build-context "helpers=$root/deploy/docker" --build-arg INSTALL_DEPS=0 \
-      --label "drumee.worker=$worker" \
+      --label "drumee.worker=$worker" --label "drumee.docker_socket=$sock" \
       -t "drumee/$name:$TAG" --load "$src"
   else
     say "Skipping server plugin '$name' (no source at $src)"
