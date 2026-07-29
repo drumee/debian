@@ -1,9 +1,9 @@
 #!/bin/bash
-# Drumee native-channel bootstrap — adds the signed APT repo and installs Drumee.
+# Drumee bare-metal bootstrap — adds the signed APT repo and installs Drumee.
 #
-#   curl -fsSL https://apt.drumee.net/install-native.sh | sudo bash
+#   curl -fsSL https://apt.drumee.net/baremetal.sh | sudo bash
 #   # unattended (preseed answers first):
-#   sudo PRESEED=/path/to/install.conf bash install-native.sh
+#   sudo PRESEED=/path/to/install.conf bash baremetal.sh
 #
 # The APT repo is a *flat* repository served from apt.drumee.net. APT_URL is the
 # base URL; KEYRING_URL points to the GPG public key used to verify the repo.

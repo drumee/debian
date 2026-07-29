@@ -2,7 +2,7 @@
 # Drumee one-command installer — the "easy path".
 #
 #   curl -fsSL https://get.drumee.com/install | bash      # interactive: asks 3-4 questions, then installs
-#   scripts/get-drumee.sh                         # same, from a checkout
+#   scripts/containers.sh                         # same, from a checkout
 #
 # One run does everything: checks (and can install) Docker, asks how people will
 # reach the server, writes the config, generates secrets, renders the stack,

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository builds, packages, and distributes the **Drumee** sovereign data platform through two channels from one source of truth (`config/drumee.yaml`):
 
-- **Container channel** — Docker Compose stack (`scripts/dev-up.sh`, `scripts/get-drumee.sh`)
+- **Container channel** — Docker Compose stack (`scripts/dev-up.sh`, `scripts/containers.sh`)
 - **Native Debian channel** — `.deb` packages installable via `apt install drumee`
 
 Each subdirectory under `infra/`, `schemas/`, `server/`, `ui/`, `static/` is a self-contained package builder that clones source from `git@github.com:drumee/`, compiles it, and produces a `.deb` via `dh_make` + `dpkg-buildpackage`. The `deploy/docker/` tree holds Dockerfiles and entrypoints for the container channel.
@@ -67,7 +67,7 @@ Five additional system databases: `utils`, `mailserver`, `template`, `trash`, pl
 - **Git SSH access** to `git@github.com:drumee/` (private repos)
 - **GPG key** matching maintainer email in `debian/changelog` (in local keyring)
 - **Node.js 22** — the `debian/control` files still say `nodejs (>= 20)`, but the
-  container images and `scripts/install-native.sh` (NodeSource) install **22**, and
+  container images and `scripts/baremetal.sh` (NodeSource) install **22**, and
   the WireGuard agent needs it. Treat 22 as the real baseline; the `>= 20` pin is
   deliberately not bumped (see the Node 22 guard under WireGuard).
 - **Debian build tools**: `dh-make`, `dpkg-buildpackage`, `debhelper`, `build-essential`
@@ -373,7 +373,7 @@ vars, writes `/etc/drumee/conf.d/wireguard.json`, and enables/starts the two
 units (or leaves them inactive when disabled). To change later:
 `dpkg-reconfigure drumee-infra`.
 
-`scripts/install-native.sh` asks the question itself (from `/dev/tty`) and
+`scripts/baremetal.sh` asks the question itself (from `/dev/tty`) and
 preseeds those four keys before `apt install`. It must: on the documented
 `curl … | sudo bash` path stdin is the pipe, so debconf never gets a terminal
 and would silently take defaults. The script then hands `/dev/tty` to apt so the
@@ -382,7 +382,7 @@ remaining questions work too. `WIREGUARD_ENABLED` / `WIREGUARD_COORDINATOR` /
 
 ### Install flow (container)
 
-`scripts/get-drumee.sh` offers it as a **4th** answer to "How will people reach
+`scripts/containers.sh` offers it as a **4th** answer to "How will people reach
 this server?" — *Behind a home router*. That mode writes the `wireguard:` block,
 keeps `local_mode: false`, and uses `tls.mode: self-signed` (with no inbound
 port, ACME HTTP-01 cannot be answered). Opt-in on the domain/IP modes with
@@ -573,7 +573,7 @@ echo "deb [signed-by=/etc/apt/keyrings/drumee.asc] https://apt.drumee.net/ ./" \
 sudo apt update && sudo apt install drumee
 ```
 
-`scripts/install-native.sh` does this automatically (`APT_URL`/`KEYRING_URL` override the defaults).
+`scripts/baremetal.sh` does this automatically (`APT_URL`/`KEYRING_URL` override the defaults).
 
 ### Container images
 
@@ -588,7 +588,7 @@ scripts/publish-images.sh   # build + push to registry
 APT_SSH_HOST=deploy@vps GH_TOKEN=<token> scripts/publish-site.sh --debs=out-debs [--key=KEYID]
 ```
 
-Builds the flat repo once, then deploys it to two independent targets: `apt.drumee.net` over rsync/SSH (`APT_SSH_HOST`, `APT_REPO_DIR`, `APT_DOMAIN`) and the `get.drumee.com` Pages content — installers, renderer, keyring, CLIs — to `PAGES_REPO` (`GH_TOKEN`). Each target is skipped with a notice when its credential is absent; setting neither is an error. `scripts/install-native.sh` is copied into the flat repo so `https://apt.drumee.net/install-native.sh` serves the bootstrap without depending on Pages.
+Builds the flat repo once, then deploys it to two independent targets: `apt.drumee.net` over rsync/SSH (`APT_SSH_HOST`, `APT_REPO_DIR`, `APT_DOMAIN`) and the `get.drumee.com` Pages content — installers, renderer, keyring, CLIs — to `PAGES_REPO` (`GH_TOKEN`). Each target is skipped with a notice when its credential is absent; setting neither is an error. `scripts/baremetal.sh` is copied into the flat repo so `https://apt.drumee.net/baremetal.sh` serves the bootstrap without depending on Pages. It is **also** copied to the pre-rename name `install-native.sh`, so bootstrap commands already in circulation keep working — drop that line in `publish-site.sh` once the old URL is no longer referenced anywhere. Note the new URL only goes live after the next `publish-site.sh` run.
 
 ## Deployment
 

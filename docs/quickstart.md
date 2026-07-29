@@ -49,7 +49,7 @@ DRUMEE_DIR=. drumee-ctl doctor     # deeper checks
 **From a checkout** (no curl-to-bash) — same wizard:
 
 ```bash
-scripts/get-drumee.sh
+scripts/containers.sh
 ```
 
 ---
@@ -97,11 +97,11 @@ the container channel above.
 
 ```bash
 # Interactive
-curl -fsSL https://apt.drumee.net/install-native.sh | sudo bash
+curl -fsSL https://apt.drumee.net/baremetal.sh | sudo bash
 
 # Unattended — render answers from drumee.yaml first
 node config/render.mjs debconf --config config/drumee.yaml --out install.conf
-sudo PRESEED=install.conf bash scripts/install-native.sh
+sudo PRESEED=install.conf bash scripts/baremetal.sh
 ```
 
 `apt install drumee` pulls the full runtime. Manage with `drumee` (processes) and

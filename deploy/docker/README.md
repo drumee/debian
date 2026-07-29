@@ -14,7 +14,7 @@ curl -fsSL https://get.drumee.com/install | bash       # renders + starts
 From a checkout:
 
 ```bash
-scripts/get-drumee.sh                          # same flow, uses local files
+scripts/containers.sh                          # same flow, uses local files
 ```
 
 ## What runs

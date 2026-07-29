@@ -35,9 +35,13 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 flat="$(mktemp -d)/apt"
 bash "$root/scripts/publish-apt.sh" --debs="$DEBS" --out="$flat" ${KEY:+--key="$KEY"}
 
-# The native bootstrap is served from the apt host too, so `curl
-# https://apt.drumee.net/install-native.sh | sudo bash` works without Pages.
-cp "$root/scripts/install-native.sh" "$flat/install-native.sh"
+# The bare-metal bootstrap is served from the apt host too, so `curl
+# https://apt.drumee.net/baremetal.sh | sudo bash` works without Pages.
+cp "$root/scripts/baremetal.sh" "$flat/baremetal.sh"
+# install-native.sh is the name this script was published under before the rename;
+# keep serving it so bootstrap commands already in the wild (and older docs) do not
+# 404. Drop this line once that URL is no longer referenced anywhere.
+cp "$root/scripts/baremetal.sh" "$flat/install-native.sh"
 
 # 1) flat repo -> apt.drumee.net ----------------------------------------------
 if [ -n "$APT_SSH_HOST" ]; then
@@ -54,8 +58,8 @@ if [ -n "$GH_TOKEN" ]; then
   work="$(mktemp -d)/site"
   git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${PAGES_REPO}.git" "$work"
   mkdir -p "$work/config" "$work/bin"
-  cp "$root/scripts/get-drumee.sh"      "$work/install"
-  cp "$root/scripts/install-native.sh"  "$work/native"
+  cp "$root/scripts/containers.sh"  "$work/install"
+  cp "$root/scripts/baremetal.sh"   "$work/native"
   cp "$root/config/render.mjs"          "$work/config/render.mjs"
   cp "$root/config/drumee.schema.json"  "$work/config/drumee.schema.json"
   cp "$root/config/drumee.example.yaml" "$work/config/drumee.example.yaml"

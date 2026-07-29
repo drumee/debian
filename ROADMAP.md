@@ -33,7 +33,7 @@ This is what keeps "two channels" from meaning "double the bugs."
 - [x] Generated `docker-compose.yml` driven by `.env`; named volumes; internal network.
 - [x] Schema run-once init container; `depends_on` + healthchecks replace dpkg ordering.
 - [x] Automatic TLS via Caddy. Optional Jitsi/Prosody/Coturn via compose `profiles:`.
-- [x] One-line bootstrap `scripts/get-drumee.sh` (`curl … | bash`).
+- [x] One-line bootstrap `scripts/containers.sh` (`curl … | bash`).
 - [x] **Real images build from local source** (`scripts/build-images-local.sh`): server-pod (Node+pm2) + ui-build (real webpack bundles), no registry needed.
 - [x] Topology corrected to match source (UI = build artifact via shared volume; proxy → server-pod). Verified live with `tests/demo-stack.sh`.
 - [x] Listener ports + ecosystem args resolved from `configs.js`: `--restPort` 24000, `--pushPort` 23000; `ecosystem.config.js` passes the required args.
@@ -44,7 +44,7 @@ This is what keeps "two channels" from meaning "double the bugs."
 
 ### Phase 3 — Native Debian channel (advanced)
 - [x] `drumee` metapackage (`meta/`) pulling the full runtime.
-- [x] Signed APT repo publisher (`scripts/publish-apt.sh`) + native bootstrap (`scripts/install-native.sh`) with unattended preseed.
+- [x] Signed APT repo publisher (`scripts/publish-apt.sh`) + native bootstrap (`scripts/baremetal.sh`) with unattended preseed.
 - [ ] Repo hosting (`apt.drumee.net`, nginx on VPS via `scripts/deploy-apt-repo.sh`) + project signing key (your infra).
 - [ ] Explicit inter-package `Depends` for robust configure ordering.
 

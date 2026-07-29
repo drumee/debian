@@ -69,14 +69,14 @@ To change it later: `dpkg-reconfigure drumee-infra`.
 Both bootstrap installers propose coordination, so nobody has to know the config
 key exists:
 
-- **`scripts/install-native.sh`** asks before `apt install` and preseeds the four
+- **`scripts/baremetal.sh`** asks before `apt install` and preseeds the four
   `wireguard_*` debconf keys. It has to ask itself: on the documented
   `curl … | sudo bash` path stdin is the pipe, so debconf would silently take
   defaults. The script also hands `/dev/tty` to apt so the remaining debconf
   questions still work. Preset `WIREGUARD_ENABLED` (plus
   `WIREGUARD_COORDINATOR`, `WIREGUARD_LISTEN_PORT`, `WIREGUARD_REFLECTOR_PORT`)
   to skip the prompt, or `DRUMEE_NONINTERACTIVE=1` to take the defaults.
-- **`scripts/get-drumee.sh`** offers it as a fourth answer to "How will people
+- **`scripts/containers.sh`** offers it as a fourth answer to "How will people
   reach this server?" — *Behind a home router*. That mode writes the `wireguard:`
   block, keeps `local_mode: false`, and falls back to `tls.mode: self-signed`,
   because with no inbound port ACME's HTTP-01 challenge can never be answered.

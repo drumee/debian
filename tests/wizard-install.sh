@@ -1,5 +1,5 @@
 #!/bin/bash
-# Tests for the interactive installer (scripts/get-drumee.sh).
+# Tests for the interactive container installer (scripts/containers.sh).
 # Runs it in render-only mode (DRUMEE_NO_START=1) with answers preset via env,
 # so it exercises the wizard's config-building + render without starting Docker.
 # Needs Node 20; Docker only used to validate the generated compose if present.
@@ -14,7 +14,7 @@ W="$(mktemp -d)"; trap 'rm -rf "$W"' EXIT
 run_wizard(){ # run_wizard <subdir> <env...>
   local d="$W/$1"; shift
   env DRUMEE_DIR="$d" DRUMEE_NO_START=1 ASSUME_YES=1 DRUMEE_NONINTERACTIVE=1 "$@" \
-    bash scripts/get-drumee.sh >"$d.log" 2>&1
+    bash scripts/containers.sh >"$d.log" 2>&1
 }
 
 printf '\033[1;36m── installer: local mode\033[0m\n'
@@ -70,13 +70,13 @@ chk "registry override honored"   "grep -q 'registry: registry.example.com/drume
 
 printf '\033[1;36m── installer: input validation + safety\033[0m\n'
 # --help works and doesn't start anything.
-chk "--help exits 0"          "bash scripts/get-drumee.sh --help"
+chk "--help exits 0"          "bash scripts/containers.sh --help"
 # Invalid admin email is rejected up front (non-interactive -> die, non-zero).
 run_wizard bad ACCESS_MODE=local ADMIN_EMAIL='not-an-email' ADMIN_PASSWORD=x
 chk "invalid email rejected"  "test -f $W/bad.log && ! test -f $W/bad/docker-compose.yml"
 # Re-running with an existing config (keep path) must not crash (set -u / unbound).
 run_wizard reuse ACCESS_MODE=local ADMIN_EMAIL=me@acme.com ADMIN_PASSWORD=x
-chk "second run keeps config"  "env DRUMEE_DIR=$W/reuse DRUMEE_NO_START=1 ASSUME_YES=1 DRUMEE_NONINTERACTIVE=1 bash scripts/get-drumee.sh"
+chk "second run keeps config"  "env DRUMEE_DIR=$W/reuse DRUMEE_NO_START=1 ASSUME_YES=1 DRUMEE_NONINTERACTIVE=1 bash scripts/containers.sh"
 chk "domain preserved on reuse" "grep -q 'domain: localhost' $W/reuse/drumee.yaml"
 
 if docker compose version >/dev/null 2>&1; then
