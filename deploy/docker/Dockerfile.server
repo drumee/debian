@@ -25,7 +25,15 @@ FROM node:22-bookworm AS build
 ARG INSTALL_DEPS=1
 WORKDIR /app
 COPY . /app
-RUN if [ "$INSTALL_DEPS" = "1" ]; then npm ci || npm install; fi \
+RUN if [ "$INSTALL_DEPS" = "1" ]; then npm ci || npm install; \
+    elif [ ! -d /app/node_modules ] || [ -z "$(ls -A /app/node_modules 2>/dev/null)" ]; then \
+      echo "FATAL: INSTALL_DEPS=0 but the build context has no node_modules." >&2; \
+      echo "  The image would ship without its dependencies and crash at startup," >&2; \
+      echo "  yet the build would report success — so fail here instead." >&2; \
+      echo "  Fix: run 'npm ci' in the source checkout, or build with" >&2; \
+      echo "  INSTALL_DEPS=1 (needs @drumee registry auth)." >&2; \
+      exit 1; \
+    fi \
     && npm run build --if-present \
     && rm -rf /app/.git
 

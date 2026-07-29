@@ -5,6 +5,9 @@ name: Release
 #   DRUMEE_SSH_KEY     deploy key with read access to the component repos
 #   GPG_PRIVATE_KEY    project signing key (armored) + GPG_PASSPHRASE
 #   REGISTRY_TOKEN     container registry push token
+#   NPM_TOKEN          (optional) token for the private @drumee npm packages —
+#                      without it the component installs fail and the image build
+#                      stops rather than publishing images with no node_modules
 #   APT_SSH_KEY        private key whose public half is authorized for
 #   APT_SSH_HOST       USER@HOST of the apt.drumee.net VPS — publishes the flat
 #                      APT repo to the nginx doc root (see scripts/deploy-apt-repo.sh)
@@ -23,6 +26,27 @@ name: Release
 on:
   push:
     tags: ['v*']
+  # Publish images without cutting a release tag. The container channel is unusable
+  # until images exist in the registry, and that should not require a version bump.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag to publish (e.g. 1.0.0 or preview)'
+        required: true
+        default: preview
+      platforms:
+        description: 'Target platforms (add linux/arm64 for Raspberry Pi / ARM boxes)'
+        required: true
+        default: linux/amd64
+        type: choice
+        options:
+          - linux/amd64
+          - linux/amd64,linux/arm64
+      push:
+        description: 'Push to the registry (off = build only, to validate)'
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -45,8 +69,14 @@ jobs:
     env:
       REGISTRY: ghcr.io/${{ github.repository_owner }}
       BRANCH: preview
+      # Tag pushes publish under the tag; a manual run publishes under its input.
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      PLATFORMS: ${{ github.event_name == 'workflow_dispatch' && inputs.platforms || 'linux/amd64' }}
     steps:
       - uses: actions/checkout@v4
+      # Emulation for any non-native platform (arm64 here). Harmless when the
+      # target is amd64 only, and buildx needs it before the first cross build.
+      - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - name: Skip notice
         if: ${{ secrets.DRUMEE_SSH_KEY == '' }}
@@ -57,14 +87,29 @@ jobs:
           mkdir -p ~/.ssh && echo "${{ secrets.DRUMEE_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Authorize the private npm registry (optional)
+        if: ${{ secrets.NPM_TOKEN != '' }}
+        run: |
+          printf '@drumee:registry=https://registry.npmjs.org/\n' > ~/.npmrc
+          printf '//registry.npmjs.org/:_authToken=%s\n' "${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
       - name: Clone component sources
         if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
         run: |
+          fail=0
           for r in server-team ui-team schemas setup-schemas static; do
             git clone -b "$BRANCH" "git@github.com:drumee/$r.git" "$HOME/$r" \
               || git clone "git@github.com:drumee/$r.git" "$HOME/$r" || true
-            ( cd "$HOME/$r" && [ -f package.json ] && (npm ci || npm install) ) || true
+            [ -f "$HOME/$r/package.json" ] || continue
+            # The images are built with INSTALL_DEPS=0, i.e. they package THIS
+            # node_modules. If the install fails the image would ship without its
+            # dependencies, so treat it as fatal instead of publishing a broken
+            # image (the Dockerfiles also refuse, this just names the cause).
+            if ! ( cd "$HOME/$r" && (npm ci || npm install) ); then
+              echo "::error::dependency install failed for $r — private @drumee packages need NPM_TOKEN"
+              fail=1
+            fi
           done
+          [ "$fail" = 0 ]
       - name: Registry login
         if: ${{ secrets.REGISTRY_TOKEN != '' }}
         uses: docker/login-action@v3
@@ -75,8 +120,7 @@ jobs:
       - name: Build and push all images
         if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
         env:
-          TAG: ${{ github.ref_name }}
-          PUSH: ${{ secrets.REGISTRY_TOKEN != '' && '1' || '0' }}
+          PUSH: ${{ (secrets.REGISTRY_TOKEN != '' && (github.event_name != 'workflow_dispatch' || inputs.push)) && '1' || '0' }}
         run: scripts/publish-images.sh
       - name: Install cosign + syft (supply-chain)
         if: ${{ secrets.REGISTRY_TOKEN != '' }}
@@ -85,22 +129,23 @@ jobs:
         if: ${{ secrets.REGISTRY_TOKEN != '' }}
         env:
           REGISTRY: ghcr.io/${{ github.repository_owner }}
-          TAG: ${{ github.ref_name }}
           COSIGN_YES: "true"
         run: |
-          for n in server-pod ui-build schemas schemas-populate infra-init; do
+          for n in server-pod ui-build schemas schemas-populate wireguard static infra-init; do
             cosign sign --yes "$REGISTRY/$n:$TAG" || echo "warn: cosign sign $n failed"
           done
       - name: SBOM for server-pod (syft)
         if: ${{ secrets.REGISTRY_TOKEN != '' }}
         uses: anchore/sbom-action@v0
         with:
-          image: ghcr.io/${{ github.repository_owner }}/server-pod:${{ github.ref_name }}
+          image: ghcr.io/${{ github.repository_owner }}/server-pod:${{ env.TAG }}
           format: spdx-json
           artifact-name: sbom-server-pod.spdx.json
 
   debs:
     needs: guard
+    # Only on a real release tag: a manual image publish should not touch apt.
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

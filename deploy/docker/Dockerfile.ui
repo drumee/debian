@@ -20,7 +20,13 @@ ENV UI_BUILD_MODE=production \
 WORKDIR /app
 COPY . /app
 RUN mkdir -p "$UI_BUILD_PATH" \
-    && if [ "$INSTALL_DEPS" = "1" ]; then npm ci || npm install; fi \
+    && if [ "$INSTALL_DEPS" = "1" ]; then npm ci || npm install; \
+       elif [ ! -d /app/node_modules ] || [ -z "$(ls -A /app/node_modules 2>/dev/null)" ]; then \
+         echo "FATAL: INSTALL_DEPS=0 but the build context has no node_modules." >&2; \
+         echo "  webpack would be fetched ad hoc and build the wrong bundle." >&2; \
+         echo "  Run 'npm ci' in the checkout, or build with INSTALL_DEPS=1." >&2; \
+         exit 1; \
+       fi \
     && npx webpack --config webpack.js \
     && rm -f "$UI_BUILD_PATH/app/stats.json"
 

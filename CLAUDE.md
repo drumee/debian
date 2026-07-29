@@ -579,8 +579,29 @@ sudo apt update && sudo apt install drumee
 
 ```bash
 scripts/publish-images.sh   # build + push to registry
-# Env: REGISTRY, TAG, PUSH=1, ALSO_LATEST, ALSO_STABLE, MEDIA_DEPS, INSTALL_DEPS
+# Env: REGISTRY, TAG, PUSH=1, PLATFORMS, ALSO_LATEST, ALSO_STABLE, MEDIA_DEPS, INSTALL_DEPS
 ```
+
+**On demand, without cutting a release tag** — the container channel is unusable
+until images exist in the registry, so `release.yml` also takes a
+`workflow_dispatch` with `tag`, `platforms` and `push` inputs. A manual run builds
+and signs images only; the `.deb`/apt jobs are gated on `github.event_name ==
+'push'` so they stay tied to real tags.
+
+`PLATFORMS` defaults to `linux/amd64`. Add `linux/arm64` for Raspberry Pi and
+other ARM home servers — which is the *typical* target for the behind-a-router
+flow, so a release meant for those boxes must publish it. Multi-platform requires
+`PUSH=1` (buildx cannot `--load` a manifest list) and QEMU, which the workflow
+installs. Emulated cross-builds of the media stack take the better part of an
+hour, which is why it is opt-in rather than the default.
+
+**`INSTALL_DEPS=0` means the image packages the checkout's `node_modules`.** Both
+`Dockerfile.server` and `Dockerfile.ui` now **fail** when that directory is
+missing: previously the build succeeded and produced a server-pod with no
+dependencies at all — verified — which crashes at startup while CI reports a green
+publish. The private `@drumee` packages need `NPM_TOKEN` in CI for the install to
+succeed at all; without it the workflow now stops with a named error instead of
+publishing an empty image.
 
 ### Full site publish (apt + Pages)
 
