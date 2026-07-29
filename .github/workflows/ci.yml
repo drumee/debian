@@ -23,6 +23,30 @@ jobs:
           severity: warning
           ignore_paths: builder/src target
 
+  # Distribution invariants (docs/distribution.md). CLAUDE.md states them as
+  # context; this is the enforcement. Expected to FAIL until the distribution
+  # increments land — the failure list IS the remaining debt, so it must stay
+  # visible rather than be silenced with continue-on-error.
+  packaging:
+    # Debian, not Ubuntu: Trixie is the only supported target, so the invariants
+    # are checked on the platform they describe. GitHub offers no Debian-hosted
+    # runner, so the job body runs inside a Trixie container — `runs-on` only
+    # selects the host that runs it. Pinned by digest, as §8 requires of images.
+    runs-on: ubuntu-latest
+    container:
+      image: debian:trixie-slim@sha256:020c0d20b9880058cbe785a9db107156c3c75c2ac944a6aa7ab59f2add76a7bd
+    steps:
+      # trixie-slim ships neither git nor CA certificates. Without git,
+      # actions/checkout falls back to a tarball download and leaves no .git, so
+      # the gate could not resolve the repo root or scope a scan to tracked files.
+      - name: Tooling the gate needs
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git ca-certificates
+      - uses: actions/checkout@v4
+      - name: Packaging invariants (scripts/check-packaging.sh)
+        run: scripts/check-packaging.sh
+
   # One comprehensive suite: render + compose validity + config smoke + the
   # installer wizard (render-only) + native packaging metadata + version drift.
   # No private source / images / VM needed — runs on every push and PR.

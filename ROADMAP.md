@@ -1,5 +1,20 @@
 # Drumee Self-Host Roadmap
 
+> **Partly superseded — read `docs/distribution.md` first.** That document is the
+> design of record for distribution and wins wherever it contradicts this file.
+> Nothing below is deleted: it records how the current state was reached, and the
+> items still marked `[ ]` outside the superseded sections remain valid.
+>
+> | Section | Status under the new design |
+> |---|---|
+> | Phase 2 — container channel | **partly superseded.** The compose stack, profiles and one-line bootstrap stand. What changes: images no longer `git clone` at build time, `ui-build` disappears (the bundles ship inside `drumee-ui-pod`), and the monolith splits into seven role containers. |
+> | Phase 3 — native Debian channel | **frozen.** Neither removed nor maintained for the duration of the transition. Do not evolve it. |
+> | Phase 5 — CI/CD | still valid, extended: `reprepro` replaces `apt-ftparchive`, channels become suites promoted by copy. |
+>
+> The invariants are summarised in `CLAUDE.md` and **enforced** by
+> `scripts/check-packaging.sh`, which runs in CI and is expected to fail until the
+> increments in `AGENT-BRIEF.md` land.
+
 Goal: turn this build factory into a **SOTA, easy-to-self-host** product with **two
 supported channels** — Docker Compose (default, easy) and native Debian (advanced).
 
@@ -29,6 +44,8 @@ This is what keeps "two channels" from meaning "double the bugs."
 - [ ] Follow-up (external `setup` repo): wizard validation loops should `break` under noninteractive frontend.
 
 ### Phase 2 — Container channel (flagship easy path)
+> Partly superseded by `docs/distribution.md` §1–§2: packages become the unit of
+> versioning, `ui-build` goes away, seven role containers replace the monolith.
 - [x] `Dockerfile.server` / `Dockerfile.ui` (multi-stage, source via `REPO_BASE` build-arg).
 - [x] Generated `docker-compose.yml` driven by `.env`; named volumes; internal network.
 - [x] Schema run-once init container; `depends_on` + healthchecks replace dpkg ordering.
@@ -43,6 +60,8 @@ This is what keeps "two channels" from meaning "double the bugs."
   `/etc/drumee/credential`, and Redis defaulting to no-auth (internal network).
 
 ### Phase 3 — Native Debian channel (advanced)
+> **Frozen** by `docs/distribution.md`: the container channel on Trixie is the
+> single target for now. Kept working, not extended.
 - [x] `drumee` metapackage (`meta/`) pulling the full runtime.
 - [x] Signed APT repo publisher (`scripts/publish-apt.sh`) + native bootstrap (`scripts/baremetal.sh`) with unattended preseed.
 - [ ] Repo hosting (`apt.drumee.net`, nginx on VPS via `scripts/deploy-apt-repo.sh`) + project signing key (your infra).

@@ -761,3 +761,45 @@ Full docs are in `docs/` and at [drumee.github.io/docs/package-building](https:/
 
 `ROADMAP.md` tracks what is done vs. outstanding per phase, including known
 upstream bugs and workarounds — read it before assuming a gap is an oversight.
+
+## Distribution — invariants
+
+Design of record: @docs/distribution.md
+These rules take precedence over `ROADMAP.md` where they conflict.
+
+Single target: container channel, Debian 13 Trixie. The native channel is
+frozen — do not evolve it, do not delete it.
+
+The `.deb` is the unit of versioning and of dependency. A container image
+installs one role metapackage at an exact version and nothing else.
+
+Forbidden, checked by `scripts/check-packaging.sh`:
+
+- `git clone` or `REPO_BASE` in a Dockerfile — sources arrive as packages,
+  never by cloning at build time.
+- `FROM` without a digest — a bare tag drifts silently.
+- `curl … | bash` or `| gpg --dearmor` in a Dockerfile — keyrings are
+  committed under `docker/keyrings/`.
+- Installing a Drumee package without `=version`.
+- `apt-get update` in a `RUN` layer separate from its `install`.
+- `npm install -g` — global Node modules come from `drumee-node-runtime`,
+  locked by lockfile.
+- Build tooling (`build-essential`, `g++`, `node-gyp`, `default-jdk`) in a
+  runtime image.
+
+Required:
+
+- Every component version comes from `release-manifest.yaml`, resolved into
+  substvars. Never write a component version anywhere else.
+- Every role: `Provides: drumee-role` and `Conflicts: drumee-role`.
+- Every role: `Depends: drumee-release (= ${binary:Version})`.
+- Fixed UID/GID 8000, defined only in `docker/Dockerfile.base`.
+- `--no-install-recommends` on every `apt-get install`.
+- Migrations are **additive only**: nullable columns, new tables, new
+  routines. No `DROP`, no incompatible type change in the same version.
+  Cleanup waits one release.
+- Maintainer scripts touch no service and no database during an image build.
+  The package delivers the payload; the job container executes it.
+
+Before declaring any task complete: `scripts/check-packaging.sh` and then
+`scripts/check-versions.sh` must both pass.
