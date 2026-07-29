@@ -33,9 +33,16 @@ If neither exists, the build exits. Seeds are a `mariabackup` snapshot of the ba
 SEEDS_DIR=/path/to/mariabackup/snapshot schemas/build.sh
 ```
 
-### schemas/Dockerfile
+### Building a seed without a local MariaDB
 
-Provides a containerised build environment for producing seeds without a local MariaDB installation. Uses `mariabackup` to snapshot and prepare the database.
+`scripts/build-seed.sh` (image: `scripts/Dockerfile.seed`) spins up a throwaway
+MariaDB in a container, loads the base databases, stocks the entity pool and
+`mariabackup`s the datadir into `seeds.tgz`. `schemas/build.sh` calls it
+automatically when no seed and no `SEEDS_DIR` are available.
+
+This replaced `schemas/Dockerfile`, which claimed the same role but could not
+build — it tried to `apt-get install` a package literally named `Dockerfile` —
+and was referenced by nothing.
 
 ## Build
 
