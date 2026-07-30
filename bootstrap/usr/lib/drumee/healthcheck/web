@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:${WEB_PORT:-80}/" || echo 000)
+case "$code" in 000|5??) echo "nginx unhealthy (HTTP $code)" >&2; exit 1 ;; esac
+exit 0

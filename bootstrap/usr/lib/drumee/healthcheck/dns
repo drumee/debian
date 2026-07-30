@@ -1,0 +1,5 @@
+#!/bin/sh
+# Ask the resolver about itself: a listening socket is not the same as a server
+# that answers.
+set -eu
+exec dig +short +time=2 +tries=1 @127.0.0.1 "${DRUMEE_DOMAIN_NAME:-localhost}" SOA >/dev/null

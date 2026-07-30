@@ -1,0 +1,20 @@
+Why this package is Architecture: all even though it ships a node_modules tree.
+
+The tree is pure JavaScript. Verified, not assumed:
+
+  * `npm ci` from the committed lockfile produces zero compiled addons — checked
+    with `find node_modules -name '*.node'` (0 results) and no platform-named
+    package directories.
+  * build.sh re-checks this on every build and REFUSES to package a payload
+    containing an ELF object or a .node addon. If a future dependency pulls in
+    native code the build fails, rather than shipping an amd64 payload to arm64
+    hosts under an `all` label.
+
+Two lockfile entries look platform-specific and are not:
+
+  * fsevents — macOS only (`os: darwin`), so npm never installs it on Linux.
+  * systeminformation — pure JavaScript; it merely declares the platforms it
+    supports.
+
+This file is what scripts/check-packaging.sh looks for: a package shipping
+node_modules under `Architecture: all` must state, and enforce, why that is true.

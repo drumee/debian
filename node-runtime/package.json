@@ -1,0 +1,16 @@
+{
+  "name": "drumee-node-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The pinned set of global Node modules Drumee roles rely on. Packaged as a .deb so the set is versioned like everything else, replacing an unpinned 'npm install -g'.",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "pm2": "^5.4.0",
+    "pm2-logrotate": "^2.7.0",
+    "shelljs": "^0.8.5",
+    "jsonfile": "^6.1.0",
+    "readline-sync": "^1.4.10",
+    "lodash": "^4.17.21",
+    "@mapbox/node-pre-gyp": "^1.0.11"
+  }
+}

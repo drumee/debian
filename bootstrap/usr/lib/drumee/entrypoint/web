@@ -1,0 +1,12 @@
+#!/bin/sh
+# web role: nginx serving the built UI bundles and the static assets. Nothing is
+# compiled here — drumee-ui-pod already contains the webpack output (§1).
+set -eu
+. /usr/lib/drumee/entrypoint/lib.sh
+drumee_release
+drumee_env
+
+command -v nginx >/dev/null || die "nginx not found (drumee-role-web provides it)"
+nginx -t || die "nginx refused its configuration"
+echo "[drumee] starting nginx in the foreground"
+exec nginx -g 'daemon off;'

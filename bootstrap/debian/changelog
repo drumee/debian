@@ -1,0 +1,10 @@
+drumee-bootstrap (2.0.0) trixie; urgency=medium
+
+  * Initial package under this name for the container distribution: per-role
+    entrypoints (app, web, media, dns, mail, schemas, infra), per-role
+    healthchecks, and a shared library for credential provisioning.
+  * Starts at 2.0.0 rather than 0.1.0: the name was used until 1.2.6 by the
+    interactive installer, since renamed to drumee-installer. Reusing a package
+    name is only safe while the version line keeps rising.
+
+ -- Drumee Packaging <packaging@drumee.com>  Thu, 30 Jul 2026 14:43:59 +0200

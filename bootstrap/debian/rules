@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+# Shell scripts only: nothing to strip, no shared libraries to derive
+# dependencies from, no debug info to compress.
+override_dh_strip:
+
+override_dh_shlibdeps:
+
+override_dh_dwz:

@@ -1,0 +1,6 @@
+#!/bin/sh
+# The media role has no listener, so probe that its worker process is alive.
+set -eu
+[ -n "${DRUMEE_MEDIA_CMD:-}" ] || exit 0
+pgrep -f "$DRUMEE_MEDIA_CMD" >/dev/null || { echo "media worker not running" >&2; exit 1; }
+exit 0

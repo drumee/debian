@@ -1,0 +1,15 @@
+#!/bin/sh
+# mail role: postfix with opendkim signing.
+set -eu
+. /usr/lib/drumee/entrypoint/lib.sh
+drumee_release
+drumee_env
+
+command -v postfix >/dev/null || die "postfix not found (drumee-role-mail provides it)"
+# opendkim first: postfix rejects mail it cannot sign once configured for it.
+if command -v opendkim >/dev/null; then
+  opendkim -x /etc/opendkim.conf || die "opendkim failed to start"
+fi
+postfix check || die "postfix refused its configuration"
+echo "[drumee] starting postfix in the foreground"
+exec postfix start-fg

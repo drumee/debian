@@ -1,0 +1,11 @@
+#!/bin/sh
+# The app role answers on both listeners; either being down means the role is not
+# serving, so both are probed.
+set -eu
+for port in "${API_PORT:-24000}" "${UI_PORT:-23000}"; do
+  # A 401 is a healthy answer from an authenticated endpoint: what is being
+  # checked is that the listener responds, not that the request is authorised.
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:$port/" || echo 000)
+  case "$code" in 000|5??) echo "port $port unhealthy (HTTP $code)" >&2; exit 1 ;; esac
+done
+exit 0

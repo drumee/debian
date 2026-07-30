@@ -1,0 +1,18 @@
+#!/bin/sh
+# app role: the REST API (24000) and the page/WebSocket server (23000), both
+# supervised by pm2 in fork mode — fork, because the apps parse argv.
+set -eu
+. /usr/lib/drumee/entrypoint/lib.sh
+drumee_release
+drumee_env
+drumee_write_credentials
+drumee_require_schema
+
+# Pending schema patches are applied by the schemas role, not here: this role
+# must not touch the database structure (§5, §6).
+ECOSYSTEM="${DRUMEE_ECOSYSTEM:-/etc/drumee/infrastructure/ecosystem.json}"
+[ -f "$ECOSYSTEM" ] || die "no pm2 ecosystem at $ECOSYSTEM (drumee-infra provides it)"
+
+command -v pm2-runtime >/dev/null || die "pm2-runtime not found (drumee-node-runtime provides it)"
+echo "[drumee] starting pm2-runtime with $ECOSYSTEM"
+exec pm2-runtime start "$ECOSYSTEM" --no-daemon

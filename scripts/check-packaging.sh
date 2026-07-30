@@ -223,6 +223,15 @@ check_arch_matches_payload() {
     [[ "$arch" == "all" ]] || continue
     ships=$(git ls-files "$pkgdir" 2>/dev/null | grep -E '(^|/)build\.sh$' \
       | tr '\n' '\0' | xargs -0 -r grep -nE '(rsync|cp|install|tar)[^|]*node_modules' 2>/dev/null)
+    # Shipping node_modules is a signal, not a verdict: a pure-JavaScript tree is
+    # legitimately Architecture: all. A package may say so in
+    # debian/arch-independent-payload, which must state the evidence AND be backed
+    # by a build-time check that refuses a payload containing compiled objects —
+    # drumee-node-runtime is the worked example. Without that file the claim is
+    # unverified, and unverified is what ships an amd64 binary to an arm64 host.
+    if [[ -n "$ships" && -f "$pkgdir/debian/arch-independent-payload" ]]; then
+      continue
+    fi
     if [[ -n "$ships" ]]; then
       hits+="$c: Architecture: all, but the payload ships node_modules"$'\n'"$ships"$'\n'
     fi

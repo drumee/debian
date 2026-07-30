@@ -1,0 +1,28 @@
+Source: drumee-bootstrap
+Section: web
+Priority: optional
+Maintainer: Drumee Packaging <packaging@drumee.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Homepage: https://drumee.com
+Rules-Requires-Root: no
+
+Package: drumee-bootstrap
+Architecture: all
+Depends: ${misc:Depends}
+Description: Role entrypoints and healthchecks for Drumee containers
+ The scripts each Drumee role container runs at start, and the probes that say
+ whether it is serving. One entrypoint per role — app, web, media, dns, mail,
+ schemas, infra — plus a shared library holding the credential provisioning that
+ was previously duplicated in every image's entrypoint.
+ .
+ These arrive as a versioned package rather than being copied into an image at
+ build time, which is what "COPY ./opt/drumee/init.d/*" used to do: outside any
+ dependency graph, unversioned, and impossible to roll back independently.
+ .
+ The package delivers the payload; the container executes it. Nothing here starts
+ a service or touches a database during an image build.
+ .
+ This package name previously belonged to the interactive bare-metal installer,
+ which is now drumee-installer. The version line continues upwards from that
+ package so apt never reads this one as a downgrade.

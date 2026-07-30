@@ -1,0 +1,12 @@
+#!/bin/sh
+# dns role: BIND9, authoritative for the instance zone, accepting TSIG-signed
+# dynamic updates so ACME DNS-01 can be answered locally.
+set -eu
+. /usr/lib/drumee/entrypoint/lib.sh
+drumee_release
+drumee_env
+
+command -v named >/dev/null || die "named not found (drumee-role-dns provides it)"
+named-checkconf || die "named refused its configuration"
+echo "[drumee] starting named in the foreground"
+exec named -g -u bind

@@ -1,0 +1,7 @@
+drumee-node-runtime (0.1.0) trixie; urgency=medium
+
+  * Initial package: pm2, pm2-logrotate, shelljs, jsonfile, readline-sync,
+    lodash and @mapbox/node-pre-gyp, locked by a committed package-lock.json.
+    Replaces the unpinned "npm install -g" in the container image build.
+
+ -- Drumee Packaging <packaging@drumee.com>  Thu, 30 Jul 2026 13:10:47 +0200

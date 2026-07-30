@@ -185,3 +185,6 @@ roles/release-manifest.yaml
 # Trailing slashes: the .install and .lintian-overrides FILES beside them are source.
 roles/debian/tmp/
 roles/debian/drumee-*/
+node-runtime/build/
+node-runtime/node_modules/
+bootstrap/build/

@@ -1,0 +1,15 @@
+#!/bin/sh
+# media role: document and image conversion. It carries the heaviest dependencies
+# and is the only component that parses untrusted input, so it runs with NO
+# database credentials and no inbound network exposure (§2).
+set -eu
+. /usr/lib/drumee/entrypoint/lib.sh
+drumee_release
+drumee_env
+
+# Deliberately not guessed. Which worker this role runs is not settled in
+# docs/distribution.md, and inventing a command here would bake a wrong contract
+# into the package. Set DRUMEE_MEDIA_CMD to the worker entry point.
+[ -n "${DRUMEE_MEDIA_CMD:-}" ] || die "DRUMEE_MEDIA_CMD is not set — the media worker command is still an open question (see docs/distribution.md §2)"
+echo "[drumee] starting media worker: $DRUMEE_MEDIA_CMD"
+exec sh -c "$DRUMEE_MEDIA_CMD"

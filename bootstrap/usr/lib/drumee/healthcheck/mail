@@ -1,0 +1,3 @@
+#!/bin/sh
+set -eu
+exec sh -c 'printf "QUIT\r\n" | timeout 3 nc -w 3 127.0.0.1 25 | grep -q "^220"'

@@ -215,7 +215,12 @@ it.
    package.
 4. `mysql-common` sat alongside `mariadb-server` in the original Dockerfile —
    a potential conflict to confirm.
-5. Availability of a Node 22 image on a Trixie base, or NodeSource pinning.
+5. ~~Availability of a Node 22 image on a Trixie base, or NodeSource pinning.~~
+   **Measured: Trixie ships nodejs 20.19.2+dfsg-1+deb13u2**, so `Depends: nodejs
+   (>= 22)` — which `drumee-node-runtime` and `drumee-role-app` both declare — is
+   unsatisfiable from Debian alone. NodeSource (or an equivalent) must therefore be
+   configured in the base image, with its keyring committed under
+   `docker/keyrings/` rather than fetched at build time. Increment 4.
 6. The `infra-init` service is not implemented. Feasibility is validated
    (`infra.js --chroot` renders the full 39-file tree from environment
    variables with no host writes) but `conf.d` provisioning still relies on a

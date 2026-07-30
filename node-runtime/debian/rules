@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+# The payload is a node_modules tree assembled by ../build.sh with `npm ci`, not
+# something dh built. Stripping and shlibdeps have nothing to act on (it is pure
+# JavaScript, which build.sh verifies), and dwz would fail looking for ELF.
+override_dh_strip:
+
+override_dh_shlibdeps:
+
+override_dh_dwz:

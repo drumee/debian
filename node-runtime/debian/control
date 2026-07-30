@@ -1,0 +1,25 @@
+Source: drumee-node-runtime
+Section: web
+Priority: optional
+Maintainer: Drumee Packaging <packaging@drumee.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Homepage: https://drumee.com
+Rules-Requires-Root: no
+
+Package: drumee-node-runtime
+Architecture: all
+Depends: ${misc:Depends}, nodejs (>= 22)
+Description: Pinned global Node modules for Drumee roles
+ The process supervisor (pm2) and the handful of Node modules Drumee's roles
+ expect to find installed globally, packaged so the set is versioned, reviewed
+ and rolled back like every other component.
+ .
+ This replaces an unpinned "npm install -g" in the image build, which resolved to
+ whatever was newest at build time and left no record of what was installed. The
+ versions here are locked by a committed package-lock.json and materialised with
+ "npm ci", so two builds of the same package version contain the same modules.
+ .
+ Architecture: all is correct and verified rather than assumed: the payload is
+ pure JavaScript, and build.sh refuses to package it if a compiled object appears
+ — see debian/arch-independent-payload.

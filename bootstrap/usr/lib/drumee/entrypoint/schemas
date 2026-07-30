@@ -1,0 +1,27 @@
+#!/bin/sh
+# schemas role: run-once. Creates the databases if absent, then applies pending
+# migrations, then exits. The container is a job, not a service (§5): the package
+# delivers the payload, this executes it.
+set -eu
+. /usr/lib/drumee/entrypoint/lib.sh
+drumee_release
+drumee_env
+drumee_write_credentials
+
+PATCHES="${DRUMEE_PATCHES_DIR:-/usr/share/drumee/patches}"
+
+# §6: additive only. A migration containing a DROP or an incompatible type change
+# must be rejected, not worked around, because rollback of code cannot roll back
+# a destructive schema change.
+if [ -d "$PATCHES" ]; then
+  bad=$(grep -rilE '^[[:space:]]*(DROP[[:space:]]+(TABLE|COLUMN|DATABASE)|ALTER[[:space:]]+TABLE[^;]*DROP)' "$PATCHES" 2>/dev/null || true)
+  if [ -n "$bad" ]; then
+    echo "[drumee] destructive migration refused (§6 additive-only):" >&2
+    printf '  %s\n' $bad >&2
+    exit 1
+  fi
+fi
+
+echo "[drumee] NOT IMPLEMENTED: schema init + migrate land in increment 6"
+echo "[drumee] payload checked: $PATCHES"
+exit 0

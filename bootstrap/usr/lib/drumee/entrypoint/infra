@@ -1,0 +1,16 @@
+#!/bin/sh
+# infra role: run-once. Renders the configuration tree the other roles mount,
+# then exits. Writes only into its output directory — never onto a host (§5).
+set -eu
+. /usr/lib/drumee/entrypoint/lib.sh
+drumee_release
+drumee_env
+
+OUT="${DRUMEE_INFRA_OUT:-/etc/drumee}"
+SETUP=/var/lib/drumee/setup-infra
+
+[ -d "$SETUP" ] || die "$SETUP not found (drumee-infra provides it)"
+command -v node >/dev/null || die "node not found"
+
+echo "[drumee] rendering the configuration tree into $OUT"
+cd "$SETUP" && exec node infra.js --chroot="$OUT" --only-infra=1
