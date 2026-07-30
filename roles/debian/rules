@@ -1,0 +1,29 @@
+#!/usr/bin/make -f
+
+# Le paquet source drumee-roles ne compile rien. Il produit uniquement des
+# metapaquets dont l'interet est le graphe de dependances : chaque role
+# epingle ses composants a une version exacte, lue depuis
+# release-manifest.yaml et injectee sous forme de substvars.
+
+RELEASE_MANIFEST ?= $(CURDIR)/release-manifest.yaml
+
+%:
+	dh $@
+
+# Les substvars doivent exister avant dh_gencontrol, qui est ce qui resout
+# ${drumee:*} en ecrivant les champs Depends definitifs.
+override_dh_gencontrol:
+	python3 debian/gen-substvars.py \
+		--manifest $(RELEASE_MANIFEST) \
+		--debian-dir debian
+	dh_gencontrol
+
+# Rien a construire, rien a installer hormis l'ancre de version.
+override_dh_auto_build:
+override_dh_auto_test:
+
+override_dh_auto_install:
+	install -d debian/drumee-release/usr/share/drumee
+	python3 debian/gen-substvars.py \
+		--manifest $(RELEASE_MANIFEST) \
+		--release-file debian/drumee-release/usr/share/drumee/release

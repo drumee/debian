@@ -1,0 +1,208 @@
+Source: drumee-roles
+Section: web
+Priority: optional
+Maintainer: Drumee Packaging <packaging@drumee.com>
+Build-Depends: debhelper-compat (= 13),
+               python3,
+               python3-yaml
+Standards-Version: 4.7.0
+Homepage: https://drumee.com
+Vcs-Git: https://github.com/drumee/debian.git
+Vcs-Browser: https://github.com/drumee/debian
+Rules-Requires-Root: no
+
+# ---------------------------------------------------------------------------
+# Ancre de version
+# ---------------------------------------------------------------------------
+# Ne contient aucun code. Son unique fonction est de rendre impossible toute
+# derive de version entre conteneurs : chaque role en depend a l'egalite
+# stricte, donc apt refuse tout melange de trains de livraison.
+# ---------------------------------------------------------------------------
+
+Package: drumee-release
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Description: Drumee release train anchor
+ Declares the release train that every Drumee role package belongs to.
+ This package ships no runtime code: it installs only
+ /usr/share/drumee/release, a plain key/value file recording the release
+ version, the APT channel it was published to, and the build timestamp.
+ .
+ Every drumee-role-* package depends on this exact version, which makes it
+ impossible for two containers of the same deployment to run components
+ from different releases.
+
+# ---------------------------------------------------------------------------
+# Exclusion mutuelle des roles
+# ---------------------------------------------------------------------------
+# Chaque role fournit ET entre en conflit avec le paquet virtuel
+# "drumee-role". Un paquet n'entrant jamais en conflit avec lui-meme, l'effet
+# net est qu'un seul role peut etre installe a la fois : le monolithe ne peut
+# pas etre reconstitue par accident dans une image.
+#
+# Si une variante tout-en-un devient necessaire un jour, elle prend la forme
+# d'un paquet drumee-role-aio qui fournit le meme paquet virtuel et depend
+# directement des composants.
+# ---------------------------------------------------------------------------
+
+Package: drumee-role-app
+Architecture: all
+Section: web
+Provides: drumee-role
+Conflicts: drumee-role
+Depends: ${misc:Depends},
+         drumee-release (= ${binary:Version}),
+         drumee-server-pod (= ${drumee:ServerVersion}),
+         drumee-bootstrap (= ${drumee:BootstrapVersion}),
+         drumee-node-runtime (= ${drumee:NodeRuntimeVersion}),
+         nodejs (>= 22),
+         nodejs (<< 23),
+         mariadb-client,
+         redis-tools
+Description: Drumee application role (REST and push services)
+ Runtime role for the container serving the Drumee backend: the REST API on
+ port 24000 and the page/WebSocket server on port 23000, both supervised by
+ pm2 in fork mode.
+ .
+ The pm2 supervisor and the pinned set of global Node modules are supplied
+ by drumee-node-runtime rather than by an unpinned "npm install -g", so the
+ JavaScript dependency set is versioned like everything else.
+
+Package: drumee-role-web
+Architecture: all
+Section: httpd
+Provides: drumee-role
+Conflicts: drumee-role
+Depends: ${misc:Depends},
+         drumee-release (= ${binary:Version}),
+         drumee-ui-pod (= ${drumee:UiVersion}),
+         drumee-static (= ${drumee:StaticVersion}),
+         drumee-bootstrap (= ${drumee:BootstrapVersion}),
+         nginx,
+         libnginx-mod-stream
+Description: Drumee web role (reverse proxy and static assets)
+ Runtime role for the container terminating HTTP, serving the compiled LETC
+ frontend bundles and the static asset tree, and proxying dynamic requests
+ to the application role.
+ .
+ No build step happens here: drumee-ui-pod already contains the webpack
+ output, produced once when the package was built in CI.
+
+Package: drumee-role-media
+Architecture: all
+Section: video
+Provides: drumee-role
+Conflicts: drumee-role
+Depends: ${misc:Depends},
+         drumee-release (= ${binary:Version}),
+         drumee-bootstrap (= ${drumee:BootstrapVersion}),
+         drumee-node-runtime (= ${drumee:NodeRuntimeVersion}),
+         nodejs (>= 22),
+         nodejs (<< 23),
+         ffmpeg,
+         graphicsmagick,
+         libreoffice-core,
+         libreoffice-writer,
+         libreoffice-calc,
+         libreoffice-impress,
+         poppler-utils,
+         dcraw,
+         p7zip-full,
+         fonts-liberation
+Description: Drumee media role (document and media conversion)
+ Runtime role for the conversion workers: video and audio transcoding,
+ raster and RAW image handling, archive extraction, and office document
+ rendering.
+ .
+ This role is deliberately isolated from the application role. It carries
+ the heaviest dependencies in the whole platform, and it is the only
+ component that parses untrusted user documents, so it runs with no
+ database credentials and no inbound network exposure.
+ .
+ Only the LibreOffice modules actually used for conversion are pulled in,
+ not the libreoffice metapackage.
+
+Package: drumee-role-dns
+Architecture: all
+Section: net
+Provides: drumee-role
+Conflicts: drumee-role
+Depends: ${misc:Depends},
+         drumee-release (= ${binary:Version}),
+         drumee-bootstrap (= ${drumee:BootstrapVersion}),
+         bind9,
+         bind9-utils,
+         bind9-dnsutils
+Description: Drumee DNS role (authoritative zone server)
+ Runtime role for the container answering as the authoritative name server
+ for the deployment's zone, including the TSIG-signed dynamic updates used
+ to answer ACME DNS-01 challenges for wildcard certificates.
+ .
+ Only required when the deployment answers challenges itself rather than
+ through a provider API or a DNS-capable TLS terminator.
+
+Package: drumee-role-mail
+Architecture: all
+Section: mail
+Provides: drumee-role
+Conflicts: drumee-role
+Depends: ${misc:Depends},
+         drumee-release (= ${binary:Version}),
+         drumee-bootstrap (= ${drumee:BootstrapVersion}),
+         postfix,
+         postfix-mysql,
+         opendkim,
+         opendkim-tools,
+         spamass-milter
+Description: Drumee mail role (SMTP and DKIM signing)
+ Runtime role for outbound and inbound mail: notification delivery,
+ invitation and onboarding messages, DKIM signing, and milter-based spam
+ filtering.
+
+Package: drumee-role-schemas
+Architecture: all
+Section: database
+Provides: drumee-role
+Conflicts: drumee-role
+Depends: ${misc:Depends},
+         drumee-release (= ${binary:Version}),
+         drumee-schemas (= ${drumee:SchemasVersion}),
+         drumee-patch (= ${drumee:PatchVersion}),
+         drumee-bootstrap (= ${drumee:BootstrapVersion}),
+         drumee-node-runtime (= ${drumee:NodeRuntimeVersion}),
+         nodejs (>= 22),
+         nodejs (<< 23),
+         mariadb-client,
+         mariadb-backup
+Description: Drumee schema role (database init and migration jobs)
+ Runtime role for the run-once containers that create the yp/utils/template
+ databases, seed the entity pool and system accounts, and apply pending
+ schema patches before the application role is allowed to start.
+ .
+ The packages install migration payloads under /usr/share/drumee/patches
+ only. Nothing touches the database at package configuration time, because
+ no database exists during an image build. Application is driven by this
+ role's entrypoint at deploy time and recorded in the schema_migrations
+ table, which makes it idempotent and lets the application role refuse to
+ start against an under-migrated database.
+
+Package: drumee-role-infra
+Architecture: all
+Section: admin
+Provides: drumee-role
+Conflicts: drumee-role
+Depends: ${misc:Depends},
+         drumee-release (= ${binary:Version}),
+         drumee-infra (= ${drumee:InfraVersion}),
+         drumee-bootstrap (= ${drumee:BootstrapVersion}),
+         drumee-node-runtime (= ${drumee:NodeRuntimeVersion}),
+         nodejs (>= 22),
+         nodejs (<< 23)
+Description: Drumee infrastructure role (configuration rendering job)
+ Runtime role for the run-once container that renders the service
+ configuration tree from the deployment's environment, writing it to the
+ shared configuration volume consumed by the other roles.
+ .
+ Rendering happens in a chroot-style target directory, so this role never
+ writes to a host path and never reconfigures the machine it runs on.
