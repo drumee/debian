@@ -126,6 +126,16 @@ Signed-By: /usr/share/keyrings/drumee-archive-keyring.gpg
 The keyring is delivered by a `drumee-archive-keyring` package, which makes
 key rotation manageable by `apt`.
 
+Until `apt.drumee.net` serves this layout, `scripts/apt-repo-local.sh` stands up
+the same thing locally under `.apt-local/` — same tool, same suites, same
+components — consumable over `file://` for host builds and over HTTP from a
+throwaway nginx container for image builds. Its signing key is generated on the
+spot and never committed. One deviation is forced by the tool: `all` cannot be
+listed in `Architectures`, since reprepro rejects it as not being a distributable
+architecture. It is not a gap — reprepro files `Architecture: all` packages into
+every listed architecture's index, so they are published for `amd64` and `arm64`
+alike, which `apt-repo-local.sh verify` checks.
+
 ## 5. Maintainer scripts must be inert at build time
 
 Drumee postinst scripts legitimately reconfigure a host: nginx, TLS, DNS, the
