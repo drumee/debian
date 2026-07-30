@@ -29,8 +29,15 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   exit 2
 fi
 
+# Vendored upstream code, tracked but not ours to change: target/ is the
+# pre-built artifact tree for drumee-bootstrap (it carries upstream acme.sh,
+# whose own installer is a `curl … | sh`), and builder/src/setup is a checkout of
+# the setup repo. Fixing either here would mean forking upstream. ci.yml's
+# ShellCheck step already skips exactly these two paths — same reasoning.
+VENDORED='^(target|builder/src)/'
+
 tracked() { # tracked <basename-regex>   -> paths of tracked files whose basename matches
-  git ls-files | grep -E "$1"
+  git ls-files | grep -Ev "$VENDORED" | grep -E "$1"
 }
 
 dockerfiles() { tracked '(^|/)Dockerfile[^/]*$'; }
@@ -196,6 +203,38 @@ check_no_hardcoded_versions() {
   fi
 }
 
+check_arch_matches_payload() {
+  local hits="" c pkgdir arch ships
+  # Architecture: all promises the payload is identical on every architecture.
+  # A payload assembled from node_modules breaks that promise silently: the tree
+  # carries compiled .node addons, and packages whose NAME encodes the platform
+  # (@img/sharp-linux-x64, @msgpackr-extract/...-linux-x64). Such a .deb built on
+  # amd64 installs cleanly on arm64 and then fails at require() — no dpkg error,
+  # no startup error until the first call. See docs/distribution.md §9.1.
+  #
+  # Checked from source rather than from a built .deb: the artifacts are
+  # gitignored and usually absent in CI, so an artifact-based check would pass by
+  # doing nothing. Copying node_modules into the staging tree is the decisive act,
+  # and it is visible in the build script. Merely referencing node_modules is not
+  # (ui/build.sh only puts .bin on PATH), hence the copy verb in the pattern.
+  while IFS= read -r c; do
+    pkgdir="${c%/debian/control}"
+    arch=$(awk '/^Architecture:/{print $2; exit}' "$c")
+    [[ "$arch" == "all" ]] || continue
+    ships=$(git ls-files "$pkgdir" 2>/dev/null | grep -E '(^|/)build\.sh$' \
+      | tr '\n' '\0' | xargs -0 -r grep -nE '(rsync|cp|install|tar)[^|]*node_modules' 2>/dev/null)
+    if [[ -n "$ships" ]]; then
+      hits+="$c: Architecture: all, but the payload ships node_modules"$'\n'"$ships"$'\n'
+    fi
+  done < <(control_files)
+  if [[ -n "$hits" ]]; then
+    bad "Architecture: all on a package carrying native code"
+    note "$hits"
+  else
+    ok "Architecture matches the payload"
+  fi
+}
+
 check_manifest_present() {
   if [[ -f release-manifest.yaml ]]; then
     ok "release-manifest.yaml present"
@@ -217,6 +256,7 @@ check_no_build_tooling
 check_drumee_pins
 check_role_exclusion
 check_no_hardcoded_versions
+check_arch_matches_payload
 check_manifest_present
 
 printf '\n'
