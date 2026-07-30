@@ -88,7 +88,10 @@ dists/
 pool/
   main/d/{drumee-roles,drumee-server-pod,drumee-ui-pod,drumee-static,
           drumee-schemas,drumee-patch,drumee-infra,drumee-bootstrap,
-          drumee-node-runtime}/
+          drumee-node-runtime}/          # drumee-bootstrap here is the NEW
+                                         # entrypoints package; the interactive
+                                         # installer was renamed to
+                                         # drumee-installer at 1.2.7
   enterprise/d/…
 ```
 

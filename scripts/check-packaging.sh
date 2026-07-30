@@ -30,7 +30,7 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 # Vendored upstream code, tracked but not ours to change: target/ is the
-# pre-built artifact tree for drumee-bootstrap (it carries upstream acme.sh,
+# pre-built artifact tree for drumee-installer (it carries upstream acme.sh,
 # whose own installer is a `curl … | sh`), and builder/src/setup is a checkout of
 # the setup repo. Fixing either here would mean forking upstream. ci.yml's
 # ShellCheck step already skips exactly these two paths — same reasoning.

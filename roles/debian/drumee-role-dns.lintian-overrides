@@ -1,0 +1,3 @@
+# A role metapackage carries no files by design: its purpose is the dependency
+# graph that pins one release train and excludes every other role.
+drumee-role-dns: empty-binary-package

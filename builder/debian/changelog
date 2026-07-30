@@ -1,3 +1,15 @@
+drumee-installer (1.2.7) stable; urgency=medium
+
+  * Rename package from drumee-bootstrap to drumee-installer. The old name is
+    needed for a different package under the container distribution design (the
+    per-role entrypoints and healthchecks, docs/distribution.md §9.2), and this
+    package is the interactive bare-metal installer, so the new name is also the
+    accurate one. Replaces/Breaks retire the old name on existing hosts.
+  * Second rename for this package: it was drumee-infra until 1.2.6, renamed for
+    the same reason — a name wanted by something else.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Thu, 30 Jul 2026 12:53:13 +0200
+
 drumee-bootstrap (1.2.6) stable; urgency=medium
 
   * Rename package from drumee-infra to drumee-bootstrap to end the name

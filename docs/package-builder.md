@@ -1,12 +1,12 @@
-# Package: builder (drumee-bootstrap interactive installer)
+# Package: builder (drumee-installer interactive installer)
 
 **Directory:** `builder/`
-**Debian package:** `drumee-bootstrap`
+**Debian package:** `drumee-installer`
 **Current version:** 1.2.6
 
 ## Purpose
 
-The `builder/` package produces a `drumee-bootstrap` `.deb` that is an **interactive first-time installer** for a bare-metal or fresh VM deployment. Unlike the canonical `drumee-infra` package (built from `infra/`, pre-configured), this variant prompts via debconf during `dpkg -i` and then runs an interactive setup menu. It was renamed from `drumee-infra` to `drumee-bootstrap` to end the collision where both `builder/` and `infra/` built the same package name.
+The `builder/` package produces a `drumee-bootstrap` `.deb` that is an **interactive first-time installer** for a bare-metal or fresh VM deployment. Unlike the canonical `drumee-infra` package (built from `infra/`, pre-configured), this variant prompts via debconf during `dpkg -i` and then runs an interactive setup menu. It was renamed from `drumee-infra` to `drumee-bootstrap` to end the collision where both `builder/` and `infra/` built the same package name, and again to `drumee-installer` at 1.2.7 because the container distribution needs `drumee-bootstrap` for the per-role entrypoints package (docs/distribution.md §9.2).
 
 > Note: the two still build from different sources (`infra/` clones and compiles
 > `setup-infra`; `builder/` packages prebuilt `target/` artifacts). A full

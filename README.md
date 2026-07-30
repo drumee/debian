@@ -119,7 +119,7 @@ meta/build.sh                           # build the `drumee` metapackage
 | `ui/` | `drumee-ui-pod` | `ui-team` |
 | `static/` | `drumee-static` | `static` |
 | `schemas-patch/` | `drumee-patch` | `schemas` |
-| `builder/` | `drumee-bootstrap` | `setup` |
+| `builder/` | `drumee-installer` | `setup` |
 | `meta/` | `drumee` | — (metapackage) |
 
 See [docs/build-pipeline.md](docs/build-pipeline.md) for flags, signing, and the

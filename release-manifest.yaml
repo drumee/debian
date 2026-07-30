@@ -1,23 +1,53 @@
-# Coherent release manifest — the authoritative version of each package in a
-# release set. `scripts/check-versions.sh` verifies every debian/changelog matches
-# this file, so the components release as a coherent set instead of drifting.
+# The authoritative statement of which version every Drumee component belongs to
+# in a release. Nothing else in the build may name a component version:
+# `roles/debian/gen-substvars.py` resolves these into debian substvars, so a role
+# package cannot pin a version that has drifted from this file by hand.
 #
-# Format: <dir>: <version>   (the package name is read from each changelog)
-# Bump here, then run: scripts/check-versions.sh --sync   to update changelogs.
+# Consumers:
+#   roles/debian/gen-substvars.py  -> debian/*.substvars -> Depends: (= version)
+#   scripts/check-versions.sh      -> verifies every debian/changelog matches
+#   meta/make-control.sh           -> pins the native metapackage's dependencies
 #
-# `product` is the single user-facing release-train version. It is the version of
-# the `drumee` metapackage, the tag all container images are published under
-# (:<product> + :stable + :latest), and what `drumee.yaml`'s `version:` pins to.
-# Component versions below are internal; users only ever see `product`.
+# Bump a version here, then run:  scripts/check-versions.sh --sync
+#
+# `release` is the single user-facing release-train version: the version of the
+# `drumee-release` anchor and of every drumee-role-* metapackage, the tag all
+# container images are published under, and what `drumee.yaml` pins to. The
+# component versions below are internal; users only ever see `release`.
+release: 1.0.0
 
-product: 1.0.0
+# APT suite this release train publishes to: trixie | trixie-beta | trixie-edge.
+channel: trixie
 
-infra: 1.2.11
-schemas: 2.6.99
-server: 2.9.73
-ui: 3.3.50
-static: 1.0.4
-caddy: 1.0.0
-schemas-patch: 1.1.6
-builder: 1.2.6
-meta: 1.0.0
+# Keys are the component names gen-substvars.py maps to substvars; the directory
+# that builds each one is resolved by scripts/check-versions.sh.
+components:
+  # --- container channel ------------------------------------------------------
+  server-pod:   2.9.73
+  ui-pod:       3.3.50
+  static:       1.0.4
+  schemas:      2.6.99
+  patch:        1.1.6
+  infra:        1.2.11
+  roles:        1.0.0
+
+  # Not built yet — created in increment 3. Declared here so the roles that
+  # depend on them resolve, and so the version is chosen in the one place where
+  # choosing versions is allowed.
+  #
+  # bootstrap starts at 2.0.0, not 0.1.0: the name drumee-bootstrap was used
+  # until now by the interactive installer (published up to 1.2.6, since renamed
+  # to drumee-installer). Reusing a package name is only safe if the version line
+  # keeps rising — otherwise apt sees the new package as a downgrade of the old
+  # one and refuses to offer it.
+  bootstrap:    2.0.0
+  node-runtime: 0.1.0
+
+  # --- outside the role graph --------------------------------------------------
+  # Optional TLS terminator, pulled in only by tls_method=caddy.
+  caddy:        1.0.0
+  # Native channel: frozen, but still guarded so it cannot drift unnoticed.
+  # Built by builder/, and named drumee-installer since 1.2.7.
+  installer:    1.2.7
+  # The native metapackage tracks `release` by definition (meta/make-control.sh).
+  meta:         1.0.0

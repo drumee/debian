@@ -15,9 +15,12 @@ control="$root/meta/debian/control"
 changelog="$root/meta/debian/changelog"
 CHECK=0; [ "${1:-}" = "--check" ] && CHECK=1
 
-mver() { sed -E 's/#.*$//' "$manifest" | awk -F': *' -v k="$1" '$1==k{print $2; exit}'; }
-PRODUCT="$(mver product)"
-[ -n "$PRODUCT" ] || { echo "error: no 'product:' in $manifest" >&2; exit 1; }
+# Reads the nested manifest: `release` at top level, everything else under
+# `components:`. Keys there are component names (server-pod), not directories.
+mver() { sed -E 's/#.*$//' "$manifest" | awk -F': *' -v k="$1" '
+  {gsub(/^[[:space:]]+/,"",$1)} $1==k {gsub(/[[:space:]]+$/,"",$2); print $2; exit}'; }
+PRODUCT="$(mver release)"
+[ -n "$PRODUCT" ] || { echo "error: no 'release:' in $manifest" >&2; exit 1; }
 
 # exact-pin each runtime component to its manifest version
 dep() { printf '  drumee-%s (= %s)' "$1" "$(mver "$2")"; }
@@ -37,8 +40,8 @@ Depends: \${misc:Depends},
 $(dep infra infra),
 $(dep schemas schemas),
 $(dep static static),
-$(dep server-pod server),
-$(dep ui-pod ui)
+$(dep server-pod server-pod),
+$(dep ui-pod ui-pod)
 Description: Drumee sovereign data platform (metapackage)
  Installs the full Drumee runtime: infrastructure, database schemas, static
  assets, backend server and frontend UI. This metapackage pins every component

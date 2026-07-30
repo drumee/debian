@@ -14,7 +14,7 @@ Each subdirectory is a self-contained package builder that clones source from `g
 | `ui/` | `drumee-ui-pod` | Frontend LETC rendering engine | `ui-team` (preview) |
 | `static/` | `drumee-static` | Static assets, fonts, localization files | `static` (main) |
 | `schemas-patch/` | `drumee-patch` | Incremental DB schema patches | `schemas` (preview) |
-| `builder/` | `drumee-bootstrap` | Interactive first-time installer with debconf setup wizard | `setup` (somanos/wip) |
+| `builder/` | `drumee-installer` | Interactive first-time installer with debconf setup wizard | `setup` (somanos/wip) |
 | `meta/` | `drumee` | Metapackage — `apt install drumee` pulls the full runtime | — |
 | `admin/` | `drumee-schemas-patch` | Production schema-patch runner (interactive build via `check_*`) | local `opt/` scripts |
 

@@ -1,4 +1,4 @@
-Source: drumee-bootstrap
+Source: drumee-installer
 Section: non-free
 Priority: optional
 Maintainer: Somanos Sar <somanos.sar@drumee.com>
@@ -6,9 +6,16 @@ Build-Depends: debhelper (>= 11)
 Standards-Version: 1.2.6
 Homepage: https://drumee.org
 
-Package: drumee-bootstrap
+Package: drumee-installer
 Architecture: all
 Depends: ${misc:Depends}, debconf (>= 0.5) | debconf-2.0
+# The name drumee-bootstrap is being handed to a different package (the container
+# entrypoints and healthchecks, docs/distribution.md §9.2), so this one takes a
+# name that says what it is. Replaces/Breaks retire the old name cleanly on hosts
+# that already have it installed; there is deliberately no Provides, because the
+# new drumee-bootstrap is NOT a drop-in for this installer.
+Replaces: drumee-bootstrap (<= 1.2.6)
+Breaks: drumee-bootstrap (<= 1.2.6)
 Description: Drumee interactive bare-metal installer
  Interactive first-run installer for a bare-metal or fresh-VM Drumee
  deployment. Runs a guided debconf setup wizard that configures the full

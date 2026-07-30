@@ -729,7 +729,7 @@ Source can be git URL (`#ref`), local dir, or archive. Installs to `$PLUGIN_DIR/
 | `static/` | `drumee-static` | `static` | No deps, served by nginx |
 | `caddy/` | `drumee-caddy` | upstream Caddy + `caddy-dns/*` | **Only `Architecture: any` package.** Compiles the binary with `xcaddy` (local Go ≥ 1.21 or Docker); optional, install it before choosing `tls_method=caddy` |
 | `schemas-patch/` | `drumee-patch` | `schemas` | Requires `--manifest` |
-| `builder/` | `drumee-bootstrap` | `setup` | Interactive installer, builds unsigned, GitLab fallback |
+| `builder/` | `drumee-installer` | `setup` | Interactive installer, builds unsigned, GitLab fallback. Renamed from `drumee-bootstrap` at 1.2.7 — that name now belongs to the container entrypoints package |
 | `meta/` | `drumee` | — | Metapackage, deps pinned via `make-control.sh` |
 | `admin/` | — | — | Admin scripts only (uses interactive `check_*` flow) |
 
@@ -742,7 +742,7 @@ scripts/        build/publish images, get-drumee, dev-up/down, apt repo, seed bu
 bin/            drumee-ctl + drumee-plugin CLIs
 meta/           drumee metapackage + make-control.sh
 tests/          config + container + native + E2E test suites
-target/         pre-built artifacts for drumee-bootstrap
+target/         pre-built artifacts for drumee-installer
 docs/           full documentation (quickstart, lifecycle, security, per-package details)
 ```
 

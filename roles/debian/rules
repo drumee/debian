@@ -5,14 +5,30 @@
 # epingle ses composants a une version exacte, lue depuis
 # release-manifest.yaml et injectee sous forme de substvars.
 
-RELEASE_MANIFEST ?= $(CURDIR)/release-manifest.yaml
+# A Debian source package must build standalone: unpacked from its .dsc there is
+# no parent directory to reach into, and §4 publishes source/ for AGPL
+# compliance, so that .dsc has to work. roles/build.sh therefore copies the
+# authoritative manifest into the source tree before building, and the copy is
+# preferred here. The parent path is the development fallback, so that a bare
+# `cd roles && dpkg-buildpackage` still works in a checkout.
+RELEASE_MANIFEST ?= $(firstword $(wildcard $(CURDIR)/release-manifest.yaml \
+                                           $(CURDIR)/../release-manifest.yaml))
+
+# Empty means neither exists: say so, rather than letting gen-substvars fail with
+# a path the reader has to reverse-engineer.
+manifest-guard:
+	@test -n "$(RELEASE_MANIFEST)" || { \
+	  echo "debian/rules: release-manifest.yaml not found."; \
+	  echo "  Looked in $(CURDIR) and $(CURDIR)/.."; \
+	  echo "  Build via roles/build.sh, which copies it into the source tree."; \
+	  exit 1; }
 
 %:
 	dh $@
 
 # Les substvars doivent exister avant dh_gencontrol, qui est ce qui resout
 # ${drumee:*} en ecrivant les champs Depends definitifs.
-override_dh_gencontrol:
+override_dh_gencontrol: manifest-guard
 	python3 debian/gen-substvars.py \
 		--manifest $(RELEASE_MANIFEST) \
 		--debian-dir debian
@@ -22,8 +38,11 @@ override_dh_gencontrol:
 override_dh_auto_build:
 override_dh_auto_test:
 
-override_dh_auto_install:
-	install -d debian/drumee-release/usr/share/drumee
+# Written into debian/tmp so dh_install can place it from
+# debian/drumee-release.install, rather than this rule reaching into the
+# package's staging directory behind debhelper's back.
+override_dh_auto_install: manifest-guard
+	install -d debian/tmp/usr/share/drumee
 	python3 debian/gen-substvars.py \
 		--manifest $(RELEASE_MANIFEST) \
-		--release-file debian/drumee-release/usr/share/drumee/release
+		--release-file debian/tmp/usr/share/drumee/release

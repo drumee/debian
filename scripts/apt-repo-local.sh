@@ -137,8 +137,13 @@ cmd_include() {
     # includedeb is idempotent per (package, version): re-adding the same
     # version is refused, which is what we want — a repository that silently
     # replaces an artifact under an unchanged version is a supply-chain hazard.
-    if reprepro -b "$REPO" -C "$component" includedeb "$suite" "$d" 2>&1 | tee /dev/stderr | grep -q "^ERROR"; then
-      die "reprepro refused $d"
+    local out
+    out=$(reprepro -b "$REPO" -C "$component" includedeb "$suite" "$d" 2>&1 || true)
+    printf '%s' "$out" | grep -vE '^(Exporting|Deleting|Created)' | sed '/^$/d; s/^/     /' >&2 || true
+    if printf '%s' "$out" | grep -qE '^ERROR|Skipping'; then
+      # A silent skip is how a repository ends up serving something other than
+      # what you just handed it.
+      die "reprepro did not include $(basename "$d") — see above"
     fi
     ok "$(basename "$d") -> $suite/$component"
   done
