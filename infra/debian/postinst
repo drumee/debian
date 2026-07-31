@@ -138,7 +138,40 @@ bridge_debconf_env() {
             fi
             ;;
     esac
-    export OWN_SSL ACME_ENV_FILE
+    # Export the name the consumers actually read: OWN_CERTS_DIR.
+    #
+    # OWN_SSL was exported alone, and nothing anywhere reads it —
+    # setup-infra/bin/install tests OWN_CERTS_DIR to decide whether to skip ACME,
+    # infra.js takes --own_certs_dir (whose argparse default is the OWN_CERTS_DIR
+    # environment variable), and the rendered /etc/drumee/drumee.sh itself does
+    # `if [ -d "$OWN_CERTS_DIR" ]` to point ACME_DIR at it. So tls_method=own and
+    # tls_method=caddy both silently did nothing of what they promised:
+    #
+    #   * init-acme ran anyway for the public domain, failing on a domain with no
+    #     delegation — invisible, because bin/install runs under `set +e`;
+    #   * certs_dir stayed at the default /etc/drumee/certs instead of the
+    #     operator's path, so nginx looked for certificates where none had been
+    #     put and refused to start;
+    #   * PRIVATE_DOMAIN was not nulled (infra.js:49), so a private vhost was
+    #     rendered for an instance that had asked for its own certificates.
+    #
+    # OWN_SSL is kept exported for anything out of tree that may have started
+    # depending on it, but OWN_CERTS_DIR is the one that has effect.
+    OWN_CERTS_DIR="$OWN_SSL"
+    export OWN_SSL OWN_CERTS_DIR ACME_ENV_FILE
+
+    # infra.js only honours the directory when it already exists
+    # (`existsSync(args.own_certs_dir)`), and bin/install only skips ACME when the
+    # variable is non-empty. A path that is set but absent therefore falls back to
+    # requesting a certificate, which is the opposite of what was asked for — so
+    # say so instead of letting it fail later at issuance or at nginx start.
+    if [ -n "$OWN_CERTS_DIR" ] && [ ! -d "$OWN_CERTS_DIR" ]; then
+        echo "drumee-infra: certificate directory does not exist: $OWN_CERTS_DIR" >&2
+        echo "  It must exist before this package is configured, or Drumee ignores it," >&2
+        echo "  requests a certificate instead, and nginx finds none where it looks." >&2
+        echo "  Create it with your wildcard certificates, then: dpkg-reconfigure drumee-infra" >&2
+    fi
+
     echo "TLS method: $TLS_METHOD"
     # WireGuard peer coordination. Defaults mirror debian/templates so an
     # instance preseeded without the wireguard/* keys stays disabled rather

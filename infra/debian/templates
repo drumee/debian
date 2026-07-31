@@ -185,6 +185,18 @@ Description: Please enter the location of your SSL certificates
  .
  Each subdomain needs its own wildcard entry: a wildcard matches a single label,
  so *.example.com does NOT cover anything below vendors.example.com.
+ .
+ This directory must EXIST, with the certificates already in it, before the
+ package is configured — otherwise Drumee ignores the setting and requests a
+ certificate instead. nginx reads them by name, in the acme.sh layout, one
+ subdirectory per certified name:
+ .
+   <this directory>/example.com_ecc/fullchain.cer   (leaf + intermediates)
+   <this directory>/example.com_ecc/ca.cer          (intermediates only)
+   <this directory>/example.com_ecc/example.com.key
+ .
+ and the same for vendors.example.com_ecc and jit.example.com_ecc. A flat
+ directory of .pem files will not be found.
 
 Template: drumee-infra/wireguard_enabled
 Type: boolean
