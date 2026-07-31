@@ -52,8 +52,14 @@ KEYARG=(); [ -n "$KEY" ] && KEYARG=(--local-user "$KEY")
   gpg "${KEYARG[@]}" --batch --yes -abs -o Release.gpg Release
 )
 
-echo "==> Exporting public key to $OUT/drumee-archive-keyring.asc"
+echo "==> Exporting public key to $OUT/drumee-archive-keyring.{asc,gpg}"
 gpg "${KEYARG[@]}" --armor --export ${KEY:-} > "$OUT/drumee-archive-keyring.asc"
+# The dearmored form too, even though this flat repository does not itself need
+# it: the pool/dists layout shares the document root and its deb822 stanza
+# points Signed-By at the .gpg. This deploy mirrors the root with --delete, so a
+# flat publish that omitted the file would delete the one the pool deploy had
+# uploaded — measured, not hypothetical. Same key, so one file serves both.
+gpg "${KEYARG[@]}" --export ${KEY:-} > "$OUT/drumee-archive-keyring.gpg"
 
 cat <<MSG
 
