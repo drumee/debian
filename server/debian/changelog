@@ -1,3 +1,29 @@
+drumee-server-pod (2.9.94) stable; urgency=medium
+  * chore(deps): @drumee/server-core ^1.1.81 (was ^1.1.80-beta)
+  * fix(account-purge): never hand a workspace back to the account being deleted
+  * feat(promo): welcome_seen flag drives Modal B post-redirect
+  * fix(drumate): delete the account immediately instead of freezing it
+  * Fix/declare cron dependency (#146)
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 16:34:25 +0200
+
+drumee-server-pod (2.9.74) stable; urgency=medium
+
+  * Fix the systemd unit killing the processes it starts. ExecStart hands off to
+    pm2 and returns, and with the default RemainAfterExit=no systemd treated that
+    as the service having finished, then tore down the cgroup — taking the pm2
+    daemon with it. So "systemctl start drumee-server-pod" never worked and the
+    stack did not come up after a reboot, while running the same init script from
+    a shell did, because it landed outside the unit's cgroup. Now oneshot with
+    RemainAfterExit=yes.
+  * Depend on drumee-node-runtime, which supplies pm2. The init script invokes pm2
+    by name and nothing installed it, so a fresh install reported every package
+    installed and served nothing, failing with "pm2: command not found". Debian
+    ships no pm2 package. Note this pulls in nodejs (>= 22) transitively, which
+    Trixie cannot satisfy alone; scripts/baremetal.sh configures NodeSource before
+    installing.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 16:33:43 +0200
+
 drumee-server-pod (2.9.73) stable; urgency=medium
 
   * Release 2.9.73 (synced from release-manifest.yaml)

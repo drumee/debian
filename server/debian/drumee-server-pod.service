@@ -4,11 +4,29 @@ Documentation=man:drumee(1)
 After=nginx.service
 
 [Service]
-Type=idle
+# ExecStart hands off to pm2 and returns immediately — the supervisor and the node
+# processes it spawns are what actually stay alive. With the default
+# RemainAfterExit=no systemd therefore concluded the service had finished the
+# instant the script exited ("Deactivated successfully" in the journal), and
+# KillMode then tore down the cgroup, killing the pm2 daemon it had just started.
+# `systemctl start drumee-server-pod` could never work, and because the unit is
+# WantedBy=multi-user.target the stack did not come up after a reboot either.
+# Running the identical init script from a shell worked, purely because it landed
+# outside the unit's cgroup — which is what made this look like a script problem
+# rather than a unit problem.
+#
+# oneshot + RemainAfterExit keeps the unit "active (exited)" with the pm2
+# processes alive in its cgroup, so stop and reboot still run ExecStop.
+Type=oneshot
+RemainAfterExit=yes
 ExecStart=/etc/init.d/drumee start
 ExecReload=/etc/init.d/drumee reload
-ExecStop=-/etc/init.d/drumee stop 
+ExecStop=-/etc/init.d/drumee stop
+# Applies on stop only, now that ExecStart returning is no longer treated as the
+# service ending: ExecStop asks pm2 to shut down, then anything left in the cgroup
+# is cleaned up.
 KillMode=mixed
+TimeoutStartSec=120
 
 [Install]
 WantedBy=multi-user.target

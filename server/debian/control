@@ -7,5 +7,17 @@ Homepage: https://drumee.org
 
 Package: drumee-server-pod
 Architecture: all
-Depends: ${misc:Depends}, nginx, redis-server, redis, node-redis, inotify-tools, graphicsmagick, libgraphicsmagick1-dev, poppler-utils, libreoffice, dcraw, curl, p7zip-full, ffmpeg, drumee-schemas, drumee-static
+# drumee-node-runtime supplies pm2, which /etc/init.d/drumee invokes by name and
+# which nothing previously installed: a fresh install came up with every package
+# "installed ok" and nothing serving, failing with "pm2: command not found" in the
+# journal. Debian ships no pm2 package, so the pinned set in drumee-node-runtime is
+# the only versioned source for it. Unversioned on purpose — the exact version
+# belongs to release-manifest.yaml, and check-packaging.sh forbids naming a
+# component version in a control file.
+#
+# It pulls in nodejs (>= 22) transitively, which Trixie cannot satisfy on its own
+# (it ships 20). scripts/baremetal.sh configures NodeSource before installing, so
+# the documented path resolves. A bare `apt install drumee` on a stock Trixie now
+# fails at install time instead of installing cleanly and never starting.
+Depends: ${misc:Depends}, nginx, redis-server, redis, node-redis, inotify-tools, graphicsmagick, libgraphicsmagick1-dev, poppler-utils, libreoffice, dcraw, curl, p7zip-full, ffmpeg, drumee-schemas, drumee-static, drumee-node-runtime
 Description: Drumee Server
