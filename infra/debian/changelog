@@ -1,3 +1,15 @@
+drumee-infra (1.2.19) stable; urgency=medium
+
+  * Serve the static assets. static_dir was derived from the runtime directory,
+    giving /srv/drumee/runtime/static, while the drumee-static package installs to
+    /srv/drumee/static. The nginx aliases for /-/static/, /-/images/ and /-/fonts/,
+    the jitsi meet root, DRUMEE_STATIC_DIR, STATIC_DIR and the pm2 ecosystem all
+    inherited the wrong path, so every stylesheet, font and image returned 404 while
+    the page itself was served correctly — status checks on the page and the REST
+    endpoint both passed and the UI rendered unstyled.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 22:22:12 +0200
+
 drumee-infra (1.2.18) stable; urgency=medium
 
   * URGENT: fix a hang that made 1.2.17 uninstallable. The check added in 1.2.17
