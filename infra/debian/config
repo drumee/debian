@@ -7,6 +7,20 @@
 set -e
 . /usr/share/debconf/confmodule
 
+# Ask FIRST whether an already-configured host should be re-rendered at all, since
+# it decides what the rest of this is for. Only asked when there is something to
+# lose: /etc/drumee/drumee.json naming a non-empty domain is what infra.js itself
+# treats as "already installed" (hasExistingSettings), so the question appears
+# exactly when infra.js would otherwise refuse to write.
+#
+# Fresh installs never see it, and the default is false, so an unattended upgrade
+# leaves a running configuration alone unless the answer was preseeded.
+if [ -f /etc/drumee/drumee.json ] \
+   && grep -qE '"domain_name"[[:space:]]*:[[:space:]]*"[^"]+"' /etc/drumee/drumee.json 2>/dev/null; then
+  db_input high drumee-infra/reconfigure_existing || true
+  db_go || true
+fi
+
 db_input high drumee-infra/description || true
 db_input high drumee-infra/domain || true
 db_go || true

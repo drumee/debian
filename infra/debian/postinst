@@ -31,6 +31,19 @@ bridge_debconf_env() {
     db_get drumee-infra/description      || true; export DRUMEE_DESCRIPTION="$RET"
     db_get drumee-infra/domain           || true; export DRUMEE_DOMAIN_NAME="$RET"
     db_get drumee-infra/local_mode       || true; export LOCAL_MODE="$RET"
+    # infra.js refuses to re-render a host that is already configured, so without
+    # this an upgrade installs new templates and applies none of them. The debconf
+    # question is only asked when there is an existing instance, and defaults to
+    # false, so this stays unset on fresh installs and on upgrades nobody agreed to
+    # re-render. Safe to offer at all only because the secrets on the host are now
+    # reused rather than regenerated.
+    db_get drumee-infra/reconfigure_existing || true
+    if [ "$RET" = "true" ]; then
+        export DRUMEE_RECONFIGURE=1
+        echo "drumee-infra: re-rendering the configuration of this existing instance."
+        echo "  Hand edits under /etc/drumee, /etc/nginx, /etc/bind, Prosody and Postfix"
+        echo "  are replaced by the rendered versions. Existing passwords are kept."
+    fi
     db_get drumee-infra/service          || true; export SERVICES="$RET"
     db_get drumee-infra/admin_email      || true; export ADMIN_EMAIL="$RET"
     db_get drumee-infra/acme_email       || true; export ACME_EMAIL_ACCOUNT="$RET"
@@ -286,6 +299,28 @@ case "$1" in
     if [ -z "$DRUMEE_DOMAIN_NAME" ]; then
         echo "drumee-infra: no domain configured (debconf drumee-infra/domain is empty)." >&2
         echo "  Preseed it first, e.g.: debconf-set-selections < install.conf  (from: render.mjs debconf)" >&2
+        exit 1
+    fi
+    # An empty domain was the only thing refused, but debconf's own default is
+    # example.com — not empty, so it sailed through and the install completed
+    # "successfully" configured for a domain the operator does not own: BIND serving
+    # its zone, ACME trying to certify it, every vhost named after it, and (until
+    # 1.2.16) nginx refusing to start because the matching address was empty too.
+    #
+    # Seen for real: a preseed file went missing between a reboot and the install,
+    # `debconf-set-selections < missing-file` wrote nothing, and nothing complained.
+    #
+    # `seen` is the precise signal — debconf sets it when a question is answered,
+    # whether by a human or by debconf-set-selections, and it persists across
+    # upgrades. So this refuses only a first configure that was never told anything,
+    # and never second-guesses an operator who did answer.
+    db_fget drumee-infra/domain seen || true
+    if [ "$RET" != "true" ]; then
+        echo "drumee-infra: the domain question was never answered — refusing to configure on defaults." >&2
+        echo "  Falling back would configure this host for '$DRUMEE_DOMAIN_NAME', a placeholder" >&2
+        echo "  rather than your domain, and the result looks like a successful install." >&2
+        echo "  Preseed it:      debconf-set-selections < install.conf   (from: render.mjs debconf)" >&2
+        echo "  or install interactively so the questions are actually asked." >&2
         exit 1
     fi
     /var/lib/drumee/setup-infra/bin/install

@@ -198,6 +198,31 @@ Description: Please enter the location of your SSL certificates
  and the same for vendors.example.com_ecc and jit.example.com_ecc. A flat
  directory of .pem files will not be found.
 
+Template: drumee-infra/reconfigure_existing
+Type: boolean
+Default: false
+Description: Re-generate the configuration of this existing Drumee instance?
+ This host is already configured — /etc/drumee/drumee.json names a domain. By
+ default an upgrade installs the new package but does NOT regenerate the
+ configuration tree, so the instance keeps running exactly as it is.
+ .
+ The consequence of declining: configuration fixes shipped with this version do
+ not reach this host. Corrections to the nginx vhosts, the routes, the certificate
+ paths, the DNS zone or the mail configuration all arrive by re-rendering, so an
+ instance that never re-renders keeps whatever those files said when it was first
+ installed.
+ .
+ The consequence of accepting: every file rendered from your answers is rewritten
+ from those answers — /etc/drumee, the nginx vhosts and includes, the BIND zones,
+ Prosody and Postfix. Anything you edited by hand in those files is lost, and the
+ DNS zone serial changes. Passwords are NOT regenerated: the database, mail and
+ butler secrets already on this host are reused, so the instance keeps working
+ against its own database.
+ .
+ Answer yes to adopt this version's configuration, no to leave the running
+ configuration untouched. You can do it later at any time with:
+ dpkg-reconfigure drumee-infra
+
 Template: drumee-infra/wireguard_enabled
 Type: boolean
 Default: false
