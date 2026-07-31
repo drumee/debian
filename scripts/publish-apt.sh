@@ -8,7 +8,9 @@
 #   deb [signed-by=/etc/apt/keyrings/drumee.asc] https://apt.drumee.net/ ./
 #
 # Usage:
-#   scripts/publish-apt.sh --debs=DIR --out=REPO_DIR [--key=EMAIL_OR_KEYID]
+#   scripts/publish-apt.sh --debs=DIR --out=REPO_DIR --key=EMAIL_OR_KEYID
+#
+# --key is required: it must be the key clients already trust. See the check below.
 #
 # Requires: apt-utils (apt-ftparchive), gpg with the signing secret key.
 set -euo pipefail
@@ -27,6 +29,20 @@ done
 [ -n "$OUT" ] || { echo "error: --out=REPO_DIR required" >&2; exit 2; }
 command -v apt-ftparchive >/dev/null || { echo "error: install apt-utils" >&2; exit 1; }
 command -v gpg >/dev/null || { echo "error: gpg required for signing" >&2; exit 1; }
+# Checked here, before several hundred MB of packages are copied, and required
+# rather than defaulted: without --key, gpg signs with whatever its default key is
+# and `--export` with an empty selector exports EVERY public key in the keyring.
+# The result is a repository signed by a key no client trusts, published beside a
+# keyring full of strangers — every existing installation then fails apt update
+# with NO_PUBKEY, on machines nobody touched. A worse outage than whatever the
+# publish was fixing, one forgotten flag away.
+[ -n "$KEY" ] || {
+  echo "error: --key=EMAIL_OR_KEYID is required." >&2
+  echo "  It must be the key clients already trust, or their next apt update fails" >&2
+  echo "  with NO_PUBKEY. Secret keys available here:" >&2
+  gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep -E '^(sec|uid)' | sed 's/^/    /' >&2
+  exit 2
+}
 
 mkdir -p "$OUT"
 echo "==> Collecting packages"
@@ -46,20 +62,20 @@ EOF
 ( cd "$OUT" && apt-ftparchive -c /tmp/apt-release.conf release . > Release )
 
 echo "==> Signing Release"
-KEYARG=(); [ -n "$KEY" ] && KEYARG=(--local-user "$KEY")
+KEYARG=(--local-user "$KEY")
 ( cd "$OUT"
   gpg "${KEYARG[@]}" --batch --yes --clearsign -o InRelease Release
   gpg "${KEYARG[@]}" --batch --yes -abs -o Release.gpg Release
 )
 
 echo "==> Exporting public key to $OUT/drumee-archive-keyring.{asc,gpg}"
-gpg "${KEYARG[@]}" --armor --export ${KEY:-} > "$OUT/drumee-archive-keyring.asc"
+gpg "${KEYARG[@]}" --armor --export "$KEY" > "$OUT/drumee-archive-keyring.asc"
 # The dearmored form too, even though this flat repository does not itself need
 # it: the pool/dists layout shares the document root and its deb822 stanza
 # points Signed-By at the .gpg. This deploy mirrors the root with --delete, so a
 # flat publish that omitted the file would delete the one the pool deploy had
 # uploaded — measured, not hypothetical. Same key, so one file serves both.
-gpg "${KEYARG[@]}" --export ${KEY:-} > "$OUT/drumee-archive-keyring.gpg"
+gpg "${KEYARG[@]}" --export "$KEY" > "$OUT/drumee-archive-keyring.gpg"
 
 cat <<MSG
 
