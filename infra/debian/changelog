@@ -1,3 +1,18 @@
+drumee-infra (1.2.16) stable; urgency=medium
+
+  * Never render a TURN upstream with no host. The address was interpolated
+    straight into `server ADDRESS:5349`, but it is optional — debconf leaves it
+    empty unless asked — while the file was written unconditionally. An instance
+    that had not been told its own address got `server :5349;`, and because
+    modules-enabled is included at nginx's main context, nginx refused its ENTIRE
+    configuration: every site on the host down, with the only symptom an upstream
+    nobody had configured. All three variants are now guarded on the address and
+    the conferencing domain, and render as comments only when either is missing —
+    inert by choice, since a half-written stream block here is a host-wide outage.
+    Checked by feeding each render to nginx -t rather than by inspection.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 18:40:57 +0200
+
 drumee-infra (1.2.15) stable; urgency=medium
 
   * Remove the private vhost when the private branch is skipped. These files are
