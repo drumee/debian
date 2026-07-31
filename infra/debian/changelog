@@ -1,3 +1,21 @@
+drumee-infra (1.2.20) stable; urgency=medium
+
+  * Remove the rendered configuration on purge. setup-infra renders its files
+    rather than shipping them, so dpkg never tracked them and a purge left every
+    one behind — nginx kept loading the vhosts of a package that no longer existed,
+    and a later install with different settings inherited them. That is how a stale
+    02-private.conf, still including an ssl/private.conf the new render
+    deliberately no longer produced, stopped nginx dead: one leftover file, every
+    site on the host down. postrm now removes exactly the files infra.js and
+    jitsi.js write into /etc/nginx, plus /etc/cron.d/drumee and the whole of
+    /etc/drumee, then reloads nginx. Named rather than globbed, so an operator's
+    own vhost is untouched. Files belonging to other packages that setup-infra
+    overwrites in place — postfix, MariaDB, BIND, mailname, Prosody, jitsi — are
+    deliberately left, since deleting them would strip those packages of
+    configuration they ship themselves.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 23:24:45 +0200
+
 drumee-infra (1.2.19) stable; urgency=medium
 
   * Serve the static assets. static_dir was derived from the runtime directory,
