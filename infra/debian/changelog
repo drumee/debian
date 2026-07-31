@@ -1,3 +1,22 @@
+drumee-infra (1.2.13) stable; urgency=medium
+
+  * Fix nginx refusing its whole configuration on any instance that has both a
+    public and a private domain. Every vhost glob-includes
+    infrastructure/routes/*.conf, and that directory held public.conf and
+    private.conf, which were not additive route modules but two renderings of the
+    same route set for two different server blocks. Both declared "location /-/",
+    so one server block got it twice and nginx failed to start, leaving nothing on
+    443. Collapsed into a single shared routes/app.conf; the glob is kept so
+    jitsi and vendors can add their own files, which own distinct prefixes.
+  * Access-Control-Allow-Origin is now a valid origin. It was a bare hostname,
+    which is not a serialised origin, so browsers ignored the header entirely; it
+    is derived from the request instead, which also gives the vendors and jit
+    vhosts their own origin rather than the apex domain.
+  * Remove route files left by an earlier release before writing, so an upgrade
+    cannot end up with the new file beside the stale pair and fail as before.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 15:46:31 +0200
+
 drumee-infra (1.2.12) stable; urgency=medium
 
   * Ask how DNS and TLS should be handled (drumee-infra/tls_method), replacing

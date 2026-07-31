@@ -1,3 +1,23 @@
+drumee-schemas (2.7.0) stable; urgency=medium
+
+  * Upgrade the MariaDB system tables to the running server version before
+    populate runs, instead of letting Debian do it concurrently. The seed carries
+    the system tables of whatever server produced it, so a restore onto a
+    different version has mariadb-upgrade rewriting mysql.proc while populate is
+    loading routines into it. The two deadlock on that table, and because
+    lock_wait_timeout defaults to 86400 the install does not fail — it hangs for a
+    day, indistinguishable from a slow restore.
+  * Stop fetching initial content over the network during populate. The wallpaper
+    and tutorial import reached a host that no longer resolves, and the failure
+    path raised a ReferenceError instead of being skipped, aborting database
+    initialization and leaving the package half-configured.
+  * Fix the factory-pool guard, which counted system accounts through a column
+    that has never existed. The query always errored, the error was swallowed into
+    a zero, and the warning therefore fired on every install — including healthy
+    ones whose pool count in the same message contradicted it.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 15:46:31 +0200
+
 drumee-schemas (2.6.99) stable; urgency=medium
   * TMP BUILD FROM REVAMP
  -- Somanos Sar <somanos.sar@drumee.com>  Thu, 04 Dec 2025 10:00:00 +000
