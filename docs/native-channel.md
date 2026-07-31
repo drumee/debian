@@ -53,15 +53,37 @@ Every subdomain needs its own wildcard entry, because **a wildcard matches exact
 one label** — `*.example.com` does not cover `x.vendors.example.com`. The same
 applies to the DNS zone: a `*` record does not answer for `*.vendors`.
 
-`apt install drumee-infra` asks how to answer the challenge:
+`apt install drumee-infra` asks how to answer the challenge — which is also the
+question of **who runs DNS for the domain**:
 
 | Choice | Requirements |
 |---|---|
-| **acme-dns-server** (default) | This host becomes the authoritative DNS server (BIND9, TSIG-signed dynamic updates). The domain's NS records must be delegated here and **inbound udp/53 must reach it** — not possible behind a typical home router. |
-| **acme-dns-api** | The TXT record is created through your DNS provider's API. **Outbound only, so no port forwarding at all** — the right choice for a box on a home LAN. No local DNS server is installed. |
+| **acme-dns-server** (default) | **Drumee provides the DNS.** BIND9 is installed here as the authoritative nameserver and serves the whole zone (see below), answering the challenge through a TSIG-signed dynamic update. The domain's NS records must be delegated here and **inbound udp/53 must reach it** — not possible behind a typical home router. |
+| **acme-dns-api** | The TXT record is created through your DNS provider's API. **Outbound only, so no port forwarding at all** — the right choice for a box on a home LAN. No DNS server is installed, so **every other record below is yours to publish**. |
 | **caddy** | The `drumee-caddy` package (a Caddy compiled with `caddy-dns` provider modules) takes 80/443, obtains and renews the certificates itself over DNS-01, and proxies to nginx on internal ports. **Outbound only**, and it can issue wildcards. Asks for the domain, the provider module and the API token. |
 | **own** | You supply wildcard certs and give their path. |
 | **self-signed** | LAN-only/test instance, no public certificate. |
+
+### What the zone contains
+
+Only `acme-dns-server` publishes this for you. On the other four choices it is the
+checklist of what you must create at your own DNS provider — the certificate is
+the smallest part of it:
+
+| Records | Purpose |
+|---|---|
+| `ns1`, `ns2` + the `NS` records at the apex | delegation, so the zone answers at all |
+| `@`, `*`, `www` | the instance itself |
+| `jit`, `*.jit` | conferencing |
+| `vendors`, `*.vendors` | vendor sites |
+| `smtp` + `MX 10 smtp` | mail delivery to this instance |
+| `SPF`, `DKIM` (`@`, `smtp._domainkey`, `dkim._domainkey`), `_dmarc` | mail *from* this instance being accepted elsewhere |
+| `_acme-challenge` | the certificate challenge |
+
+The mail authentication records are the ones most often forgotten: without them
+the instance still works, but mail it sends is likely to be filed as spam. The
+DKIM key is generated during `drumee-infra` configuration, so those records can
+only be published after the first install.
 
 For `acme-dns-api`, create the credentials file on the host **before** installing,
 mode `0600`, exporting an [acme.sh dnsapi](https://github.com/acmesh-official/acme.sh/wiki/dnsapi)

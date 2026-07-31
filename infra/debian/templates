@@ -92,32 +92,41 @@ Template: drumee-infra/tls_method
 Type: select
 Choices: acme-dns-server, acme-dns-api, caddy, own, self-signed
 Default: acme-dns-server
-Description: How should TLS certificates be obtained?
+Description: How should DNS and TLS certificates be handled?
  Drumee needs a WILDCARD certificate (example.com plus *.example.com), which
- can only be issued through a DNS-01 challenge — never over HTTP. There are
- two ways to answer that challenge:
+ can only be issued through a DNS-01 challenge — never over HTTP. So this
+ answer decides two things at once: how that challenge is answered, and who
+ runs DNS for your domain.
  .
- acme-dns-server: this machine runs its own authoritative DNS server (BIND9)
- and answers the challenge locally. Requires that the domain's NS records are
- delegated here and that inbound UDP port 53 reaches this machine — so it does
- NOT work behind a home router.
+ acme-dns-server: Drumee provides the DNS. BIND9 is installed here and becomes
+ the authoritative nameserver for your domain, serving the complete zone — ns1
+ and ns2, the apex and its wildcard, jit, vendors and *.vendors, the MX record,
+ and the SPF, DKIM and DMARC records that let mail sent by this instance be
+ accepted elsewhere. The certificate challenge is then answered locally through
+ a TSIG-signed dynamic update, as one record among all those. Requires the
+ domain's NS records to be delegated to this machine and inbound UDP port 53 to
+ reach it — so it does NOT work behind a home router.
  .
  acme-dns-api: the challenge record is created through your DNS provider's API
  (any provider supported by acme.sh). This needs only outbound access, so it
- works behind NAT with no port forwarding at all. No local DNS server is set
- up in this mode.
+ works behind NAT with no port forwarding at all. No DNS server is installed:
+ every other record stays yours to publish at your provider, including jit,
+ vendors, *.vendors and the mail authentication records — without those, mail
+ from this instance is likely to be rejected as spam.
  .
  caddy: Caddy obtains and renews the certificates itself, using the DNS
  provider module it was built with, and terminates TLS on ports 80/443 in front
  of nginx (nginx moves to internal ports). Also outbound-only, so it works
- behind NAT. Requires the drumee-caddy package; without it this choice is
- refused and nginx keeps ports 80/443.
+ behind NAT. As with acme-dns-api, no DNS server is installed and the zone
+ remains yours to publish. Requires the drumee-caddy package; without it this
+ choice is refused and nginx keeps ports 80/443.
  .
- own: you already have wildcard certificates and will point Drumee at them.
+ own: you already have wildcard certificates and will point Drumee at them. No
+ DNS server is installed; the zone remains yours to publish.
  .
- self-signed: no public certificate — for a LAN-only or test instance. Only
- meaningful together with a local domain; on a public domain a certificate is
- still requested (use "own" to supply your own instead).
+ self-signed: no public certificate and no DNS server — for a LAN-only or test
+ instance. Only meaningful together with a local domain; on a public domain a
+ certificate is still requested (use "own" to supply your own instead).
 
 Template: drumee-infra/acme_env_file
 Type: string

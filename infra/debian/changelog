@@ -1,3 +1,21 @@
+drumee-infra (1.2.12) stable; urgency=medium
+
+  * Ask how DNS and TLS should be handled (drumee-infra/tls_method), replacing
+    the own_ssl boolean, which is kept so existing preseeds keep working. The
+    default, acme-dns-server, installs BIND9 here as the authoritative
+    nameserver for the domain; acme-dns-api and caddy validate over a provider
+    API and need no inbound port at all.
+  * Serve and certify vendors.<domain> and *.vendors.<domain> alongside jit.
+    Each subdomain needs its own wildcard, since a wildcard matches exactly one
+    label — own_ssl_path now says so.
+  * Derive and export JITSI_DOMAIN, which was always empty. Once vendors made
+    the value load-bearing, an empty one aborted the install in
+    create-local-certs.
+  * Optional WireGuard peer coordination, disabled by default: reach this
+    instance from outside without opening a router port.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Thu, 30 Jul 2026 18:33:37 +0200
+
 drumee-infra (1.2.11) unstable; urgency=medium
   * Changed cront jobs to handle tmp files cleaning
 
