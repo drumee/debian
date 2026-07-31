@@ -47,12 +47,27 @@ while read -r name version; do
     printf '  ok   %-14s %s %s\n' "$dir" "$pkg" "$version"
   elif [ "$SYNC" = 1 ]; then
     printf '  sync %-14s %s %s -> %s\n' "$dir" "$pkg" "$cur" "$version$rev"
+    # Reuse the maintainer of the previous entry. Read leniently — some existing
+    # changelogs here put the trailer at column 0 instead of the ' -- ' the format
+    # requires — but always WRITE the conforming form. Matching strictly used to
+    # yield an empty maintainer and an entry dpkg-parsechangelog refuses, which
+    # surfaced only at build time, well away from the sync that caused it.
+    maint="$(grep -m1 -E '^ ?-- .*<.*>' "$cl" | sed -E 's/^ ?-- //; s/  +[A-Z][a-z][a-z],.*$//')"
+    if [ -z "$maint" ] && [ -n "${DEBFULLNAME:-}" ] && [ -n "${DEBEMAIL:-}" ]; then
+      maint="$DEBFULLNAME <$DEBEMAIL>"
+    fi
+    if [ -z "$maint" ]; then
+      maint="$(git -C "$root" config user.name) <$(git -C "$root" config user.email)>"
+    fi
+    case "$maint" in
+      *"<"*">"*) : ;;
+      *) echo "FATAL cannot determine the maintainer for $dir; set DEBFULLNAME and DEBEMAIL" >&2
+         exit 1 ;;
+    esac
     tmp="$(mktemp)"
     {
       printf '%s (%s) stable; urgency=medium\n\n  * Release %s (synced from release-manifest.yaml)\n\n -- %s  %s\n\n' \
-        "$pkg" "$version" "$version" \
-        "$(grep -m1 -E '^ -- ' "$cl" | sed -E 's/^ -- //; s/  .*$//')" \
-        "$(date -R)"
+        "$pkg" "$version$rev" "$version" "$maint" "$(date -R)"
       cat "$cl"
     } > "$tmp"
     mv "$tmp" "$cl"
