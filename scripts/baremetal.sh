@@ -38,6 +38,18 @@ have_tty() { [ "${DRUMEE_NONINTERACTIVE:-0}" = "1" ] && return 1; { true <"$TTY"
 [ "$(id -u)" = "0" ] || { echo "error: run as root (sudo)" >&2; exit 1; }
 command -v apt-get >/dev/null || { echo "error: this installer targets Debian/Ubuntu" >&2; exit 1; }
 
+# curl is needed for the very first step, fetching the keyring — not just later
+# for NodeSource. A minimal Debian install has neither curl nor ca-certificates,
+# and the script used to die on line 1 of its real work with "curl: command not
+# found". The documented `curl … | sudo bash` invocation hides this (curl
+# obviously exists if it fetched the script), but any other delivery — wget, scp,
+# a pre-downloaded copy, a cloud-init file — hits it immediately.
+if ! command -v curl >/dev/null; then
+  echo "==> Installing curl (absent on minimal installs)"
+  apt-get update
+  apt-get install -y curl ca-certificates
+fi
+
 echo "==> Adding Drumee APT repository (flat: $APT_URL)"
 install -d -m 0755 /etc/apt/keyrings
 curl -fsSL "$KEYRING_URL" -o /etc/apt/keyrings/drumee.asc
