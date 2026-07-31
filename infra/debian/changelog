@@ -1,3 +1,19 @@
+drumee-infra (1.2.15) stable; urgency=medium
+
+  * Remove the private vhost when the private branch is skipped. These files are
+    rendered rather than shipped, so dpkg cannot clean them: purging the package
+    leaves them, and a reinstall with different settings inherits them. nginx
+    refuses its whole configuration over one bad include, so a single leftover
+    takes down the entire site. Switching an instance to its own certificates
+    nulls the private domain, ssl/private.conf is then correctly not produced, and
+    the 02-private.conf from the previous install kept including it — nginx would
+    not start until that one file was deleted by hand. Sweeps exactly the four
+    private-only entries the branch renders. The public side is deliberately left
+    alone: acting on a falsy public domain would delete the vhost serving the
+    instance.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 18:29:09 +0200
+
 drumee-infra (1.2.14) stable; urgency=medium
 
   * Export the certificate-directory variable that is actually read. postinst set
