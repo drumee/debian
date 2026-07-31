@@ -36,7 +36,13 @@ get_email() {
   else
     changelog="${base}/$type/debian/changelog"
   fi
-  email=$(egrep '<.+>' $changelog | head -1 | awk -F'[<>]' '{print $2}')
+  # Match the maintainer TRAILER, not merely the first line carrying angle
+  # brackets: a changelog bullet may legitimately contain them (describing
+  # "vendors.<domain>" once yielded the key name "domain", and the build then
+  # failed at signing with "No secret key"). The leading space is what the
+  # changelog format requires, but some entries here sit at column 0, so accept
+  # either.
+  email=$(grep -E '^ ?-- .+<.+>' "$changelog" | head -1 | awk -F'[<>]' '{print $2}')
   echo $email
 }
 

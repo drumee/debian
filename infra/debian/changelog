@@ -5,7 +5,7 @@ drumee-infra (1.2.12) stable; urgency=medium
     default, acme-dns-server, installs BIND9 here as the authoritative
     nameserver for the domain; acme-dns-api and caddy validate over a provider
     API and need no inbound port at all.
-  * Serve and certify vendors.<domain> and *.vendors.<domain> alongside jit.
+  * Serve and certify vendors.DOMAIN and *.vendors.DOMAIN alongside jit.
     Each subdomain needs its own wildcard, since a wildcard matches exactly one
     label — own_ssl_path now says so.
   * Derive and export JITSI_DOMAIN, which was always empty. Once vendors made
