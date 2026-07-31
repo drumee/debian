@@ -129,15 +129,67 @@ Signed-By: /usr/share/keyrings/drumee-archive-keyring.gpg
 The keyring is delivered by a `drumee-archive-keyring` package, which makes
 key rotation manageable by `apt`.
 
-Until `apt.drumee.net` serves this layout, `scripts/apt-repo-local.sh` stands up
-the same thing locally under `.apt-local/` — same tool, same suites, same
-components — consumable over `file://` for host builds and over HTTP from a
-throwaway nginx container for image builds. Its signing key is generated on the
-spot and never committed. One deviation is forced by the tool: `all` cannot be
-listed in `Architectures`, since reprepro rejects it as not being a distributable
+`scripts/apt-repo-local.sh` stands up the same thing locally under `.apt-local/`
+— consumable over `file://` for host builds and over HTTP from a throwaway nginx
+container for image builds. Its signing key is generated on the spot and never
+committed. One deviation is forced by the tool: `all` cannot be listed in
+`Architectures`, since reprepro rejects it as not being a distributable
 architecture. It is not a gap — reprepro files `Architecture: all` packages into
 every listed architecture's index, so they are published for `amd64` and `arm64`
-alike, which `apt-repo-local.sh verify` checks.
+alike, which `verify` checks.
+
+### Building and publishing it
+
+`scripts/publish-pool.sh` produces the tree above, and both scripts source the
+same definition (`scripts/lib/apt-repo.sh`) for suites, components,
+architectures and `ValidFor` — one file, so the layout proven locally is by
+construction the layout that ships.
+
+```bash
+scripts/publish-pool.sh init    --key=EMAIL_OR_KEYID
+scripts/publish-pool.sh include --debs=out-debs [--suite=trixie] [--component=main]
+scripts/publish-pool.sh promote --from=trixie-beta --to=trixie
+scripts/publish-pool.sh verify  [SUITE]     # structure, signature, Valid-Until
+scripts/publish-pool.sh check   [SUITE]     # a real apt client, in a container
+scripts/deploy-apt-repo.sh --layout=pool --no-provision
+```
+
+Three properties that are cheap to assume and expensive to get wrong, so each is
+checked rather than asserted:
+
+- **Promotion copies, it does not rebuild.** Promoting six packages from `trixie`
+  to `trixie-beta` leaves six files in `pool/`, referenced by both suites. The
+  bytes tested in beta are the bytes that ship.
+- **`Architecture: all` reaches every architecture.** `verify` counts the
+  packages in `binary-amd64` and `binary-arm64` and fails if either is empty.
+- **The signing key is not about to expire.** Both `init` and `include` refuse an
+  expired key and warn inside 60 days. When a repository key expires, every
+  client's `apt update` fails at once, on boxes nobody has touched for months,
+  and it presents as an outage rather than as a key problem.
+
+### Coexistence with the flat repository
+
+The flat repository stays at the document root while clients migrate: a box that
+already installed Drumee carries the flat stanza in its `sources.list.d`, and
+removing it under them breaks `apt update` on a machine nobody changed. So
+`dists/` and `pool/` are deployed *beside* the flat files, and two rules in
+`deploy-apt-repo.sh` keep both layouts intact:
+
+| Path | Sync | Why |
+| --- | --- | --- |
+| `pool/` | no `--delete` | immutable artifacts, still referenced by older indices |
+| `dists/` | `--delete` | generated indices; a stale one advertises packages that are gone |
+| flat root | `--delete`, excluding `dists/` and `pool/` | without the exclusion a flat publish deletes the entire pool tree |
+
+That last exclusion is load-bearing, not defensive decoration: a dry run of a
+flat publish against a document root containing the pool tree lists every
+`dists/` and `pool/` file for deletion when it is omitted.
+
+`conf/` and `db/` are **never** uploaded. They are reprepro's configuration and
+internal state and they live in the same base directory as `dists/` and `pool/`,
+so uploading the base directory wholesale would put the signing configuration on
+a public web server. The deploy names the two published subdirectories
+explicitly.
 
 ## 5. Maintainer scripts must be inert at build time
 

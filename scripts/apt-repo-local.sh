@@ -26,6 +26,12 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# The layout is defined once and shared with scripts/publish-pool.sh, which
+# publishes the real repository — so what is proven here is the same shape that
+# ships, not a lookalike.
+# shellcheck source=lib/apt-repo.sh
+source "$root/scripts/lib/apt-repo.sh"
+
 REPO="${APT_LOCAL_DIR:-$root/.apt-local}"
 PORT="${APT_LOCAL_PORT:-8899}"
 CONTAINER=drumee-apt-local
@@ -34,16 +40,6 @@ CONTAINER=drumee-apt-local
 NGINX_IMAGE="${NGINX_IMAGE:-nginx:alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752}"
 
 KEY_UID="Drumee local test key <local@drumee.invalid>"
-SUITES=(trixie trixie-beta trixie-edge)
-COMPONENTS="main enterprise"
-# NOT 'all', despite what a package's Architecture field may say: reprepro
-# rejects it outright ("Distribution trixie contains an architecture called
-# 'all'"). It is not a distributable architecture, it is a statement that one
-# binary serves every architecture — so reprepro files Architecture: all
-# packages into EVERY listed architecture's index. Listing amd64 and arm64
-# therefore publishes arch-independent packages to both, which is exactly the
-# intent. `verify` below proves it rather than asserting it.
-ARCHITECTURES="amd64 arm64 source"
 
 say()  { printf '\033[1;36m==>\033[0m %s\n' "$*"; }
 ok()   { printf '  \033[1;32mok\033[0m   %s\n' "$*"; }
@@ -80,38 +76,20 @@ cmd_init() {
   fi
   ok "signing key ${fpr:0:16}…"
 
-  say "Writing conf/distributions (${#SUITES[@]} suites x $COMPONENTS)"
-  : > "$REPO/conf/distributions"
+  say "Writing conf/distributions (${#DRUMEE_APT_SUITES[@]} suites x $DRUMEE_APT_COMPONENTS)"
   local suite
-  for suite in "${SUITES[@]}"; do
-    cat >> "$REPO/conf/distributions" <<EOF
-Origin: Drumee
-Label: Drumee local test
-Codename: $suite
-Suite: $suite
-Architectures: $ARCHITECTURES
-Components: $COMPONENTS
-Description: Drumee local test repository ($suite)
-SignWith: $fpr
-# Channels are SUITES, not components: they are mutually exclusive release
-# trains, so a client pins one through /etc/apt/preferences.d. Components are
-# reserved for the open-core split (main = AGPL core, enterprise = commercial).
-# Promotion between channels is 'reprepro copy', never a rebuild, so the
-# artifact tested in beta is bit-for-bit the one that ships.
-
-EOF
-  done
+  drumee_apt_write_distributions "$REPO/conf/distributions" "$fpr" "Drumee local test"
 
   # Exported in both encodings: .asc for humans and for `apt-key`-free setups,
   # .gpg dearmored for Signed-By, which is what the deb822 stanza references.
   gpg --armor --export "$fpr" > "$REPO/drumee-local-keyring.asc"
   gpg --export "$fpr"        > "$REPO/drumee-local-keyring.gpg"
 
-  for suite in "${SUITES[@]}"; do
+  for suite in "${DRUMEE_APT_SUITES[@]}"; do
     reprepro -b "$REPO" export "$suite" >/dev/null
   done
   ok "repository at $REPO"
-  ok "suites: ${SUITES[*]}"
+  ok "suites: ${DRUMEE_APT_SUITES[*]}"
   printf '\n'
   say "Next: scripts/apt-repo-local.sh include out-debs/*.deb"
 }
@@ -159,8 +137,8 @@ cmd_sources() {
 # /etc/apt/sources.list.d/drumee-local.sources
 Types: deb
 URIs: $uri
-Suites: ${SUITES[0]}
-Components: $COMPONENTS
+Suites: ${DRUMEE_APT_SUITES[0]}
+Components: $DRUMEE_APT_COMPONENTS
 Architectures: amd64
 Signed-By: $REPO/drumee-local-keyring.gpg
 EOF

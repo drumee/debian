@@ -552,7 +552,31 @@ Two-space indent before bullets and single-space before `--` are required by `dp
 
 ## Publishing & Distribution
 
-### APT repository (flat, self-hosted at `apt.drumee.net`)
+Two layouts are served from `apt.drumee.net` at once, deliberately: the flat
+repository that existing installs already point at, and the `dists/pool` tree
+that replaces it. See "Coexistence with the flat repository" in
+`docs/distribution.md` §4 — in short, `dists/` and `pool/` deploy *beside* the
+flat files, the flat publish excludes them from its `--delete`, and reprepro's
+`conf/`+`db/` are never uploaded.
+
+### APT repository — pool/dists (`scripts/publish-pool.sh`)
+
+```bash
+scripts/publish-pool.sh init    --key=EMAIL_OR_KEYID
+scripts/publish-pool.sh include --debs=DIR [--suite=trixie] [--component=main]
+scripts/publish-pool.sh promote --from=trixie-beta --to=trixie
+scripts/publish-pool.sh verify|check|list|sources [SUITE]
+scripts/deploy-apt-repo.sh --layout=pool --no-provision
+```
+
+reprepro-based, staged in `apt-pool/` (gitignored). Suites are the channels
+(`trixie`, `trixie-beta`, `trixie-edge`), components are the open-core split
+(`main`, `enterprise`); the shape lives in `scripts/lib/apt-repo.sh`, shared with
+`apt-repo-local.sh` so the two cannot drift. `check` resolves a package with a
+real apt client in a container. **Sign with the same key as the flat repository**
+or already-installed boxes get `NO_PUBKEY`.
+
+### APT repository (flat, the layout being superseded)
 
 ```bash
 scripts/publish-apt.sh --debs=DIR --out=REPO_DIR [--key=EMAIL_OR_KEYID]

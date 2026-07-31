@@ -16,43 +16,94 @@
 #
 # Usage:
 #   scripts/deploy-apt-repo.sh [--host=USER@HOST] [--repo-dir=DIR] [--domain=DOMAIN]
-#                              [--no-provision]
+#                              [--layout=flat|pool] [--no-provision]
 #
 # --host defaults to debian@apt.drumee.net, the production repo host. Pass it
 # explicitly to publish elsewhere (a staging VPS, a mirror).
 #
+# --layout=flat (default) uploads the flat repository built by publish-apt.sh:
+#   Packages/Release/InRelease and the .deb files, all at the document root.
+#
+# --layout=pool uploads the dists/pool tree built by publish-pool.sh. It is
+# deliberately ADDITIVE — the flat repository stays where it is, because boxes
+# already installed carry the flat stanza in their sources.list.d and would
+# otherwise break on the next `apt update`. Two rules make that safe:
+#
+#   dists/  is mirrored WITH --delete. Indices are generated, and a stale index
+#           left behind advertises packages that are no longer there.
+#   pool/   is uploaded WITHOUT --delete. Its contents are immutable artifacts
+#           that older indices may still reference.
+#
+# What is never uploaded: reprepro's conf/ and db/. They live in the same base
+# directory as dists/ and pool/, so uploading that directory wholesale would put
+# the signing configuration and the internal database on a public web server.
+# This script names the two subdirectories explicitly for that reason — do not
+# "simplify" it back to uploading the base directory.
+#
 # Env:
-#   APT_LOCAL_DIR   local repo dir to upload (default: apt-repo)
+#   APT_LOCAL_DIR   local repo dir to upload (default: apt-repo, or apt-pool
+#                   when --layout=pool)
 set -euo pipefail
 
 DOMAIN="apt.drumee.net"
 REPO_DIR="/var/www/apt.drumee.net"
 HOST="debian@apt.drumee.net"
 PROVISION=1
-APT_LOCAL_DIR="${APT_LOCAL_DIR:-apt-repo}"
+LAYOUT="flat"
+APT_LOCAL_DIR_SET="${APT_LOCAL_DIR:-}"
 
 for arg in "$@"; do
   case $arg in
     --host=*)       HOST="${arg#*=}" ;;
     --repo-dir=*)   REPO_DIR="${arg#*=}" ;;
     --domain=*)     DOMAIN="${arg#*=}" ;;
+    --layout=*)     LAYOUT="${arg#*=}" ;;
     --no-provision) PROVISION=0 ;;
     *) echo "unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
 
+case "$LAYOUT" in
+  flat) APT_LOCAL_DIR="${APT_LOCAL_DIR_SET:-apt-repo}" ;;
+  pool) APT_LOCAL_DIR="${APT_LOCAL_DIR_SET:-${DRUMEE_POOL_DIR:-apt-pool}}" ;;
+  *) echo "error: --layout must be flat or pool" >&2; exit 2 ;;
+esac
+
 [ -n "$HOST" ] || { echo "error: --host= was given an empty value" >&2; exit 2; }
-echo "==> Target: $HOST:$REPO_DIR (domain $DOMAIN)"
+echo "==> Target: $HOST:$REPO_DIR (domain $DOMAIN, layout $LAYOUT)"
 [ -d "$APT_LOCAL_DIR" ] || { echo "error: local repo dir not found: $APT_LOCAL_DIR" >&2; exit 2; }
-[ -f "$APT_LOCAL_DIR/InRelease" ] || { echo "error: $APT_LOCAL_DIR does not look like an APT repo (no InRelease)" >&2; exit 2; }
+
+if [ "$LAYOUT" = "pool" ]; then
+  [ -d "$APT_LOCAL_DIR/dists" ] && [ -d "$APT_LOCAL_DIR/pool" ] \
+    || { echo "error: $APT_LOCAL_DIR has no dists/ and pool/ — run scripts/publish-pool.sh first" >&2; exit 2; }
+else
+  [ -f "$APT_LOCAL_DIR/InRelease" ] \
+    || { echo "error: $APT_LOCAL_DIR does not look like a flat APT repo (no InRelease)" >&2; exit 2; }
+fi
 
 if [ "$PROVISION" = 1 ]; then
   echo "==> Creating remote directory $REPO_DIR"
   ssh "$HOST" "sudo mkdir -p $REPO_DIR && sudo chown \$(whoami): $REPO_DIR"
 fi
 
-echo "==> Uploading repo files"
-rsync -avz --delete "$APT_LOCAL_DIR/" "$HOST:$REPO_DIR/"
+if [ "$LAYOUT" = "pool" ]; then
+  # pool/ first: an index must never be published before the files it points at,
+  # or a client that updates in between resolves a package to a 404.
+  echo "==> Uploading pool/ (additive, no --delete)"
+  rsync -avz "$APT_LOCAL_DIR/pool/" "$HOST:$REPO_DIR/pool/"
+  echo "==> Uploading dists/ (mirrored, --delete)"
+  rsync -avz --delete "$APT_LOCAL_DIR/dists/" "$HOST:$REPO_DIR/dists/"
+  echo "==> Uploading keyring"
+  rsync -avz "$APT_LOCAL_DIR/drumee-archive-keyring.asc" \
+             "$APT_LOCAL_DIR/drumee-archive-keyring.gpg" "$HOST:$REPO_DIR/"
+else
+  # --delete mirrors the document root, so the pool tree must be excluded or a
+  # flat publish silently removes the repository the other layout just deployed.
+  # The two coexist by design; only this exclusion makes that true in practice.
+  echo "==> Uploading repo files (flat; dists/ and pool/ left untouched)"
+  rsync -avz --delete --exclude='dists/' --exclude='pool/' \
+        "$APT_LOCAL_DIR/" "$HOST:$REPO_DIR/"
+fi
 
 if [ "$PROVISION" = 0 ]; then
   echo "==> Deployed to $HOST:$REPO_DIR (provisioning skipped)"

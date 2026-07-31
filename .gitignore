@@ -188,3 +188,6 @@ roles/debian/drumee-*/
 node-runtime/build/
 node-runtime/node_modules/
 bootstrap/build/
+
+# pool/dists repository staged by scripts/publish-pool.sh
+apt-pool/
