@@ -1,3 +1,20 @@
+drumee-infra (1.2.14) stable; urgency=medium
+
+  * Export the certificate-directory variable that is actually read. postinst set
+    OWN_SSL, which nothing reads; bin/install, infra.js and the rendered
+    drumee.sh all read OWN_CERTS_DIR. So tls_method=own and tls_method=caddy did
+    none of what they promise: ACME ran anyway and failed invisibly under set +e,
+    the certificate directory stayed at the default instead of the operator's
+    path, so nginx looked for certificates where none had been placed, and a
+    private vhost was rendered for an instance that had supplied its own certs.
+  * Warn when the certificate directory does not exist, since it is only honoured
+    when it already does, and otherwise a certificate is requested instead.
+  * State the layout nginx reads in the debconf question: one NAME_ecc
+    subdirectory per certified name holding fullchain.cer, ca.cer and NAME.key.
+    A flat directory of .pem files is never found.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 17:57:41 +0200
+
 drumee-infra (1.2.13) stable; urgency=medium
 
   * Fix nginx refusing its whole configuration on any instance that has both a
