@@ -30,6 +30,15 @@ bridge_debconf_env() {
     # confmodule is already sourced at the top of the script.
     db_get drumee-infra/description      || true; export DRUMEE_DESCRIPTION="$RET"
     db_get drumee-infra/domain           || true; export DRUMEE_DOMAIN_NAME="$RET"
+    # Whether the domain was ever actually answered, read HERE and exported, because
+    # every debconf command must happen inside the session this function opens and
+    # closes with db_stop below. Asking afterwards blocks forever waiting for a reply
+    # on a closed connection — which is exactly what happened when this check lived
+    # in the configure arm: it hung every configure of 1.2.17, fresh or upgrade, with
+    # the postinst asleep on a pipe and no child process to show why.
+    RET=""
+    db_fget drumee-infra/domain seen 2>/dev/null || RET=""
+    export DRUMEE_DOMAIN_SEEN="$RET"
     db_get drumee-infra/local_mode       || true; export LOCAL_MODE="$RET"
     # infra.js refuses to re-render a host that is already configured, so without
     # this an upgrade installs new templates and applies none of them. The debconf
@@ -37,7 +46,14 @@ bridge_debconf_env() {
     # false, so this stays unset on fresh installs and on upgrades nobody agreed to
     # re-render. Safe to offer at all only because the secrets on the host are now
     # reused rather than regenerated.
-    db_get drumee-infra/reconfigure_existing || true
+    # RET is cleared first because `db_get X || true` leaves the PREVIOUS question's
+    # value in RET when X is unknown to debconf — it does not clear it. A template
+    # that failed to register would then be read as whatever was queried just above
+    # (local_mode, i.e. "false" here, but the coupling is the bug). Seen for real:
+    # a stale debconf frontend held config.dat during an upgrade's unpack, the new
+    # template never registered, and this query then blocked the postinst outright.
+    RET=""
+    db_get drumee-infra/reconfigure_existing 2>/dev/null || RET=""
     if [ "$RET" = "true" ]; then
         export DRUMEE_RECONFIGURE=1
         echo "drumee-infra: re-rendering the configuration of this existing instance."
@@ -314,8 +330,7 @@ case "$1" in
     # whether by a human or by debconf-set-selections, and it persists across
     # upgrades. So this refuses only a first configure that was never told anything,
     # and never second-guesses an operator who did answer.
-    db_fget drumee-infra/domain seen || true
-    if [ "$RET" != "true" ]; then
+    if [ "$DRUMEE_DOMAIN_SEEN" != "true" ]; then
         echo "drumee-infra: the domain question was never answered — refusing to configure on defaults." >&2
         echo "  Falling back would configure this host for '$DRUMEE_DOMAIN_NAME', a placeholder" >&2
         echo "  rather than your domain, and the result looks like a successful install." >&2

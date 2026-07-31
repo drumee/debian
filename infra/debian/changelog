@@ -1,3 +1,48 @@
+drumee-infra (1.2.18) stable; urgency=medium
+
+  * URGENT: fix a hang that made 1.2.17 uninstallable. The check added in 1.2.17
+    for whether the domain question had been answered ran AFTER db_stop had closed
+    the debconf session, and a debconf command on a closed connection blocks
+    forever reading a reply that never comes. Every configure of 1.2.17 wedged
+    there — fresh install or upgrade — leaving the package half-configured, dpkg
+    interrupted, and a postinst asleep on a pipe with no child process to explain
+    why. The check now runs inside the session, before db_stop, and exports its
+    answer for the configure arm to test.
+  * Do not let an unknown debconf question be read as the previous answer:
+    `db_get X || true` leaves the prior question's value in RET rather than
+    clearing it, so a template that failed to register was read as whatever was
+    queried just before it.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 20:20:56 +0200
+
+drumee-infra (1.2.17) stable; urgency=medium
+
+  * Ask before re-rendering an existing instance, and re-render when the answer is
+    yes. infra.js refuses to re-render a configured host, so every upgrade until now
+    installed new templates and applied none of them — this is the first release
+    that can deliver a configuration fix to a host that is already installed. The
+    question appears only when there is something to lose (a drumee.json naming a
+    domain, the marker infra.js itself tests) and defaults to no, so fresh installs
+    never see it and an unattended upgrade leaves a running configuration alone. It
+    states both consequences: declining means shipped fixes to the vhosts, routes,
+    certificate paths, DNS zone and mail configuration never reach this host;
+    accepting rewrites every rendered file from the stored answers, losing hand
+    edits to them.
+  * Reuse the secrets a host already has instead of minting new ones. This is what
+    made re-rendering unsafe, and had to land first: a second render used to
+    overwrite credential/db.json with a password MariaDB had never been told,
+    locking the application out of its own database. The mail password matters as
+    much, being embedded in the rendered postfix configuration and stored in the
+    mailserver tables at once.
+  * Refuse to configure on defaults. Only an EMPTY domain was rejected, but
+    debconf's default is example.com — not empty — so an install with no preseed
+    completed "successfully" configured for a domain the operator does not own,
+    with BIND serving its zone and every vhost named after it. Tests debconf's
+    `seen` flag, which is set whether a human or debconf-set-selections answered
+    and persists across upgrades.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 31 Jul 2026 19:36:16 +0200
+
 drumee-infra (1.2.16) stable; urgency=medium
 
   * Never render a TURN upstream with no host. The address was interpolated
