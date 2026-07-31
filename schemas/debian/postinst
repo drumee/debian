@@ -29,7 +29,15 @@ case "$1" in
     # accounts fail with EMPTY_FACTORY — a silently half-broken install. Detect it
     # and report loudly with the remedy. (root@localhost auths via unix_socket.)
     pool=$(mariadb -N -B -e "SELECT COUNT(*) FROM yp.entity WHERE area='pool'" 2>/dev/null || echo 0)
-    sysacct=$(mariadb -N -B -e "SELECT COUNT(*) FROM yp.drumate WHERE category='system'" 2>/dev/null || echo 0)
+    # Count by username. yp.drumate has no `category` column and never did, so the
+    # previous query failed with ER_BAD_FIELD_ERROR on every run; `2>/dev/null ||
+    # echo 0` then turned that error into a plain 0, and the guard fired on EVERY
+    # install — reporting "system accounts missing" against a database that held
+    # nobody, guest and system all along. Verified on a live install. A guard that
+    # cannot pass is worse than no guard: it teaches the operator to ignore it.
+    sysacct=$(mariadb -N -B -e \
+      "SELECT COUNT(*) FROM yp.drumate WHERE username IN ('nobody','guest','system')" \
+      2>/dev/null || echo 0)
     if [ "${pool:-0}" -eq 0 ] || [ "${sysacct:-0}" -eq 0 ]; then
         echo "" >&2
         echo "drumee-schemas: WARNING — factory pool empty / system accounts missing" >&2
