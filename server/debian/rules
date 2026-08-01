@@ -16,9 +16,25 @@
 
 %:
 	dh $@
+
+# --no-start on BOTH, because the generated start is the bug.
+#
+# dh_installinit emits `invoke-rc.d drumee-server-pod start` before
+# dh_installsystemd's block runs, and that block is where the unit is first
+# enabled; nothing does a daemon-reload in between. On a fresh install systemd
+# therefore does not know the unit yet, invoke-rc.d silently no-ops and returns
+# 0, and the install reports success with the stack down. Measured twice on a
+# wiped box: it only ever "worked" when systemd still had the unit cached from a
+# previous install.
+#
+# The unit is still installed and ENABLED by these — only the start is
+# suppressed, and postinst's drumee-server-pod-start trigger owns it instead, so
+# it happens once, after dpkg has configured drumee-ui-pod too.
+override_dh_installinit:
+	dh_installinit --no-start
+
 override_dh_installsystemd:
-	dh_installsystemd drumee-server-pod.service
-# override_dh_installsystemd:
+	dh_installsystemd --no-start drumee-server-pod.service
 
 # 	dh_systemd_enable -pdrumee --name=drumee drumee.service
 # 	dh_installinit -pdrumee --no-start --noscripts

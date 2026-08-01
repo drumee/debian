@@ -18,6 +18,43 @@ set -e
 # the debian-policy package
 # Source debconf library.
 
+# Bring the pm2 stack up.
+#
+# Called from the `triggered` arm, i.e. after dpkg has configured everything else
+# in the run — see debian/drumee-server-pod.triggers for why it cannot be done
+# from `configure`.
+#
+# daemon-reload first: on a fresh install the unit file has only just been
+# unpacked, and until systemd is told about it every start attempt is a silent
+# no-op. That is the whole bug this replaces.
+#
+# restart, not start: on an upgrade the point is to pick up the new code, and a
+# `start` against an already-active unit does nothing. On a fresh install the
+# unit is inactive and restart starts it, so one verb covers both.
+#
+# Never fatal. A stack that fails to start is recoverable with one command, while
+# a postinst that exits non-zero leaves the package half-configured and blocks
+# every later apt operation on the box.
+start_pod() {
+    if [ -d /run/systemd/system ]; then
+        systemctl --system daemon-reload >/dev/null 2>&1 || true
+        if deb-systemd-invoke restart drumee-server-pod.service >/dev/null 2>&1; then
+            echo "Drumee server started (pm2: main, main/service, factory)."
+            return 0
+        fi
+        echo "warning: drumee-server-pod did not start." >&2
+        echo "  Retry with: systemctl start drumee-server-pod" >&2
+        echo "  Diagnose with: journalctl -u drumee-server-pod -n 50" >&2
+        return 0
+    fi
+    # No systemd: fall back to the init script directly.
+    if [ -x /etc/init.d/drumee-server-pod ]; then
+        invoke-rc.d drumee-server-pod start \
+            || echo "warning: drumee-server-pod did not start (see /etc/init.d/drumee)." >&2
+    fi
+    return 0
+}
+
 case "$1" in
     configure)
     # The app runs under pm2 (started by /etc/init.d/drumee). pm2 is an npm global,
@@ -38,6 +75,19 @@ case "$1" in
     if [ -x $patch ]; then
         $patch
     fi
+    # Ask dpkg to call us back once the whole run is configured. If triggers are
+    # unavailable for any reason, start here instead — too early is still better
+    # than never, and the watchdog cron would otherwise be the only thing that
+    # ever brings the stack up.
+    if ! dpkg-trigger --no-await drumee-server-pod-start 2>/dev/null; then
+        echo "note: dpkg triggers unavailable — starting the server now instead."
+        start_pod
+    fi
+    ;;
+
+    triggered)
+    # Fired by drumee-server-pod-start, at the end of the dpkg run.
+    start_pod
     ;;
 
     reconfigure)

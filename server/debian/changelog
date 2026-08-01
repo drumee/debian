@@ -1,3 +1,40 @@
+drumee-server-pod (2.9.95) stable; urgency=medium
+
+  * Actually start the server after installing it. A from-scratch install
+    finished reporting success with nothing listening: nginx up, pm2 daemon not
+    even running, every page 502. Nothing brought the stack up until a reboot,
+    an hour's wait for the watchdog cron, or a manual `drumee start` — the worst
+    shape of failure, because the installer says Done.
+    .
+    Cause: dh_installinit emits its `invoke-rc.d drumee-server-pod start` BEFORE
+    dh_installsystemd's block, and that block is where the unit first gets
+    enabled — with no daemon-reload in between. On a genuinely fresh install
+    systemd does not know the unit yet, so invoke-rc.d silently does nothing and
+    returns 0. Confirmed by wiping the same box twice: the first reinstall did
+    start it (systemd still had the unit cached from before the purge, journal
+    shows Starting/Finished), the second, with systemd's state cleared too,
+    produced no journal entry at all. Running the generated block standalone
+    starts the unit fine, which is what made this look like it worked.
+    .
+    Second defect in the same place: drumee-ui-pod depends on this package, so
+    dpkg configures the UI afterwards. Even when the start did fire, it brought
+    the stack up against a UI that was not installed yet.
+  * Both are fixed by taking the start away from debhelper (--no-start on
+    dh_installinit and dh_installsystemd — the unit is still installed and
+    enabled) and giving it to a self-interest dpkg trigger. dpkg runs triggered
+    maintainer scripts once every other package in the transaction is
+    configured, which is the only point at which this stack can correctly come
+    up. The handler does its own daemon-reload first, uses restart so one verb
+    covers fresh installs and upgrades, and is never fatal: a stack that failed
+    to start is one command away from fixed, while a postinst exiting non-zero
+    leaves the package half-configured and blocks every later apt run.
+  * Upstream changes in this build: server-core ^1.1.81; account-purge no longer
+    hands a workspace back to the account being deleted; welcome_seen drives
+    Modal B post-redirect; drumate deletion is immediate rather than a freeze;
+    cron dependency declared (#146).
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Sat, 01 Aug 2026 16:10:00 +0200
+
 drumee-server-pod (2.9.94) stable; urgency=medium
   * chore(deps): @drumee/server-core ^1.1.81 (was ^1.1.80-beta)
   * fix(account-purge): never hand a workspace back to the account being deleted

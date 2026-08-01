@@ -54,13 +54,6 @@ log)
     manager $1 $2
   fi
   ;;
-plugin)
-  shift
-  PLUGIN_DIR="${DRUMEE_RUNTIME_DIR:-$DRUMEE_ROOT_DIR/runtime}/plugins/server" \
-  RESTART_CMD="$0 restart" \
-  PLUGIN_OWNER="$DRUMEE_SYSTEM_USER" \
-    drumee-plugin "$@"
-  ;;
 *)
   manager $*
   ;;

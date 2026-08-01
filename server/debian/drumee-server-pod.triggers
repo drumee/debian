@@ -1,0 +1,17 @@
+# Self-interest trigger, activated by this package's own postinst.
+#
+# It exists to move the service start to the END of the dpkg run. Two reasons,
+# both measured on a from-scratch install:
+#
+#   * dh_installinit emits its `invoke-rc.d drumee-server-pod start` BEFORE
+#     dh_installsystemd's block, which is where the unit is first enabled — and
+#     nothing does a daemon-reload in between. On a genuinely fresh install
+#     systemd does not yet know the unit, so invoke-rc.d silently does nothing
+#     and returns 0. The install reports success and the stack is down.
+#   * drumee-ui-pod depends on drumee-server-pod, so dpkg configures the UI
+#     AFTER it. Starting the server from its own postinst therefore starts a
+#     stack whose UI is not in place yet.
+#
+# dpkg runs triggered maintainer scripts once every other package in the
+# transaction is configured, which is exactly when the stack can come up.
+interest-noawait drumee-server-pod-start
