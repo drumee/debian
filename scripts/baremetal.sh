@@ -77,6 +77,27 @@ fi
 # and abort on a closed stdin. Keep the Drumee-rendered versions automatically.
 CONFOPTS=(-o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef)
 
+# BIND9, ahead of Drumee and unconditionally.
+#
+# Two of the five TLS methods need this host to be authoritative for its own
+# zone: acme-dns-server (the default — the DNS-01 challenge is answered by a
+# local nsupdate) and self-signed, i.e. every LAN-only install, where nothing
+# else on the network knows the domain and the name would otherwise resolve
+# nowhere at all. drumee-infra only Recommends bind9, and a Recommends is not an
+# ordering constraint: apt may configure drumee-infra first, and its postinst
+# would then try to start a nameserver that dpkg has unpacked but not yet set
+# up. Installing it in its own transaction first removes the race.
+#
+# Unconditional because the method is chosen later, by debconf, during the
+# install below — this script does not know it yet. That is not a leak: when the
+# zone belongs at a DNS provider (acme-dns-api, caddy, own), drumee-infra's
+# postinst stands named back down rather than letting it answer for a domain
+# served elsewhere.
+if ! command -v named >/dev/null 2>&1; then
+  echo "==> Installing BIND9 (serves this instance's zone; stood down if unused)"
+  apt-get install -y "${CONFOPTS[@]}" bind9 bind9-utils
+fi
+
 set_selections() { # set_selections <key> <type> <value>
   command -v debconf-set-selections >/dev/null || apt-get install -y debconf-utils
   printf 'drumee-infra\tdrumee-infra/%s\t%s\t%s\n' "$1" "$2" "$3" | debconf-set-selections

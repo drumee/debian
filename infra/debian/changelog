@@ -1,3 +1,56 @@
+drumee-infra (1.2.21) stable; urgency=medium
+
+  * Deploy DNS automatically on the self-signed / private path. A LAN instance
+    is the only thing on the network that knows its own domain: nothing
+    delegates a private name, so without a resolver on the box it resolves for
+    nobody — the zone for it was rendered in full under /var/lib/bind and then
+    served by nothing at all. tls_method=self-signed (and any local_mode
+    install) now stands up BIND9 for that zone, alongside acme-dns-server which
+    already needed it for the DNS-01 challenge.
+  * Decide DNS from the TLS method instead of inferring it. setup-infra keyed
+    "install a nameserver" off ACME_ENV_FILE, a variable that is only ever about
+    the certificate challenge — so tls_method=own got a nameserver it had no use
+    for. postinst now exports DRUMEE_DNS_SERVER (1 for acme-dns-server and
+    self-signed, 0 for acme-dns-api, caddy and own) and bin/install honours it;
+    unset keeps the previous behaviour for out-of-tree callers. When DNS is not
+    wanted and named is nevertheless present, postinst stands it down rather
+    than let it answer for a domain served at the operator's provider — guarded
+    by the setup-infra marker in named.conf.local, so a nameserver Drumee did
+    not configure is never touched.
+  * Recommends: bind9, bind9-utils. Not Depends: three of the five TLS methods
+    have no use for a nameserver. scripts/baremetal.sh installs it in its own
+    transaction ahead of Drumee, because a Recommends is not an ordering
+    constraint and apt may otherwise configure drumee-infra first, leaving its
+    postinst to start a nameserver dpkg has unpacked but not yet set up.
+  * debian/config now db_sets tls_method=self-signed in local mode. It only set
+    a shell variable before, so the postinst read the answer back as the
+    template default and a LAN install arrived claiming to want ACME against a
+    delegated public zone.
+  * Fix the rendered BIND configuration, which named rejected outright. A
+    single-NIC host has private_ip4 == public_ip4, so both halves of
+    named.conf.local derived the same reverse zone and declared
+    <rev>.in-addr.arpa twice — and named refuses its entire configuration over
+    a duplicate, not just the zone at fault. The public reverse zone also named
+    its file /var/lib/bind/<reverse_public_ip4> while infra.js writes it to
+    /var/lib/bind/<public_ip4>, and both reverse zone files set $ORIGIN to the
+    bare octets without the in-addr.arpa suffix, putting every record in them
+    out of zone. Zone declarations now mirror exactly the conditions infra.js
+    uses to decide which files it writes.
+  * init-named no longer dies on its first command. It ran under set -e and
+    began with `service named stop`, which exits non-zero when the unit does not
+    exist — the normal state where bind9 was never installed. It aborted before
+    generating the TSIG key that named.conf.local includes unconditionally, and
+    bin/install runs it under set +e, so the whole failure was silent. It now
+    reports a missing bind9 with the command to fix it, validates with
+    named-checkconf before starting rather than after, and reports zone-load
+    complaints without trading them for no DNS at all.
+  * tests/native/dns-zone-config.sh renders the real templates and hands them to
+    a real named-checkconf in a disposable container. Verified: it fails on the
+    duplicate zone as it stood before this change, and all three zones load
+    after it.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Sat, 01 Aug 2026 10:55:00 +0200
+
 drumee-infra (1.2.20) stable; urgency=medium
 
   * Remove the rendered configuration on purge. setup-infra renders its files

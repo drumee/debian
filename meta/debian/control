@@ -9,7 +9,7 @@ Homepage: https://drumee.org
 Package: drumee
 Architecture: all
 Depends: ${misc:Depends},
-  drumee-infra (= 1.2.20),
+  drumee-infra (= 1.2.21),
   drumee-schemas (= 2.7.0),
   drumee-static (= 1.0.4),
   drumee-server-pod (= 2.9.94),

@@ -44,12 +44,21 @@ db_go || true
 
 # TLS. Only asked for a public instance: a local_mode box has no domain to
 # certify and takes the self-signed path.
+#
+# db_set, not just a shell variable: the postinst reads the answer back from
+# debconf, and an unanswered tls_method reads as its template default
+# (acme-dns-server). A local_mode install therefore arrived in the postinst
+# claiming to want ACME against a delegated public zone — the opposite of what
+# was chosen here. Writing the answer makes the two scripts agree, which now
+# also decides whether a local DNS server is deployed.
 tls_method=self-signed
 db_get drumee-infra/local_mode || true
 if [ "$RET" != "true" ]; then
   db_input high drumee-infra/tls_method || true
   db_go || true
   db_get drumee-infra/tls_method || true; tls_method="$RET"
+else
+  db_set drumee-infra/tls_method self-signed || true
 fi
 
 # An old preseed that only knows own_ssl still selects the "own" path.

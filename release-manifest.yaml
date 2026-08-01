@@ -28,7 +28,7 @@ components:
   static:       1.0.4
   schemas:      2.7.0
   patch:        1.1.6
-  infra:        1.2.20
+  infra:        1.2.21
   roles:        1.0.0
 
   # Not built yet — created in increment 3. Declared here so the roles that

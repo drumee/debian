@@ -62,13 +62,19 @@ question of **who runs DNS for the domain**:
 | **acme-dns-api** | The TXT record is created through your DNS provider's API. **Outbound only, so no port forwarding at all** — the right choice for a box on a home LAN. No DNS server is installed, so **every other record below is yours to publish**. |
 | **caddy** | The `drumee-caddy` package (a Caddy compiled with `caddy-dns` provider modules) takes 80/443, obtains and renews the certificates itself over DNS-01, and proxies to nginx on internal ports. **Outbound only**, and it can issue wildcards. Asks for the domain, the provider module and the API token. |
 | **own** | You supply wildcard certs and give their path. |
-| **self-signed** | LAN-only/test instance, no public certificate. |
+| **self-signed** | LAN-only/test instance, no public certificate. **BIND9 is installed here too**, serving the zone for your private domain — nothing delegates a private name, so without a resolver on this box it resolves for nobody. Point the LAN at this host afterwards (the router's DHCP "DNS server" option, or each client). |
+
+BIND9 is a **Recommends** of `drumee-infra`, so `apt install drumee` brings it in
+and `--no-install-recommends` or `dpkg -i` do not — the postinst says so, with the
+command to fix it. On the three choices that keep DNS at a provider, the postinst
+stands named back down rather than let it answer for a domain served elsewhere.
 
 ### What the zone contains
 
-Only `acme-dns-server` publishes this for you. On the other four choices it is the
-checklist of what you must create at your own DNS provider — the certificate is
-the smallest part of it:
+`acme-dns-server` and `self-signed` publish this for you — the first on a public
+domain, the second on your LAN. On the other three choices it is the checklist of
+what you must create at your own DNS provider, and the certificate is the
+smallest part of it:
 
 | Records | Purpose |
 |---|---|

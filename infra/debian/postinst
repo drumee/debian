@@ -167,6 +167,44 @@ bridge_debconf_env() {
             fi
             ;;
     esac
+    # Does this instance serve its own DNS? setup-infra used to infer that from
+    # ACME_ENV_FILE alone, which is only ever about the certificate challenge —
+    # so tls_method=own installed a nameserver it had no use for, and a LAN-only
+    # instance got one by accident rather than on purpose. Decide it here, from
+    # the answer the operator actually gave, and hand bin/install the conclusion
+    # in DRUMEE_DNS_SERVER.
+    #
+    #   acme-dns-server  the DNS-01 challenge is answered by a local, TSIG-signed
+    #                    nsupdate — there is no certificate without the zone
+    #   self-signed      a LAN instance is the only thing on the network that
+    #                    knows its own domain. Without a resolver here, nothing
+    #                    resolves it: no browser, no client, not the box itself.
+    #                    This is the case that used to render a complete zone
+    #                    under /var/lib/bind and then serve none of it.
+    #   acme-dns-api |
+    #   caddy | own      the zone lives at the operator's provider. Taking udp/53
+    #                    to answer for a domain served elsewhere is not neutral.
+    case "$TLS_METHOD" in
+        acme-dns-server|self-signed) DRUMEE_DNS_SERVER=1 ;;
+        *)                           DRUMEE_DNS_SERVER=0 ;;
+    esac
+    # Local mode implies self-signed whatever tls_method says (debian/config
+    # skips the question entirely), and it is the case that needs DNS most.
+    [ "$LOCAL_MODE" = "true" ] && DRUMEE_DNS_SERVER=1
+    export DRUMEE_DNS_SERVER
+
+    # bind9 is Recommends, not Depends — three of the five methods have no use
+    # for it. `apt install drumee` pulls it in; --no-install-recommends and
+    # `dpkg -i` do not. Say so before the install runs, while the operator can
+    # still act on it, rather than leaving them to discover that the name does
+    # not resolve.
+    if [ "$DRUMEE_DNS_SERVER" = "1" ] && ! command -v named >/dev/null 2>&1; then
+        echo "drumee-infra: this instance is meant to serve DNS for $DRUMEE_DOMAIN_NAME," >&2
+        echo "  but bind9 is not installed. The zone will be rendered and nothing will" >&2
+        echo "  answer for it. To finish:" >&2
+        echo "      apt-get install bind9 bind9-utils && dpkg-reconfigure drumee-infra" >&2
+    fi
+
     # Export the name the consumers actually read: OWN_CERTS_DIR.
     #
     # OWN_SSL was exported alone, and nothing anywhere reads it —
@@ -265,6 +303,54 @@ EOF
     fi
 }
 
+# Report on — or stand down — the local nameserver, once setup-infra has had its
+# turn at it.
+#
+# infra.js renders the BIND tree unconditionally, so even a method that keeps its
+# zone at a DNS provider ends up with /etc/bind/named.conf.local declaring this
+# instance's zone. bind9's own postinst starts named on install, which on such a
+# host means one of two bad outcomes: it answers authoritatively for a domain
+# served elsewhere, or — since the TSIG key is only generated on the DNS path and
+# named.conf.local includes it — it fails to load at all and leaves a failed unit
+# behind. Stand it down instead. The marker is what keeps this from touching a
+# nameserver that was not put there by Drumee.
+DRUMEE_NAMED_MARKER="Configs setup by Drumee setup-infra utility"
+
+finish_dns() {
+    command -v named >/dev/null 2>&1 || return 0
+
+    if [ "${DRUMEE_DNS_SERVER:-0}" = "1" ]; then
+        # setup-infra/bin/init-named has already validated the config and
+        # started the service by this point; only the verdict is left to report.
+        #
+        # One retry first, because Recommends is not an ordering constraint: on
+        # `apt install drumee` apt may configure drumee-infra before bind9, so
+        # init-named ran against a nameserver that was unpacked but not yet set
+        # up and could not start it. By now bind9's own configure has usually
+        # happened, and this is the difference between a working install and a
+        # correct-looking one that answers nothing.
+        if ! systemctl is-active --quiet named 2>/dev/null; then
+            deb-systemd-invoke start named.service >/dev/null 2>&1 || true
+        fi
+        if systemctl is-active --quiet named 2>/dev/null; then
+            echo "DNS: named is authoritative for $DRUMEE_DOMAIN_NAME on this host."
+            echo "  Nothing else on the network knows that name yet — point the LAN here,"
+            echo "  either through the router's DHCP \"DNS server\" option or per client."
+            echo "  Check it with:  dig +short $DRUMEE_DOMAIN_NAME @<this host's address>"
+        else
+            echo "drumee-infra: named is installed but not running, so $DRUMEE_DOMAIN_NAME" >&2
+            echo "  resolves nowhere. See: journalctl -u named -n 50" >&2
+        fi
+        return 0
+    fi
+
+    if grep -qF "$DRUMEE_NAMED_MARKER" /etc/bind/named.conf.local 2>/dev/null; then
+        echo "DNS: ${TLS_METHOD:-this TLS method} keeps the zone with your provider — standing named down."
+        deb-systemd-invoke stop named.service >/dev/null 2>&1 || true
+        systemctl disable named.service >/dev/null 2>&1 || true
+    fi
+}
+
 # Write /etc/drumee/conf.d/wireguard.json and wire up the units. The file is
 # generated here rather than shipped in the package so dpkg never treats it as
 # a conffile and never prompts on upgrade.
@@ -339,12 +425,20 @@ case "$1" in
         exit 1
     fi
     /var/lib/drumee/setup-infra/bin/install
+    finish_dns
     setup_wireguard
     ;;
 
     reconfigure)
     bridge_debconf_env
     node /var/lib/drumee/setup-infra/infra.js --force-install=1
+    # This arm re-renders without going through bin/install, so nothing here
+    # would ever (re)start named — and "then: dpkg-reconfigure drumee-infra" is
+    # the advice every DNS-related message in this script gives.
+    if [ "${DRUMEE_DNS_SERVER:-0}" = "1" ]; then
+        /var/lib/drumee/setup-infra/bin/init-named || true
+    fi
+    finish_dns
     setup_wireguard
     ;;
 

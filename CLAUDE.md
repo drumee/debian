@@ -178,7 +178,7 @@ drumee-infra
 
 ## Post-Install Behavior
 
-- **drumee-infra**: runs `setup-infra/bin/install` (root) — renders 88 lodash templates into `/etc/drumee/`, `/etc/nginx/`, `/etc/bind/`, `/etc/prosody/`, `/etc/jitsi/`, `/etc/postfix/`, MariaDB, Coturn. Sets up SSL (ACME/self-signed/own certs), DNS (BIND9), DKIM, Prosody XMPP, PM2 ecosystem, and crontab (cert renewal, tmp cleanup, watchdog, DB/storage backups). Whether BIND9 is installed at all depends on the TLS method — see the DNS-01 section below.
+- **drumee-infra**: runs `setup-infra/bin/install` (root) — renders 88 lodash templates into `/etc/drumee/`, `/etc/nginx/`, `/etc/bind/`, `/etc/prosody/`, `/etc/jitsi/`, `/etc/postfix/`, MariaDB, Coturn. Sets up SSL (ACME/self-signed/own certs), DNS (BIND9), DKIM, Prosody XMPP, PM2 ecosystem, and crontab (cert renewal, tmp cleanup, watchdog, DB/storage backups). Whether BIND9 serves the zone depends on the TLS method — `acme-dns-server` and `self-signed` do, the rest leave DNS at the operator's provider. See the DNS-01 section below.
 - **drumee-schemas**: runs `setup-schemas/bin/install` (root) — restores MariaDB from seeds via `mariabackup`, creates system accounts (nobody, guest, system, admin), provisions initial hubs, imports wallpapers/tutorials, generates RSA key pair, sends welcome email with password-reset link.
 - **drumee-server-pod**: sources `/etc/drumee/drumee.sh`, applies pending patches from `/var/lib/drumee/postinstall/patch.sh`.
 - **drumee-patch**: stages patch files; applied at next server startup (not immediately).
@@ -192,18 +192,70 @@ wildcard can only be validated by DNS-01. There is **no HTTP-01 path** natively,
 so inbound `:80` is irrelevant to certificates here. Three paths, selected by two
 env vars that `postinst` bridges from the `drumee-infra/tls_method` debconf menu:
 
-| `tls_method` | env | What happens |
-|---|---|---|
-| `acme-dns-server` (default) | neither set | `bin/init-named` installs **BIND9 as zone master** (`tsig-keygen` → `/etc/bind/keys/update.key`), ACME uses `dns_nsupdate` against `ns1.<domain>`. Needs NS delegation **and inbound udp/53** — so it cannot work behind a home router |
-| `acme-dns-api` | `ACME_ENV_FILE` | acme.sh uses `dns_$ACME_PROVIDER` (any dnsapi; OVH credential templates ship in setup-infra). **Outbound only → works behind NAT.** BIND9 is not installed at all |
-| `caddy` | `OWN_SSL` + internal nginx ports | **drumee-caddy** (a Caddy built with `caddy-dns` modules) owns 80/443, issues over DNS-01 itself, and proxies to nginx. Outbound-only, and it *can* do wildcards — unlike stock Caddy, which is why the module build matters |
-| `own` | `OWN_SSL` | ACME skipped, operator's wildcard certs used |
+| `tls_method` | env | DNS | What happens |
+|---|---|---|---|
+| `acme-dns-server` (default) | neither set | **served here** | `bin/init-named` brings up **BIND9 as zone master** (`tsig-keygen` → `/etc/bind/keys/update.key`), ACME uses `dns_nsupdate` against `ns1.<domain>`. Needs NS delegation **and inbound udp/53** — so it cannot work behind a home router |
+| `self-signed` | neither set | **served here** | No public certificate. BIND9 serves the zone locally, because a private domain is delegated nowhere and would otherwise resolve for nobody — see below |
+| `acme-dns-api` | `ACME_ENV_FILE` | at your provider | acme.sh uses `dns_$ACME_PROVIDER` (any dnsapi; OVH credential templates ship in setup-infra). **Outbound only → works behind NAT** |
+| `caddy` | `OWN_SSL` + internal nginx ports | at your provider | **drumee-caddy** (a Caddy built with `caddy-dns` modules) owns 80/443, issues over DNS-01 itself, and proxies to nginx. Outbound-only, and it *can* do wildcards — unlike stock Caddy, which is why the module build matters |
+| `own` | `OWN_SSL` | at your provider | ACME skipped, operator's wildcard certs used |
 
-`ACME_ENV_FILE` is the switch for *both* decisions — `setup-infra/bin/install`
-runs `init-named` only when that variable is unset **or points at a missing
-file**, and `init-acme` sources the file to read `ACME_PROVIDER`. So the file must
-exist *before* the package is configured, and it must export the provider name
-itself; `postinst` checks and warns rather than letting issuance fail later.
+**`DRUMEE_DNS_SERVER` is what decides the DNS column**, not `ACME_ENV_FILE`.
+`postinst` derives it from `tls_method` (`1` for the two rows above, `0` for the
+rest; local mode forces `1`) and `bin/install` honours it. Unset, it falls back
+to the old inference — `init-named` when `ACME_ENV_FILE` is unset or points at a
+missing file — which is only about the *certificate challenge* and therefore
+also switched DNS on for `tls_method=own`, where nothing wanted it.
+
+`ACME_ENV_FILE` still selects the challenge method: `init-acme` sources the file
+to read `ACME_PROVIDER`, so it must exist *before* the package is configured and
+must export the provider name itself; `postinst` checks and warns rather than
+letting issuance fail later.
+
+**bind9 is `Recommends`, not `Depends`** — three of the five methods have no use
+for a nameserver, and one squatting udp/53 for a domain served elsewhere is not
+harmless. Consequences worth knowing: `apt install drumee` pulls it in but
+`--no-install-recommends` and `dpkg -i` do not (`postinst` says so, with the
+command to fix it); a Recommends is **not an ordering constraint**, so
+`scripts/baremetal.sh` installs bind9 in its own transaction *before* Drumee,
+and `finish_dns` retries the start once; and when DNS is not wanted, `postinst`
+stands named back down — guarded by the setup-infra marker in
+`named.conf.local`, so a nameserver Drumee did not configure is never touched.
+
+### Why self-signed implies DNS
+
+A LAN instance is the only thing on the network that knows its own domain.
+Nothing delegates `drumee.lan`, no upstream resolver will ever answer for it, and
+`/etc/hosts` on every client is not a deployment. So on this path the nameserver
+*is* the product, not an ACME implementation detail — the zone was already being
+rendered in full under `/var/lib/bind`, and nothing served it.
+
+Two rendering bugs sat behind that, invisible for as long as bind9 was never
+installed, both fixed and both guarded by `tests/native/dns-zone-config.sh`:
+
+- **Duplicate reverse zone.** A single-NIC host has `private_ip4 == public_ip4`,
+  so the public and private halves of `named.conf.local` derived the *same*
+  `<rev>.in-addr.arpa` and declared it twice. named refuses its **entire**
+  configuration over that, not just the zone at fault.
+- **Zone files named after the wrong thing.** The public reverse zone pointed at
+  `/var/lib/bind/<reverse_public_ip4>` while `infra.js` writes it to
+  `/var/lib/bind/<public_ip4>`; and both reverse zone files set `$ORIGIN` to the
+  bare octets with no `in-addr.arpa` suffix, putting every record out of zone.
+
+Zone declarations now mirror exactly the conditions `infra.js` uses to decide
+which files it writes — the two must agree, or named rejects the lot.
+
+`init-named` was also unable to survive its own first line: it ran under
+`set -e` starting with `service named stop`, which exits non-zero when the unit
+does not exist, so it aborted before generating the TSIG key that
+`named.conf.local` includes unconditionally — and `bin/install` runs it under
+`set +e`, so nothing reported any of it. It now validates with `named-checkconf`
+*before* starting (plain, not `-z`: a record-level complaint should not cost the
+instance all of DNS) and reports what it finds.
+
+The remaining half is not the package's to do: **point the LAN at the box**, via
+the router's DHCP "DNS server" option or per client. `postinst` prints the `dig`
+command to confirm it.
 
 The file holds DNS API secrets and is therefore **never rendered** from
 `drumee.yaml` — the config only carries its path (`tls.acme_env_file`), and the
@@ -280,7 +332,9 @@ This pairs with WireGuard coordination: a **native** box on a home LAN can have
 wizard's "Behind a home router" mode still falls back to `self-signed` purely
 because of the Caddy limitation above, not because DNS-01 is impossible there.
 
-`self-signed` is only meaningful with a local domain: setup-infra has no
+`self-signed` still installs the nameserver (that is the point of the row above);
+what it does not do is get you a public certificate. It is only meaningful with a
+local domain: setup-infra has no
 "public domain, no ACME" mode (`infra.js:42` sets `PUBLIC_DOMAIN` from any
 non-empty `DRUMEE_DOMAIN_NAME`, and `bin/install` then runs `init-acme` unless
 `OWN_CERTS_DIR` is set), so `postinst` warns when the two are combined. Note
@@ -677,6 +731,7 @@ tests/native/install-verify.sh        # native channel E2E (disposable Debian co
 tests/native/control-deps.sh         # inter-package dependency ordering check
 tests/native/verify-debconf-bridge.sh # preseed → debconf → DRUMEE_* env, in a real .deb install
 tests/native/make-seed.sh            # generate bootstrap seeds.tgz for schemas build
+tests/native/dns-zone-config.sh      # rendered BIND config vs. a real named-checkconf
 tests/wireguard/probe-port.sh        # endpoint probe against real kernel WireGuard
 ```
 
@@ -687,9 +742,14 @@ guards → wizard render → `native/control-deps.sh`.
 
 The heavier suites are **not** in `run-all.sh` and must be run by hand:
 `smoke-container.sh`, `e2e-local.sh`, `demo-stack.sh`, `native/install-verify.sh`,
-`native/verify-debconf-bridge.sh`, `wireguard/probe-port.sh`. All of them
-self-`SKIP` (exit 0) when Docker or Node is unavailable — check their output, not
-just the exit code.
+`native/verify-debconf-bridge.sh`, `native/dns-zone-config.sh`,
+`wireguard/probe-port.sh`. All of them self-`SKIP` (exit 0) when Docker or Node
+is unavailable — check their output, not just the exit code.
+
+`native/dns-zone-config.sh` also needs a **setup-infra checkout with its
+`node_modules`** (a sibling `../setup-infra`, or `infra/src/setup-infra` after a
+build, or `SETUP_INFRA_SRC=`): it renders the actual lodash templates rather
+than a copy of them, so it cannot drift from what the package ships.
 
 ## CI/CD (GitHub Actions)
 

@@ -9,4 +9,5 @@ Package: drumee-infra
 Architecture: all
 Depends: ${misc:Depends}, binutils, apt-utils, git, nodejs (>= 20), nginx, libnginx-mod-stream,
   cron, libncurses6, git, g++, gyp, openssh-client, libcurl4, wireguard-tools, iproute2
+Recommends: bind9, bind9-utils
 Description: Setup Drumee infrastructure and environment

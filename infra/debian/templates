@@ -109,7 +109,7 @@ Description: How should DNS and TLS certificates be handled?
  .
  acme-dns-api: the challenge record is created through your DNS provider's API
  (any provider supported by acme.sh). This needs only outbound access, so it
- works behind NAT with no port forwarding at all. No DNS server is installed:
+ works behind NAT with no port forwarding at all. No DNS server is run here:
  every other record stays yours to publish at your provider, including jit,
  vendors, *.vendors and the mail authentication records — without those, mail
  from this instance is likely to be rejected as spam.
@@ -117,16 +117,21 @@ Description: How should DNS and TLS certificates be handled?
  caddy: Caddy obtains and renews the certificates itself, using the DNS
  provider module it was built with, and terminates TLS on ports 80/443 in front
  of nginx (nginx moves to internal ports). Also outbound-only, so it works
- behind NAT. As with acme-dns-api, no DNS server is installed and the zone
+ behind NAT. As with acme-dns-api, no DNS server is run here and the zone
  remains yours to publish. Requires the drumee-caddy package; without it this
  choice is refused and nginx keeps ports 80/443.
  .
  own: you already have wildcard certificates and will point Drumee at them. No
- DNS server is installed; the zone remains yours to publish.
+ DNS server is run here; the zone remains yours to publish.
  .
- self-signed: no public certificate and no DNS server — for a LAN-only or test
- instance. Only meaningful together with a local domain; on a public domain a
- certificate is still requested (use "own" to supply your own instead).
+ self-signed: no public certificate — for a LAN-only or test instance. BIND9 is
+ installed here and serves the zone for your domain on this machine, because
+ nothing else on the network knows that name: a private domain is not delegated
+ anywhere, so without a resolver here it resolves for nobody. Point the LAN at
+ this host afterwards (the router's DHCP "DNS server" option, or each client's
+ resolver) and the name works everywhere on it. Only meaningful together with a
+ local domain; on a public domain a certificate is still requested (use "own" to
+ supply your own instead).
 
 Template: drumee-infra/acme_env_file
 Type: string
