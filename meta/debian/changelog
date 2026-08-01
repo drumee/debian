@@ -1,3 +1,9 @@
+drumee (1.0.11) stable; urgency=medium
+
+  * Release 1.0.11
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Sat, 01 Aug 2026 11:44:29 +0200
+
 drumee (1.0.10) stable; urgency=medium
 
   * Release 1.0.10 (synced from release-manifest.yaml)
