@@ -1,3 +1,37 @@
+drumee-infra (1.2.23) stable; urgency=medium
+
+  * Make tls_method=self-signed produce a serving instance. It could not: nginx
+    failed to load and nothing was served. Found by wiping a test box and
+    reinstalling from scratch — the deployments before it had all inherited a
+    hand-built /etc/drumee/ssl tree from an earlier tls_method=own install, which
+    had been masking this the whole time.
+    .
+    create-local-certs signed only the private and conferencing names, while
+    infra.js renders the public and vendors vhosts whenever a domain is set,
+    whatever the TLS method — so the apex and vendors names had no certificate.
+    Those vhosts also read the acme.sh layout (fullchain.cer + ca.cer), which
+    until now only ACME, Caddy's exporter or an operator's own certs produced.
+    Every name now gets both layouts, since the templates disagree about which
+    they read, and names with no rendered .cnf are no longer skipped.
+  * Skip ACME on the self-signed path. A private domain cannot answer a DNS-01
+    challenge, so init-acme was eleven retries with sleeps between — minutes of
+    guaranteed failure on every install — and it registered an ACME account for
+    an address that will never validate. postinst exports DRUMEE_TLS_METHOD for
+    this; unset keeps the previous behaviour for out-of-tree callers.
+  * The self-signed certificates were also ones no client would accept. The
+    rendered openssl configs carry `CN = *.<domain>` and no subjectAltName at
+    all; every current browser ignores CN and requires a SAN, and a wildcard CN
+    would not have covered the apex regardless. The config is now generated with
+    `DNS:<domain>, DNS:*.<domain>`.
+  * Two quieter fixes in the same script: the trust-store copy used a .cer
+    extension while update-ca-certificates only considers *.crt, so none of these
+    certificates was ever trusted by the host (5 added now, where it reported 0);
+    and the private key was being copied world-readable into
+    /usr/local/share/ca-certificates, a directory that exists to hold public
+    trust material.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Sat, 01 Aug 2026 14:45:00 +0200
+
 drumee-infra (1.2.22) stable; urgency=medium
 
   * Do not declare the private BIND zone when own_certs_dir is set. infra.js

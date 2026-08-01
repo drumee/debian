@@ -193,6 +193,13 @@ bridge_debconf_env() {
     [ "$LOCAL_MODE" = "true" ] && DRUMEE_DNS_SERVER=1
     export DRUMEE_DNS_SERVER
 
+    # The method itself, for the decisions that are not reducible to a boolean.
+    # setup-infra reads it to skip ACME on the self-signed path (a private domain
+    # cannot answer a DNS-01 challenge, so init-acme is minutes of guaranteed
+    # failure) and to know that create-local-certs is then the ONLY thing that
+    # will certify the public names. Unset keeps the previous behaviour.
+    export DRUMEE_TLS_METHOD="$TLS_METHOD"
+
     # bind9 is Recommends, not Depends — three of the five methods have no use
     # for it. `apt install drumee` pulls it in; --no-install-recommends and
     # `dpkg -i` do not. Say so before the install runs, while the operator can
