@@ -1,3 +1,32 @@
+drumee-infra (1.2.22) stable; urgency=medium
+
+  * Do not declare the private BIND zone when own_certs_dir is set. infra.js
+    nulls private_domain in that case, but on a LOCAL variable — data.private_domain
+    stays populated, so named.conf.local declared a zone whose files infra.js
+    then never wrote. named refuses its ENTIRE configuration over a missing zone
+    file, so on a fresh tls_method=own host that is the difference between DNS
+    and no DNS at all. Found by deploying 1.2.21 to a real host that had been
+    switched away from tls_method=own: own_certs_dir persists in the rendered
+    configuration even after the method changes, and only a zone file left
+    behind by an earlier render kept named loading. The 1.2.21 template
+    approximated infra.js's conditions; it now mirrors them.
+  * Make the "bind9 is not installed" hint one that works. bind9 ships
+    /etc/bind/named.conf.local as a conffile and setup-infra has already
+    rendered one over it, so `apt-get install bind9` on an existing Drumee host
+    stops at a conffile prompt — and with a non-interactive stdin dpkg fails
+    with "end of file on stdin at conffile prompt", leaving bind9 unconfigured.
+    The hint now passes --force-confnew, which costs nothing because the
+    dpkg-reconfigure that follows renders our version back. scripts/baremetal.sh
+    was already safe: it installs bind9 first, with --force-confold/confdef.
+  * tests/native/dns-zone-config.sh now checks the invariant rather than one
+    instance of it. Zone files are written by replicating infra.js's OWN
+    decision logic, and every zone declared in named.conf.local must both name a
+    file that render produced and load in a real named-checkconf -z. Two cases:
+    a LAN self-signed host and a tls_method=own host. Verified to fail on the
+    1.2.21 template, which declares two zones with no files behind them.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Sat, 01 Aug 2026 12:20:00 +0200
+
 drumee-infra (1.2.21) stable; urgency=medium
 
   * Deploy DNS automatically on the self-signed / private path. A LAN instance

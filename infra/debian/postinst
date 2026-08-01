@@ -202,7 +202,14 @@ bridge_debconf_env() {
         echo "drumee-infra: this instance is meant to serve DNS for $DRUMEE_DOMAIN_NAME," >&2
         echo "  but bind9 is not installed. The zone will be rendered and nothing will" >&2
         echo "  answer for it. To finish:" >&2
-        echo "      apt-get install bind9 bind9-utils && dpkg-reconfigure drumee-infra" >&2
+        # --force-confnew is not optional here. bind9 ships /etc/bind/named.conf.local
+        # as a conffile and setup-infra has already rendered one over it, so a
+        # later install stops at a conffile prompt — and on a non-interactive
+        # stdin dpkg fails outright with "end of file on stdin at conffile
+        # prompt", leaving bind9 unconfigured. Taking the maintainer's file
+        # costs nothing: the reconfigure on the next line renders ours back.
+        echo "      apt-get install -o Dpkg::Options::=--force-confnew bind9 bind9-utils" >&2
+        echo "      dpkg-reconfigure drumee-infra" >&2
     fi
 
     # Export the name the consumers actually read: OWN_CERTS_DIR.
