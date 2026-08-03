@@ -6,22 +6,53 @@
 # native .deb build expects:
 #   1. a local MariaDB (started here) with the base databases loaded from the
 #      schemas repo's templates/factory/seed/*.sql,
-#   2. the entity pool STOCKED via server-team's offline/factory (so the seed
-#      never ships an empty pool -> the postinst EMPTY_FACTORY guard, gap #2),
-#   3. a mariabackup --backup + --prepare, tar'd in the exact layout that
+#   2. a mariabackup --backup + --prepare, tar'd in the exact layout that
 #      setup-schemas/bin/install consumes (tar --one-top-level=seeds ->
 #      mariabackup --copy-back --target-dir=.../seeds).
 #
-# Steps 1-2 REUSE the proven container assets verbatim (schemas-init.sh +
-# container-populate.js, which already drives offline/factory/schema.js and the
-# genesis templates) — just pointed at a local loopback MariaDB instead of the
-# compose 'mariadb' service. Step 3 mirrors schemas/src/schemas/bin/build-seeds.
+# Step 1 REUSES the proven container asset verbatim (schemas-init.sh) — just
+# pointed at a local loopback MariaDB instead of the compose 'mariadb' service.
+# Step 2 mirrors schemas/src/schemas/bin/build-seeds.
+#
+# THE SEED CARRIES NO ENTITIES. It used to also run container-populate.js here,
+# which stocked the factory pool and created the fixed system accounts, on the
+# reasoning that a seed shipping an empty pool would trip the postinst
+# EMPTY_FACTORY guard. That produced a seed describing *this container* rather
+# than *a Drumee*, and it broke installs in two ways, both measured on a
+# from-scratch native box:
+#
+#   - Every entity it stocked carried an absolute home_dir built from this
+#     container's DRUMEE_DATA_DIR (/data). A native install whose data_dir is
+#     /srv/data allocated users straight out of that pool, so the admin account
+#     and several hubs landed under /data/mfs — which nginx does not serve
+#     (`alias /srv/data/mfs/`). 20 of 115 entities were on the wrong root.
+#   - `nobody` is the one account with a FIXED id (ID_NOBODY,
+#     'ffffffffffffffff'). The seed already held that row, so the target host's
+#     populate.js -> createNobody -> updateEntries hit ER_DUP_ENTRY on all six
+#     of its UPDATEs, every install. `nobody` kept the seed's dead
+#     /data/mfs home_dir and the pool entity drawn for it was stranded. Guest
+#     and system don't force an id, so instead of failing they silently
+#     duplicated: guest+guest1, system+system1.
+#
+# The EMPTY_FACTORY premise no longer holds either: setup-schemas'
+# populate.js:stockFactory tops the pool up on the TARGET host (idempotent, to
+# POOL_COUNT), and schemas' postinst runs bin/install before it counts the pool,
+# so the guard sees a stocked pool. Stocking on the target is also the only way
+# to get correct paths, since only the target knows its own data_dir.
+#
+# Keep it this way: anything host-specific written here ships to every install.
+# schemas' bin/make-templates asserts the same property for the templates that
+# feed step 1.
 #
 # Source trees are bind-mounted read-only (see scripts/build-seed.sh):
-#   /src/server-main   server-team  (offline/factory + @drumee node_modules)
-#   /src/setup-schemas setup-schemas(lib/organization + its node_modules)
 #   /src/schemas       schemas      (templates/factory + schema/patch corpus)
 #   /out               host output directory (seeds.tgz lands here)
+#
+# server-team and setup-schemas used to be mounted here too, purely to run
+# container-populate.js. Dropping that step drops them, and with them the
+# requirement that server-team already carry node_modules/@drumee — so the seed
+# is now buildable from public sources alone, which is what
+# docs/reproducible-builds.md was after.
 set -euo pipefail
 
 # --- knobs (overridable via `docker run -e`) --------------------------------
@@ -30,20 +61,16 @@ DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD:-seedroot}"
 DB_USER="${DB_USER:-drumee-app}"
 DB_PASSWORD="${DB_PASSWORD:-seedapp}"
 DRUMEE_DOMAIN_NAME="${DRUMEE_DOMAIN_NAME:-localhost}"
-POOL_COUNT="${POOL_COUNT:-10}"
 DATADIR="${DATADIR:-/var/lib/mysql}"
 BACKUP_DIR="${BACKUP_DIR:-/backup}"
 OUT_DIR="${OUT_DIR:-/out}"
 OUT_FILE="${OUT_FILE:-seeds.tgz}"
 
-SRC_SERVER=/src/server-main
-SRC_SETUP=/src/setup-schemas
 SRC_SCHEMAS=/src/schemas
 FACTORY_DIR="$SRC_SCHEMAS/templates/factory"
 
-for d in "$SRC_SERVER/offline/factory" "$SRC_SETUP/lib" "$FACTORY_DIR/seed"; do
-  [ -d "$d" ] || { echo "FATAL: expected mounted source missing: $d" >&2; exit 1; }
-done
+[ -d "$FACTORY_DIR/seed" ] || {
+  echo "FATAL: expected mounted source missing: $FACTORY_DIR/seed" >&2; exit 1; }
 mkdir -p "$OUT_DIR" "$BACKUP_DIR"
 
 # --- 1. start a local MariaDB on loopback ------------------------------------
@@ -82,11 +109,7 @@ SQL
 done
 mariadb -uroot --socket=/run/mysqld/mysqld.sock -e 'FLUSH PRIVILEGES'
 
-# --- redis (Cache.load() in container-populate needs a live Redis) -----------
-echo "==> Starting redis on 127.0.0.1"
-redis-server --daemonize yes --bind 127.0.0.1 --save '' >/dev/null
-
-# --- 2a. base databases + factory seed (reuse schemas-init.sh) ---------------
+# --- 2. base databases + factory seed (reuse schemas-init.sh) ----------------
 echo "==> schemas-init: base DBs from templates/factory/seed + schema patches"
 DB_HOST=127.0.0.1 DB_PORT="$DB_PORT" DB_ROOT_PASSWORD="$DB_ROOT_PASSWORD" \
 DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" \
@@ -94,23 +117,30 @@ DRUMEE_DOMAIN_NAME="$DRUMEE_DOMAIN_NAME" \
 FACTORY_DIR="$FACTORY_DIR" SCHEMAS_DIR="$SRC_SCHEMAS" \
   /usr/local/bin/schemas-init
 
-# --- 2b. populate + stock the entity pool (reuse container-populate.js) -------
-# populate-entrypoint materializes /etc/drumee config (db.json/redis.json/
-# drumee.json/.my.cnf) then runs the command we pass it. NODE_PATH lets the
-# mounted setup-schemas resolve @drumee/* from the mounted server-team tree.
-# CREATE_ADMIN is intentionally UNSET: the native install's populate.js creates
-# the domain-specific admin/RSA keys at install time; the seed only needs the
-# base schema + a stocked pool + the fixed system accounts.
-echo "==> container-populate: org.populate + stockFactory (offline/factory) + system accounts"
-DB_HOST=127.0.0.1 DB_PORT="$DB_PORT" DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" \
-DRUMEE_DOMAIN_NAME="$DRUMEE_DOMAIN_NAME" DRUMEE_DATA_DIR=/data \
-REDIS_HOST=127.0.0.1 REDIS_PORT=6379 \
-SS_DIR="$SRC_SETUP" SERVER_MAIN="$SRC_SERVER" GENESIS_DIR="$FACTORY_DIR" \
-POOL_COUNT="$POOL_COUNT" \
-NODE_PATH="$SRC_SERVER/node_modules:$SRC_SETUP/node_modules" \
-  /usr/local/bin/drumee-populate node /usr/local/lib/drumee/container-populate.js
+# --- 3. neutrality assertion -------------------------------------------------
+# The seed must describe a Drumee, not this container. Asserted rather than
+# assumed, because the previous version of this script violated it silently and
+# the damage only showed up as an admin account whose files nginx would not
+# serve (see the header). Anything that reintroduces host state — a template
+# that regained rows, a populate step added back here — fails the build now.
+echo "==> Checking the seed carries no host-specific entities"
+seed_check() { mariadb -uroot -p"$DB_ROOT_PASSWORD" -h127.0.0.1 -P"$DB_PORT" -N -B -e "$1" 2>/dev/null || echo 0; }
+bad=0
+entities=$(seed_check "SELECT COUNT(*) FROM yp.entity")
+homedirs=$(seed_check "SELECT COUNT(*) FROM yp.entity WHERE home_dir IS NOT NULL AND home_dir<>''")
+trashed=$(seed_check "SELECT COUNT(*) FROM trash.entity")
+if [ "${entities:-0}" != 0 ]; then
+  echo "FATAL: seed contains $entities yp.entity rows — it must contain none." >&2
+  echo "  Entities carry an absolute home_dir, so they can only be created on the" >&2
+  echo "  target host, which is the only party that knows its own data_dir." >&2
+  bad=1
+fi
+[ "${homedirs:-0}" = 0 ] || { echo "FATAL: seed contains $homedirs baked home_dir values." >&2; bad=1; }
+[ "${trashed:-0}" = 0 ] || { echo "FATAL: seed's trash.entity carries $trashed deleted account(s) from the template host." >&2; bad=1; }
+[ "$bad" = 0 ] || { echo "Refusing to publish a host-specific seed." >&2; exit 1; }
+echo "Seed is host-neutral (0 entities; pool is stocked by populate.js on the target)"
 
-echo "==> Pool status"
+echo "==> Pool status (expected empty — the target host stocks it)"
 mariadb -uroot -p"$DB_ROOT_PASSWORD" -h127.0.0.1 -P"$DB_PORT" -N -B \
   -e "SELECT area, type, COUNT(*) FROM yp.entity GROUP BY area, type" || true
 

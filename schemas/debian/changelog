@@ -1,3 +1,34 @@
+drumee-schemas (2.7.1) stable; urgency=medium
+
+  * Ship a host-neutral seed. seeds.tgz was built by running container-populate.js
+    inside the seed builder, which stocked the factory pool and created the fixed
+    system accounts — so the seed described that container rather than a Drumee.
+    Entities carry an ABSOLUTE home_dir, built from the builder's
+    DRUMEE_DATA_DIR=/data, and a native install allocates users straight out of
+    that pool. Measured on a from-scratch box: 20 of 115 entities sat under
+    /data/mfs, including the admin account and the Portal and System hubs, while
+    nginx serves `alias /srv/data/mfs/`. Their files were unreachable.
+    .
+    Separately, `nobody` is the one account with a fixed id (ID_NOBODY,
+    'ffffffffffffffff'). The seed already held that row, so every install's
+    createNobody -> updateEntries hit ER_DUP_ENTRY on all six of its UPDATEs;
+    nobody kept the seed's dead /data/mfs home_dir and the pool entity drawn for
+    it was stranded with its own database. guest and system don't force an id, so
+    rather than failing they silently duplicated: guest+guest1, system+system1.
+    .
+    The seed now carries zero entities. setup-schemas' populate.js:stockFactory
+    stocks the pool on the target host — idempotent, to POOL_COUNT — and this
+    package's postinst runs bin/install before it counts the pool, so the
+    EMPTY_FACTORY guard is satisfied. Stocking on the target is also the only way
+    to get correct paths: only the target knows its own data_dir.
+    .
+    Asserted, not assumed: the seed builder refuses to publish a seed containing
+    yp.entity rows, baked home_dir values, or a trash.entity left over from the
+    template host, and schemas' bin/make-templates asserts the same for the
+    templates feeding it.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Mon, 03 Aug 2026 16:38:42 +0200
+
 drumee-schemas (2.7.0) stable; urgency=medium
 
   * Upgrade the MariaDB system tables to the running server version before

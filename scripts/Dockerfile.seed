@@ -1,35 +1,31 @@
 # Drumee seed-builder image — a self-contained toolbox that produces schemas'
 # var/tmp/drumee/seeds.tgz offline (the mariabackup snapshot the native .deb
-# install restores). Built from source, NOT from the server-pod image: the app
-# code + @drumee node_modules are bind-mounted at runtime (see scripts/build-seed.sh),
-# so this image only carries the tools + the reused helper scripts.
+# install restores). Built from source, NOT from the server-pod image: the schemas
+# templates are bind-mounted at runtime (see scripts/build-seed.sh), so this image
+# only carries the tools + the reused helper script.
+#
+# No Node and no Redis: both existed solely for container-populate.js, which used
+# to pre-stock the entity pool and create the system accounts into the seed. That
+# baked this container's data dir into every entity, so it is gone — the target
+# host stocks the pool at install, where the real data_dir is known. Dropping it
+# also removed a `curl | gpg --dearmor` NodeSource bootstrap from this image.
 #
 #   docker build -f scripts/Dockerfile.seed \
 #     --build-context helpers=deploy/docker -t drumee/seed:local scripts
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl gnupg \
+      ca-certificates \
       mariadb-server mariadb-client mariadb-backup \
-      redis-server \
-    && mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
-         | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" \
-         > /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Reused, unmodified container assets from the compose channel (helpers context =
-# deploy/docker): the DB initializer, the populate driver, and the populate config
-# driver. Kept identical to the compose channel so the seed is built by the same
-# vetted code paths. seed-entrypoint.sh is seed-specific and lives here in scripts/.
+# Reused, unmodified container asset from the compose channel (helpers context =
+# deploy/docker): the DB initializer. Kept identical to the compose channel so both
+# channels' base databases come from the same vetted code path. seed-entrypoint.sh
+# is seed-specific and lives here in scripts/.
 COPY --from=helpers schemas-init.sh        /usr/local/bin/schemas-init
-COPY --from=helpers populate-entrypoint.sh /usr/local/bin/drumee-populate
-COPY --from=helpers container-populate.js  /usr/local/lib/drumee/container-populate.js
 COPY seed-entrypoint.sh                    /usr/local/bin/seed-entrypoint
-RUN chmod +x /usr/local/bin/schemas-init /usr/local/bin/drumee-populate \
-             /usr/local/bin/seed-entrypoint \
+RUN chmod +x /usr/local/bin/schemas-init /usr/local/bin/seed-entrypoint \
     && mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld
 
 ENTRYPOINT ["seed-entrypoint"]
