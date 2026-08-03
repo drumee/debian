@@ -408,10 +408,72 @@ EOF
     deb-systemd-invoke restart drumee-wg-agent.service     || true
 }
 
+# Nothing else does this — not this script, and not setup-infra/bin/install (grep
+# either for nginx: they write vhosts and never tell nginx about them). nginx's
+# own postinst has already started it by the time we are configured, with the
+# config that existed *before* the render, so the process stays up with no Drumee
+# vhost loaded and the instance serves nothing at all. `systemctl is-active nginx`
+# says "active" and `curl` gets connection-refused, because there is no listener:
+# an install that reports success and answers on no port.
+#
+# Found the same way as the certificate bug in 1.2.23 — by wiping a box and
+# installing from scratch. Deployments that came up "fine" had all been restarted
+# by hand at some point, which is what hid it.
+reload_nginx() {
+    command -v nginx >/dev/null 2>&1 || return 0
+
+    # Never reload a configuration nginx would reject: a reload failure leaves the
+    # old workers serving, which here means still serving nothing, and the reason
+    # scrolls past in a postinst nobody re-reads. Say it instead.
+    if ! nginx -t >/dev/null 2>&1; then
+        echo "drumee-infra: nginx rejected the rendered configuration — not reloading." >&2
+        nginx -t 2>&1 | sed 's/^/  /' >&2
+        echo "  Fix the reported file, then: systemctl restart nginx" >&2
+        return 0
+    fi
+
+    # A reload picks up new vhosts, but only if there is a master to signal. On a
+    # first install nginx may legitimately be stopped (policy-rc.d, a failed
+    # earlier start), and reloading a dead unit is a silent no-op.
+    if systemctl is-active --quiet nginx 2>/dev/null; then
+        deb-systemd-invoke reload nginx.service >/dev/null 2>&1 \
+            || deb-systemd-invoke restart nginx.service >/dev/null 2>&1 || true
+        echo "Reloaded nginx with the rendered Drumee vhosts"
+    else
+        deb-systemd-invoke start nginx.service >/dev/null 2>&1 || true
+        echo "Started nginx with the rendered Drumee vhosts"
+    fi
+}
+
+# setup-infra renders 90-turn-relay.*.conf into /etc/nginx/modules-enabled, which
+# Debian's nginx.conf includes at MAIN context, and its content is a `stream {}`
+# block. That directive only exists once libnginx-mod-stream's load_module link is
+# in place, and Debian's own libnginx-mod-* prerm parks that link as
+# `<name>.conf.removed` whenever the module package is removed. Land a stream
+# block while the link is parked and nginx refuses its entire configuration:
+#
+#   nginx: [emerg] unknown directive "stream" in
+#          /etc/nginx/modules-enabled/90-turn-relay.public.conf:15
+#
+# We Depends on libnginx-mod-stream, but a dependency is not a guarantee that its
+# link is enabled *now*: dpkg configures nginx before libnginx-mod-stream (the
+# nginx-abi-* virtual package makes nginx the prerequisite), so `nginx -t` runs
+# during nginx's own postinst while the module is still parked. Restore the link
+# before anything renders a stream block, rather than after nginx has already
+# rejected it.
+ensure_nginx_stream_module() {
+    parked=/etc/nginx/modules-enabled/50-mod-stream.conf.removed
+    [ -L "$parked" ] || return 0
+    if mv "$parked" /etc/nginx/modules-enabled/50-mod-stream.conf; then
+        echo "drumee-infra: re-enabled nginx stream module (was parked as .removed)"
+    fi
+}
+
 case "$1" in
     configure)
     echo "Configuring Drumee Infrastructure"
     bridge_debconf_env
+    ensure_nginx_stream_module
     if [ -z "$DRUMEE_DOMAIN_NAME" ]; then
         echo "drumee-infra: no domain configured (debconf drumee-infra/domain is empty)." >&2
         echo "  Preseed it first, e.g.: debconf-set-selections < install.conf  (from: render.mjs debconf)" >&2
@@ -441,10 +503,12 @@ case "$1" in
     /var/lib/drumee/setup-infra/bin/install
     finish_dns
     setup_wireguard
+    reload_nginx
     ;;
 
     reconfigure)
     bridge_debconf_env
+    ensure_nginx_stream_module
     node /var/lib/drumee/setup-infra/infra.js --force-install=1
     # This arm re-renders without going through bin/install, so nothing here
     # would ever (re)start named — and "then: dpkg-reconfigure drumee-infra" is
@@ -454,6 +518,7 @@ case "$1" in
     fi
     finish_dns
     setup_wireguard
+    reload_nginx
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

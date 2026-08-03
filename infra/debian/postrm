@@ -19,31 +19,64 @@ set -e
 # the debian-policy package
 
 
+# setup-infra RENDERS these rather than shipping them, so dpkg does not track
+# them and removing the package used to leave every one behind. That is not
+# merely untidy: nginx keeps loading the vhosts of a package that no longer
+# exists, and a later install with different settings inherits them. A stale
+# 02-private.conf left by a previous install, still including an
+# ssl/private.conf the new render deliberately no longer produced, stopped nginx
+# dead — one leftover file, every site on the host down, because nginx refuses
+# its whole configuration over a single bad include.
+#
+# Exactly the set infra.js and jitsi.js write into /etc/nginx (grep for
+# ${nginx}/ in those files). Named rather than globbed, so nothing an operator
+# added by hand disappears with it.
+clean_nginx_renders() {
+  for f in \
+      /etc/nginx/sites-enabled/01-public.conf \
+      /etc/nginx/sites-enabled/02-private.conf \
+      /etc/nginx/sites-enabled/03-vendors.public.conf \
+      /etc/nginx/sites-enabled/20-jitsi.public.conf \
+      /etc/nginx/sites-enabled/20-jitsi.private.conf \
+      /etc/nginx/modules-enabled/90-turn-relay.public.conf \
+      /etc/nginx/modules-enabled/90-turn-relay.private.conf \
+      /etc/cron.d/drumee ; do
+    [ -e "$f" ] && rm -f "$f" && echo "removed $f"
+  done
+
+  # nginx may still be running with the vhosts just deleted in its loaded
+  # config. Reload so it stops serving a removed instance; never fail over it.
+  if [ -x /usr/sbin/nginx ] && nginx -t >/dev/null 2>&1; then
+    if [ -d /run/systemd/system ]; then
+      deb-systemd-invoke reload nginx.service >/dev/null 2>&1 || true
+    else
+      invoke-rc.d nginx reload >/dev/null 2>&1 || true
+    fi
+  fi
+}
+
 case "$1" in
-    purge)
-      # setup-infra RENDERS these rather than shipping them, so dpkg does not track
-      # them and a purge used to leave every one behind. That is not merely untidy:
-      # nginx keeps loading the vhosts of a package that no longer exists, and a
-      # later install with different settings inherits them. A stale
-      # 02-private.conf left by a previous install, still including an
-      # ssl/private.conf the new render deliberately no longer produced, stopped
-      # nginx dead — one leftover file, every site on the host down, because nginx
-      # refuses its whole configuration over a single bad include.
+    remove)
+      # Cleaned on `remove`, not just on `purge`. `remove` deletes the files this
+      # package ships under /etc/drumee while leaving the rendered vhosts that
+      # *include* them — and those includes are unconditional, so nginx then
+      # refuses its entire configuration:
       #
-      # Exactly the set infra.js and jitsi.js write into /etc/nginx (grep for
-      # ${nginx}/ in those files). Named rather than globbed, so nothing an
-      # operator added by hand disappears with it.
-      for f in \
-          /etc/nginx/sites-enabled/01-public.conf \
-          /etc/nginx/sites-enabled/02-private.conf \
-          /etc/nginx/sites-enabled/03-vendors.public.conf \
-          /etc/nginx/sites-enabled/20-jitsi.public.conf \
-          /etc/nginx/sites-enabled/20-jitsi.private.conf \
-          /etc/nginx/modules-enabled/90-turn-relay.public.conf \
-          /etc/nginx/modules-enabled/90-turn-relay.private.conf \
-          /etc/cron.d/drumee ; do
-        [ -e "$f" ] && rm -f "$f" && echo "removed $f"
-      done
+      #   nginx: [emerg] open() "/etc/drumee/ssl/public.conf" failed (2: No such
+      #          file or directory) in /etc/nginx/sites-enabled/01-public.conf:36
+      #
+      # Which is unrecoverable by installing again, because every Drumee package
+      # Depends on nginx: nginx cannot configure until drumee-infra re-renders
+      # /etc/drumee/ssl, and drumee-infra cannot configure until nginx does. A
+      # plain `apt remove drumee && apt install drumee` deadlocked exactly there,
+      # leaving the whole stack unpacked-but-unconfigured. Observed on a real box.
+      #
+      # /etc/drumee itself is NOT touched here — credentials and certificates
+      # survive a remove and only a purge is allowed to take them.
+      clean_nginx_renders
+      ;;
+    purge)
+      clean_nginx_renders
 
       # Drumee's own namespace: drumee.sh, drumee.json, conf.d, infrastructure,
       # ssl, certs and credential. Credentials go too — that is what purge means —
@@ -58,18 +91,12 @@ case "$1" in
       # postfix, MariaDB or BIND without configuration they ship themselves, which
       # is a worse outcome than leaving a rewritten file behind. Reinstalling or
       # reconfiguring those packages restores their own versions.
-
-      # nginx is still running with the vhosts just deleted in its loaded config.
-      # Reload so it stops serving a purged instance; never fail the purge over it.
-      if [ -x /usr/sbin/nginx ] && nginx -t >/dev/null 2>&1; then
-        if [ -d /run/systemd/system ]; then
-          deb-systemd-invoke reload nginx.service >/dev/null 2>&1 || true
-        else
-          invoke-rc.d nginx reload >/dev/null 2>&1 || true
-        fi
-      fi
       ;;
-    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+      # Deliberately no cleanup on upgrade: the old postrm runs before the new
+      # postinst re-renders, so deleting the vhosts here would leave nginx
+      # without them for the length of the upgrade — and fail it outright if the
+      # new render never gets that far.
       ;;
 
     *)

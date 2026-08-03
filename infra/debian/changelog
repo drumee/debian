@@ -1,3 +1,60 @@
+drumee-infra (1.2.25) stable; urgency=medium
+
+  * Reload nginx after rendering its vhosts. Nothing did — neither postinst nor
+    setup-infra/bin/install (grep either for nginx: they write the files and never
+    tell nginx about them). nginx's own postinst has already started it by the time
+    we are configured, with the configuration that existed *before* the render, so
+    the process stays up carrying no Drumee vhost and the instance serves nothing:
+    `systemctl is-active nginx` reports active while curl gets connection-refused,
+    because there is no listener on 80 or 443 at all.
+    .
+    A fresh `apt install drumee` therefore completed, reported success, started the
+    backend on 23000/24000 — and answered on no public port until somebody ran
+    `systemctl restart nginx` by hand. Found by wiping a box and installing from
+    scratch; every deployment that looked healthy had been restarted at some point,
+    which is exactly what kept this hidden.
+    .
+    The reload is refused rather than attempted when `nginx -t` fails, and the test
+    output is printed: a failed reload leaves the old workers serving, which here
+    means still serving nothing, with the reason buried in postinst output. A
+    stopped unit is started rather than reloaded, since reloading a dead unit is a
+    silent no-op.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Mon, 03 Aug 2026 14:26:09 +0200
+
+drumee-infra (1.2.24) stable; urgency=medium
+
+  * Clean the rendered nginx configuration on `remove`, not only on `purge`.
+    `remove` deletes the files this package ships under /etc/drumee while leaving
+    the vhosts that unconditionally *include* them, so nginx then refuses its
+    whole configuration:
+    .
+      nginx: [emerg] open() "/etc/drumee/ssl/public.conf" failed (2: No such
+             file or directory) in /etc/nginx/sites-enabled/01-public.conf:36
+    .
+    Which no reinstall can recover from, because every Drumee package Depends on
+    nginx: nginx cannot configure until drumee-infra re-renders /etc/drumee/ssl,
+    and drumee-infra cannot configure until nginx does. `apt remove drumee`
+    followed by `apt install drumee` deadlocked precisely there and left the
+    entire stack unpacked-but-unconfigured. Observed on a real box, not inferred.
+    Nothing is cleaned on `upgrade`: the old postrm runs before the new postinst
+    re-renders, so deleting the vhosts there would strip nginx of them mid-upgrade.
+  * Re-enable nginx's stream module before rendering a stream block. Debian's
+    libnginx-mod-* prerm parks its load_module link as `<name>.conf.removed` when
+    the module package is removed, and our 90-turn-relay.*.conf lands a `stream {}`
+    block in modules-enabled — which nginx includes at MAIN context, so a parked
+    link costs the instance all of nginx:
+    .
+      nginx: [emerg] unknown directive "stream" in
+             /etc/nginx/modules-enabled/90-turn-relay.public.conf:15
+    .
+    Depending on libnginx-mod-stream does not fix this: dpkg configures nginx
+    first (nginx provides the nginx-abi-* the module needs), so `nginx -t` runs
+    inside nginx's postinst while the module is still parked. postinst now
+    restores the link before anything renders a stream block.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Mon, 03 Aug 2026 13:01:09 +0200
+
 drumee-infra (1.2.23) stable; urgency=medium
 
   * Make tls_method=self-signed produce a serving instance. It could not: nginx
