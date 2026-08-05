@@ -18,7 +18,10 @@ build_dir=$(get_build_dir ${base}/build/$version)
 
 REPO_BASE=git@github.com:drumee
 bundle $base "setup-schemas" "main" "" "var/lib/drumee/setup-schemas"
-bundle $base "schemas" "preview" "" ""
+# fix/neutral-templates, not preview: it carries the regenerated host-neutral
+# templates (no dev-box rows, no baked /data/mfs roots, intact trigger DDL) and
+# the strip_definer fix. Move this back to preview once that branch merges.
+bundle $base "schemas" "fix/neutral-templates" "" ""
 schemas_src=${base}/src/schemas
 
 # --- seed resolution ---------------------------------------------------------

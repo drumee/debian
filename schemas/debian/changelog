@@ -1,3 +1,28 @@
+drumee-schemas (2.7.2) stable; urgency=medium
+
+  * Build from schemas' regenerated host-neutral templates. 2.7.1 shipped a
+    neutral seed, but one built from the *previous* template generation: the
+    triggers in it were still the corrupt DDL the old greedy DEFINER sed produced,
+    so all three yp disk_usage triggers arrived only because schemas-init replays
+    the patch corpus over them. The regenerated templates carry intact
+    `CREATE ... TRIGGER `name`` headers, so the seed now supplies them directly
+    and that replay stops being load-bearing.
+    .
+    Also fixes 98 surviving `DEFINER=``@`localhost`` clauses — an empty definer
+    user, which the first strip_definer pattern did not match because it required
+    at least one character. Restoring those on a host with no anonymous
+    ''@'localhost' account is the exact failure that stripping DEFINER prevents.
+    .
+    schemas/build.sh is pinned to the fix/neutral-templates branch until it merges
+    into preview.
+    .
+    Seed rebuilt offline from the branch: loads with zero errors (2.7.1's
+    templates produced three ERROR 1064), and the restored snapshot holds 3 yp
+    triggers, 762 routines, 144 tables, and 0 rows in yp.entity, trash.entity and
+    mailserver.domains.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Tue, 04 Aug 2026 09:09:31 +0200
+
 drumee-schemas (2.7.1) stable; urgency=medium
 
   * Ship a host-neutral seed. seeds.tgz was built by running container-populate.js
