@@ -72,6 +72,14 @@ jobs:
       # Tag pushes publish under the tag; a manual run publishes under its input.
       TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
       PLATFORMS: ${{ github.event_name == 'workflow_dispatch' && inputs.platforms || 'linux/amd64' }}
+      # Secret presence as job-level env, because the `secrets` context is NOT
+      # available in a step `if:` — GitHub rejects the whole workflow file for it,
+      # which is why every run of this file failed in 0s without starting a job.
+      # `secrets` IS allowed in `env:`, and `env` IS allowed in `if:`, so the
+      # gating survives the round trip. These are strings: 'true' / 'false'.
+      HAS_SSH_KEY: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+      HAS_REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
       # Emulation for any non-native platform (arm64 here). Harmless when the
@@ -79,21 +87,21 @@ jobs:
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - name: Skip notice
-        if: ${{ secrets.DRUMEE_SSH_KEY == '' }}
+        if: env.HAS_SSH_KEY != 'true'
         run: echo "DRUMEE_SSH_KEY not set — skipping image build/publish."
       - name: Configure source access (SSH deploy key)
-        if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+        if: env.HAS_SSH_KEY == 'true'
         run: |
           mkdir -p ~/.ssh && echo "${{ secrets.DRUMEE_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan github.com >> ~/.ssh/known_hosts
       - name: Authorize the private npm registry (optional)
-        if: ${{ secrets.NPM_TOKEN != '' }}
+        if: env.HAS_NPM_TOKEN == 'true'
         run: |
           printf '@drumee:registry=https://registry.npmjs.org/\n' > ~/.npmrc
           printf '//registry.npmjs.org/:_authToken=%s\n' "${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
       - name: Clone component sources
-        if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+        if: env.HAS_SSH_KEY == 'true'
         run: |
           fail=0
           for r in server-team ui-team schemas setup-schemas static; do
@@ -111,22 +119,22 @@ jobs:
           done
           [ "$fail" = 0 ]
       - name: Registry login
-        if: ${{ secrets.REGISTRY_TOKEN != '' }}
+        if: env.HAS_REGISTRY_TOKEN == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.REGISTRY_TOKEN }}
       - name: Build and push all images
-        if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+        if: env.HAS_SSH_KEY == 'true'
         env:
           PUSH: ${{ (secrets.REGISTRY_TOKEN != '' && (github.event_name != 'workflow_dispatch' || inputs.push)) && '1' || '0' }}
         run: scripts/publish-images.sh
       - name: Install cosign + syft (supply-chain)
-        if: ${{ secrets.REGISTRY_TOKEN != '' }}
+        if: env.HAS_REGISTRY_TOKEN == 'true'
         uses: sigstore/cosign-installer@v3
       - name: Sign images (keyless, GitHub OIDC) + emit SBOM
-        if: ${{ secrets.REGISTRY_TOKEN != '' }}
+        if: env.HAS_REGISTRY_TOKEN == 'true'
         env:
           REGISTRY: ghcr.io/${{ github.repository_owner }}
           COSIGN_YES: "true"
@@ -135,7 +143,7 @@ jobs:
             cosign sign --yes "$REGISTRY/$n:$TAG" || echo "warn: cosign sign $n failed"
           done
       - name: SBOM for server-pod (syft)
-        if: ${{ secrets.REGISTRY_TOKEN != '' }}
+        if: env.HAS_REGISTRY_TOKEN == 'true'
         uses: anchore/sbom-action@v0
         with:
           image: ghcr.io/${{ github.repository_owner }}/server-pod:${{ env.TAG }}
@@ -147,18 +155,26 @@ jobs:
     # Only on a real release tag: a manual image publish should not touch apt.
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
+    env:
+      # See the note in the images job: secret presence has to be hoisted into env
+      # before a step `if:` can test it.
+      HAS_SSH_KEY: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+      HAS_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+      HAS_APT_KEY: ${{ secrets.APT_SSH_KEY != '' }}
+      HAS_APT_HOST: ${{ secrets.APT_SSH_HOST != '' }}
+      HAS_PAGES_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
       - name: Install build toolchain
         run: sudo apt-get update && sudo apt-get install -y dh-make devscripts debhelper build-essential apt-utils
       - name: Import signing key
-        if: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+        if: env.HAS_GPG_KEY == 'true'
         run: echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
       - name: Generate base seed (drumee-schemas needs a mariabackup seed)
-        if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+        if: env.HAS_SSH_KEY == 'true'
         run: tests/native/make-seed.sh        # -> schemas/var/tmp/drumee/seeds.tgz
       - name: Build packages
-        if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+        if: env.HAS_SSH_KEY == 'true'
         run: |
           mkdir -p ~/.ssh && echo "${{ secrets.DRUMEE_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519 && ssh-keyscan github.com >> ~/.ssh/known_hosts
@@ -166,10 +182,10 @@ jobs:
           ./build-all.sh
           meta/build.sh
       - name: Native install verify (end-to-end, disposable Debian container)
-        if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+        if: env.HAS_SSH_KEY == 'true'
         run: tests/native/install-verify.sh   # installs the built .debs + checks it serves
       - name: Authorize the apt.drumee.net deploy key
-        if: ${{ secrets.APT_SSH_KEY != '' && secrets.APT_SSH_HOST != '' }}
+        if: env.HAS_APT_KEY == 'true' && env.HAS_APT_HOST == 'true'
         env:
           APT_SSH_HOST: ${{ secrets.APT_SSH_HOST }}
           APT_SSH_KEY: ${{ secrets.APT_SSH_KEY }}
@@ -187,24 +203,24 @@ jobs:
           # Pin the key per-host so the github.com deploy key is not offered here.
           printf 'Host %s\n  IdentityFile ~/.ssh/id_apt\n  IdentitiesOnly yes\n' "$host" >> ~/.ssh/config
       - name: Publish install hosts (apt.drumee.net + get.drumee.com Pages)
-        if: ${{ secrets.GPG_PRIVATE_KEY != '' && secrets.DRUMEE_SSH_KEY != '' && (secrets.APT_SSH_HOST != '' || secrets.PAGES_DEPLOY_TOKEN != '') }}
+        if: env.HAS_GPG_KEY == 'true' && env.HAS_SSH_KEY == 'true' && (env.HAS_APT_HOST == 'true' || env.HAS_PAGES_TOKEN == 'true')
         env:
           APT_SSH_HOST: ${{ secrets.APT_SSH_HOST }}
           GH_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
           REF_NAME: ${{ github.ref_name }}
         run: scripts/publish-site.sh --debs=out-debs        # uses the imported default GPG key
       - name: Skip apt publish notice
-        if: ${{ secrets.APT_SSH_HOST == '' || secrets.APT_SSH_KEY == '' }}
+        if: env.HAS_APT_HOST != 'true' || env.HAS_APT_KEY != 'true'
         run: echo "APT_SSH_HOST/APT_SSH_KEY not set — built .debs but did not publish to apt.drumee.net."
       - name: Skip Pages publish notice
-        if: ${{ secrets.PAGES_DEPLOY_TOKEN == '' }}
+        if: env.HAS_PAGES_TOKEN != 'true'
         run: echo "PAGES_DEPLOY_TOKEN not set — did not publish the get.drumee.com Pages content."
       - name: Upload artifacts
-        if: ${{ secrets.DRUMEE_SSH_KEY != '' }}
+        if: env.HAS_SSH_KEY == 'true'
         uses: actions/upload-artifact@v4
         with: { name: debs, path: out-debs/*.deb, if-no-files-found: ignore }
       - name: Skip notice
-        if: ${{ secrets.DRUMEE_SSH_KEY == '' }}
+        if: env.HAS_SSH_KEY != 'true'
         run: echo "DRUMEE_SSH_KEY not set — skipping .deb build (needs private source)."
 
   smoke:
