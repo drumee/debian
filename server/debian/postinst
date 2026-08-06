@@ -50,14 +50,14 @@ start_pod() {
     # No systemd: fall back to the init script directly.
     if [ -x /etc/init.d/drumee-server-pod ]; then
         invoke-rc.d drumee-server-pod start \
-            || echo "warning: drumee-server-pod did not start (see /etc/init.d/drumee)." >&2
+            || echo "warning: drumee-server-pod did not start (see /usr/sbin/drumee)." >&2
     fi
     return 0
 }
 
 case "$1" in
     configure)
-    # The app runs under pm2 (started by /etc/init.d/drumee). pm2 is an npm global,
+    # The app runs under pm2 (started by /usr/sbin/drumee). pm2 is an npm global,
     # not a Debian package, so install it here if it isn't already present.
     if ! command -v pm2 >/dev/null 2>&1; then
         echo "Installing pm2 (process manager for the Drumee server)"

@@ -12,7 +12,7 @@ Description: Please enter the domain name
 
 Template: drumee-infra/local_mode
 Type: boolean
-Default: true
+Default: false
 Description: Please confirm only local network
  You have provided "local" as domain name. That means your Drumee instance
  won't be reachable from the public Internet.

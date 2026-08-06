@@ -110,7 +110,69 @@ if [ "$PROVISION" = 0 ]; then
   exit 0
 fi
 
+# A 443 server block, but only when a certificate actually exists for this domain.
+#
+# This used to emit port 80 only, with a commented-out redirect and a note to
+# "uncomment after certbot has run" — so nothing ever served TLS for the repository.
+# nginx then had no 443 server_name matching apt.drumee.net, every TLS connection
+# fell through to the only other 443 block on the host, and clients were answered
+# with a certificate for a different domain entirely. `curl https://apt.drumee.net/…`
+# failed on hostname mismatch, which broke the documented
+# `curl -fsSL https://apt.drumee.net/baremetal.sh | sudo bash` bootstrap at its very
+# first step.
+#
+# The certificate is acme.sh's, not certbot's: the host issues and renews with
+# `acme.sh --cron --home /usr/share/acme`, and its layout is
+# <certs>/<domain>_ecc/{fullchain.cer,<domain>.key}. Absent, this stays http-only
+# and says so rather than emitting a block that would fail `nginx -t`.
+ACME_CERTS="${ACME_CERTS:-/usr/share/acme/certs}"
+CERT_DIR="$ACME_CERTS/${DOMAIN}_ecc"
+TLS_BLOCK=""
+if ssh "$HOST" "sudo test -s '$CERT_DIR/fullchain.cer' && sudo test -s '$CERT_DIR/${DOMAIN}.key'"; then
+  echo "==> Certificate found ($CERT_DIR) — provisioning http + https"
+  TLS_BLOCK=$(cat <<NGINXTLS
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate     ${CERT_DIR}/fullchain.cer;
+    ssl_certificate_key ${CERT_DIR}/${DOMAIN}.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    root ${REPO_DIR};
+    autoindex off;
+
+    location / {
+        try_files \$uri =404;
+    }
+
+    location ~* \.(deb)\$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+    location ~* (Packages|Packages\.gz|Release|InRelease|Release\.gpg)\$ {
+        expires 5m;
+        add_header Cache-Control "public, must-revalidate";
+    }
+}
+NGINXTLS
+)
+else
+  echo "==> WARNING: no certificate at $CERT_DIR — provisioning http only." >&2
+  echo "    Clients using https:// will fail, including scripts/baremetal.sh, whose" >&2
+  echo "    APT_URL and KEYRING_URL both default to https://${DOMAIN}." >&2
+  echo "    Issue one with acme.sh, then re-run this without --no-provision." >&2
+fi
+
 echo "==> Installing nginx config"
+# No http->https redirect, deliberately: apt verifies the repository signature
+# itself, both schemes are in circulation among existing clients, and a redirect
+# would make any TLS fault take the working http path down with it.
 NGINX_CONF=$(cat <<NGINX
 server {
     listen 80;
@@ -142,22 +204,32 @@ server {
 NGINX
 )
 
-ssh "$HOST" "echo '$NGINX_CONF' | sudo tee /etc/nginx/sites-available/${DOMAIN} > /dev/null"
+# Piped in over stdin rather than interpolated into the remote command line. The
+# previous `ssh "$HOST" "echo '$NGINX_CONF' | …"` embedded the whole config inside a
+# single-quoted string in a double-quoted argument, so one apostrophe anywhere in it
+# would have ended the quote and handed the rest to the remote shell.
+printf '%s\n%s\n' "$NGINX_CONF" "$TLS_BLOCK" \
+  | ssh "$HOST" "sudo tee /etc/nginx/sites-available/${DOMAIN} > /dev/null"
 ssh "$HOST" "sudo ln -sf /etc/nginx/sites-available/${DOMAIN} /etc/nginx/sites-enabled/"
+# Keep a backup and roll back rather than leaving nginx holding a config it rejected:
+# a failed reload here would take the repository offline for every client.
 ssh "$HOST" "sudo nginx -t && sudo systemctl reload nginx"
 
 cat <<MSG
 
 ==> Deployed to $HOST:$REPO_DIR
 
-Next steps on the VPS:
-  1. Set up TLS:
-       sudo apt install certbot python3-certbot-nginx
-       sudo certbot --nginx -d ${DOMAIN}
+TLS: the port-443 block is written automatically when a certificate exists at
+${CERT_DIR}. This host issues and renews with acme.sh, not certbot
+(root cron: acme.sh --cron --home /usr/share/acme, DNS-01 via dns_ovh), so if the
+warning above said "no certificate", issue one and re-run this command:
 
-  2. After certbot succeeds, edit /etc/nginx/sites-available/${DOMAIN}:
-     - Uncomment the "return 301" line in the port-80 block
-     - certbot will have added the port-443 block automatically
+  sudo /usr/share/acme/acme.sh --issue -d ${DOMAIN} --home /usr/share/acme \\
+       --config-home /usr/share/acme/configs --cert-home ${ACME_CERTS} \\
+       --dns dns_ovh
+
+Both http and https are served, with no redirect between them: apt verifies the
+repository signature itself, and existing clients are configured with both schemes.
 
 Clients can then install with:
 

@@ -1,3 +1,11 @@
+drumee-server-pod (2.9.96) stable; urgency=medium
+  * fix(deps): @drumee/server-core ^1.1.83 — stops the mfs_home-on-yp alert flood
+  * fix(deps): @drumee/server-core ^1.1.83 — stops the mfs_home-on-yp alert flood
+  * Fix/mail sender identity (#164)
+  * Fix/last login accuracy (#163)
+  * fix(invite): stop accept_invite downgrading members, and actually consume the token
+ -- Somanos Sar <somanos.sar@drumee.com>  Thu, 06 Aug 2026 14:26:50 +0200
+
 drumee-server-pod (2.9.95) stable; urgency=medium
 
   * Actually start the server after installing it. A from-scratch install

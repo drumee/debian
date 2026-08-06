@@ -163,6 +163,7 @@ src/*
 # demo stack scratch dir
 tests/.demo-run/
 out-debs/
+release-debs/
 apt-repo/
 
 # local APT test repository (contains a generated signing key)

@@ -1,3 +1,11 @@
+drumee-ui-pod (3.3.74) stable; urgency=medium
+  * perf(tutorial): cut the wait between tutorial steps (#459)
+  * fix(meeting): a changed avatar now reaches every participant (#457)
+  * refactor(billing): say something when the deep-link storage fails
+  * feat(billing): deep link that opens Billing & subscription
+  * fix(promo): hold the LAUNCH30 offer until the account has used Drumee
+ -- Somanos Sar <somanos.sar@drumee.com>  Thu, 06 Aug 2026 14:25:42 +0200
+
 drumee-ui-pod (3.3.50) stable; urgency=medium
 
   * Release 3.3.50 (synced from release-manifest.yaml)

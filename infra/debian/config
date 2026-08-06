@@ -25,10 +25,34 @@ db_input high drumee-infra/description || true
 db_input high drumee-infra/domain || true
 db_go || true
 
-db_get drumee-infra/domain || true
-if [ "$RET" = "local" ]; then
+# local_mode is only ASKED for the literal domain "local", so on every other
+# install nothing answers it — and an unanswered debconf question reads back as its
+# template default. That default was `true` (measured: GET on an untouched database
+# returns `0 true`), so "is this a LAN-only instance?" was silently answered yes on
+# every public install, and the tls_method block below then ran
+# `db_set tls_method self-signed` over whatever the operator had chosen — without
+# ever showing them the tls_method question, since its db_input sits in the
+# `!= true` arm. A public install came out self-signed, with BIND9 up and no
+# certificate.
+#
+# Two halves, because two install paths read this:
+#   - the template now defaults to false, which is what a bare `dpkg -i` reads:
+#     dpkg does not run config scripts, so nothing below executes on that path;
+#   - the value is written explicitly here, for the apt/dpkg-reconfigure path.
+#
+# Only when unseen, so an explicit preseed still wins: render.mjs emits this key
+# from drumee.yaml, and a LAN install legitimately pairs local_mode=true with a
+# domain that is not the string "local" (drumee.lan, say). Setting it
+# unconditionally would overwrite that.
+db_get drumee-infra/domain || true; domain="$RET"
+db_fget drumee-infra/local_mode seen || true; local_seen="$RET"
+if [ "$domain" = "local" ]; then
+  # Pre-set so the question still offers "yes" as its default, which is the right
+  # default for the question itself — the operator just typed "local".
+  [ "$local_seen" = "true" ] || db_set drumee-infra/local_mode true || true
   db_input high drumee-infra/local_mode || true
 else
+  [ "$local_seen" = "true" ] || db_set drumee-infra/local_mode false || true
   db_input medium drumee-infra/service || true
 fi
 db_go || true

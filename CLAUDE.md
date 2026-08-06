@@ -427,12 +427,11 @@ vars, writes `/etc/drumee/conf.d/wireguard.json`, and enables/starts the two
 units (or leaves them inactive when disabled). To change later:
 `dpkg-reconfigure drumee-infra`.
 
-`scripts/baremetal.sh` asks the question itself (from `/dev/tty`) and
-preseeds those four keys before `apt install`. It must: on the documented
-`curl … | sudo bash` path stdin is the pipe, so debconf never gets a terminal
-and would silently take defaults. The script then hands `/dev/tty` to apt so the
-remaining questions work too. `WIREGUARD_ENABLED` / `WIREGUARD_COORDINATOR` /
-`…_LISTEN_PORT` / `…_REFLECTOR_PORT` skip the prompt.
+`scripts/baremetal.sh` asks these questions itself (from `/dev/tty`) and
+preseeds the four keys before `apt install` — along with **every other
+drumee-infra setting**; see "baremetal.sh owns the interaction" below.
+`WIREGUARD_ENABLED` / `WIREGUARD_COORDINATOR` / `…_LISTEN_PORT` /
+`…_REFLECTOR_PORT` skip those prompts.
 
 ### Install flow (container)
 
@@ -689,6 +688,107 @@ APT_SSH_HOST=deploy@vps GH_TOKEN=<token> scripts/publish-site.sh --debs=out-debs
 
 Builds the flat repo once, then deploys it to two independent targets: `apt.drumee.net` over rsync/SSH (`APT_SSH_HOST`, `APT_REPO_DIR`, `APT_DOMAIN`) and the `get.drumee.com` Pages content — installers, renderer, keyring, CLIs — to `PAGES_REPO` (`GH_TOKEN`). Each target is skipped with a notice when its credential is absent; setting neither is an error. `scripts/baremetal.sh` is copied into the flat repo so `https://apt.drumee.net/baremetal.sh` serves the bootstrap without depending on Pages. It is **also** copied to the pre-rename name `install-native.sh`, so bootstrap commands already in circulation keep working — drop that line in `publish-site.sh` once the old URL is no longer referenced anywhere. Note the new URL only goes live after the next `publish-site.sh` run.
 
+## baremetal.sh owns the interaction
+
+`scripts/baremetal.sh` asks for **every** drumee-infra setting itself and
+preseeds the answers, rather than leaving the questions to debconf. Two reasons,
+both structural:
+
+- On the documented `curl … | sudo bash` path **stdin is the script**, so debconf
+  never has a terminal and silently takes every default. All prompts therefore
+  read `/dev/tty`, and apt is handed `<"$TTY"` too so dependencies with their own
+  questions (postfix) still work.
+- `infra/debian/config` asks `db_dir`, `data_dir`, `backup_location`,
+  `exchange_location` and the wireguard ports at **medium/low** priority, which
+  the default debconf priority never displays. They were unreachable interactively.
+
+| | |
+|---|---|
+| Gate | `DRUMEE_NONINTERACTIVE` unset or `0` → prompt; **any other value** → silent |
+| Per-answer override | `DRUMEE_DOMAIN`, `DRUMEE_TLS_METHOD`, … (full list in the script header) — set means don't ask |
+| `PRESEED=<install.conf>` | unattended, no prompts at all; the preseed decides everything |
+
+### Topology decides the shape of the install
+
+`detect_topology` classifies the host's `scope global` addresses *before* asking
+anything, and the branch it picks drives the domain, the TLS method and the admin
+email. Full walkthrough in `docs/baremetal.md`.
+
+| Branch | Condition | Serving address | `tls_method` | `local_mode` | Domain default |
+|---|---|---|---|---|---|
+| **wan** | ≥1 public address | asked, defaults to first public | asked: `acme-dns-server` (default), `acme-dns-api`, `caddy`, `own` | `false` | `example.com` |
+| **lan** + `dns` | no public, ≥1 private | asked, defaults to first private | `self-signed`, not asked | `true` | `drumee.lan` |
+| **lan** + `wireguard` | as above | as above | asked: `acme-dns-api` (default), `caddy`, `own`, `self-signed` | `false` | `example.com` |
+| **localhost** | neither | not asked | `self-signed`, not asked | `true` | `localhost` |
+
+The lan branch asks **how it should be reached** before anything else, because the
+two answers are mutually exclusive by construction: `render.mjs:210` rejects
+`wireguard.enabled` with `local_mode`, and `infra/debian/config:106` skips the
+WireGuard questions when `local_mode` is true. `dns` = LAN-only, BIND9 serves the
+zone, self-signed. `wireguard` = reachable with no open port, `local_mode=false`,
+and a real certificate becomes possible over DNS-01. `acme-dns-server` is absent
+from the wireguard menu on purpose — it needs inbound udp/53, which is the one
+thing that box hasn't got.
+
+**`local_mode` is always preseeded, including `false`** — see the trap below. It is
+belt-and-braces now that drumee-infra ≥ 1.2.26 writes the value itself, and it is
+what keeps this script correct against an older infra package.
+
+### The local_mode trap (fixed in drumee-infra 1.2.26)
+
+`local_mode` is only ever *asked* for the literal domain `"local"`, so on any other
+install nothing answered it — and an unanswered debconf question reads back as its
+template default, which was **`true`**. `infra/debian/config` read that back and ran
+`db_set tls_method self-signed`, never showing the `tls_method` question at all
+because its `db_input` sits in the other arm of the same test.
+
+Measured against the real `config` script in a Trixie container, before the fix:
+
+| Preseed | `local_mode` | `tls_method` |
+|---|---|---|
+| `domain=example.com` only | `true` | **`self-signed`** |
+| `domain=example.com` + `tls_method=acme-dns-api` | `true` | **`self-signed`** — overwritten |
+| … + `local_mode=false` | `false` | `acme-dns-api` |
+
+So only a preseed carrying `local_mode` escaped it. `render.mjs debconf` always
+emits that key, which is why the rendered-preseed path never hit this and anything
+partial or hand-written did.
+
+Fixed in both halves, because two paths read the value: the **template** now
+defaults to `false` (what a bare `dpkg -i` reads — dpkg runs no config script), and
+**`config` writes it explicitly** for the apt/`dpkg-reconfigure` path, guarded by
+`db_fget … seen` so a preseed still wins. The `"local"` branch pre-sets `true`
+before asking, so that question keeps offering the answer the operator just implied.
+
+Private means RFC1918, **CGNAT `100.64/10`** and IPv6 ULA `fc00::/7` — CGNAT is
+not RFC1918 but is exactly as unreachable from outside, which is the only property
+that matters. Everything else is public, including IPv6 GUA `2000::/3`.
+
+Why `lan` is not a real TLS choice: no CA can validate a name that is delegated
+nowhere, so `self-signed` is the only honest answer — and it is also the path that
+installs BIND9 to *serve* the zone locally, which is what makes the name usable on
+the LAN at all. `local_mode=true` travels with it and skips the WireGuard
+questions.
+
+The domain on those branches is not the literal string `"local"`, and does not
+need to be: `infra/debian/config:29` only *asks* `local_mode` when it is, and
+never overwrites a preseeded answer — line 55 then reads `local_mode` back and
+forces `self-signed` from it. The two agree.
+
+Everything else — question order, conditions, defaults — **mirrors
+`infra/debian/config` and `infra/debian/templates`**. The two must stay in step: a
+question asked here is marked *seen*, so debconf will not ask it, and a divergence
+lands silently in the rendered configuration rather than as an error.
+
+One deliberate addition: it also asks for the **serving IPv4/IPv6**, which
+`infra/debian/config` never asks but `infra/debian/postinst` reads. On the
+interactive path they were always empty, so `infra.js` skipped the entire public
+branch — no nginx `01-public.conf`, no public/reverse BIND zones, no
+postfix/opendkim. Detected addresses are offered as interactive defaults only;
+unattended they stay unset (the detected address is usually the LAN one, and
+preseeding it as *public* would quietly change every existing unattended install).
+`-` declines a family.
+
 ## Deployment
 
 ### Manual native install
@@ -842,6 +942,8 @@ Full docs are in `docs/` and at [drumee.github.io/docs/package-building](https:/
 - Quickstart, first-deploy runbook, production ops, lifecycle, security
 - Build pipeline, reproducible builds, release engineering, version management
 - `docs/wireguard.md` (peer coordination), `docs/native-audit.md` (native-channel gap audit)
+- `docs/baremetal.md` (the native bootstrap: three modes, the wan/lan/localhost
+  branches, and every question in order)
 
 `ROADMAP.md` tracks what is done vs. outstanding per phase, including known
 upstream bugs and workarounds — read it before assuming a gap is an oversight.

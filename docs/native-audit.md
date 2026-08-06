@@ -29,7 +29,7 @@ stands between "works after a few manual nudges" and a fully turnkey `apt instal
 | preseeded `network.ip4/ip6` dropped by the bridge → `infra.js` skipped the whole public branch (nginx `01-public.conf`, BIND public/reverse zones, postfix/opendkim) | postinst exports `PUBLIC_IP4`/`PUBLIC_IP6` from `ip4`/`public_ip4` | ✅ fixed (committed) |
 | `ip4`/`ip6` never *asked* interactively — `config` has no `db_input` and nothing `db_subst`s `${__IP4_LIST__}` (only the wizard's `prompt.sh` does) | add detection + prompts to `infra/debian/config`, or drop the templates and document `network.ip4` as wizard-only | ⏳ open |
 | nginx `stream{}` (turn-relay) without the stream module → config invalid | `drumee-infra` `Depends: libnginx-mod-stream` | ✅ fixed (committed) |
-| pm2 not installed → `/etc/init.d/drumee` can't launch the app | `drumee-server-pod` postinst `npm i -g pm2` | ✅ fixed (committed) |
+| pm2 not installed → `/usr/sbin/drumee` can't launch the app | `drumee-server-pod` postinst `npm i -g pm2` | ✅ fixed (committed) |
 | `ecosystem.config.js` not generated → init.d has nothing to start | `main()` never called `writeEcoSystem()` | ✅ fixed + pushed to `setup-infra` (verified via chroot render) |
 | dpkg **conffile prompt** on infra-rendered MariaDB configs | `baremetal.sh` uses `--force-confold` | ✅ fixed (committed) |
 | `server/var/lib/drumee/postinstall/patch.sh` missing | ship a no-op placeholder (`dh_install` wants `files/var/*`) | ✅ fixed (committed) |
@@ -65,7 +65,7 @@ expected need for a real host to validate.
 | `drumee.sh` / `drumee.json` | `infra.js:454`, `drumee.sh.tpl` | env + config |
 | nginx routing | `routes/main.conf.tpl:50` | `/-/svc`→24000, ws→23000, static `/-/app` `/-/api` `/-/plugins` aliased |
 | system accounts (nobody/guest/system/admin) | `organization.js:191-391` | via `drumate_create` in `populate.js` |
-| **process start** | `server/etc/init.d/drumee` + `drumee-server-pod.service` | systemd unit (`dh_installsystemd`) → `/etc/init.d/drumee start` → `pm2 start ecosystem.config.js` (index.js + service.js + factory). **Starts on install and on boot.** |
+| **process start** | `server/usr/sbin/drumee` + `drumee-server-pod.service` | systemd unit (`dh_installsystemd`) → `/usr/sbin/drumee start` → `pm2 start ecosystem.config.js` (index.js + service.js + factory). **Starts on install and on boot.** The wrapper is installed at that one path only; a second copy under `/etc/init.d/drumee` used to make `systemd-sysv-generator` synthesize a duplicate unit that hung shutdown for 5 minutes. |
 | schema **triggers** | `setup-schemas/bin/install:44` | restored via `mariabackup --copy-back` (**physical** restore) — so it **avoids** the `bin/make-templates` greedy-sed trigger corruption that bit our SQL-dump container path. ✅ |
 
 ## Real gaps / risks (native-specific, actionable)

@@ -19,9 +19,13 @@ After=nginx.service
 # processes alive in its cgroup, so stop and reboot still run ExecStop.
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/etc/init.d/drumee start
-ExecReload=/etc/init.d/drumee reload
-ExecStop=-/etc/init.d/drumee stop
+# /usr/sbin/drumee, not /etc/init.d/drumee: the identical script used to be shipped
+# at both paths, and the one under /etc/init.d had no unit of the same name, so
+# systemd-sysv-generator built a duplicate drumee.service out of it that fought this
+# unit over the same pm2 daemon and hung shutdown for its full 5-minute timeout.
+ExecStart=/usr/sbin/drumee start
+ExecReload=/usr/sbin/drumee reload
+ExecStop=-/usr/sbin/drumee stop
 # Applies on stop only, now that ExecStart returning is no longer treated as the
 # service ending: ExecStop asks pm2 to shut down, then anything left in the cgroup
 # is cleaned up.

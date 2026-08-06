@@ -1,3 +1,31 @@
+drumee-infra (1.2.26) stable; urgency=medium
+
+  * local_mode no longer defaults to "yes", which was silently turning every
+    public install into a self-signed one. The question is only ever ASKED for the
+    literal domain "local", so on any other install nothing answered it — and an
+    unanswered debconf question reads back as its template default, which was
+    true. config then read that back and ran `db_set tls_method self-signed`,
+    without ever showing the tls_method question, because its db_input sits in the
+    other arm of the same test. Measured in a Trixie container against the real
+    config script: a public domain with nothing preseeded came out
+    local_mode=true, tls_method=self-signed, and a preseed that explicitly asked
+    for acme-dns-api was overwritten to self-signed just the same. Only a preseed
+    carrying local_mode=false escaped — which is why `render.mjs debconf`, which
+    always emits that key, never hit it, and why anything hand-written or partial
+    did.
+    Fixed in both halves, because two install paths read this value: the template
+    now defaults to false, which is what a bare `dpkg -i` sees (dpkg runs no
+    config script, so nothing else applies on that path), and config writes the
+    value explicitly for the apt/dpkg-reconfigure path. The explicit write is
+    guarded by `db_fget ... seen`, so a preseed still wins: a LAN instance
+    legitimately pairs local_mode=true with a domain that is not the string
+    "local". The "local" branch pre-sets true before asking, so the question keeps
+    offering the answer the operator has just implied.
+
+  * Release 1.2.26 (synced from release-manifest.yaml)
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Wed, 05 Aug 2026 15:09:40 +0200
+
 drumee-infra (1.2.25) stable; urgency=medium
 
   * Reload nginx after rendering its vhosts. Nothing did — neither postinst nor

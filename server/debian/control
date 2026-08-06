@@ -7,7 +7,7 @@ Homepage: https://drumee.org
 
 Package: drumee-server-pod
 Architecture: all
-# drumee-node-runtime supplies pm2, which /etc/init.d/drumee invokes by name and
+# drumee-node-runtime supplies pm2, which /usr/sbin/drumee invokes by name and
 # which nothing previously installed: a fresh install came up with every package
 # "installed ok" and nothing serving, failing with "pm2: command not found" in the
 # journal. Debian ships no pm2 package, so the pinned set in drumee-node-runtime is

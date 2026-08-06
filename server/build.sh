@@ -23,13 +23,24 @@ echo Building with email=$email version=$version build_dir=$build_dir
 bundle $base "server-team" "preview" "*" $server_target
 ${base}/update-changelog.sh
 
+# The pm2 wrapper goes to exactly two places: the operator CLI at /usr/sbin/drumee,
+# and debian/<pkg>.init so dh_installinit registers /etc/init.d/drumee-server-pod
+# under the same name as the unit (which therefore shadows it under systemd).
+#
+# It used to be copied to /etc/init.d/drumee and /etc/rc{3,6}.d/ as well, and that
+# was the cause of a five-minute stop job on every shutdown: /etc/init.d/drumee had
+# no unit of the same name, so systemd-sysv-generator synthesized a *second*
+# service from it — Type=forking, GuessMainPID=no, TimeoutSec=5min and an unguarded
+# ExecStop, running the same `pm2 stop all` as drumee-server-pod.service. Whichever
+# stop job ran second asked a dead pm2 to stop, pm2 spawned a fresh daemon just to
+# answer, and systemd had no main PID to watch, so it waited out the full timeout.
+# The rc*.d copies were plain files rather than symlinks and systemd ignored them.
+# All three were conffiles, so removing them from the payload is not enough on its
+# own — see debian/drumee-server-pod.maintscript.
 init_file=${base}/system/usr/sbin/drumee
 chmod a+x $init_file
 rsync $init_file ${base}/debian/$packagename.init
-rsync $init_file ${base}/etc/init.d/drumee
 rsync $init_file ${base}/usr/sbin/drumee
-rsync $init_file ${base}/etc/rc3.d/S02drumee
-rsync $init_file ${base}/etc/rc6.d/K01drumee
 server_base=${base}/src/server-team
 cd ${server_base}
 # npm i @drumee/server-essentials

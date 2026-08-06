@@ -1,0 +1,11 @@
+# These three were conffiles, so dropping them from the payload does not remove
+# them from boxes that already have them — dpkg preserves an obsolete conffile
+# forever unless asked. /etc/init.d/drumee is the one that matters: with no unit of
+# the same name, systemd-sysv-generator turns it into a duplicate drumee.service
+# that hangs shutdown for 5 minutes (see build.sh). The rc*.d pair were plain file
+# copies of the same script, never symlinks, and systemd ignored them.
+#
+# 2.9.95 was the last version to ship all three.
+rm_conffile /etc/init.d/drumee 2.9.95
+rm_conffile /etc/rc3.d/S02drumee 2.9.95
+rm_conffile /etc/rc6.d/K01drumee 2.9.95
