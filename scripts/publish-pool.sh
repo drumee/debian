@@ -127,18 +127,52 @@ cmd_include() {
   shopt -u nullglob
   [ ${#files[@]} -gt 0 ] || die "no .deb files in $debs"
 
+  local added=0 present=0 unchanged=() failed=()
   for f in "${files[@]}"; do
-    # includedeb refuses to replace an existing (package, version): a repository
-    # that silently serves different bytes under a version it already published
-    # is the supply-chain hazard this whole layout exists to avoid. Bump the
-    # version instead.
+    # includedeb refuses to REPLACE an existing (package, version): a repository that
+    # silently serves different bytes under a version it already published is the
+    # supply-chain hazard this whole layout exists to avoid. Bump the version instead.
     out=$(reprepro -b "$REPO" -C "$component" includedeb "$suite" "$f" 2>&1 || true)
     printf '%s' "$out" | grep -vE '^(Exporting|Deleting|Created)' | sed '/^$/d; s/^/     /' >&2 || true
-    if printf '%s' "$out" | grep -qE '^ERROR|Skipping'; then
-      die "reprepro did not include $(basename "$f") — see above"
+    if printf '%s' "$out" | grep -qE '^ERROR'; then
+      # Recorded and carried on, rather than aborting the loop. A single conflicting
+      # package used to stop the run, so every file after it was never attempted and
+      # the operator could not tell what had actually been published without
+      # re-reading the log. Failures are summarised at the end and the command still
+      # exits non-zero.
+      failed+=("$(basename "$f")")
+      printf '  \033[1;31mfailed\033[0m %s\n' "$(basename "$f")"
+      continue
     fi
+    # "Skipping inclusion of 'X' 'V' … as it has already 'V'" is idempotent success,
+    # NOT failure: a release normally moves only some components, and the rest arrive
+    # at a version the pool already carries. Treating it as fatal aborted the whole
+    # include on the first unchanged package and silently left every later one out.
+    if printf '%s' "$out" | grep -qE 'Skipping inclusion'; then
+      present=$((present + 1)); unchanged+=("$(basename "$f")")
+      printf '  \033[2malready present\033[0m %s\n' "$(basename "$f")"
+      continue
+    fi
+    added=$((added + 1))
     ok "$(basename "$f") -> $suite/$component"
   done
+
+  printf '  %d added, %d already present in %s/%s\n' "$added" "$present" "$suite" "$component"
+  # Said out loud, because this is also what a rebuild-without-a-version-bump looks
+  # like: reprepro keys on version, so a changed .deb under a version already
+  # published is skipped and the pool keeps serving the OLD bytes.
+  if [ "$present" -gt 0 ]; then
+    printf '  \033[1;33mnote\033[0m the pool kept its existing copy of: %s\n' "${unchanged[*]}"
+    printf '       If any of those were rebuilt with changed content, the new bytes are\n'
+    printf '       NOT published — bump the version and include again.\n'
+  fi
+  if [ "${#failed[@]}" -gt 0 ]; then
+    printf '  \033[1;31m%d failed\033[0m: %s\n' "${#failed[@]}" "${failed[*]}"
+    printf '       A "cannot be included / can only be included again if they are the same"\n'
+    printf '       error means the pool already publishes that VERSION with different bytes.\n'
+    printf '       Do not force it: bump the version so the new content gets its own.\n'
+    exit 1
+  fi
 }
 
 # ------------------------------------------------------------------- promote
@@ -192,6 +226,22 @@ cmd_verify() {
 
   [ -f "$rel/InRelease" ] && ok "InRelease present ($suite)" \
     || { printf '  FAIL InRelease missing\n'; rc=1; }
+  # The PUBLISHED keyring must contain the key the suite is signed with. These are
+  # produced at different times — the keyring at init, the signature on every export —
+  # so changing SignWith afterwards leaves a repository that verifies fine here (the
+  # local keyring has every key) and is unusable by a client, which sees only
+  # "Missing key ... needed to verify signature". Caught for real: the pool was
+  # re-signed with the flat repository's key and its keyring still held the old one.
+  local signwith kr_keys
+  signwith="$(awk '/^SignWith:/ {print $2; exit}' "$REPO/conf/distributions" 2>/dev/null)"
+  kr_keys="$(gpg --show-keys "$REPO/drumee-archive-keyring.asc" 2>/dev/null | grep -oE '[0-9A-F]{40}')"
+  if [ -n "$signwith" ] && printf '%s\n' "$kr_keys" | grep -qx "$signwith"; then
+    ok "published keyring carries the signing key"
+  else
+    printf '  FAIL published keyring does not carry %s (has: %s)\n' \
+      "${signwith:-<unset>}" "$(printf '%s' "$kr_keys" | tr '\n' ' ')"; rc=1
+  fi
+
   gpg --verify "$rel/InRelease" >/dev/null 2>&1 \
     && ok "InRelease signature verifies" \
     || { printf '  FAIL InRelease does not verify\n'; rc=1; }

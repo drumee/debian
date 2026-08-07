@@ -108,9 +108,10 @@ resolution:
 docker run --rm debian:trixie bash -c '
   apt-get update -qq && apt-get install -y -qq curl ca-certificates gnupg >/dev/null
   install -d -m 0755 /etc/apt/keyrings
-  curl -fsSL https://apt.drumee.net/drumee-archive-keyring.asc -o /etc/apt/keyrings/drumee.asc
-  echo "deb [signed-by=/etc/apt/keyrings/drumee.asc] https://apt.drumee.net/ ./" \
-    > /etc/apt/sources.list.d/drumee.list
+  curl -fsSL https://apt.drumee.net/drumee-archive-keyring.gpg \
+    -o /etc/apt/keyrings/drumee-archive-keyring.gpg
+  printf "Types: deb\nURIs: https://apt.drumee.net\nSuites: trixie\nComponents: main\nSigned-By: /etc/apt/keyrings/drumee-archive-keyring.gpg\n" \
+    > /etc/apt/sources.list.d/drumee.sources
   curl -fsSL https://deb.nodesource.com/setup_22.x | bash - >/dev/null 2>&1
   apt-get update -qq && apt-get install -y --dry-run drumee | grep ^Inst'
 ```

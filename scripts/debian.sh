@@ -11,12 +11,17 @@
 #   baremetal.sh       previous name, kept because that URL is in circulation
 #   install-native.sh  the name before that
 #
-# The APT repo is a *flat* repository served from apt.drumee.net. APT_URL is the
-# base URL; KEYRING_URL points to the GPG public key used to verify the repo.
+# The APT repo is the pool/dists repository served from apt.drumee.net, configured as
+# a deb822 .sources stanza. APT_URL is the base URL, APT_SUITE the release channel,
+# and KEYRING_URL the GPG public key used to verify it. The older flat repository is
+# frozen — see the note at the stanza below.
 #
 # Env:
-#   APT_URL      (default https://apt.drumee.net)  flat repo base
-#   KEYRING_URL  (default https://apt.drumee.net/drumee-archive-keyring.asc)
+#   APT_URL       (default https://apt.drumee.net)  pool/dists repo base
+#   APT_SUITE     (default trixie)  release channel: trixie | trixie-beta | trixie-edge
+#   APT_COMPONENT (default main)    main = AGPL core, enterprise = commercial tier
+#   KEYRING_URL   (default https://apt.drumee.net/drumee-archive-keyring.gpg)
+#   KEYRING_PATH  (default /etc/apt/keyrings/drumee-archive-keyring.gpg)
 #   PRESEED      (optional)  install.conf from config/render.mjs
 #
 # INTERACTION
@@ -57,7 +62,13 @@
 set -euo pipefail
 
 APT_URL="${APT_URL:-https://apt.drumee.net}"
-KEYRING_URL="${KEYRING_URL:-https://apt.drumee.net/drumee-archive-keyring.asc}"
+KEYRING_URL="${KEYRING_URL:-https://apt.drumee.net/drumee-archive-keyring.gpg}"
+KEYRING_PATH="${KEYRING_PATH:-/etc/apt/keyrings/drumee-archive-keyring.gpg}"
+# Release channel = APT suite. trixie is stable; trixie-beta and trixie-edge exist for
+# pre-release trains and are mutually exclusive with it (suites, not components, so a
+# box pins one channel and apt preferences can override per package).
+APT_SUITE="${APT_SUITE:-trixie}"
+APT_COMPONENT="${APT_COMPONENT:-main}"
 PRESEED="${PRESEED:-}"
 
 # Every answer: empty means "not answered yet, ask for it".
@@ -120,12 +131,40 @@ if ! command -v curl >/dev/null; then
   apt-get install -y curl ca-certificates
 fi
 
-echo "==> Adding Drumee APT repository (flat: $APT_URL)"
+echo "==> Adding Drumee APT repository ($APT_SUITE, $APT_COMPONENT) at $APT_URL"
 install -d -m 0755 /etc/apt/keyrings
-curl -fsSL "$KEYRING_URL" -o /etc/apt/keyrings/drumee.asc
-# Flat repo: trailing slash on the base + "./" component (no suite/section).
-echo "deb [signed-by=/etc/apt/keyrings/drumee.asc] $APT_URL/ ./" \
-  > /etc/apt/sources.list.d/drumee.list
+curl -fsSL "$KEYRING_URL" -o "$KEYRING_PATH"
+
+# deb822, pointing at the pool/dists layout. The flat repository it replaces is
+# FROZEN: it still serves what it always served, so boxes installed against it keep
+# working, but new releases only reach the pool. 1.0.23 was the first pool-only one.
+#
+# Architectures is deliberately NOT pinned. The pool publishes amd64 and arm64, and
+# hardcoding amd64 would silently exclude arm64 — which is the typical target for the
+# behind-a-router flow (Raspberry Pi and similar). Omitted, apt uses dpkg's native
+# architecture, which is the right answer on both.
+#
+# The keyring goes to /etc/apt/keyrings, not /usr/share/keyrings: this script is an
+# administrator adding a third-party repository, and /usr/share/keyrings belongs to
+# files shipped by packages. When drumee-archive-keyring exists it will own the path
+# under /usr/share and this can point there instead; writing an unowned file into a
+# package-owned location now would collide with it later.
+cat > /etc/apt/sources.list.d/drumee.sources <<SOURCES
+Types: deb
+URIs: $APT_URL
+Suites: $APT_SUITE
+Components: $APT_COMPONENT
+Signed-By: $KEYRING_PATH
+SOURCES
+
+# Retire the flat stanza if this box has one. Left in place it keeps pulling from a
+# repository that no longer receives releases, and once the flat files are eventually
+# withdrawn every `apt update` on the box fails. Re-running this script is therefore
+# also the migration path off flat.
+if [ -f /etc/apt/sources.list.d/drumee.list ]; then
+  echo "==> Migrating off the frozen flat repository (removing drumee.list)"
+  rm -f /etc/apt/sources.list.d/drumee.list
+fi
 
 echo "==> apt update"
 apt-get update

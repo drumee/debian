@@ -153,14 +153,28 @@ Configuring this way moves nginx to `8080`/`8443` (Caddy needs 80/443) and write
 
 The packages are **self-hosted on `apt.drumee.net`** — the `drumee-static` deb alone
 is ~175 MB, over GitHub's 100 MB git-file limit, so they cannot live in a Pages git
-repo. Clients use a flat repo:
+repo. Clients use the pool/dists repository, configured as a deb822 stanza in
+`/etc/apt/sources.list.d/drumee.sources`:
 
 ```
-deb [signed-by=/etc/apt/keyrings/drumee.asc] https://apt.drumee.net/ ./
+Types: deb
+URIs: https://apt.drumee.net
+Suites: trixie
+Components: main
+Signed-By: /etc/apt/keyrings/drumee-archive-keyring.gpg
 ```
 
-The signing key is served from the same host at
-`https://apt.drumee.net/drumee-archive-keyring.asc`.
+`Suites` selects the release channel (`trixie` stable, `trixie-beta`, `trixie-edge`).
+`Architectures` is omitted on purpose so apt uses the host's own — the pool publishes
+`amd64` and `arm64`.
+
+The signing key is served from the same host, as
+`https://apt.drumee.net/drumee-archive-keyring.gpg` (or `.asc` for the armoured form).
+
+The older **flat** repository at the document root is **frozen**: it still serves what
+it always served, so boxes installed against it keep working, but releases from 1.0.23
+onward go to the pool only. Re-running `scripts/debian.sh` migrates a box by replacing
+the flat `drumee.list` with the stanza above.
 
 ## Needs your infrastructure
 

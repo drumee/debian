@@ -654,28 +654,51 @@ reprepro-based, staged in `apt-pool/` (gitignored). Suites are the channels
 real apt client in a container. **Sign with the same key as the flat repository**
 or already-installed boxes get `NO_PUBKEY`.
 
-### APT repository (flat, the layout being superseded)
+Clients configure (deb822, pointing at the pool):
+
+```bash
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://apt.drumee.net/drumee-archive-keyring.gpg \
+  | sudo tee /etc/apt/keyrings/drumee-archive-keyring.gpg >/dev/null
+sudo tee /etc/apt/sources.list.d/drumee.sources >/dev/null <<'SOURCES'
+Types: deb
+URIs: https://apt.drumee.net
+Suites: trixie
+Components: main
+Signed-By: /etc/apt/keyrings/drumee-archive-keyring.gpg
+SOURCES
+sudo apt update && sudo apt install drumee
+```
+
+`Suites` is the release channel — `trixie` is stable, `trixie-beta` and `trixie-edge`
+exist for pre-release trains and are mutually exclusive with it. `Architectures` is
+deliberately omitted so apt uses dpkg's native architecture; the pool publishes both
+`amd64` and `arm64`.
+
+`scripts/debian.sh` does this automatically. Overridable: `APT_URL`, `APT_SUITE`
+(the channel), `APT_COMPONENT`, `KEYRING_URL`, `KEYRING_PATH`. Re-running it on a box
+that still carries the flat `drumee.list` **removes that stanza**, so the installer is
+also the migration path off flat.
+
+### APT repository (flat, FROZEN)
 
 ```bash
 scripts/publish-apt.sh --debs=DIR --out=REPO_DIR [--key=EMAIL_OR_KEYID]
 scripts/deploy-apt-repo.sh [--host=USER@HOST] [--repo-dir=DIR] [--domain=DOMAIN]
 ```
 
+**Frozen as of release 1.0.23, which was published to the pool only.** It still serves
+everything it already served — boxes installed against it keep working, and its `.deb`
+files stay downloadable — but new releases do not go here. Do not publish to it without
+a deliberate reason; new work belongs in the pool above.
+
+Existing clients are migrated by re-running `scripts/debian.sh`, which replaces the flat
+`drumee.list` with the deb822 `.sources` stanza. Until a box is migrated it simply stops
+seeing new versions; nothing breaks.
+
 `publish-apt.sh` generates `Packages`, `Packages.gz`, `Release`, `InRelease`, `Release.gpg`, and `drumee-archive-keyring.asc` into a flat directory (no `dists/pool` tree). Requires `apt-utils` (for `apt-ftparchive`) and `gpg`.
 
 `deploy-apt-repo.sh` rsyncs that directory to the VPS document root (default `/var/www/apt.drumee.net`), installs an nginx vhost for the domain (default `apt.drumee.net`), and reloads nginx. `--host` defaults to **`debian@apt.drumee.net`** (production) — pass it to target a staging box or mirror; it prints the resolved target before doing anything. TLS is set up separately with certbot; `APT_LOCAL_DIR` selects the local repo dir (default `apt-repo`). CI does not rely on the default: `publish-site.sh` always passes `--host="$APT_SSH_HOST"` and skips the deploy entirely when that is unset.
-
-Clients configure:
-
-```bash
-curl -fsSL https://apt.drumee.net/drumee-archive-keyring.asc \
-  | sudo tee /etc/apt/keyrings/drumee.asc >/dev/null
-echo "deb [signed-by=/etc/apt/keyrings/drumee.asc] https://apt.drumee.net/ ./" \
-  | sudo tee /etc/apt/sources.list.d/drumee.list
-sudo apt update && sudo apt install drumee
-```
-
-`scripts/debian.sh` does this automatically (`APT_URL`/`KEYRING_URL` override the defaults).
 
 ### Container images
 

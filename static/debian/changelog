@@ -1,3 +1,9 @@
+drumee-static (1.0.5) stable; urgency=medium
+  * Updated pdfium
+  * Cleaned node_modules
+  * Added .gitignore
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 07 Aug 2026 14:56:35 +0200
+
 drumee-static (1.0.4) stable; urgency=medium
   * Updated pdfium
   * Cleaned node_modules
