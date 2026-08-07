@@ -7,11 +7,11 @@ the host via `apt`, configured from a debconf preseed for unattended runs.
 
 ```bash
 # Interactive
-curl -fsSL https://apt.drumee.net/baremetal.sh | sudo bash
+curl -fsSL https://apt.drumee.net/debian.sh | sudo bash
 
 # Unattended — preseed answers rendered from drumee.yaml first
 node config/render.mjs debconf --out install.conf
-sudo PRESEED=install.conf bash scripts/baremetal.sh
+sudo PRESEED=install.conf bash scripts/debian.sh
 ```
 
 `apt install drumee` pulls the `drumee` metapackage (`meta/`), which depends on

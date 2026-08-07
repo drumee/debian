@@ -91,22 +91,30 @@ done < <(sed -E 's/#.*$//' "$manifest" | tr -d '\r' \
          inc && NF==2 {gsub(/:$/,"",$1); print $1, $2}')
 
 # ---------------------------------------------------------------- installer
-# baremetal.sh is served from the flat repo, and publish-apt.sh does NOT copy it —
+# debian.sh is served from the flat repo, and publish-apt.sh does NOT copy it —
 # only publish-site.sh does. So it silently goes stale while packages publish fine,
 # and the documented `curl … | sudo bash` then installs with the previous flow.
+# Checked under the current name; publish-site.sh also serves baremetal.sh and
+# install-native.sh as byte-identical aliases for URLs already in circulation.
 hdr "installer (bootstrap script)"
-local_bm="$root/scripts/baremetal.sh"
+local_bm="$root/scripts/debian.sh"
 lsum="$(sha256sum "$local_bm" 2>/dev/null | cut -c1-12)"
 llines="$(wc -l < "$local_bm" 2>/dev/null | tr -d ' ')"
 if [ "$REMOTE" = 1 ]; then
   tmp_bm="$(mktemp)"
-  if curl -fsSL --max-time 25 "$APT_URL/baremetal.sh" -o "$tmp_bm" 2>/dev/null; then
-    rsum="$(sha256sum "$tmp_bm" | cut -c1-12)"; rlines="$(wc -l < "$tmp_bm" | tr -d ' ')"
-  else rsum="?"; rlines="?"; fi
+  if curl -fsSL --max-time 25 "$APT_URL/debian.sh" -o "$tmp_bm" 2>/dev/null; then
+    rsum="$(sha256sum "$tmp_bm" | cut -c1-12)"; rlines="$(wc -l < "$tmp_bm" | tr -d ' ')"; rcell=""
+  elif [ "$?" = 22 ]; then
+    # curl exit 22 with -f is an HTTP >= 400: we reached the server and it does not
+    # have this path. That is "not published", not "could not look" — the distinction
+    # matters right after a rename, when the new URL genuinely is not there yet.
+    rsum=""; rcell="not on the server"
+  else rsum="?"; rcell="?"; fi
   rm -f "$tmp_bm"
-else rsum="?"; rlines="?"; fi
-printf '  %-24s %-38s %-24s %s\n' "baremetal.sh" "$llines lines  $lsum" \
-  "$rlines lines  $rsum" "$(verdict "$lsum" "$rsum")"
+else rsum="?"; rcell="?"; fi
+: "${rcell:=$rlines lines  $rsum}"
+printf '  %-24s %-38s %-24s %s\n' "debian.sh" "$llines lines  $lsum" \
+  "$rcell" "$(verdict "$lsum" "$rsum")"
 
 # ---------------------------------------------------------------- git
 hdr "git — working tree vs origin"

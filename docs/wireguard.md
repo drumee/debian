@@ -69,7 +69,7 @@ To change it later: `dpkg-reconfigure drumee-infra`.
 Both bootstrap installers propose coordination, so nobody has to know the config
 key exists:
 
-- **`scripts/baremetal.sh`** asks before `apt install` and preseeds the four
+- **`scripts/debian.sh`** asks before `apt install` and preseeds the four
   `wireguard_*` debconf keys. It has to ask itself: on the documented
   `curl … | sudo bash` path stdin is the pipe, so debconf would silently take
   defaults. The script also hands `/dev/tty` to apt so the remaining debconf

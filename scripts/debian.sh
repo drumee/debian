@@ -1,9 +1,15 @@
 #!/bin/bash
-# Drumee bare-metal bootstrap — adds the signed APT repo and installs Drumee.
+# Drumee native (Debian/Ubuntu) bootstrap — adds the signed APT repo and installs
+# Drumee.
 #
-#   curl -fsSL https://apt.drumee.net/baremetal.sh | sudo bash
+#   curl -fsSL https://apt.drumee.net/debian.sh | sudo bash
 #   # unattended (preseed answers first):
-#   sudo PRESEED=/path/to/install.conf bash baremetal.sh
+#   sudo PRESEED=/path/to/install.conf bash debian.sh
+#
+# Published under three names, all byte-identical (see scripts/publish-site.sh):
+#   debian.sh          current
+#   baremetal.sh       previous name, kept because that URL is in circulation
+#   install-native.sh  the name before that
 #
 # The APT repo is a *flat* repository served from apt.drumee.net. APT_URL is the
 # base URL; KEYRING_URL points to the GPG public key used to verify the repo.

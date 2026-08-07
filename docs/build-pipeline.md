@@ -84,9 +84,10 @@ indices. History accumulates deliberately: old versions stay downloadable.
 **8 — Deploy.** `deploy-apt-repo.sh --layout=flat` rsyncs `apt-repo/` to the server.
 Two traps:
 
-- **It does not publish the installer.** `scripts/baremetal.sh` is copied into the
-  flat repo by **`publish-site.sh` only** (lines 40 and 44, under both
-  `baremetal.sh` and the legacy `install-native.sh` name). A package-only publish
+- **It does not publish the installer.** `scripts/debian.sh` is copied into the
+  flat repo by **`publish-site.sh` only**, under three names: `debian.sh` plus the
+  previous `baremetal.sh` and `install-native.sh`, kept byte-identical because those
+  URLs are in circulation. A package-only publish
   leaves the documented `curl … | sudo bash` serving the *previous* installer, which
   can then preseed different answers than the packages now expect.
 - The flat root syncs with `--delete`, excluding `dists/` and `pool/`. Dry-run before

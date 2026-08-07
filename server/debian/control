@@ -16,7 +16,7 @@ Architecture: all
 # component version in a control file.
 #
 # It pulls in nodejs (>= 22) transitively, which Trixie cannot satisfy on its own
-# (it ships 20). scripts/baremetal.sh configures NodeSource before installing, so
+# (it ships 20). scripts/debian.sh configures NodeSource before installing, so
 # the documented path resolves. A bare `apt install drumee` on a stock Trixie now
 # fails at install time instead of installing cleanly and never starting.
 Depends: ${misc:Depends}, nginx, redis-server, redis, node-redis, inotify-tools, graphicsmagick, libgraphicsmagick1-dev, poppler-utils, libreoffice, dcraw, curl, p7zip-full, ffmpeg, drumee-schemas, drumee-static, drumee-node-runtime

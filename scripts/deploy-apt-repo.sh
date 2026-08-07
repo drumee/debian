@@ -118,7 +118,7 @@ fi
 # fell through to the only other 443 block on the host, and clients were answered
 # with a certificate for a different domain entirely. `curl https://apt.drumee.net/…`
 # failed on hostname mismatch, which broke the documented
-# `curl -fsSL https://apt.drumee.net/baremetal.sh | sudo bash` bootstrap at its very
+# `curl -fsSL https://apt.drumee.net/debian.sh | sudo bash` bootstrap at its very
 # first step.
 #
 # The certificate is acme.sh's, not certbot's: the host issues and renews with
@@ -164,7 +164,7 @@ NGINXTLS
 )
 else
   echo "==> WARNING: no certificate at $CERT_DIR — provisioning http only." >&2
-  echo "    Clients using https:// will fail, including scripts/baremetal.sh, whose" >&2
+  echo "    Clients using https:// will fail, including scripts/debian.sh, whose" >&2
   echo "    APT_URL and KEYRING_URL both default to https://${DOMAIN}." >&2
   echo "    Issue one with acme.sh, then re-run this without --no-provision." >&2
 fi

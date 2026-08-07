@@ -63,7 +63,7 @@ This is what keeps "two channels" from meaning "double the bugs."
 > **Frozen** by `docs/distribution.md`: the container channel on Trixie is the
 > single target for now. Kept working, not extended.
 - [x] `drumee` metapackage (`meta/`) pulling the full runtime.
-- [x] Signed APT repo publisher (`scripts/publish-apt.sh`) + native bootstrap (`scripts/baremetal.sh`) with unattended preseed.
+- [x] Signed APT repo publisher (`scripts/publish-apt.sh`) + native bootstrap (`scripts/debian.sh`) with unattended preseed.
 - [ ] Repo hosting (`apt.drumee.net`, nginx on VPS via `scripts/deploy-apt-repo.sh`) + project signing key (your infra).
 - [ ] Explicit inter-package `Depends` for robust configure ordering.
 

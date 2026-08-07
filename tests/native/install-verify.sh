@@ -46,7 +46,7 @@ set -u
 export DEBIAN_FRONTEND=noninteractive
 log(){ printf '\n\033[1;36m== %s ==\033[0m\n' "$*"; }
 
-# The same options scripts/baremetal.sh passes, and for the same reason:
+# The same options scripts/debian.sh passes, and for the same reason:
 # drumee-infra renders MariaDB's conffiles (50-server.cnf / 50-client.cnf), so when
 # mariadb-client is configured afterwards dpkg finds a file "created by you or by a
 # script" and asks what to do. Without these the prompt reads stdin — it was eating

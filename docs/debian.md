@@ -1,10 +1,10 @@
-# `baremetal.sh` — the native bootstrap and its interactive flow
+# `debian.sh` — the native bootstrap and its interactive flow
 
-`scripts/baremetal.sh` is the entry point for a native install:
+`scripts/debian.sh` is the entry point for a native install:
 
 ```bash
-curl -fsSL https://apt.drumee.net/baremetal.sh | sudo bash     # interactive
-sudo PRESEED=install.conf bash baremetal.sh                    # unattended
+curl -fsSL https://apt.drumee.net/debian.sh | sudo bash     # interactive
+sudo PRESEED=install.conf bash debian.sh                    # unattended
 ```
 
 It adds the signed APT repository, ensures Node 22 and BIND9, asks for every
@@ -163,7 +163,7 @@ revisit one — including the ones this script asks on debconf's behalf.
 
 ## Related
 
-- `CLAUDE.md` — "baremetal.sh owns the interaction", and the TLS/DNS-01 section
+- `CLAUDE.md` — "debian.sh owns the interaction", and the TLS/DNS-01 section
   that explains why `tls_method` decides two things at once.
 - `docs/native-channel.md` — the preseed route and `render.mjs debconf`.
 - `infra/debian/config`, `infra/debian/templates` — the authority this flow

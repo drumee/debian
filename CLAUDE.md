@@ -67,7 +67,7 @@ Five additional system databases: `utils`, `mailserver`, `template`, `trash`, pl
 - **Git SSH access** to `git@github.com:drumee/` (private repos)
 - **GPG key** matching maintainer email in `debian/changelog` (in local keyring)
 - **Node.js 22** — the `debian/control` files still say `nodejs (>= 20)`, but the
-  container images and `scripts/baremetal.sh` (NodeSource) install **22**, and
+  container images and `scripts/debian.sh` (NodeSource) install **22**, and
   the WireGuard agent needs it. Treat 22 as the real baseline; the `>= 20` pin is
   deliberately not bumped (see the Node 22 guard under WireGuard).
 - **Debian build tools**: `dh-make`, `dpkg-buildpackage`, `debhelper`, `build-essential`
@@ -217,7 +217,7 @@ for a nameserver, and one squatting udp/53 for a domain served elsewhere is not
 harmless. Consequences worth knowing: `apt install drumee` pulls it in but
 `--no-install-recommends` and `dpkg -i` do not (`postinst` says so, with the
 command to fix it); a Recommends is **not an ordering constraint**, so
-`scripts/baremetal.sh` installs bind9 in its own transaction *before* Drumee,
+`scripts/debian.sh` installs bind9 in its own transaction *before* Drumee,
 and `finish_dns` retries the start once; and when DNS is not wanted, `postinst`
 stands named back down — guarded by the setup-infra marker in
 `named.conf.local`, so a nameserver Drumee did not configure is never touched.
@@ -427,9 +427,9 @@ vars, writes `/etc/drumee/conf.d/wireguard.json`, and enables/starts the two
 units (or leaves them inactive when disabled). To change later:
 `dpkg-reconfigure drumee-infra`.
 
-`scripts/baremetal.sh` asks these questions itself (from `/dev/tty`) and
+`scripts/debian.sh` asks these questions itself (from `/dev/tty`) and
 preseeds the four keys before `apt install` — along with **every other
-drumee-infra setting**; see "baremetal.sh owns the interaction" below.
+drumee-infra setting**; see "debian.sh owns the interaction" below.
 `WIREGUARD_ENABLED` / `WIREGUARD_COORDINATOR` / `…_LISTEN_PORT` /
 `…_REFLECTOR_PORT` skip those prompts.
 
@@ -605,10 +605,10 @@ because they drift independently: **manifest** (authoritative), **built** (newes
 `.deb` under `<pkg>/build/` — a bump with no rebuild ships nothing), **staged** (what
 `apt-repo/Packages` advertises). The right column is what `apt.drumee.net` actually
 serves. Also covers git per repo, tags local vs `git ls-remote`, the checksum of the
-published `baremetal.sh` against `scripts/baremetal.sh`, and an rsync dry-run of
+published `debian.sh` against `scripts/debian.sh`, and an rsync dry-run of
 `apt-repo/` against the server. `git` and `curl` only.
 
-The installer row exists because `publish-apt.sh` does **not** copy `baremetal.sh` —
+The installer row exists because `publish-apt.sh` does **not** copy `debian.sh` —
 only `publish-site.sh` does — so the documented `curl … | sudo bash` can serve a
 previous installer while packages publish fine.
 
@@ -675,7 +675,7 @@ echo "deb [signed-by=/etc/apt/keyrings/drumee.asc] https://apt.drumee.net/ ./" \
 sudo apt update && sudo apt install drumee
 ```
 
-`scripts/baremetal.sh` does this automatically (`APT_URL`/`KEYRING_URL` override the defaults).
+`scripts/debian.sh` does this automatically (`APT_URL`/`KEYRING_URL` override the defaults).
 
 ### Container images
 
@@ -711,11 +711,11 @@ publishing an empty image.
 APT_SSH_HOST=deploy@vps GH_TOKEN=<token> scripts/publish-site.sh --debs=out-debs [--key=KEYID]
 ```
 
-Builds the flat repo once, then deploys it to two independent targets: `apt.drumee.net` over rsync/SSH (`APT_SSH_HOST`, `APT_REPO_DIR`, `APT_DOMAIN`) and the `get.drumee.com` Pages content — installers, renderer, keyring, CLIs — to `PAGES_REPO` (`GH_TOKEN`). Each target is skipped with a notice when its credential is absent; setting neither is an error. `scripts/baremetal.sh` is copied into the flat repo so `https://apt.drumee.net/baremetal.sh` serves the bootstrap without depending on Pages. It is **also** copied to the pre-rename name `install-native.sh`, so bootstrap commands already in circulation keep working — drop that line in `publish-site.sh` once the old URL is no longer referenced anywhere. Note the new URL only goes live after the next `publish-site.sh` run.
+Builds the flat repo once, then deploys it to two independent targets: `apt.drumee.net` over rsync/SSH (`APT_SSH_HOST`, `APT_REPO_DIR`, `APT_DOMAIN`) and the `get.drumee.com` Pages content — installers, renderer, keyring, CLIs — to `PAGES_REPO` (`GH_TOKEN`). Each target is skipped with a notice when its credential is absent; setting neither is an error. `scripts/debian.sh` is copied into the flat repo so `https://apt.drumee.net/debian.sh` serves the bootstrap without depending on Pages. It is **also** copied to both earlier names — `baremetal.sh` and `install-native.sh` — so bootstrap commands already in circulation keep working; retire one only after confirming it is referenced nowhere. Note a renamed or newly added URL only goes live after the next `publish-site.sh` run (or an equivalent manual stage + deploy).
 
-## baremetal.sh owns the interaction
+## debian.sh owns the interaction
 
-`scripts/baremetal.sh` asks for **every** drumee-infra setting itself and
+`scripts/debian.sh` asks for **every** drumee-infra setting itself and
 preseeds the answers, rather than leaving the questions to debconf. Two reasons,
 both structural:
 
@@ -737,7 +737,7 @@ both structural:
 
 `detect_topology` classifies the host's `scope global` addresses *before* asking
 anything, and the branch it picks drives the domain, the TLS method and the admin
-email. Full walkthrough in `docs/baremetal.md`.
+email. Full walkthrough in `docs/debian.md`.
 
 | Branch | Condition | Serving address | `tls_method` | `local_mode` | Domain default |
 |---|---|---|---|---|---|
@@ -970,7 +970,7 @@ Full docs are in `docs/` and at [drumee.github.io/docs/package-building](https:/
   code change to a package a client can install, with the steps that silently ship
   nothing when skipped
 - `docs/wireguard.md` (peer coordination), `docs/native-audit.md` (native-channel gap audit)
-- `docs/baremetal.md` (the native bootstrap: three modes, the wan/lan/localhost
+- `docs/debian.md` (the native bootstrap: three modes, the wan/lan/localhost
   branches, and every question in order)
 
 `ROADMAP.md` tracks what is done vs. outstanding per phase, including known

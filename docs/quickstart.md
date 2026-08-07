@@ -97,11 +97,11 @@ the container channel above.
 
 ```bash
 # Interactive
-curl -fsSL https://apt.drumee.net/baremetal.sh | sudo bash
+curl -fsSL https://apt.drumee.net/debian.sh | sudo bash
 
 # Unattended — render answers from drumee.yaml first
 node config/render.mjs debconf --config config/drumee.yaml --out install.conf
-sudo PRESEED=install.conf bash scripts/baremetal.sh
+sudo PRESEED=install.conf bash scripts/debian.sh
 ```
 
 `apt install drumee` pulls the full runtime. Manage with `drumee` (processes) and

@@ -31,14 +31,14 @@ stands between "works after a few manual nudges" and a fully turnkey `apt instal
 | nginx `stream{}` (turn-relay) without the stream module → config invalid | `drumee-infra` `Depends: libnginx-mod-stream` | ✅ fixed (committed) |
 | pm2 not installed → `/usr/sbin/drumee` can't launch the app | `drumee-server-pod` postinst `npm i -g pm2` | ✅ fixed (committed) |
 | `ecosystem.config.js` not generated → init.d has nothing to start | `main()` never called `writeEcoSystem()` | ✅ fixed + pushed to `setup-infra` (verified via chroot render) |
-| dpkg **conffile prompt** on infra-rendered MariaDB configs | `baremetal.sh` uses `--force-confold` | ✅ fixed (committed) |
+| dpkg **conffile prompt** on infra-rendered MariaDB configs | `debian.sh` uses `--force-confold` | ✅ fixed (committed) |
 | `server/var/lib/drumee/postinstall/patch.sh` missing | ship a no-op placeholder (`dh_install` wants `files/var/*`) | ✅ fixed (committed) |
 | ~~`--conf-path` doubled~~ | **non-issue** — the generated ecosystem passes only `--pushPort/--restPort`; the doubling was a manual-invocation artifact, not a packaging bug | n/a |
 | domain `local` awkward for local browser testing | prefer `domain: localhost` for local installs | ⏳ docs / installer default |
 | `drumee-static` has no source to build → `/-/static/*` 404 (cosmetic) | obtain/build the `static` repo | ⏳ needs source |
 
 **Net after these fixes:** every blocking gap is closed — a fresh `apt install drumee`
-(via `baremetal.sh`, which adds Node 20 + `--force-confold`; packages pull
+(via `debian.sh`, which adds Node 20 + `--force-confold`; packages pull
 `mariadb-backup`/`libnginx-mod-stream`/`nodejs>=20` and install pm2; infra generates
 the ecosystem; populate stocks the pool) should reach a serving instance **without
 manual steps**. Only `domain: localhost` default and `drumee-static` remain (cosmetic /
@@ -89,7 +89,7 @@ prints "Setup has failed" and aborts.
   does `. confmodule` → `db_get drumee-infra/domain` → `echo export DRUMEE_DOMAIN_NAME=… >> env`.
 - The **metapackage path does not**: `infra/debian/postinst` just calls
   `setup-infra/bin/install` with **no `db_get` / no `export`**. So `apt install drumee`
-  with a preseed (what `scripts/baremetal.sh` + `render.mjs debconf` target) runs
+  with a preseed (what `scripts/debian.sh` + `render.mjs debconf` target) runs
   `infra.js` with empty env → silent failure.
 
 **Fix:** have `infra/debian/postinst` read the `drumee-infra/*` debconf answers and
@@ -173,7 +173,7 @@ supports `require(ESM)`) — both channels now ship **Node 22 (current LTS)** �
 infra failing cascades to schemas.
 
 **Fix (Option A, applied):** make the native install provide **Node 22.x (NodeSource)** —
-`scripts/baremetal.sh` adds the NodeSource repo before `apt install`, and the
+`scripts/debian.sh` adds the NodeSource repo before `apt install`, and the
 component `debian/control` files `Depends: nodejs (>= 20)` and drop the Debian `npm`
 dep (NodeSource's nodejs bundles npm and Debian's `npm` conflicts with it). This mirrors
 the container channel's `node:22` base. Without Node ≥20, `apt` now fails with a clear
