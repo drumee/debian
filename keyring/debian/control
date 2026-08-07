@@ -1,0 +1,28 @@
+Source: drumee-archive-keyring
+Section: misc
+Priority: optional
+Maintainer: Drumee Packaging <packaging@drumee.com>
+Build-Depends: debhelper-compat (= 13), gnupg
+Standards-Version: 4.7.0
+Homepage: https://drumee.com
+Rules-Requires-Root: no
+
+Package: drumee-archive-keyring
+Architecture: all
+Depends: ${misc:Depends}
+Description: GnuPG archive keys for the Drumee APT repository
+ The public keys apt uses to verify apt.drumee.net, installed to
+ /usr/share/keyrings/drumee-archive-keyring.gpg.
+ .
+ Shipping the keys as a package is what makes key rotation possible at all. A key
+ fetched once with curl is never refreshed, so a repository whose signing key
+ expires or is replaced simply stops verifying on every box that fetched it — and
+ the failure ("Missing key ... needed to verify signature", or an expired-key
+ error) reads as a repository fault rather than as a key that needed distributing.
+ With this package, a new key reaches clients through the same apt upgrade as
+ everything else, and can be added to the keyring one release BEFORE the
+ repository starts signing with it.
+ .
+ The keyring is built from public keys committed to the source tree, not exported
+ from whatever keyring the build host happens to have, so the contents are
+ reviewable in a diff and identical for every builder.

@@ -1,0 +1,17 @@
+drumee-archive-keyring (1.1.0) stable; urgency=medium
+
+  * Release 1.1.0 (synced from release-manifest.yaml)
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 07 Aug 2026 15:59:25 +0200
+
+drumee-archive-keyring (1.0.0) stable; urgency=medium
+
+  * Release 1.0.0 (synced from release-manifest.yaml)
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 07 Aug 2026 15:36:23 +0200
+
+drumee-archive-keyring (0.0.0) stable; urgency=medium
+
+  * Placeholder — the version is set from release-manifest.yaml.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 07 Aug 2026 13:00:00 +0200

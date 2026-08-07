@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+# The payload is a GnuPG keyring assembled by ../build.sh from the committed
+# armoured keys. There is nothing for these to act on, and dh_dwz fails looking
+# for ELF.
+override_dh_strip:
+
+override_dh_shlibdeps:
+
+override_dh_dwz:

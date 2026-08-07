@@ -24,6 +24,13 @@ PRODUCT="$(mver release)"
 
 # exact-pin each runtime component to its manifest version
 dep() { printf '  drumee-%s (= %s)' "$1" "$(mver "$2")"; }
+# ...but a MINIMUM for trust material. The keyring is not part of the runtime set whose
+# coherence this metapackage exists to guarantee; it carries the keys apt needs to
+# verify the repository. An exact pin would mean a client cannot take a newer keyring
+# without taking a whole new release train — and an emergency key rotation is precisely
+# the moment you want the keyring to move on its own, ahead of everything else. A floor
+# still guarantees that installing this train gets a keyring new enough for it.
+dep_min() { printf '  drumee-%s (>= %s)' "$1" "$(mver "$2")"; }
 gen_control() {
   cat <<EOF
 Source: drumee
@@ -41,11 +48,17 @@ $(dep infra infra),
 $(dep schemas schemas),
 $(dep static static),
 $(dep server-pod server-pod),
-$(dep ui-pod ui-pod)
+$(dep ui-pod ui-pod),
+$(dep_min archive-keyring keyring)
 Description: Drumee sovereign data platform (metapackage)
  Installs the full Drumee runtime: infrastructure, database schemas, static
  assets, backend server and frontend UI. This metapackage pins every component
  to the release-train version ($PRODUCT) so the set installs coherently.
+ .
+ It also pulls in drumee-archive-keyring, which carries the keys apt uses to verify
+ apt.drumee.net. That dependency is a minimum rather than an exact pin: it is how a
+ rotated signing key reaches an installed host at all, and it has to be able to move
+ ahead of the runtime set to do that.
  .
  For unattended installs, preseed answers first:
  debconf-set-selections < install.conf  (see config/render.mjs).

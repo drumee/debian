@@ -14,7 +14,7 @@
 # `drumee-release` anchor and of every drumee-role-* metapackage, the tag all
 # container images are published under, and what `drumee.yaml` pins to. The
 # component versions below are internal; users only ever see `release`.
-release: 1.0.23
+release: 1.0.24
 
 # APT suite this release train publishes to: trixie | trixie-beta | trixie-edge.
 channel: trixie
@@ -43,6 +43,11 @@ components:
   bootstrap:    2.0.0
   node-runtime: 0.1.0
 
+  # Ships the repository's public keys to /usr/share/keyrings. Versioned here like
+  # everything else because a key rotation IS a release: the new key has to reach
+  # clients through this package one release before the repository signs with it.
+  keyring:      1.1.0
+
   # --- outside the role graph --------------------------------------------------
   # Optional TLS terminator, pulled in only by tls_method=caddy.
   caddy:        1.0.0
@@ -50,4 +55,4 @@ components:
   # Built by builder/, and named drumee-installer since 1.2.7.
   installer:    1.2.7
   # The native metapackage tracks `release` by definition (meta/make-control.sh).
-  meta:         1.0.23
+  meta:         1.0.24

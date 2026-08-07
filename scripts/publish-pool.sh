@@ -234,7 +234,12 @@ cmd_verify() {
   # re-signed with the flat repository's key and its keyring still held the old one.
   local signwith kr_keys
   signwith="$(awk '/^SignWith:/ {print $2; exit}' "$REPO/conf/distributions" 2>/dev/null)"
-  kr_keys="$(gpg --show-keys "$REPO/drumee-archive-keyring.asc" 2>/dev/null | grep -oE '[0-9A-F]{40}')"
+  # --with-subkey-fingerprint is required, not cosmetic: SignWith names the SIGNING
+  # SUBKEY (the master is certify-only and cannot sign), and plain --show-keys prints
+  # only the primary fingerprint. Without it this guard fails on a correctly rotated
+  # repository — verified against the 2026 key.
+  kr_keys="$(gpg --show-keys --with-subkey-fingerprint "$REPO/drumee-archive-keyring.asc" \
+             2>/dev/null | grep -oE '[0-9A-F]{40}')"
   if [ -n "$signwith" ] && printf '%s\n' "$kr_keys" | grep -qx "$signwith"; then
     ok "published keyring carries the signing key"
   else

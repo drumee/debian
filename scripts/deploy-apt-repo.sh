@@ -91,11 +91,17 @@ if [ "$LAYOUT" = "pool" ]; then
   # or a client that updates in between resolves a package to a 404.
   echo "==> Uploading pool/ (additive, no --delete)"
   rsync -avz "$APT_LOCAL_DIR/pool/" "$HOST:$REPO_DIR/pool/"
-  echo "==> Uploading dists/ (mirrored, --delete)"
-  rsync -avz --delete "$APT_LOCAL_DIR/dists/" "$HOST:$REPO_DIR/dists/"
+  # Keyring BEFORE dists/, for the same reason pool/ comes before both: never publish
+  # something that points at material the server does not have yet. During a key
+  # rotation the new indices are signed by a key the old keyring does not contain, so
+  # uploading them first leaves a window in which a client fetching the keyring cannot
+  # verify the repository — "Missing key ... needed to verify signature", which reads
+  # as a broken repository rather than as an upload still in flight.
   echo "==> Uploading keyring"
   rsync -avz "$APT_LOCAL_DIR/drumee-archive-keyring.asc" \
              "$APT_LOCAL_DIR/drumee-archive-keyring.gpg" "$HOST:$REPO_DIR/"
+  echo "==> Uploading dists/ (mirrored, --delete)"
+  rsync -avz --delete "$APT_LOCAL_DIR/dists/" "$HOST:$REPO_DIR/dists/"
 else
   # --delete mirrors the document root, so the pool tree must be excluded or a
   # flat publish silently removes the repository the other layout just deployed.

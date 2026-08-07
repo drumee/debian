@@ -1,0 +1,59 @@
+#!/bin/sh
+# Migrate a box off the frozen flat repository onto the pool/dists layout.
+#
+# Release 1.0.23 was the first published to the pool only. A box configured with the
+# old flat stanza keeps working — the flat repository still serves what it always
+# served — but it sees no new releases, silently, because "no candidate" looks
+# identical to "already up to date".
+#
+# Doing it here means an `apt upgrade` migrates the box, which is the only mechanism
+# that reaches an install nobody is logged into. The alternative is re-running
+# scripts/debian.sh by hand on every host.
+set -e
+
+SOURCES=/etc/apt/sources.list.d/drumee.sources
+FLAT=/etc/apt/sources.list.d/drumee.list
+KEYRING=/usr/share/keyrings/drumee-archive-keyring.gpg
+
+case "$1" in
+    configure)
+    # Only when the box has the flat stanza and no pool stanza. Anything else is
+    # either already migrated or a deliberate local configuration, and rewriting
+    # someone's apt sources because a keyring package was upgraded would be well
+    # outside what this package is for.
+    if [ -f "$FLAT" ] && [ ! -f "$SOURCES" ]; then
+        # Suite and component are not guessed from the flat stanza — it has neither,
+        # that being the difference between the layouts. trixie/main is the stable
+        # channel; a box that wants beta edits the file afterwards.
+        cat > "$SOURCES" <<SRC
+# Written by drumee-archive-keyring when migrating this host off the frozen flat
+# repository. Suites is the release channel: trixie (stable), trixie-beta,
+# trixie-edge. Architectures is deliberately absent so apt uses this machine's own.
+Types: deb
+URIs: https://apt.drumee.net
+Suites: trixie
+Components: main
+Signed-By: $KEYRING
+SRC
+        # Renamed rather than deleted: apt only reads .list and .sources, so this
+        # disables it while leaving the operator's original one `mv` from restored.
+        # Deleting a file in /etc that this package does not own would also be wrong.
+        mv "$FLAT" "$FLAT.frozen-flat"
+        echo "drumee-archive-keyring: migrated this host to the pool repository."
+        echo "  wrote    $SOURCES"
+        echo "  disabled $FLAT (kept as $FLAT.frozen-flat)"
+    fi
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+    echo "postinst called with unknown argument \`$1'" >&2
+    exit 1
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0
