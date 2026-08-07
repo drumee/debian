@@ -349,14 +349,14 @@ done < <(printf '%s\n' "$units")
 # grep -c prints 0 AND exits 1 when nothing matches, so `|| echo 0` used to append a
 # second line and the count arrived as "0\n0" — which is neither empty nor "0", so a
 # clean journal was reported as a failure whose message was two lines of zeros.
-to="$(dex "journalctl -b -1 --no-pager 2>/dev/null | grep -icE 'timed out waiting for|stop job' || true" 2>/dev/null | head -1 | tr -dc '0-9')"
+to="$(dex "journalctl -b -1 -t systemd --no-pager 2>/dev/null | grep -icE 'timed out waiting for|stop job' || true" 2>/dev/null | head -1 | tr -dc '0-9')"
 if [ -z "${to:-}" ]; then
   note "SKIP: no previous boot in the journal to inspect"
 elif [ "$to" = "0" ]; then
   ok "no stop-job timeout in the previous boot's journal"
 else
   no "$to stop-job timeout message(s) in the previous boot"
-  dex "journalctl -b -1 --no-pager 2>/dev/null | grep -iE 'timed out waiting for|stop job' | tail -5" | sed 's/^/       /'
+  dex "journalctl -b -1 -t systemd --no-pager 2>/dev/null | grep -iE 'timed out waiting for|stop job' | tail -5" | sed 's/^/       /'
 fi
 # Deliberately NOT asserting that 127.0.0.1 survived here. Docker re-creates the
 # /etc/resolv.conf bind mount on every container start, so the file is replaced by the

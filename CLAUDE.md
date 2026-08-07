@@ -911,6 +911,7 @@ tests/native/verify-debconf-bridge.sh # preseed → debconf → DRUMEE_* env, in
 tests/native/make-seed.sh            # generate bootstrap seeds.tgz for schemas build
 tests/native/dns-zone-config.sh      # rendered BIND config vs. a real named-checkconf
 tests/native/upgrade-reconfigure.sh  # the lifecycle of an INSTALLED box: upgrade → reconfigure → reboot
+tests/native/lifecycle-remote.sh     # the same, on a REAL box over ssh (covers NM + a kernel reboot)
 tests/wireguard/probe-port.sh        # endpoint probe against real kernel WireGuard
 ```
 
@@ -966,7 +967,37 @@ once, by A4.
 **Not covered, and it needs a real box:** NetworkManager's regeneration of
 `resolv.conf` — Docker re-creates that bind mount on every container start, so
 *persistence*, the exact thing 1.2.28 got wrong, cannot be observed here. Nor can a
-kernel reboot. The script prints the real-box commands at the end.
+kernel reboot. That is what the next script is for.
+
+### The same, on a real box — `tests/native/lifecycle-remote.sh`
+
+```bash
+tests/native/lifecycle-remote.sh --host=somanos@testbox [--domain=drumee.lan] [--no-reboot]
+```
+
+Six legs (L1–L6) over ssh, covering the two properties the container cannot: **NM
+regenerating `resolv.conf` at boot** and a **kernel reboot**. Needs key access and
+passwordless sudo; it re-renders and reboots, so point it at a disposable box. It does
+not purge, downgrade or touch data. Verified on testbox: 15/15, twice consecutively.
+
+Four things it took to make it trustworthy, each a trap worth not re-learning:
+
+- **`sudo for f in …` cannot work** — sudo runs a command, `for` is a shell keyword. The
+  snapshot loop silently returned nothing, and two empty snapshots compare *equal*, so
+  "unchanged by apt" passed on a box that had never been measured. `snapshot()` now emits
+  `__EMPTY__` and L1 aborts on it rather than letting six vacuous assertions run.
+- **debconf redirects maintainer-script output to stderr.** `postinst` sources
+  `confmodule`, which claims stdout for the debconf protocol — so the "re-rendering"
+  line arrives on stderr, and dropping stderr made the harness report the 1.2.31
+  regression on a box where the re-render demonstrably happened.
+- **`journalctl … | grep 'stop job'` matched sudo's own audit line** from the *previous
+  run of that same check*. Scoped to `-t systemd`, since only PID 1 logs a stop-job
+  timeout.
+- **`systemctl is-system-running` is not a usable "booted" signal on desktop-flavoured
+  Debian**: `plymouth-quit-wait.service` holds until a splash nobody will dismiss, so
+  `multi-user.target` stays pending and the state is `starting` forever. L6 waits for the
+  specific units instead — sshd answers at ~10s while `drumee-server-pod` finishes at
+  ~14.7s, and a single sample accused a unit that was merely still activating.
 
 `native/dns-zone-config.sh` also needs a **setup-infra checkout with its
 `node_modules`** (a sibling `../setup-infra`, or `infra/src/setup-infra` after a
