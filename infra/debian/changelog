@@ -1,3 +1,35 @@
+drumee-infra (1.2.27) stable; urgency=medium
+
+  * Make `dpkg-reconfigure drumee-infra` actually re-render. It was a silent
+    no-op, on exactly the hosts it exists for.
+    .
+    setup-infra guards against clobbering an installed host:
+    hasExistingSettings() reads /etc/drumee/drumee.json and, if a domain_name is
+    already there, refuses — and infra.js then calls exit(0), so the caller sees
+    success. Re-rendering is allowed only when it was explicitly agreed to, which
+    the guard tests as `args.reconfigure` (its own message says "Use
+    --reconfigure=1", and the argparse default reads DRUMEE_RECONFIGURE=1 "so a
+    package can drive it").
+    .
+    This postinst passed `--force-install=1` instead — an option that is declared
+    with the help text "Override existing configs" and read by nothing. So the
+    guard held, infra.js exited 0, dpkg reported success, and not one file was
+    re-rendered. Measured against the setup-infra bundled in 1.2.26:
+    --force-install=1 blocks, --reconfigure=1 proceeds.
+    .
+    Consequence while it lasted: no configuration fix could reach an installed
+    host, and every TLS/DNS message in this script ends by advising
+    "then: dpkg-reconfigure drumee-infra" — advice that did nothing. Note this is
+    the mechanism, not the policy: re-rendering still overwrites hand edits under
+    /etc/drumee, the nginx vhosts, the BIND zones, Prosody and Postfix, which is
+    what the debconf reconfigure_existing question warns about.
+    .
+    Also fixed upstream in setup-infra, which now accepts --force-install as an
+    alias for --reconfigure, so an already-deployed postinst passing the old flag
+    starts working too.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 07 Aug 2026 08:13:01 +0200
+
 drumee-infra (1.2.26) stable; urgency=medium
 
   * local_mode no longer defaults to "yes", which was silently turning every

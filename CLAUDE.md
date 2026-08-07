@@ -45,7 +45,7 @@ All service URLs follow `/-/svc/module.method` — no hardcoded routes.
 └── infrastructure/ecosystem.json  # PM2 process definitions
 
 /var/lib/drumee/
-├── setup-infra/         # infra install scripts + 88 lodash templates
+├── setup-infra/         # infra install scripts + 69 lodash templates
 ├── setup-schemas/       # schema install scripts + populate.js
 ├── patches/             # pending schema patches
 └── postinstall/patch.sh # applied at server startup
@@ -178,8 +178,8 @@ drumee-infra
 
 ## Post-Install Behavior
 
-- **drumee-infra**: runs `setup-infra/bin/install` (root) — renders 88 lodash templates into `/etc/drumee/`, `/etc/nginx/`, `/etc/bind/`, `/etc/prosody/`, `/etc/jitsi/`, `/etc/postfix/`, MariaDB, Coturn. Sets up SSL (ACME/self-signed/own certs), DNS (BIND9), DKIM, Prosody XMPP, PM2 ecosystem, and crontab (cert renewal, tmp cleanup, watchdog, DB/storage backups). Whether BIND9 serves the zone depends on the TLS method — `acme-dns-server` and `self-signed` do, the rest leave DNS at the operator's provider. See the DNS-01 section below.
-- **drumee-schemas**: runs `setup-schemas/bin/install` (root) — restores MariaDB from seeds via `mariabackup`, creates system accounts (nobody, guest, system, admin), provisions initial hubs, imports wallpapers/tutorials, generates RSA key pair, sends welcome email with password-reset link.
+- **drumee-infra**: runs `setup-infra/bin/install` (root) — renders 69 lodash templates into `/etc/drumee/`, `/etc/nginx/`, `/etc/bind/`, `/etc/prosody/`, `/etc/jitsi/`, `/etc/postfix/`, MariaDB, Coturn. Sets up SSL (ACME/self-signed/own certs), DNS (BIND9), DKIM, Prosody XMPP, PM2 ecosystem, and crontab (cert renewal, tmp cleanup, watchdog, DB/storage backups). Whether BIND9 serves the zone depends on the TLS method — `acme-dns-server` and `self-signed` do, the rest leave DNS at the operator's provider. See the DNS-01 section below.
+- **drumee-schemas**: runs `setup-schemas/bin/install` (root) — restores MariaDB from seeds via `mariabackup`, creates system accounts (nobody, guest, system, admin), provisions initial hubs, generates RSA key pair, sends welcome email with password-reset link.
 - **drumee-server-pod**: sources `/etc/drumee/drumee.sh`, applies pending patches from `/var/lib/drumee/postinstall/patch.sh`.
 - **drumee-patch**: stages patch files; applied at next server startup (not immediately).
 - **drumee-static**, **drumee-ui-pod**: no special post-install.
@@ -906,7 +906,7 @@ Source can be git URL (`#ref`), local dir, or archive. Installs to `$PLUGIN_DIR/
 
 | Directory | Package | Source repo(s) | Notes |
 |---|---|---|---|
-| `infra/` | `drumee-infra` | `setup-infra`, `acme.sh` | Post-install renders 88+ config templates |
+| `infra/` | `drumee-infra` | `setup-infra`, `acme.sh` | Post-install renders 69 config templates |
 | `schemas/` | `drumee-schemas` | `setup-schemas`, `schemas` | Requires `seeds.tgz`; post-install restores MariaDB |
 | `server/` | `drumee-server-pod` | `server-team` | Post-install applies pending patches |
 | `ui/` | `drumee-ui-pod` | `ui-team` | Webpack build during package build |

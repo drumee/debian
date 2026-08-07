@@ -36,7 +36,7 @@ infra/build.sh
 │   ├── bin/install           # post-install entry point (requires root)
 │   ├── infra.js              # main template renderer
 │   ├── jitsi.js              # Jitsi-specific renderer
-│   └── templates/            # 88 lodash .tpl files mirroring /etc/ layout
+│   └── templates/            # 69 lodash .tpl files mirroring /etc/ layout
 └── utils/                    # shared shell utilities
 /etc/acme/                    # acme.sh SSL tool
 ```
@@ -52,7 +52,7 @@ libncurses6, g++, gyp, openssh-client, libcurl4
 
 Runs as root. Orchestrates the full infrastructure setup in this order:
 
-1. **Generates all config files** via `node infra.js` (and `node jitsi.js` unless `--no-jitsi`). Renders 88 lodash templates into `/etc/drumee/`, `/etc/nginx/`, `/etc/bind/`, `/etc/prosody/`, `/etc/jitsi/`, `/etc/postfix/`, `/etc/turnserver.conf`, `/etc/opendkim/`, and `/etc/mysql/`.
+1. **Generates all config files** via `node infra.js` (and `node jitsi.js` unless `--no-jitsi`). Renders 69 lodash templates into `/etc/drumee/`, `/etc/nginx/`, `/etc/bind/`, `/etc/prosody/`, `/etc/jitsi/`, `/etc/postfix/`, `/etc/turnserver.conf`, `/etc/opendkim/`, and `/etc/mysql/`.
 
 2. **Writes the master runtime environment** `/etc/drumee/drumee.sh` — sourced by the server on every startup. If this file is absent after step 1, install aborts.
 

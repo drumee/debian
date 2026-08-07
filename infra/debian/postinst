@@ -509,7 +509,14 @@ case "$1" in
     reconfigure)
     bridge_debconf_env
     ensure_nginx_stream_module
-    node /var/lib/drumee/setup-infra/infra.js --force-install=1
+    # --reconfigure=1, not --force-install=1. setup-infra's hasExistingSettings()
+    # gates re-rendering on `args.reconfigure` (templates/utils.js) and its own
+    # message says "Use --reconfigure=1"; --force-install was declared but read by
+    # nothing. So this arm passed a flag that did nothing: the guard held, infra.js
+    # exit(0)'d, dpkg reported success, and NOTHING was re-rendered — which made
+    # `dpkg-reconfigure drumee-infra` a silent no-op on exactly the hosts it exists
+    # for, and it is the advice every TLS/DNS message in this script gives.
+    node /var/lib/drumee/setup-infra/infra.js --reconfigure=1
     # This arm re-renders without going through bin/install, so nothing here
     # would ever (re)start named — and "then: dpkg-reconfigure drumee-infra" is
     # the advice every DNS-related message in this script gives.

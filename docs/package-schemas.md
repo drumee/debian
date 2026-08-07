@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Bootstraps the Drumee database layer. The post-install script (`bin/install`) restores a MariaDB snapshot from seeds, creates system accounts (nobody, guest, system, admin), provisions the initial hubs and media filesystem, imports wallpapers and tutorials, generates the RSA key pair, and sends a welcome email with the admin password-reset link.
+Bootstraps the Drumee database layer. The post-install script (`bin/install`) restores a MariaDB snapshot from seeds, creates system accounts (nobody, guest, system, admin), provisions the initial hubs and media filesystem, generates the RSA key pair, and sends a welcome email with the admin password-reset link.
 
 ## Source Repos
 
@@ -120,7 +120,9 @@ Runs as root. Two-phase execution:
    | Admin internal sharebox | private | — |
    | Admin external sharebox (DMZ) | — | for guest sharing |
 
-7. **Media import** — downloads wallpapers from `content.drumee.com/Wallpapers` and tutorial content.
+7. **Media import** — **disabled.** The wallpaper and tutorial import is commented out in
+   `populate.js` (with the `withTimeout` guard that bounded it), because it reaches the
+   network mid-install and precedes the RSA key generation, which must run.
 8. **RSA key pair** — generates and writes to `/etc/drumee/credential/crypto/public.pem` and `private.pem`.
 9. **Welcome page** — renders `asset/welcome.html` with the password-reset link to `<data_dir>/tmp/welcome.html`.
 
