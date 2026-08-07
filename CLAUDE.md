@@ -587,6 +587,31 @@ meta/make-control.sh --check       # CI guard: fail if out of sync
 
 To bump a version: edit `release-manifest.yaml`, then run `--sync` + `make-control.sh`.
 
+A **release-train** bump touches **two** manifest keys — top-level `release:` *and*
+`components.meta` — and `--sync` writes only the component changelogs, reporting
+`DRIFT release` for the train; `meta/make-control.sh` writes that one. Bumping either
+key alone leaves a guard failing. Full walkthrough of the build→publish path, and the
+steps that look optional but are not, in @docs/build-pipeline.md.
+
+### Where the release stands: `scripts/release-status.sh`
+
+```bash
+scripts/release-status.sh              # local (left) vs live (right)
+scripts/release-status.sh --no-remote  # no network calls
+```
+
+One table answering "is what I have what users get". Local is three separate columns
+because they drift independently: **manifest** (authoritative), **built** (newest
+`.deb` under `<pkg>/build/` — a bump with no rebuild ships nothing), **staged** (what
+`apt-repo/Packages` advertises). The right column is what `apt.drumee.net` actually
+serves. Also covers git per repo, tags local vs `git ls-remote`, the checksum of the
+published `baremetal.sh` against `scripts/baremetal.sh`, and an rsync dry-run of
+`apt-repo/` against the server. `git` and `curl` only.
+
+The installer row exists because `publish-apt.sh` does **not** copy `baremetal.sh` —
+only `publish-site.sh` does — so the documented `curl … | sudo bash` can serve a
+previous installer while packages publish fine.
+
 ### update-changelog.sh
 
 `server/`, `static/`, `ui/`, `schemas-patch/` each have one. Compares `debian/changelog` version against the upstream `package.json` version and picks whichever is **higher**. Without `--message`, it pulls the last 5 non-merge git commits as bullet points. Called automatically by `server/build.sh`, `ui/build.sh`, and `static/build.sh` (not `schemas-patch`).
@@ -940,7 +965,10 @@ overwritten from the upstream repos on the next build.
 Full docs are in `docs/` and at [drumee.github.io/docs/package-building](https://drumee.github.io/docs/package-building/):
 - Per-package deep dives: infra, schemas, server, ui, static, schemas-patch, builder
 - Quickstart, first-deploy runbook, production ops, lifecycle, security
-- Build pipeline, reproducible builds, release engineering, version management
+- Build pipeline, reproducible builds, release engineering, version management —
+  start with `docs/build-pipeline.md` "End to end", which is the ordered path from a
+  code change to a package a client can install, with the steps that silently ship
+  nothing when skipped
 - `docs/wireguard.md` (peer coordination), `docs/native-audit.md` (native-channel gap audit)
 - `docs/baremetal.md` (the native bootstrap: three modes, the wan/lan/localhost
   branches, and every question in order)

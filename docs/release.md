@@ -30,9 +30,21 @@ set. `scripts/check-versions.sh` fails CI if any `debian/changelog` drifts from 
 
 ```bash
 # bump versions in release-manifest.yaml, then:
-scripts/check-versions.sh --sync     # rewrite changelog top lines to match
+scripts/check-versions.sh --sync     # rewrite COMPONENT changelog top lines to match
+meta/make-control.sh                 # the release train's own entry + the = pins
 scripts/check-versions.sh            # verify (also runs in CI)
+meta/make-control.sh --check         # verify (also runs in CI)
 ```
+
+`--sync` does not write the release train's changelog — it reports `DRIFT release` and
+`meta/make-control.sh` writes it. A train bump also touches **two** manifest keys,
+`release:` and `components.meta`. See [version-management.md](version-management.md).
+
+The whole path from a code change to something a client can install — including the
+steps that look optional and are not — is in
+[build-pipeline.md](build-pipeline.md#end-to-end-from-a-change-to-something-a-client-can-install).
+`scripts/release-status.sh` shows local beside live when you want to know where a
+release actually got to.
 
 ## Pipelines
 

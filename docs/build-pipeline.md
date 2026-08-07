@@ -8,6 +8,122 @@
 - **Node.js** required for packages that run `npm install` or webpack during the build.
 - **Debian build tools**: `dh_make`, `dpkg-buildpackage`, `debhelper`.
 
+## End to end: from a change to something a client can install
+
+```
+  edit code
+      │
+  1 ─ release-manifest.yaml          the ONLY place a version is stated
+      │                              (a release-train bump touches TWO keys)
+  2 ─ scripts/check-versions.sh --sync
+      │                              rewrites component changelogs
+  3 ─ meta/make-control.sh           re-pins the metapackage + writes the train version
+      │
+  4 ─ unlock the GPG key             the build signs; a locked key fails at the last step
+      │
+  5 ─ <pkg>/build.sh                 bundle() pulls upstream, dpkg-buildpackage signs
+      │
+  6 ─ assemble the release set       every pinned package + drumee-node-runtime
+      │
+  7 ─ scripts/publish-apt.sh         → apt-repo/ : Packages, Release, InRelease, signed
+      │
+  8 ─ scripts/deploy-apt-repo.sh     → apt.drumee.net
+      │
+  9 ─ scripts/release-status.sh      local vs live, then a real apt client
+      │
+ 10 ─ commit, tag vX.Y.Z, push
+```
+
+The order matters, and so does every note below: each of these has a failure mode
+that leaves the build green and ships nothing.
+
+**1 — Version.** `release-manifest.yaml` is authoritative; never write a component
+version anywhere else. A **release-train** bump touches **two** keys — the top-level
+`release:` *and* `components.meta` — because the metapackage tracks the train by
+definition. Bumping only one leaves `check-versions.sh` failing on the other.
+
+**2 — Sync.** `--sync` rewrites each *component* changelog to match the manifest. It
+does **not** write the release train's changelog; it only reports `DRIFT release`.
+Step 3 writes that one.
+
+**3 — Re-pin.** `meta/make-control.sh` regenerates `meta/debian/control` with exact
+`=` pins and prepends the train's changelog entry. Skip it and the metapackage pins
+whatever it pinned last — which, if a component moved, is a version that no longer
+exists in the repository, making `apt install drumee` unsatisfiable.
+
+**4 — Signing key.** `dpkg-buildpackage -k<email>` needs the key unlocked. From a
+non-interactive shell it fails with `No pinentry` at the *end* of a long build. Check
+first:
+
+```bash
+echo t | gpg --batch --pinentry-mode error -u <maintainer-email> --clearsign -o /dev/null
+```
+
+**5 — Build.** Two behaviours that change what you get:
+
+- `DEB_BUILD_TARGET` is honoured by **`infra`, `schemas`, `server` only**. `ui`,
+  `static`, `meta`, `schemas-patch` and `builder` leave the `.deb` in
+  `<pkg>/build/` and must be collected by hand.
+- `update-changelog.sh` (`server`, `ui`, `static`, `schemas-patch`) takes
+  **`max(changelog, upstream package.json)`**, so an upstream repo that has moved
+  ahead **outranks the manifest and changes the version you are building** — `ui` has
+  jumped 24 patch versions this way. It also **replaces** the entry for the target
+  version with the last five upstream commit subjects, so hand-written changelog prose
+  for the *current* version does not survive a rebuild unless `--message` is passed,
+  and `build.sh` does not pass it. Put the reasoning in the git commit message.
+
+**6 — The release set.** Whatever you hand to `publish-apt.sh` must contain every
+package the metapackage pins, plus `drumee-node-runtime` (`drumee-server-pod`
+depends on it — omit it and apt refuses the whole install with *"but it is not
+installable"*).
+
+**7 — Stage.** `publish-apt.sh --debs=<dir> --out=apt-repo --key=<email>` copies the
+`.deb`s alongside whatever is already in `apt-repo/` and regenerates + signs the
+indices. History accumulates deliberately: old versions stay downloadable.
+
+**8 — Deploy.** `deploy-apt-repo.sh --layout=flat` rsyncs `apt-repo/` to the server.
+Two traps:
+
+- **It does not publish the installer.** `scripts/baremetal.sh` is copied into the
+  flat repo by **`publish-site.sh` only** (lines 40 and 44, under both
+  `baremetal.sh` and the legacy `install-native.sh` name). A package-only publish
+  leaves the documented `curl … | sudo bash` serving the *previous* installer, which
+  can then preseed different answers than the packages now expect.
+- The flat root syncs with `--delete`, excluding `dists/` and `pool/`. Dry-run before
+  every upload and confirm the deletion count is zero:
+
+  ```bash
+  rsync -avzn --delete --exclude='dists/' --exclude='pool/' \
+    apt-repo/ debian@apt.drumee.net:/var/www/apt.drumee.net/ | grep '^deleting'
+  ```
+
+**9 — Verify.** `scripts/release-status.sh` puts local beside live in one table —
+manifest / built / staged on the left, what `apt.drumee.net` actually serves on the
+right, plus git, tags, the installer checksum and an rsync dry-run. Then prove it with
+a real client, because only that exercises signature verification and dependency
+resolution:
+
+```bash
+docker run --rm debian:trixie bash -c '
+  apt-get update -qq && apt-get install -y -qq curl ca-certificates gnupg >/dev/null
+  install -d -m 0755 /etc/apt/keyrings
+  curl -fsSL https://apt.drumee.net/drumee-archive-keyring.asc -o /etc/apt/keyrings/drumee.asc
+  echo "deb [signed-by=/etc/apt/keyrings/drumee.asc] https://apt.drumee.net/ ./" \
+    > /etc/apt/sources.list.d/drumee.list
+  curl -fsSL https://deb.nodesource.com/setup_22.x | bash - >/dev/null 2>&1
+  apt-get update -qq && apt-get install -y --dry-run drumee | grep ^Inst'
+```
+
+NodeSource is required in that check, not optional: Trixie ships Node 20 and
+`drumee-node-runtime` declares `nodejs (>= 22)`, so `apt install drumee` cannot
+resolve from Debian alone.
+
+**10 — Commit and tag.** The packages are built from the working tree, so publishing
+before committing leaves artifacts in the wild that no commit describes. Tag the
+commit the release was built from, and record in the tag which upstream commits were
+bundled — `bundle()` pulls from **origin**, so an unpushed fix in `setup-infra` or
+`server-team` is *not* in the package even though it is in your checkout.
+
 ## Building a Single Package
 
 ```bash
@@ -41,7 +157,7 @@ Only these flags actually affect a build:
 
 | Script | Flag | Effect |
 |---|---|---|
-| `ui/build.sh` | `--compile=yes\|no` | Run the webpack compile step (default `yes`) |
+| `ui/build.sh` | `--compile=yes\|no` | Parsed but **not honoured** — webpack always runs |
 | `ui/build.sh` | `--enable-api=yes\|no` | Also compile the `api` webpack target (default `no`) |
 | `schemas-patch/build.sh` | `--manifest=auto\|<file>` | **Required** — selects the patch manifest (see [schemas-patch](package-schemas-patch.md)) |
 | `schemas-patch/build.sh` | `<N>` (positional) | Commit depth for `--manifest=auto` (default `2`) |
