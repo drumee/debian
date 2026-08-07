@@ -1,3 +1,7 @@
+# DEPRECATED — source-based image. See deploy/docker/DEPRECATED.md.
+# The build context here is a source checkout; the replacement installs .deb packages
+# from apt.drumee.net into docker/Dockerfile.base. Do not add to this file: fixes to
+# keep the current stack running are fine, new work belongs in the package-based path.
 # Drumee schemas-init image — run-once database initializer + schema patcher.
 # Lean: a MariaDB client + the factory templates + the schema/patch corpus + the
 # init script. It does NOT run the Node patch engine (that assumes a local

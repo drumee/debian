@@ -9,6 +9,18 @@
 #   TAG        (default local)
 #   MEDIA_DEPS (default 0)   1 = install libreoffice/ffmpeg/etc (large, slow)
 set -euo pipefail
+if [ -z "${DRUMEE_QUIET_DEPRECATION:-}" ]; then
+  # Deprecation notice, printed rather than only written down: this script builds images
+  # from SOURCE CHECKOUTS, which is the approach docs/distribution.md §1 replaces with
+  # images that install .deb packages. It still works and is still the only container path
+  # that does, so this warns rather than refuses — but nothing new should be added to it.
+  # See deploy/docker/DEPRECATED.md for what replaces each image and what has to be true
+  # before the tree can go.
+  printf '\033[1;33m==> DEPRECATED\033[0m source-based image build (deploy/docker/).\n'
+  printf '    Replacement: role packages installed into docker/Dockerfile.base.\n'
+  printf '    See deploy/docker/DEPRECATED.md. Set DRUMEE_QUIET_DEPRECATION=1 to silence.\n'
+fi
+
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SERVER_SRC="${SERVER_SRC:-$HOME/server-team}"
 UI_SRC="${UI_SRC:-$HOME/ui-team}"

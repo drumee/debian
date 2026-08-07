@@ -1,3 +1,7 @@
+# DEPRECATED — source-based image. See deploy/docker/DEPRECATED.md.
+# The build context here is a source checkout; the replacement installs .deb packages
+# from apt.drumee.net into docker/Dockerfile.base. Do not add to this file: fixes to
+# keep the current stack running are fine, new work belongs in the package-based path.
 # Drumee ui-build image — NOT a long-running service. It webpack-builds the LETC
 # frontend assets and, at container start, copies them into a shared volume that
 # server-pod serves from $DRUMEE_UI_HOME. The compose runs it once (restart: no).

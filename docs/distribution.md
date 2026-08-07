@@ -256,9 +256,35 @@ it.
 
 ## 9. Open blocking questions
 
-1. `drumee-server-pod` is currently `Architecture: all`. If the package bundles
-   natively compiled Node modules this is incorrect and will fail silently on
-   arm64. **Settle this before freezing the architecture matrix.**
+1. ~~`drumee-server-pod` is currently `Architecture: all`.~~ **Settled at 2.9.98:
+   it bundles native code, so it is `Architecture: any`, and amd64 is the only
+   architecture built.** The payload carries 18 compiled `.node` addons — every one
+   `linux-x64` (`@img/sharp-linux-x64`, `@msgpackr-extract/…-linux-x64`,
+   `@parcel/watcher-linux-x64-*`) — plus private copies of libvips, cairo and rsvg.
+   Under `all`, reprepro filed the amd64 build into `binary-arm64` too, so an arm64
+   box installed it cleanly and then died at the first `require()` into sharp: no
+   dpkg error, nothing in the journal until the first thumbnail.
+
+   Two consequences, both deliberate:
+
+   - `debian/rules` overrides `dh_shlibdeps`, `dh_strip` and `dh_dwz`. `any`
+     activates `binary-arch`, which ran those three over the vendored tree for the
+     first time; `dh_shlibdeps` failed outright trying to resolve the bundled `.so`
+     files against system packages. Letting it succeed would be worse — it would
+     add `Depends` on whatever system libraries happened to match, for objects that
+     link against their own bundled copies. The runtime dependencies are declared by
+     hand in `control`, which is correct for a vendored payload.
+   - **arm64 has no `drumee-server-pod` at all**, and the stale `all` copy was
+     removed from `binary-arm64` rather than left in place. So `apt install drumee`
+     on arm64 now fails with `Depends: drumee-server-pod (= 2.9.98) but it is not
+     installable` instead of installing something that cannot run. Measured with a
+     real apt client on both architectures (`docker run --platform linux/arm64`).
+
+   What this leaves open is no longer a packaging question but a build-capacity one:
+   arm64 — the typical behind-a-router target — needs a builder (native, or buildx
+   under QEMU with an arm64 `npm ci`) before it can be served again. `verify`'s
+   "`Architecture: all` reaches every architecture" count is therefore 8 for amd64
+   and 7 for arm64 by design, not drift.
 2. `drumee-node-runtime` and `drumee-bootstrap` do not exist yet. The first
    replaces the unpinned `npm install -g`, the second replaces
    `COPY ./opt/drumee/init.d/*`, which bypasses versioning entirely.

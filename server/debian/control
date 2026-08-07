@@ -6,7 +6,15 @@ Standards-Version: 2.9.7
 Homepage: https://drumee.org
 
 Package: drumee-server-pod
-Architecture: all
+# Architecture: any, not all. The payload is a node_modules tree carrying 18 compiled
+# .node addons, every one linux-x64 (@img/sharp-linux-x64,
+# @msgpackr-extract/msgpackr-extract-linux-x64, @parcel/watcher-linux-x64-*). Under
+# `all` that amd64 build installed cleanly on arm64 and then failed at require() — no
+# dpkg error, no startup error until the first call into sharp or msgpackr. See
+# docs/distribution.md §9.1. `any` means one build per architecture, which is honest:
+# apt now refuses on an architecture nobody has built rather than installing something
+# that cannot work.
+Architecture: any
 # drumee-node-runtime supplies pm2, which /usr/sbin/drumee invokes by name and
 # which nothing previously installed: a fresh install came up with every package
 # "installed ok" and nothing serving, failing with "pm2: command not found" in the

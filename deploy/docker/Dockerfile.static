@@ -1,3 +1,7 @@
+# DEPRECATED — source-based image. See deploy/docker/DEPRECATED.md.
+# The build context here is a source checkout; the replacement installs .deb packages
+# from apt.drumee.net into docker/Dockerfile.base. Do not add to this file: fixes to
+# keep the current stack running are fine, new work belongs in the package-based path.
 # Drumee static assets (drumee-static) — run-once publisher.
 # Serves /-/static/* and /-/images/* (splash CSS, fonts, logo). The app's own UI
 # styles ship in the webpack bundles; this package is for the pre-boot splash and

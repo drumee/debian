@@ -270,7 +270,8 @@ DNS-01 there would require a custom Caddy build (`xcaddy` + `caddy-dns/*`).
 `tls_method=caddy` configures the package built by **`caddy/`** in this repo: a
 Caddy compiled with the `caddy-dns` provider modules, which is what lets it answer
 DNS-01 and therefore issue wildcards (see `caddy/README.md`). It is the only
-`Architecture: any` package here, and it is **optional** — not in the metapackage,
+`Architecture: any` package here that compiles a binary of its own (`drumee-server-pod`
+is `any` too, but only because it vendors prebuilt addons), and it is **optional** — not in the metapackage,
 since it is only needed for this TLS method. `postinst` writes the two halves of
 the interface and both sides must stay in sync:
 
@@ -545,6 +546,25 @@ tests, not by reading the code.
 
 ## Container Channel
 
+**The source-based images under `deploy/docker/` are deprecated** — see
+@deploy/docker/DEPRECATED.md. They build from source checkouts, so nothing pins what
+went into an image and the OS dependencies live in Dockerfiles instead of
+`debian/control`. The replacement installs the seven role packages
+(`roles/debian/control`, each `Provides`/`Conflicts: drumee-role`) into
+`docker/Dockerfile.base`, which is already digest-pinned with UID/GID 8000 and a
+committed NodeSource keyring.
+
+Nothing is removed yet: this is still the only working container path. The build
+scripts print a deprecation notice (`DRUMEE_QUIET_DEPRECATION=1` silences it), and the
+removal criteria are listed in DEPRECATED.md.
+
+Worth knowing: **all three `check-packaging.sh` failures live in this deprecated tree**
+and are deliberately not being fixed in place — digest-pinning a `FROM` in a file that
+is being deleted buys nothing, and `npm install -g pm2` is already obsolete now that
+`drumee-node-runtime` is published. The exception is `Architecture: all` on
+`drumee-server-pod`, which needs deciding regardless because the role images inherit it
+(`docs/distribution.md` §9.1).
+
 ```bash
 scripts/build-images-local.sh   # build images from local source (tag: local)
 scripts/dev-up.sh               # render config + bring up compose stack
@@ -715,7 +735,10 @@ and signs images only; the `.deb`/apt jobs are gated on `github.event_name ==
 
 `PLATFORMS` defaults to `linux/amd64`. Add `linux/arm64` for Raspberry Pi and
 other ARM home servers — which is the *typical* target for the behind-a-router
-flow, so a release meant for those boxes must publish it. Multi-platform requires
+flow, so a release meant for those boxes must publish it. **But an arm64 image is
+not enough on its own now that the roles install packages**: `drumee-server-pod` is
+`Architecture: any` and only amd64 is built, so an arm64 role image would fail at
+`apt install`. Publishing arm64 means building the package for arm64 first. Multi-platform requires
 `PUSH=1` (buildx cannot `--load` a manifest list) and QEMU, which the workflow
 installs. Emulated cross-builds of the media stack take the better part of an
 hour, which is why it is opt-in rather than the default.
@@ -956,10 +979,10 @@ Source can be git URL (`#ref`), local dir, or archive. Installs to `$PLUGIN_DIR/
 |---|---|---|---|
 | `infra/` | `drumee-infra` | `setup-infra`, `acme.sh` | Post-install renders 69 config templates |
 | `schemas/` | `drumee-schemas` | `setup-schemas`, `schemas` | Requires `seeds.tgz`; post-install restores MariaDB |
-| `server/` | `drumee-server-pod` | `server-team` | Post-install applies pending patches |
+| `server/` | `drumee-server-pod` | `server-team` | `Architecture: any` since 2.9.98 — **amd64 only, arm64 is not served**. Post-install applies pending patches |
 | `ui/` | `drumee-ui-pod` | `ui-team` | Webpack build during package build |
 | `static/` | `drumee-static` | `static` | No deps, served by nginx |
-| `caddy/` | `drumee-caddy` | upstream Caddy + `caddy-dns/*` | **Only `Architecture: any` package.** Compiles the binary with `xcaddy` (local Go ≥ 1.21 or Docker); optional, install it before choosing `tls_method=caddy` |
+| `caddy/` | `drumee-caddy` | upstream Caddy + `caddy-dns/*` | `Architecture: any`, and the only one that actually compiles anything. Compiles the binary with `xcaddy` (local Go ≥ 1.21 or Docker); optional, install it before choosing `tls_method=caddy` |
 | `schemas-patch/` | `drumee-patch` | `schemas` | Requires `--manifest` |
 | `builder/` | `drumee-installer` | `setup` | Interactive installer, builds unsigned, GitLab fallback. Renamed from `drumee-bootstrap` at 1.2.7 — that name now belongs to the container entrypoints package |
 | `meta/` | `drumee` | — | Metapackage, deps pinned via `make-control.sh` |

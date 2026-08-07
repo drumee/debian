@@ -47,6 +47,12 @@ Description: Drumee release train anchor
 # ---------------------------------------------------------------------------
 
 Package: drumee-role-app
+# "all" bien que ce role ne soit satisfaisable que la ou drumee-server-pod existe.
+# Depuis 2.9.98 ce dernier est Architecture: any et seul amd64 est construit (voir
+# docs/distribution.md §9.1), donc sur arm64 ce role est refuse par apt avec
+# "drumee-server-pod ... but it is not installable" — echec explicite, et non une
+# image qui demarre puis casse au premier require(). Ne pas annoncer arm64 dans la
+# matrice des images de ce role avant qu'un server-pod arm64 soit publie.
 Architecture: all
 Section: web
 Provides: drumee-role

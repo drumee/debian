@@ -1,5 +1,12 @@
 # Drumee container channel
 
+> **The images in this directory are deprecated.** They build from source checkouts;
+> the replacement installs `.deb` packages from `apt.drumee.net` into
+> `docker/Dockerfile.base`. This tree still works and is still the only container path
+> that does, so nothing is removed yet — but new work belongs in the package-based
+> path. See [DEPRECATED.md](DEPRECATED.md) for what replaces each image, why, and what
+> has to be true before this tree can go.
+
 The recommended, easiest way to self-host Drumee: one config file, a few
 containers, automatic HTTPS.
 

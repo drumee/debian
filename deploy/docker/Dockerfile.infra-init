@@ -1,3 +1,7 @@
+# DEPRECATED — source-based image. See deploy/docker/DEPRECATED.md.
+# The build context here is a source checkout; the replacement installs .deb packages
+# from apt.drumee.net into docker/Dockerfile.base. Do not add to this file: fixes to
+# keep the current stack running are fine, new work belongs in the package-based path.
 # Drumee infra-init image — run-once. Renders the canonical optional-service
 # configs (Jitsi/Prosody/Coturn, Postfix/OpenDKIM, BIND) with setup-infra's own
 # engine, into mounted volumes the service containers consume. See

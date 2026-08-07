@@ -69,11 +69,18 @@ done
 cd $build_dir
 package=${packagename}_${version}
 echo "BUILDING PACKAGE $package IN $build_dir"
-dh_make --native --yes --indep --packagename ${packagename}_${version} --email $email
+# --single, not --indep: this package is Architecture: any now, and --indep generates
+# the arch-independent scaffolding. Our own debian/ is copied over the generated one
+# immediately below, so what actually decides the built architecture is control — but
+# leaving --indep here misdescribes the package to anyone reading the build.
+dh_make --native --yes --single --packagename ${packagename}_${version} --email $email
 for f in $(ls ${base}/debian); do
   cp -r ${base}/debian/$f $build_dir/debian/
 done
 dpkg-buildpackage -k$email
 if [ -d "${DEB_BUILD_TARGET}" ]; then
-  cp $base/build/${package}_all.deb "${DEB_BUILD_TARGET}"
+  # The filename is _<arch>.deb now that this package is Architecture: any, so it
+  # cannot be hardcoded — dpkg-architecture reports what this build produced.
+  deb_arch=$(dpkg-architecture -qDEB_HOST_ARCH)
+  cp "$base/build/${package}_${deb_arch}.deb" "${DEB_BUILD_TARGET}"
 fi

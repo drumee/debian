@@ -36,6 +36,29 @@ override_dh_installinit:
 override_dh_installsystemd:
 	dh_installsystemd --no-start drumee-server-pod.service
 
+# The three below exist because this package became Architecture: any. Under
+# Architecture: all, dpkg-buildpackage only ran binary-indep, so these tools never
+# touched the payload at all; `any` activates binary-arch and they run for the first
+# time. The payload is a VENDORED node_modules tree — 18 .node addons plus private
+# copies of libvips, cairo, rsvg, harfbuzz and friends that sharp and canvas ship for
+# their own use — and none of it is something dh built.
+#
+# dh_shlibdeps is the one that actually failed: it tried to resolve those bundled .so
+# files against system packages, could not, and aborted the build. Letting it succeed
+# would be worse than skipping it — it would add Depends on whatever system libraries
+# happened to match, for objects that deliberately link against their own bundled
+# copies. The real runtime dependencies are declared by hand in debian/control
+# (graphicsmagick, poppler-utils, libreoffice, ffmpeg, …), which is where they belong
+# for a vendored tree.
+#
+# dh_strip and dh_dwz would rewrite third-party binaries we did not compile and have no
+# debug symbols for.
+override_dh_shlibdeps:
+
+override_dh_strip:
+
+override_dh_dwz:
+
 # 	dh_systemd_enable -pdrumee --name=drumee drumee.service
 # 	dh_installinit -pdrumee --no-start --noscripts
 # 	dh_systemd_start -pdrumee --no-restart-on-upgrade

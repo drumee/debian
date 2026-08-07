@@ -1,3 +1,7 @@
+# DEPRECATED — source-based image. See deploy/docker/DEPRECATED.md.
+# The build context here is a source checkout; the replacement installs .deb packages
+# from apt.drumee.net into docker/Dockerfile.base. Do not add to this file: fixes to
+# keep the current stack running are fine, new work belongs in the package-based path.
 # Drumee schemas-populate image — run-once. Stocks the entity pool from the
 # schemas genesis templates and creates the system accounts + RSA keypair, by
 # running setup-schemas' real bootstrap code (see container-populate.js).

@@ -1,3 +1,11 @@
+drumee-server-pod (2.9.98) stable; urgency=medium
+  * feat(contact): add contact.lookup — match the address book by email
+  * revert: enable yp connection pool via db_pool_size (default 5)
+  * fix: enable yp connection pool via db_pool_size (default 5)
+  * refactor(noti): one resolver for the hub-invite workspace name
+  * fix(over-limit): Google Drive migration is OFF while locked — with two exits
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 07 Aug 2026 17:08:43 +0200
+
 drumee-server-pod (2.9.97) stable; urgency=medium
   * feat(contact): add contact.lookup — match the address book by email
   * revert: enable yp connection pool via db_pool_size (default 5)
