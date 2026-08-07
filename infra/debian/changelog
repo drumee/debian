@@ -1,3 +1,30 @@
+drumee-infra (1.2.29) stable; urgency=medium
+
+  * Make 1.2.28's resolver fix survive a reboot. It did not, and the failure was
+    silent in exactly the way that matters: the install measured as working.
+    .
+    ipv4.dns is an ORDERED list and NetworkManager writes resolv.conf in that
+    order. `nmcli +ipv4.dns 127.0.0.1` appends, so the profile became
+    "8.8.8.8,127.0.0.1" while the live resolv.conf edit still put 127.0.0.1 first
+    — on-box resolution worked, and was verified working. On the next boot NM
+    regenerated resolv.conf from the profile, in profile order, and the box asked
+    8.8.8.8 for its own domain. glibc does not fall through to the next server on
+    NXDOMAIN, only on refusal or timeout, so an authoritative "no such name" from
+    a public resolver is final: on-box resolution was broken again with nothing in
+    any log to say so.
+    .
+    The whole list is now rewritten with 127.0.0.1 first and the previous servers
+    kept behind it. Loopback connections are skipped — 1.2.28 wrote to `lo` too,
+    which is harmless but not ours to modify.
+  * Report whether the host can resolve its own domain, asked through the SYSTEM
+    resolver (getent hosts) rather than by querying named directly. That
+    distinction is the lesson from the above: a check that talked to 127.0.0.1
+    explicitly would have passed while nsswitch was broken. On failure it says so
+    and prints the resolver state, instead of leaving the operator to discover it
+    the next time an on-box probe fails.
+
+ -- somanos.sar@drumee.com  Fri, 07 Aug 2026 18:12:46 +0200
+
 drumee-infra (1.2.28) stable; urgency=medium
 
   * Make the host resolve the zone it serves. A LAN instance came up with named
