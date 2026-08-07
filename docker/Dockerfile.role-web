@@ -1,0 +1,64 @@
+# drumee-web — the first package-based role image.
+#
+# The whole point: this Dockerfile contains no source checkout, no git clone, no
+# webpack, and not one component version. It installs ONE metapackage at an exact
+# version and lets dpkg resolve the rest. Compare deploy/docker/Dockerfile.ui, which
+# builds from a working tree and runs webpack in the image.
+#
+#   docker build -f docker/Dockerfile.role-web -t drumee/role-web:<tag> \
+#     --build-arg ROLE_VERSION=1.0.29-1~trixie1 .
+#
+# Build context is the repository root, because the base image and the committed
+# keyring both live under docker/.
+#
+# ROLE_VERSION is required and has no default. A default would be a component version
+# written outside release-manifest.yaml, which is the one thing the distribution
+# invariants forbid; the caller passes what the manifest says.
+
+# Pinned by DIGEST, with no default for either argument, because a floating tag is the
+# thing docs/distribution.md forbids: two builds of the same tag are not the same image.
+# The caller resolves the digest — docker/build-role.sh does it by pushing the base to a
+# throwaway local registry, since a local-only image has no repo digest to reference
+# (measured: `FROM name@<image id>` is rejected for images that were never pushed).
+ARG BASE_IMAGE
+ARG BASE_DIGEST
+FROM ${BASE_IMAGE}@${BASE_DIGEST}
+
+ARG ROLE_VERSION
+ARG APT_URI=https://apt.drumee.net
+ARG APT_SUITE=trixie
+ARG APT_COMPONENTS=main
+
+USER root
+
+# The public half of the archive key, committed rather than fetched — see
+# docker/keyrings/README.md. drumee-apt-source refuses to write a stanza whose keyring
+# is missing, so an unsigned source cannot be created by accident.
+COPY docker/keyrings/drumee-archive-keyring.gpg /usr/share/keyrings/drumee-archive-keyring.gpg
+
+# One layer: update and install together, because a cached `apt-get update` layer paired
+# with a later install resolves against an index that no longer matches the repository.
+# --no-install-recommends throughout. The exact-version pin is what makes the image
+# reproducible from the manifest alone.
+RUN set -eu; \
+    : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
+        /usr/share/keyrings/drumee-archive-keyring.gpg; \
+    apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+        "drumee-role-web=${ROLE_VERSION}" \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Recorded in the image so `docker inspect` answers "which release is this" without
+# starting it. Read from the anchor package rather than restated, so it cannot disagree.
+RUN . /usr/share/drumee/release \
+ && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
+
+LABEL org.opencontainers.image.title="drumee-web" \
+      org.opencontainers.image.description="Drumee web role: nginx, LETC bundles, static assets" \
+      org.opencontainers.image.source="https://github.com/drumee/debian"
+
+USER drumee
+EXPOSE 80 443
+CMD ["nginx", "-g", "daemon off;"]

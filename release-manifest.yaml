@@ -29,7 +29,7 @@ components:
   schemas:      2.7.2
   patch:        1.1.6
   infra:        1.2.31
-  roles:        1.0.0
+  roles:        1.0.29
 
   # Not built yet — created in increment 3. Declared here so the roles that
   # depend on them resolve, and so the version is chosen in the one place where

@@ -727,6 +727,54 @@ seeing new versions; nothing breaks.
 
 `deploy-apt-repo.sh` rsyncs that directory to the VPS document root (default `/var/www/apt.drumee.net`), installs an nginx vhost for the domain (default `apt.drumee.net`), and reloads nginx. `--host` defaults to **`debian@apt.drumee.net`** (production) — pass it to target a staging box or mirror; it prints the resolved target before doing anything. TLS is set up separately with certbot; `APT_LOCAL_DIR` selects the local repo dir (default `apt-repo`). CI does not rely on the default: `publish-site.sh` always passes `--host="$APT_SSH_HOST"` and skips the deploy entirely when that is unset.
 
+### Package-based role images (the replacement path)
+
+```bash
+docker/build-role.sh web                  # version from release-manifest.yaml
+APT_URI=http://localhost:8099 docker/build-role.sh web   # against a local repo
+```
+
+`docker/Dockerfile.role-web` is the first of the seven. It contains **no source
+checkout, no git clone, no webpack and not one component version** — it installs one
+metapackage at an exact version and lets dpkg resolve the rest. `ROLE_VERSION` has no
+default on purpose: a default would be a component version written outside
+`release-manifest.yaml`.
+
+The base is pinned by **digest**, and `build-role.sh` exists because of how that has to
+be obtained: a locally-built image has no repo digest, and `FROM name@<image id>` is
+rejected for an image that was never pushed (measured). So the script pushes the base to
+a throwaway local registry and reads the digest back — the same mechanism the release
+path uses against the real registry.
+
+`docker/keyrings/drumee-archive-keyring.gpg` is the **public** half of the archive key,
+committed rather than fetched: fetching a key at build time is what the
+`curl … | gpg --dearmor` invariant forbids. `drumee-apt-source` refuses to write a
+stanza whose keyring is missing, so an unsigned source cannot appear by accident.
+
+**The roles do not decompose anything yet, and the reason is in `debian/control`.**
+`drumee-role-web` asks for `ui-pod`, `static`, `bootstrap` and nginx, and resolves to
+**508 packages** — every Drumee component plus mariadb-server, redis-server, LibreOffice
+(23 packages), ffmpeg, GraphicsMagick, nodejs, g++ and binutils. The chain:
+
+```
+role-web → drumee-ui-pod → drumee-server-pod → drumee-schemas → mariadb-server
+                                             → libreoffice, ffmpeg, graphicsmagick
+         → drumee-static  → drumee-infra    → nginx, g++, binutils, gyp
+```
+
+Those `Depends` are native-channel assumptions from when everything was one box, and
+they are harmless there because the metapackage installs the whole set anyway. In the
+container channel they defeat the entire decomposition — including the security argument
+for splitting out `drumee-media` (`docs/distribution.md` §2), since the web role would
+carry the document parsers. **Fixing this means `drumee-ui-pod` dropping
+`Depends: drumee-server-pod` and `drumee-static` dropping `Depends: drumee-infra`** (plus
+the `binutils`/`git`/`nodejs` build-time leftovers). Neither has a postinst that needs
+the other, and `tests/native/control-deps.sh` is the guard for the ordering question.
+
+A second consequence: `role-web` is `Architecture: all` but transitively requires
+`drumee-server-pod`, which is amd64-only — so it is **not installable on arm64** today,
+verified against the published `binary-arm64` index.
+
 ### Container images
 
 ```bash

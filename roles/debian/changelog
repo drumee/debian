@@ -1,3 +1,21 @@
+drumee-roles (1.0.29-1~trixie1) stable; urgency=medium
+
+  * Anchor the source version to the release train, and publish for the first time.
+    .
+    drumee-release existed at 1.0.0-1~trixie1 while its own payload recorded
+    DRUMEE_RELEASE=1.0.29, which made the anchor inert: every role declares
+    `Depends: drumee-release (= ${binary:Version})` precisely so two containers of
+    one deployment cannot come from two rows of the manifest, and that constraint
+    was the same string for every release train. Two trains would also have
+    produced two different drumee-release 1.0.0-1~trixie1 artifacts — the same
+    version, different bytes, which reprepro refuses (and which already bit
+    drumee-static at 1.0.4).
+    .
+    components.roles now tracks `release`, so a train bump re-syncs and rebuilds
+    this package and the anchor names the train it belongs to.
+
+ -- Drumee Packaging <packaging@drumee.com>  Fri, 07 Aug 2026 20:44:13 +0200
+
 drumee-roles (1.0.0-1~trixie1) trixie; urgency=medium
 
   * Initial release-train packaging: the drumee-release anchor and the seven

@@ -5,11 +5,13 @@
 #
 #   drumee-apt-source <uri> <suite> <components> <keyring-path>
 #
-# The base image configures no Drumee source itself: the project signing key does
-# not exist yet (docs/distribution.md §4), and committing a developer's throwaway
-# test key would ship trust in it. Role builds therefore pass the repository they
-# should install from — the local test repository during development,
-# apt.drumee.net once it is signed with the project key.
+# The base image configures no Drumee source itself, so a role build names the
+# repository it installs from — the local test repository during development,
+# apt.drumee.net for a release. The project key now exists (an offline certify-only
+# master with a signing subkey, keyring 1.1.0), and its PUBLIC half is committed as
+# docker/keyrings/drumee-archive-keyring.gpg: a public key is exactly what belongs in
+# the tree, and fetching one at build time is what the check-packaging invariant
+# against `curl … | gpg --dearmor` forbids.
 set -eu
 
 [ $# -eq 4 ] || { echo "usage: drumee-apt-source <uri> <suite> <components> <keyring>" >&2; exit 2; }
