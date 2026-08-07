@@ -9,5 +9,11 @@ Package: drumee-infra
 Architecture: all
 Depends: ${misc:Depends}, binutils, apt-utils, git, nodejs (>= 20), nginx, libnginx-mod-stream,
   cron, libncurses6, git, g++, gyp, openssh-client, libcurl4, wireguard-tools, iproute2
-Recommends: bind9, bind9-utils
+# bind9-utils is here for tsig-keygen and named-checkconf, which bin/init-named
+# needs. bind9-dnsutils is here for dig, which nothing needs to *run* — but postinst
+# ends the DNS path by printing "Check it with: dig +short <domain> @<address>", and
+# on a fresh install that command did not exist: neither bind9 nor bind9-utils pulls
+# dig in. Telling an operator to run a tool the package did not install is the kind
+# of small dishonesty that makes them doubt the rest of the output.
+Recommends: bind9, bind9-utils, bind9-dnsutils
 Description: Setup Drumee infrastructure and environment

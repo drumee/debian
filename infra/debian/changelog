@@ -1,3 +1,38 @@
+drumee-infra (1.2.28) stable; urgency=medium
+
+  * Make the host resolve the zone it serves. A LAN instance came up with named
+    answering the domain for the whole network while /etc/resolv.conf still
+    pointed at the DHCP resolver, so the box could not resolve its own name:
+    on-box `curl https://<domain>/` returned nothing while the identical request
+    from any other machine on the LAN got the site. Everything on-box that refers
+    to the instance by name was resolving against a resolver that has never heard
+    of the domain — drumee-ctl doctor's TLS probe, health checks, the
+    password-reset URL in the welcome email if it is followed locally.
+    .
+    bin/init-named now points the host at 127.0.0.1 after named starts, but only
+    after asking that named for the zone's SOA — named-checkconf passes
+    configurations whose zone files do not load, and pointing the resolver at a
+    named that came up empty would be worse than leaving it alone. It is added as
+    the FIRST nameserver with the existing ones kept behind it, because glibc
+    moves to the next server on refusal or timeout: a named that is down then
+    costs a retry rather than all DNS. Safe because the rendered
+    named.conf.options sets `recursion yes` with public forwarders, so 127.0.0.1
+    is a complete resolver and not an authoritative island.
+    .
+    Persisted per resolver manager, since editing the file alone is a fix that
+    lasts until the next reboot: a systemd-resolved drop-in routing only this
+    domain to the local named (split DNS, narrowest possible change), or
+    `nmcli +ipv4.dns` which prepends to what DHCP supplies rather than replacing
+    it. Deliberately no `nmcli con up` afterwards — on the documented install path
+    this runs over ssh, and bouncing the connection carrying the install to apply
+    a DNS entry is a poor trade; the live file is edited directly for the
+    immediate half.
+  * Recommend bind9-dnsutils. postinst ends the DNS path by printing "Check it
+    with: dig +short <domain> @<address>" and on a fresh install that command did
+    not exist — neither bind9 nor bind9-utils pulls dig in.
+
+ -- somanos.sar@drumee.com  Fri, 07 Aug 2026 18:04:26 +0200
+
 drumee-infra (1.2.27) stable; urgency=medium
 
   * Make `dpkg-reconfigure drumee-infra` actually re-render. It was a silent
