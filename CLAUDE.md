@@ -623,8 +623,15 @@ scripts/release-status.sh --no-remote  # no network calls
 One table answering "is what I have what users get". Local is three separate columns
 because they drift independently: **manifest** (authoritative), **built** (newest
 `.deb` under `<pkg>/build/` — a bump with no rebuild ships nothing), **staged** (what
-`apt-repo/Packages` advertises). The right column is what `apt.drumee.net` actually
-serves. Also covers git per repo, tags local vs `git ls-remote`, the checksum of the
+`apt-pool/` advertises). The right column is what `apt.drumee.net` actually
+serves, plus a **live arch** column — `amd64+arm64` for the arch:all packages,
+`amd64` alone for `drumee-server-pod` since 2.9.98.
+
+Both sides read the **pool** layout. They used to read the flat one, which went wrong
+the moment flat was frozen at 1.0.22: every current package reported `differs` against
+a repository nobody is meant to install from. The flat repo keeps its own section,
+labelled frozen, where "in sync" means the frozen bytes are intact — not that the
+current release is published. Also covers git per repo, tags local vs `git ls-remote`, the checksum of the
 published `debian.sh` against `scripts/debian.sh`, and an rsync dry-run of
 `apt-repo/` against the server. `git` and `curl` only.
 

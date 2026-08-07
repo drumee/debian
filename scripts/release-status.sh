@@ -9,11 +9,22 @@
 #
 #   manifest  release-manifest.yaml — the only authoritative version statement
 #   built     the newest .deb under <pkg>/build/ — a bump with no rebuild ships nothing
-#   staged    what apt-repo/Packages advertises — a build that was never staged
+#   staged    what apt-pool/ (reprepro) advertises — a build that was never included
 #
 # and RIGHT is what apt.drumee.net actually serves, which is the only column a user
 # ever sees. A green manifest column with a stale live column is the normal shape of
 # "I bumped the version and forgot to publish".
+#
+# Both read the POOL layout (dists/<suite>/<component>/binary-<arch>/Packages), not the
+# flat one. The flat repository is frozen at 1.0.22 on purpose, so reading it made every
+# current package report "differs" against a repository nobody is meant to install from
+# — a status tool answering about the wrong repository is worse than no status tool. The
+# flat repo still gets its own section at the bottom, labelled as frozen.
+#
+# The arch column exists because an arch:all package is filed into every architecture's
+# index while an arch:any one is filed only where it was built. drumee-server-pod became
+# Architecture: any at 2.9.98 (amd64 only), so "amd64" there is correct and "amd64+arm64"
+# would be the bug — see docs/distribution.md §9.1.
 #
 # Uses git and curl only — no GitHub API, no gh.
 set -uo pipefail
@@ -21,6 +32,9 @@ set -uo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 manifest="$root/release-manifest.yaml"
 APT_URL="${APT_URL:-https://apt.drumee.net}"
+POOL_SUITE="${POOL_SUITE:-trixie}"
+POOL_COMPONENT="${POOL_COMPONENT:-main}"
+POOL_ARCHES="${POOL_ARCHES:-amd64 arm64}"
 REMOTE=1
 for a in "$@"; do [ "$a" = "--no-remote" ] && REMOTE=0; done
 
@@ -60,15 +74,43 @@ highest() { # highest <packages-file> <pkg>
     | sort -V | tail -1
 }
 
-live_packages="$(mktemp)"; trap 'rm -f "$live_packages"' EXIT
-if [ "$REMOTE" = 1 ]; then
-  curl -fsSL --max-time 25 "$APT_URL/Packages" -o "$live_packages" 2>/dev/null \
-    || : > "$live_packages"
-fi
+# One index file per architecture, for each side. Kept per-arch rather than
+# concatenated because the arch column needs to know which one a version came from.
+tmpd="$(mktemp -d)"; trap 'rm -rf "$tmpd"' EXIT
+for a in $POOL_ARCHES; do
+  : > "$tmpd/live.$a"
+  [ "$REMOTE" = 1 ] || continue
+  curl -fsSL --max-time 25 \
+    "$APT_URL/dists/$POOL_SUITE/$POOL_COMPONENT/binary-$a/Packages" \
+    -o "$tmpd/live.$a" 2>/dev/null || : > "$tmpd/live.$a"
+done
+
+pool_index() { # pool_index <arch>  -> path to the local staged index
+  echo "$root/apt-pool/dists/$POOL_SUITE/$POOL_COMPONENT/binary-$1/Packages"
+}
+
+# Highest version across every architecture, plus which arches carry it.
+across() { # across <prefix|local> <pkg>  -> "<version> <arch,arch>"
+  local kind="$1" pkg="$2" a v best="" arches=""
+  for a in $POOL_ARCHES; do
+    if [ "$kind" = local ]; then v="$(highest "$(pool_index "$a")" "$pkg")"
+    else                        v="$(highest "$tmpd/live.$a" "$pkg")"; fi
+    [ -n "$v" ] || continue
+    if [ -z "$best" ] || [ "$v" = "$(printf '%s\n%s\n' "$best" "$v" | sort -V | tail -1)" ]; then
+      [ "$v" = "$best" ] || arches=""
+      best="$v"
+    fi
+    [ "$v" = "$best" ] && arches="${arches:+$arches+}$a"
+  done
+  # A sentinel, not an empty first field: `read` collapses leading whitespace, so
+  # "" plus "-" arrives as version="-" and the "not published" verdict is lost.
+  echo "${best:-__NONE__} ${arches:--}"
+}
 
 # ---------------------------------------------------------------- packages
-hdr "packages — local vs $APT_URL"
-printf '  %-24s %-9s %-9s %-9s   %-9s %s\n' "" "manifest" "built" "staged" "LIVE" ""
+hdr "packages — local vs $APT_URL ($POOL_SUITE/$POOL_COMPONENT)"
+printf '  %-24s %-9s %-9s %-9s   %-9s %-12s %s\n' \
+  "" "manifest" "built" "staged" "LIVE" "live arch" ""
 while read -r name version; do
   [ -n "$name" ] || continue
   dir="$(component_dir "$name")"
@@ -78,13 +120,16 @@ while read -r name version; do
 
   built="$(find "$root/$dir/build" -maxdepth 2 -name "${pkg}_*.deb" -printf '%f\n' 2>/dev/null \
     | sed -E "s/^${pkg}_(.+)_[a-z0-9]+\.deb$/\1/" | sort -V | tail -1)"
-  staged="$(highest "$root/apt-repo/Packages" "$pkg")"
-  live="$(highest "$live_packages" "$pkg")"
-  [ "$REMOTE" = 1 ] || live="?"
+  read -r staged _        < <(across local "$pkg")
+  read -r live live_arch  < <(across live  "$pkg")
+  [ "$staged" = __NONE__ ] && staged=""
+  [ "$live"   = __NONE__ ] && live=""
+  if [ "$REMOTE" != 1 ]; then live="?"; live_arch="?"; fi
 
   label="$pkg"; [ "$name" = meta ] && label="$pkg (release train)"
-  printf '  %-24s %-9s %-9s %-9s   %-9s %s\n' \
-    "$label" "$version" "${built:--}" "${staged:--}" "${live:--}" "$(verdict "$version" "$live")"
+  printf '  %-24s %-9s %-9s %-9s   %-9s %-12s %s\n' \
+    "$label" "$version" "${built:--}" "${staged:--}" "${live:--}" "${live_arch:--}" \
+    "$(verdict "$version" "$live")"
 done < <(sed -E 's/#.*$//' "$manifest" | tr -d '\r' \
   | awk '/^components:/ {inc=1; next}
          /^[^[:space:]#]/ {inc=0}
@@ -165,9 +210,39 @@ done
 # ---------------------------------------------------------------- staged vs served
 # The only check that compares FILES rather than versions, and the one that catches a
 # staged repo that was signed but never uploaded. Needs ssh; skipped without it.
-hdr "flat repo — apt-repo/ vs the server"
+# pool/ is checked without --delete, exactly as deploy-apt-repo.sh uploads it: the
+# artifacts are immutable and older indices still reference them, so a file present
+# on the server and absent locally is normal rather than drift.
+hdr "pool repo — apt-pool/ vs the server"
+if [ "$REMOTE" = 1 ] && [ -d "$root/apt-pool/dists" ] && [ -n "${APT_SSH_HOST:-debian@apt.drumee.net}" ]; then
+  host="${APT_SSH_HOST:-debian@apt.drumee.net}"
+  for sub in pool dists; do
+    del=(); [ "$sub" = dists ] && del=(--delete)
+    out="$(timeout 90 rsync -az --dry-run "${del[@]}" \
+            "$root/apt-pool/$sub/" "$host:${APT_REPO_DIR:-/var/www/apt.drumee.net}/$sub/" 2>/dev/null)" \
+      || out="__FAIL__"
+    if [ "$out" = "__FAIL__" ]; then
+      printf '  %-24s %-38s %-24s %s\n' "rsync dry-run $sub/" "apt-pool/$sub/" "$host" "${Y}unreachable${Z}"
+      continue
+    fi
+    xfer="$(printf '%s\n' "$out" | grep -cE '\.deb$|^(In)?Release|^Packages')"
+    d="$(printf '%s\n' "$out" | grep -c '^deleting')"
+    v="${G}in sync${Z}"; [ "$xfer" != 0 ] && v="${R}$xfer to upload${Z}"
+    [ "$d" != 0 ] && v="$v ${R}$d would be DELETED${Z}"
+    printf '  %-24s %-38s %-24s %s\n' "rsync dry-run $sub/" "apt-pool/$sub/" "$host" "$v"
+  done
+else
+  printf '  %-22s %s\n' "rsync dry-run" "${D}skipped${Z}"
+fi
+
+# The flat layout is FROZEN at 1.0.22 and served only so already-installed boxes keep
+# working; they are migrated by hand. "in sync" here means the frozen bytes are intact,
+# NOT that the current release is published — that is the pool section above.
+hdr "flat repo (frozen — kept for pre-pool installs) vs the server"
 if [ "$REMOTE" = 1 ] && [ -d "$root/apt-repo" ] && [ -n "${APT_SSH_HOST:-debian@apt.drumee.net}" ]; then
   host="${APT_SSH_HOST:-debian@apt.drumee.net}"
+  frozen="$(highest "$root/apt-repo/Packages" drumee)"
+  printf '  %-24s %s\n' "frozen at" "${D}drumee ${frozen:-?}${Z}"
   out="$(timeout 90 rsync -az --dry-run --delete \
           --exclude='dists/' --exclude='pool/' \
           "$root/apt-repo/" "$host:${APT_REPO_DIR:-/var/www/apt.drumee.net}/" 2>/dev/null)" || out="__FAIL__"
