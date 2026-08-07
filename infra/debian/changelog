@@ -1,3 +1,37 @@
+drumee-infra (1.2.30) stable; urgency=medium
+
+  * Stop publishing a link-local IPv6 address in the zone. A LAN box whose only
+    IPv6 address is the interface's link-local one published it as the AAAA of the
+    apex, ns1, ns2, smtp, jit and the wildcard: the ip module classes fe80::/10 as
+    private, so getAddresses selected it as private_ip6 and private.tpl emitted it
+    seven times.
+    .
+    A link-local address is only meaningful together with an interface scope and an
+    AAAA record has nowhere to put one, so the zone handed every client an address
+    it cannot connect to. Measured on a real install: `curl -6 https://<domain>/`
+    failed outright, and plain curl only survived because happy-eyeballs falls back
+    to IPv4 after wasting a connection attempt on every request. An IPv6-only
+    client, or any library without that fallback, cannot reach the instance at all.
+    No AAAA is strictly better than an AAAA nothing can dial — clients then use the
+    A record and get there.
+    .
+    Only visible now because 1.2.29 made the box resolve its own zone; before that
+    nothing on the instance ever asked. The address was in the zone the whole time.
+    .
+    isPublishableIp6() rejects fe80::/10, ::1 and ::, and applies to
+    operator-supplied values too: an explicit --private-ip6 fe80::1 is no more
+    publishable than a detected one. fd00::/8 stays publishable — unique-local is
+    private in the same sense as 192.168/16, and usable by every client that can
+    reach the box at all.
+    .
+    Guarded by tests/native/dns-zone-config.sh, which now exercises the shipped
+    predicate itself rather than a copy, asserts no rendered zone contains a
+    link-local AAAA, and gained an ip6 case so the templates' AAAA branch is
+    rendered and handed to a real named-checkconf for the first time — every other
+    case leaves both ip6 values empty.
+
+ -- somanos.sar@drumee.com  Fri, 07 Aug 2026 18:24:34 +0200
+
 drumee-infra (1.2.29) stable; urgency=medium
 
   * Make 1.2.28's resolver fix survive a reboot. It did not, and the failure was

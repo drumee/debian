@@ -76,6 +76,19 @@ const cases = {
     own_certs_dir: '/etc/drumee/ssl',
     expect_zones: ['example.com', '113.0.203.in-addr.arpa'],
   },
+  // The AAAA branch of the zone templates, which no other case reaches — every
+  // other one leaves both ip6 values empty, so the whole `if (private_ip6 != "")`
+  // block was never rendered here and never handed to named. A unique-local
+  // address is the realistic publishable case for a LAN instance.
+  ip6: { ...base,
+    public_domain: 'drumee.lan',   private_domain: 'drumee.local',
+    public_ip4: '192.168.5.164',   private_ip4: '192.168.5.164',
+    private_ip6: 'fd00:5::202',    public_ip6: '',
+    reverse_public_ip4: '5.168.192', reverse_private_ip4: '5.168.192',
+    jitsi_public_domain: 'jit.drumee.lan', jitsi_private_domain: 'jit.drumee.local',
+    own_certs_dir: '',
+    expect_zones: ['drumee.lan', '5.168.192.in-addr.arpa', 'drumee.local'],
+  },
 };
 
 for (const [name, data] of Object.entries(cases)) {
@@ -106,7 +119,7 @@ SETUP_INFRA_SRC="$SETUP_INFRA_SRC" OUT="$tmp" node "$tmp/render.js" || {
   echo "FAIL: could not render the bind templates"; exit 1; }
 
 fail=0
-for case_name in lan own; do
+for case_name in lan own ip6; do
   conf="$tmp/$case_name/bind/named.conf.local"
   echo "==> [$case_name] zone declarations:"
   grep -oE '^zone "[^"]+"' "$conf" | sed 's/^/   /'
@@ -133,6 +146,54 @@ for case_name in lan own; do
 done
 [ "$fail" = "0" ] || exit 1
 
+# ---------------------------------------------------------------------------
+# No zone may publish a link-local IPv6 address.
+#
+# A LAN box whose only IPv6 is the interface's fe80::/10 address published it as the
+# AAAA of the apex, ns1, ns2, smtp, jit and the wildcard: the ip module classes
+# fe80::/10 as private, so it was selected as private_ip6. A link-local address is
+# only meaningful with an interface scope and an AAAA record cannot carry one, so
+# every client was handed an address it could not connect to — `curl -6` failed
+# outright and plain curl only survived by falling back to IPv4 after a wasted
+# connection attempt per request. No AAAA at all is strictly better.
+#
+# Fixed upstream in templates/ip6.js (isPublishableIp6), which is what the two checks
+# below cover: the rendered zones, and the predicate itself.
+# ---------------------------------------------------------------------------
+ll=$(grep -rhoiE 'AAAA[[:space:]]+fe[89ab][0-9a-f]:[^[:space:]]*' "$tmp"/*/libbind/ 2>/dev/null)
+if [ -n "$ll" ]; then
+  echo "   FAIL: a rendered zone publishes a link-local AAAA:"; printf '     %s\n' "$ll"; exit 1
+fi
+echo "   ok: no link-local AAAA in any rendered zone"
+
+if [ -f "$SETUP_INFRA_SRC/templates/ip6.js" ]; then
+  # The shipped predicate, not a copy of it — a reimplementation here would pass
+  # while the package went on publishing fe80::.
+  if SETUP_INFRA_SRC="$SETUP_INFRA_SRC" node -e '
+    const { isPublishableIp6 } = require(process.env.SETUP_INFRA_SRC + "/templates/ip6.js");
+    const cases = [
+      ["fe80::fae4:e3ff:fece:9cbc", false],
+      ["fe80::1", false], ["feb0::1", false], ["FE80::1", false],
+      ["fe80::1%wlp2s0", false],
+      ["::1", false], ["::", false], ["", false], [null, false],
+      ["fd00:5::202", true],
+      ["2001:db8::1", true], ["2a01:e0a::1", true],
+    ];
+    let bad = 0;
+    for (const [a, want] of cases) {
+      const got = isPublishableIp6(a);
+      if (got !== want) { console.log("     " + JSON.stringify(a) + ": expected " + want + ", got " + got); bad++; }
+    }
+    process.exit(bad ? 1 : 0);
+  '; then
+    echo "   ok: isPublishableIp6 rejects link-local, loopback and unspecified"
+  else
+    echo "   FAIL: isPublishableIp6 misclassifies an address"; exit 1
+  fi
+else
+  echo "   SKIP: setup-infra checkout predates templates/ip6.js"
+fi
+
 echo "==> named-checkconf (real BIND, disposable container)…"
 docker run --rm -i -v "$tmp":/in:ro debian:trixie bash -s <<'INNER'
 set -u
@@ -142,7 +203,7 @@ apt-get install -y -qq --no-install-recommends bind9 bind9-utils >/dev/null 2>&1
   || { echo "SKIP: could not install bind9 in the container"; exit 0; }
 
 rc=0
-for case_name in lan own; do
+for case_name in lan own ip6; do
   rm -rf /etc/bind/named.conf.local /etc/bind/named.conf.log /var/lib/bind/*
   install -d /etc/bind/keys /var/lib/bind
   cp /in/$case_name/bind/named.conf.local /in/$case_name/bind/named.conf.log /etc/bind/
