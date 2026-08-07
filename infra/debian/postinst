@@ -54,7 +54,21 @@ bridge_debconf_env() {
     # template never registered, and this query then blocked the postinst outright.
     RET=""
     db_get drumee-infra/reconfigure_existing 2>/dev/null || RET=""
-    if [ "$RET" = "true" ]; then
+    # DEBCONF_RECONFIGURE is exported by dpkg-reconfigure itself, and honouring it is
+    # what finally makes `dpkg-reconfigure drumee-infra` do something. dpkg-reconfigure
+    # calls `postinst configure` — NOT `postinst reconfigure`, which nothing calls —
+    # so it landed in the arm that runs bin/install, which called infra.js with no
+    # arguments, so hasExistingSettings() printed "Use --reconfigure=1" and returned
+    # true and nothing was re-rendered. The command reported success and changed
+    # nothing, on exactly the hosts it exists for, and it is the advice eight messages
+    # in this script give. Found by shipping a zone fix and watching a reconfigure fail
+    # to apply it.
+    #
+    # Running dpkg-reconfigure is an explicit operator action whose whole purpose is to
+    # reconfigure, so it implies the intent. reconfigure_existing stays as the way to
+    # ask for the same during a normal apt run, where re-rendering over an operator's
+    # tree must never happen on its own.
+    if [ "$RET" = "true" ] || [ "${DEBCONF_RECONFIGURE:-0}" = "1" ]; then
         export DRUMEE_RECONFIGURE=1
         echo "drumee-infra: re-rendering the configuration of this existing instance."
         echo "  Hand edits under /etc/drumee, /etc/nginx, /etc/bind, Prosody and Postfix"
@@ -506,27 +520,13 @@ case "$1" in
     reload_nginx
     ;;
 
-    reconfigure)
-    bridge_debconf_env
-    ensure_nginx_stream_module
-    # --reconfigure=1, not --force-install=1. setup-infra's hasExistingSettings()
-    # gates re-rendering on `args.reconfigure` (templates/utils.js) and its own
-    # message says "Use --reconfigure=1"; --force-install was declared but read by
-    # nothing. So this arm passed a flag that did nothing: the guard held, infra.js
-    # exit(0)'d, dpkg reported success, and NOTHING was re-rendered — which made
-    # `dpkg-reconfigure drumee-infra` a silent no-op on exactly the hosts it exists
-    # for, and it is the advice every TLS/DNS message in this script gives.
-    node /var/lib/drumee/setup-infra/infra.js --reconfigure=1
-    # This arm re-renders without going through bin/install, so nothing here
-    # would ever (re)start named — and "then: dpkg-reconfigure drumee-infra" is
-    # the advice every DNS-related message in this script gives.
-    if [ "${DRUMEE_DNS_SERVER:-0}" = "1" ]; then
-        /var/lib/drumee/setup-infra/bin/init-named || true
-    fi
-    finish_dns
-    setup_wireguard
-    reload_nginx
-    ;;
+    # There is deliberately no `reconfigure)` arm. There used to be, it passed
+    # --reconfigure=1 to infra.js, and it was DEAD CODE: dpkg-reconfigure runs
+    # `postinst configure $version` (debconf's dpkg-reconfigure, line ~110) and
+    # nothing in dpkg or debconf ever invokes a postinst with `reconfigure`. Having
+    # it there was worse than not having it, because it looked exactly like the fix
+    # for "dpkg-reconfigure changes nothing" while being unreachable. The real fix is
+    # DEBCONF_RECONFIGURE above, in the arm that actually runs.
 
     abort-upgrade|abort-remove|abort-deconfigure)
     ;;

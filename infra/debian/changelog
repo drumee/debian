@@ -1,3 +1,32 @@
+drumee-infra (1.2.31) stable; urgency=medium
+
+  * Make `dpkg-reconfigure drumee-infra` actually re-render. It did not, on any
+    installed host, and it is the advice eight separate messages in this postinst
+    give — including every "fix it, then reconfigure" for TLS and DNS.
+    .
+    dpkg-reconfigure runs `postinst configure $version`. It does NOT invoke
+    `postinst reconfigure`, and nothing in dpkg or debconf does; the `reconfigure)`
+    arm that passed --reconfigure=1 was dead code, unreachable since it was
+    written, and it looked exactly like the fix for this while being nothing of the
+    kind. The reachable arm runs setup-infra's bin/install, which called
+    `node infra.js` with no arguments, so hasExistingSettings() found
+    /etc/drumee/drumee.json, printed "Use --reconfigure=1" and returned true. Every
+    reconfigure reported success and changed not one file.
+    .
+    postinst now exports DRUMEE_RECONFIGURE when DEBCONF_RECONFIGURE is set —
+    dpkg-reconfigure exports that itself, and running it is an explicit operator
+    action whose whole purpose is to reconfigure, so it carries the intent.
+    bin/install forwards it to infra.js and jitsi.js. The reconfigure_existing
+    question stays as the way to ask for the same during a normal apt run, where
+    re-rendering over an operator's tree must never happen on its own. The dead arm
+    is gone, with a comment where it was saying why there is none.
+    .
+    Found by shipping 1.2.30's zone fix, running dpkg-reconfigure on the test box to
+    apply it, and watching the zone file keep its original mtime. Worth stating
+    plainly: 1.2.30 was correct and unreachable on any existing install.
+
+ -- somanos.sar@drumee.com  Fri, 07 Aug 2026 18:30:51 +0200
+
 drumee-infra (1.2.30) stable; urgency=medium
 
   * Stop publishing a link-local IPv6 address in the zone. A LAN box whose only
