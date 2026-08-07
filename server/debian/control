@@ -27,5 +27,18 @@ Architecture: any
 # (it ships 20). scripts/debian.sh configures NodeSource before installing, so
 # the documented path resolves. A bare `apt install drumee` on a stock Trixie now
 # fails at install time instead of installing cleanly and never starting.
-Depends: ${misc:Depends}, nginx, redis-server, redis, node-redis, inotify-tools, graphicsmagick, libgraphicsmagick1-dev, poppler-utils, libreoffice, dcraw, curl, p7zip-full, ffmpeg, drumee-schemas, drumee-static, drumee-node-runtime
+#
+# drumee-schemas and drumee-static are deliberately NOT here.
+#
+# schemas pulls mariadb-server, which the container design puts in its own container
+# (the official mariadb:11.8 image) — an app role carrying a database server is the
+# monolith again. static is 181 MB of assets belonging to the web role. Both were
+# declared because on a single box every component was installed anyway.
+#
+# Safe to drop because this postinst needs neither at configure time: it guards its use
+# of the rendered environment (`if [ -f /etc/drumee/drumee.sh ]`) and its patch step
+# (`if [ -x $patch ]`), and the DB work those patches do happens at server startup, not
+# at dpkg time. A complete native install is guaranteed by the `drumee` metapackage,
+# which pins every component exactly.
+Depends: ${misc:Depends}, nginx, redis-server, redis, node-redis, inotify-tools, graphicsmagick, libgraphicsmagick1-dev, poppler-utils, libreoffice, dcraw, curl, p7zip-full, ffmpeg, drumee-node-runtime
 Description: Drumee Server

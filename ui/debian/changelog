@@ -1,3 +1,11 @@
+drumee-ui-pod (3.3.75) stable; urgency=medium
+  * feat(analytics): install the Google Ads tag AW-18350168481
+  * Fix/document get info (#469)
+  * fix(secure-share): track the access list by email again, revoke column hidden (#470)
+  * chore(webrtc): drop the two CHECK_FULLSCREEN debug logs
+  * feat(webrtc): name the person sharing their screen on the presenter tile
+ -- Somanos Sar <somanos.sar@drumee.com>  Fri, 07 Aug 2026 22:08:09 +0200
+
 drumee-ui-pod (3.3.74) stable; urgency=medium
   * perf(tutorial): cut the wait between tutorial steps (#459)
   * fix(meeting): a changed avatar now reaches every participant (#457)

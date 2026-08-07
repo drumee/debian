@@ -57,12 +57,14 @@ start_pod() {
 
 case "$1" in
     configure)
-    # The app runs under pm2 (started by /usr/sbin/drumee). pm2 is an npm global,
-    # not a Debian package, so install it here if it isn't already present.
-    if ! command -v pm2 >/dev/null 2>&1; then
-        echo "Installing pm2 (process manager for the Drumee server)"
-        npm install -g pm2 || echo "warning: pm2 install failed — install it manually (npm i -g pm2)" >&2
-    fi
+    # pm2 comes from drumee-node-runtime, which this package Depends on — it is a
+    # versioned, lockfile-pinned source for a tool Debian does not package. There used
+    # to be an `npm install -g pm2` here as a fallback, and it is gone: reaching the
+    # network from a maintainer script installs an unpinned version, cannot work on a
+    # box without egress, and is the thing docs/distribution.md forbids outright. If
+    # pm2 is missing now, the dependency is missing, and that is dpkg's to report.
+    command -v pm2 >/dev/null 2>&1 \
+      || echo "warning: pm2 not found — drumee-node-runtime should have supplied it" >&2
     if [ -f /etc/drumee/drumee.sh ]; then
         source /etc/drumee/drumee.sh
         if [ "$DRUMEE_SERVER_MAIN" == "" ]; then

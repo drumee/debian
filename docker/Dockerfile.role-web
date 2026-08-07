@@ -20,6 +20,10 @@
 # The caller resolves the digest — docker/build-role.sh does it by pushing the base to a
 # throwaway local registry, since a local-only image has no repo digest to reference
 # (measured: `FROM name@<image id>` is rejected for images that were never pushed).
+# buildkit warns InvalidDefaultArgInFrom here, because neither ARG has a default and the
+# FROM therefore has no valid value on its own. That warning is the POINT and must not be
+# "fixed" by adding a default: any default is a floating reference, which is what
+# docs/distribution.md §8 rules out. docker/build-role.sh always supplies both.
 ARG BASE_IMAGE
 ARG BASE_DIGEST
 FROM ${BASE_IMAGE}@${BASE_DIGEST}

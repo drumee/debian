@@ -7,5 +7,16 @@ Homepage: https://drumee.org
 
 Package: drumee-ui-pod
 Architecture: all
-Depends: ${misc:Depends}, binutils, nodejs (>= 20), git, drumee-server-pod
+# No component dependencies, and no build tooling — see the note in
+# static/debian/control for the full reasoning.
+#
+# The webpack bundles in this package were produced when the package was built; nothing
+# compiles at install time, so binutils, git and nodejs were build-time leftovers.
+#
+# `Depends: drumee-server-pod` also used to carry the install ORDER: the server had to
+# be configured before the UI. That is no longer true — drumee-server-pod 2.9.95 moved
+# its service start into a self-interest dpkg trigger, which dpkg runs once every other
+# package in the transaction is configured, whatever the dependency graph says. The
+# trigger's own comment names this dependency as one of the two bugs it works around.
+Depends: ${misc:Depends}
 Description: Drumee User Interface

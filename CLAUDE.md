@@ -161,20 +161,41 @@ seed builder.
 
 ## Install Order and Dependencies
 
+**Inter-component `Depends` are the minimum, and there is exactly one left.** As of
+static 1.0.6 / ui-pod 3.3.75 / server-pod 2.9.99:
+
 ```
-drumee-infra → drumee-schemas → drumee-static → drumee-server-pod → drumee-ui-pod
+drumee-schemas  →  drumee-infra        the only component-to-component dependency
+                                       (schemas' postinst restores MariaDB from the
+                                        seed using the credentials infra renders)
+
+drumee-static      no component Depends
+drumee-ui-pod      no component Depends
+drumee-server-pod  no component Depends (system packages only + drumee-node-runtime)
 ```
+
+What the removed edges used to provide, and what provides it now:
+
+| Was | Now |
+|---|---|
+| completeness — every component installed | the **`drumee` metapackage** pins each one at an exact version (`meta/make-control.sh`) |
+| start order — server after schemas, UI after server | **`drumee-server-pod`'s dpkg trigger** (`interest-noawait drumee-server-pod-start`), which dpkg fires once every other package in the transaction is configured, whatever the graph says |
+| server-pod finding a rendered config | its postinst **guards** both uses: `if [ -f /etc/drumee/drumee.sh ]` and `if [ -x $patch ]` |
+
+Why they had to go: those `Depends` were single-box assumptions, harmless natively
+because the metapackage installs the whole set anyway. In the container channel they
+defeated the entire decomposition — `drumee-role-web` (ui-pod + static + nginx) resolved
+to **508 packages**, every component plus mariadb-server, redis-server, LibreOffice,
+ffmpeg and g++, because static pulled `drumee-infra` and ui-pod pulled
+`drumee-server-pod`. And the role image could not even **build**: `drumee-infra`'s
+postinst correctly refuses to configure without an answered domain question, so the
+transaction failed with five packages unconfigured. Both measured, not predicted.
+
+`tests/native/control-deps.sh` is the guard, and it asserts the *inverse* of what it
+used to: static, ui-pod and server-pod must reach nothing, nothing installable in an
+image may reach `drumee-infra`, and the two replacement mechanisms above must exist.
 
 `drumee-patch` can be applied after `drumee-schemas`.
-
-```
-drumee-infra
-└── drumee-schemas   (mariadb-server, mariadb-client)
-    ├── drumee-static
-    ├── drumee-server-pod  (nginx, redis, ffmpeg, libreoffice, graphicsmagick, …)
-    └── drumee-ui-pod      (nodejs, git)
-        └── drumee-patch   (mariadb-server, mariadb-client)
-```
 
 ## Post-Install Behavior
 

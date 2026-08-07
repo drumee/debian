@@ -7,5 +7,23 @@ Homepage: https://drumee.com
 
 Package: drumee-static
 Architecture: all
-Depends: ${misc:Depends}, binutils, nodejs, git, drumee-infra
+# No component dependencies, and no build tooling.
+#
+# This package is an asset tree served by nginx: it has no maintainer script, nothing
+# it runs, and nothing it reads from another component. It depended on drumee-infra
+# (and on binutils/nodejs/git, left over from build time) because on a single box
+# everything depended on everything, and the metapackage installs the whole set
+# regardless — so the declaration cost nothing there and was never questioned.
+#
+# It costs a great deal in the container channel: drumee-role-web asks for
+# ui-pod + static + nginx and resolved to 508 packages, every Drumee component
+# included, because static dragged in drumee-infra and ui-pod dragged in
+# drumee-server-pod. The role image then failed to BUILD, because drumee-infra's
+# postinst correctly refuses to configure without an answered domain — a package
+# that must not be installed at image build time at all.
+#
+# What guarantees a complete native install is the `drumee` metapackage, which pins
+# every component at an exact version (meta/make-control.sh); what orders the service
+# start is drumee-server-pod's dpkg trigger. Neither needs these Depends.
+Depends: ${misc:Depends}
 Description: Drumee Static Files
