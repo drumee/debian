@@ -910,6 +910,7 @@ tests/native/control-deps.sh         # inter-package dependency ordering check
 tests/native/verify-debconf-bridge.sh # preseed → debconf → DRUMEE_* env, in a real .deb install
 tests/native/make-seed.sh            # generate bootstrap seeds.tgz for schemas build
 tests/native/dns-zone-config.sh      # rendered BIND config vs. a real named-checkconf
+tests/native/upgrade-reconfigure.sh  # the lifecycle of an INSTALLED box: upgrade → reconfigure → reboot
 tests/wireguard/probe-port.sh        # endpoint probe against real kernel WireGuard
 ```
 
@@ -921,8 +922,51 @@ guards → wizard render → `native/control-deps.sh`.
 The heavier suites are **not** in `run-all.sh` and must be run by hand:
 `smoke-container.sh`, `e2e-local.sh`, `demo-stack.sh`, `native/install-verify.sh`,
 `native/verify-debconf-bridge.sh`, `native/dns-zone-config.sh`,
-`wireguard/probe-port.sh`. All of them self-`SKIP` (exit 0) when Docker or Node
+`native/upgrade-reconfigure.sh`, `wireguard/probe-port.sh`. All of them self-`SKIP` (exit 0) when Docker or Node
 is unavailable — check their output, not just the exit code.
+
+### The lifecycle suite — `tests/native/upgrade-reconfigure.sh`
+
+Every other native test covers a **fresh install**. Four consecutive releases shipped
+bugs that only a *second* lifecycle event could reveal — 1.2.28's resolver fix undone by
+a reboot, 1.2.30's zone fix unreachable on any installed host, and 1.2.31's discovery
+that `dpkg-reconfigure drumee-infra` had never re-rendered anything. The install path was
+well covered; the apply-a-fix-to-an-existing-box path was not covered at all.
+
+It runs **systemd as PID 1** in a privileged disposable Trixie container (so
+`docker stop` is a real systemd shutdown, which is what a hanging stop job shows up in),
+installs `drumee-infra` only (every one of those bugs lived in the rendering/debconf
+layer, so no schemas and no seed archive), and asserts eight things in an order that *is*
+the property:
+
+| | |
+|---|---|
+| A1 | a fresh install renders the configuration tree |
+| A2 | an upgrade leaves it **byte-for-byte** alone — operator edits must survive apt |
+| A3 | `dpkg-reconfigure` **does** re-render |
+| A4 | a **planted defect is gone** afterwards — the "a shipped fix reaches an installed host" property |
+| A5 | no rendered zone publishes a link-local AAAA |
+| A6 | the host resolves its own domain **through `getent`**, not by querying 127.0.0.1 directly |
+| A7 | a systemd reboot brings every unit back, with no stop-job timeout |
+| A8 | no unreachable `reconfigure)` arm has come back in `postinst` |
+
+Two design points worth keeping. The **upgrade is a repack**, not "install from the pool
+then upgrade": the pool serves exactly one version per package, so that would be a no-op
+upgrade — a test that appears to cover the path while performing no upgrade. And
+`INFRA_DEB=<path>` exists so the harness can be pointed at a deliberately regressed
+package: it was validated against the real pre-fix `1.2.30` artifact, where exactly A3
+and A4 fail and nothing else does.
+
+That validation found a false PASS in the harness itself — A3's baseline was taken
+*before* planting the sentinel, so writing the sentinel satisfied "the tree changed" on
+its own and A3 passed on the broken package while A4 failed. The baseline is taken after
+planting now, and A5 excludes the sentinel address so a surviving sentinel is reported
+once, by A4.
+
+**Not covered, and it needs a real box:** NetworkManager's regeneration of
+`resolv.conf` — Docker re-creates that bind mount on every container start, so
+*persistence*, the exact thing 1.2.28 got wrong, cannot be observed here. Nor can a
+kernel reboot. The script prints the real-box commands at the end.
 
 `native/dns-zone-config.sh` also needs a **setup-infra checkout with its
 `node_modules`** (a sibling `../setup-infra`, or `infra/src/setup-infra` after a
