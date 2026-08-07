@@ -25,7 +25,14 @@ RemainAfterExit=yes
 # unit over the same pm2 daemon and hung shutdown for its full 5-minute timeout.
 ExecStart=/usr/sbin/drumee start
 ExecReload=/usr/sbin/drumee reload
-ExecStop=-/usr/sbin/drumee stop
+# `timeout 15` and TimeoutStopSec below are belt-and-braces, not the fix: the wrapper
+# no longer loses pm2 to a login session scope (see /usr/sbin/drumee), so ExecStop now
+# has a live daemon to talk to. But a wedged `pm2 stop` used to cost the default
+# TimeoutStopSec of 90s on every single shutdown — measured — and a reboot that takes
+# 90s longer for no visible reason is exactly the kind of fault nobody reports. Bound
+# it: 15s for the graceful stop, 20s before systemd gives up and SIGKILLs the cgroup.
+ExecStop=-/usr/bin/timeout 15 /usr/sbin/drumee stop
+TimeoutStopSec=20
 # Applies on stop only, now that ExecStart returning is no longer treated as the
 # service ending: ExecStop asks pm2 to shut down, then anything left in the cgroup
 # is cleaned up.

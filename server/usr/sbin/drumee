@@ -9,11 +9,37 @@ if [ -z $DRUMEE_SYSTEM_USER ]; then
 fi
 
 
+: "${DRUMEE_SYSTEM_GROUP:=$DRUMEE_SYSTEM_USER}"
+
+# setpriv, not su. `su` goes through pam_systemd, which registers a LOGIN SESSION and
+# moves pm2 into /user.slice/user-<uid>.slice/session-cN.scope — outside the cgroup of
+# whatever started it. Measured on a real box, from a service context:
+#
+#   su      -> 0::/user.slice/user-33.slice/session-c3.scope
+#   setpriv -> 0::/system.slice/<unit>.service
+#
+# That escape is what hung shutdown. The session scope is not ordered against
+# drumee-server-pod.service, so systemd tore it down first — killing the pm2 God
+# daemon and every worker — and the unit's ExecStop then asked a dead pm2 to stop and
+# blocked for the full TimeoutStopSec:
+#
+#   session-c2.scope: Killing process 7932 (PM2 v5.4.3: God) with signal SIGTERM
+#   Stopping drumee-server-pod.service...                    (46ms later)
+#   drumee-server-pod.service: Stopping timed out. Terminating.   (90s later)
+#
+# setpriv drops privilege without a PAM session, so pm2 stays in the caller's cgroup:
+# under systemd that is the unit's own, which is what makes the unit's KillMode and
+# its ExecStop meaningful. Interactive use (`sudo drumee restart`) is unaffected —
+# privileges are dropped exactly as before.
+#
+# env does the PATH lookup for pm2, since setpriv execs directly without a shell.
 manager() {
   if [ -d $DRUMEE_LOG_DIR ]; then
-    su -s /bin/bash $DRUMEE_SYSTEM_USER -c "HOME=$DRUMEE_SERVER_HOME pm2 -o $DRUMEE_LOG_DIR/out.log -e $DRUMEE_LOG_DIR/err.log $*"
+    setpriv --reuid "$DRUMEE_SYSTEM_USER" --regid "$DRUMEE_SYSTEM_GROUP" --init-groups \
+      env "HOME=$DRUMEE_SERVER_HOME" pm2 -o "$DRUMEE_LOG_DIR/out.log" -e "$DRUMEE_LOG_DIR/err.log" "$@"
   else
-    su -s /bin/bash $DRUMEE_SYSTEM_USER -c "HOME=$DRUMEE_SERVER_HOME pm2 $*"
+    setpriv --reuid "$DRUMEE_SYSTEM_USER" --regid "$DRUMEE_SYSTEM_GROUP" --init-groups \
+      env "HOME=$DRUMEE_SERVER_HOME" pm2 "$@"
   fi
 }
 

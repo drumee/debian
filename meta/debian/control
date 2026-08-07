@@ -3,7 +3,7 @@ Section: non-free
 Priority: optional
 Maintainer: Somanos Sar <somanos.sar@drumee.com>
 Build-Depends: debhelper (>= 11)
-Standards-Version: 1.0.21
+Standards-Version: 1.0.22
 Homepage: https://drumee.org
 
 Package: drumee
@@ -12,12 +12,12 @@ Depends: ${misc:Depends},
   drumee-infra (= 1.2.27),
   drumee-schemas (= 2.7.2),
   drumee-static (= 1.0.4),
-  drumee-server-pod (= 2.9.96),
+  drumee-server-pod (= 2.9.97),
   drumee-ui-pod (= 3.3.74)
 Description: Drumee sovereign data platform (metapackage)
  Installs the full Drumee runtime: infrastructure, database schemas, static
  assets, backend server and frontend UI. This metapackage pins every component
- to the release-train version (1.0.21) so the set installs coherently.
+ to the release-train version (1.0.22) so the set installs coherently.
  .
  For unattended installs, preseed answers first:
  debconf-set-selections < install.conf  (see config/render.mjs).
