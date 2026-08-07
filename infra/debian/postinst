@@ -486,6 +486,30 @@ ensure_nginx_stream_module() {
 case "$1" in
     configure)
     echo "Configuring Drumee Infrastructure"
+    # ---------------------------------------------------------------------------
+    # Payload only, when this filesystem is an image being built.
+    #
+    # docs/distribution.md §5: "the package delivers the payload, the job container
+    # executes it". policy-rc.d already stops a maintainer script from STARTING a
+    # service during a build; nothing stopped one from CONFIGURING the machine, and
+    # this postinst legitimately refuses to configure without an answered domain — so
+    # `apt install drumee-role-infra` inside a Dockerfile failed the whole transaction
+    # and left five packages unconfigured. Measured while building drumee/role-web.
+    #
+    # Refusing is right for a host and wrong for an image, so the two cases are told
+    # apart explicitly rather than guessed at. DRUMEE_BUILD_TIME is set by
+    # docker/Dockerfile.base, next to policy-rc.d and for the same reason.
+    #
+    # It stays set in the running container, which is deliberate: configuration there
+    # comes from the shared volume the infra-init job renders, not from dpkg. An
+    # operator who really wants to reconfigure inside a container must unset it.
+    # ---------------------------------------------------------------------------
+    if [ "${DRUMEE_BUILD_TIME:-0}" = "1" ]; then
+        echo "  DRUMEE_BUILD_TIME=1 — delivering the payload only."
+        echo "  Nothing is rendered and nothing on this filesystem is touched."
+        echo "  The infra-init job renders the configuration tree at deploy time."
+        exit 0
+    fi
     bridge_debconf_env
     ensure_nginx_stream_module
     if [ -z "$DRUMEE_DOMAIN_NAME" ]; then

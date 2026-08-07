@@ -299,8 +299,32 @@ it.
    unsatisfiable from Debian alone. NodeSource (or an equivalent) must therefore be
    configured in the base image, with its keyring committed under
    `docker/keyrings/` rather than fetched at build time. Increment 4.
-6. The `infra-init` service is not implemented. Feasibility is validated
-   (`infra.js --chroot` renders the full 39-file tree from environment
-   variables with no host writes) but `conf.d` provisioning still relies on a
-   workaround in the entrypoint. Without it the jitsi/mail/dns profiles remain
-   unusable.
+6. ~~The `infra-init` service is not implemented.~~ **Implemented at release 1.0.31**
+   as `docker/Dockerfile.role-infra` + `docker/infra-init-entrypoint.sh`. It renders
+   with setup-infra's own engine (`infra.js --chroot=/out`) into the shared
+   configuration volume and exits: 43 files, `domain_name` correct, all three nginx
+   vhosts, all four BIND zones, credentials `0640` inside a `0750` directory, the tree
+   owned `8000:8000` and readable by the web role as uid 8000, and its own filesystem
+   provably unchanged by the render. The `conf.d` workaround is gone — the whole tree
+   is rendered, not a hand-picked subset, so there is no adapter carrying knowledge of
+   which files belong to which service.
+
+   Three prerequisites had to be fixed rather than worked around, and all three also
+   affected a first native install:
+
+   - `drumee-infra`'s postinst refuses to configure a host without an answered domain
+     question, which failed the apt transaction inside a `docker build`. `policy-rc.d`
+     stops a maintainer script *starting a service*; nothing stopped one *configuring
+     the machine*. `DRUMEE_BUILD_TIME`, set as `ENV` in `docker/Dockerfile.base` beside
+     `policy-rc.d`, is the companion flag — §5's rule, enforced.
+   - `domain_name` and `main_domain` were written from `sysEnv()`, so on a host with no
+     prior configuration one render produced `DRUMEE_DOMAIN_NAME=example.com` in
+     `drumee.sh` and `"domain_name": "localhost"` in `drumee.json`. They now use the
+     domain the run resolved.
+   - `getDkim()` was a bare `readFileSync`, so any render on a public domain died with
+     an unhandled ENOENT on the DKIM key — no nginx config, no `drumee.sh`, nothing —
+     unless the caller had generated the key first, an undocumented ordering
+     requirement. A missing key now costs mail signing, not the configuration.
+
+   What remains for the jitsi/mail/dns profiles is wiring the rendered volume into the
+   role services, i.e. `render.mjs compose` — not the rendering itself.

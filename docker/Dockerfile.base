@@ -43,6 +43,18 @@ RUN set -eu; \
     printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d; \
     chmod 0755 /usr/sbin/policy-rc.d
 
+# The companion to policy-rc.d, one layer up: that stops a maintainer script STARTING a
+# service during a build, this stops one CONFIGURING the machine. drumee-infra's postinst
+# refuses to configure without an answered domain question — correct for a host, fatal for
+# a `docker build`, where it failed the whole apt transaction. With this set it delivers
+# its payload and renders nothing; the infra-init job renders at deploy time
+# (docs/distribution.md §5).
+#
+# Deliberately ENV, not an ARG: it must apply to every derived role build, and it is
+# harmless in the running container, where configuration arrives on the shared volume
+# rather than from dpkg.
+ENV DRUMEE_BUILD_TIME=1
+
 # Recommends off globally, as well as per-command. The invariant is checked on
 # each apt-get install line, but a package installed by a maintainer script does
 # not go through one — this catches those too.

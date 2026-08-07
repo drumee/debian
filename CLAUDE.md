@@ -752,8 +752,11 @@ seeing new versions; nothing breaks.
 
 ```bash
 docker/build-role.sh web                  # version from release-manifest.yaml
+docker/build-role.sh infra                # the configuration-rendering job
 APT_URI=http://localhost:8099 docker/build-role.sh web   # against a local repo
 ```
+
+Two of the seven exist: `docker/Dockerfile.role-web` and `docker/Dockerfile.role-infra`.
 
 `docker/Dockerfile.role-web` is the first of the seven. It contains **no source
 checkout, no git clone, no webpack and not one component version** — it installs one
@@ -795,6 +798,54 @@ the other, and `tests/native/control-deps.sh` is the guard for the ordering ques
 A second consequence: `role-web` is `Architecture: all` but transitively requires
 `drumee-server-pod`, which is amd64-only — so it is **not installable on arm64** today,
 verified against the published `binary-arm64` index.
+
+### infra-init — the configuration-rendering job
+
+`docs/distribution.md` §5 made real: the package delivers the payload at build time, this
+container executes it at deploy time. `drumee/role-infra` runs
+`docker/infra-init-entrypoint.sh`, which renders with **setup-infra's own engine**
+(`infra.js --chroot=/out`) into the shared configuration volume and exits. Nothing here
+reimplements a template — the 43-file tree has one source of truth and the container
+channel must not grow a second.
+
+```bash
+docker volume create drumee_conf
+docker run --rm -v drumee_conf:/out \
+  -e DRUMEE_DOMAIN_NAME=example.com -e PUBLIC_IP4=203.0.113.7 \
+  -e ADMIN_EMAIL=ops@example.com drumee/role-infra:<release>
+```
+
+Measured: 43 files, `domain_name` correct, all three nginx vhosts, all four BIND zones,
+credentials `0640` in a `0750` directory, the whole tree owned `8000:8000` and readable by
+the web role running as uid 8000. **Its own filesystem is unchanged by the render** —
+verified by hashing `/etc/drumee`, `/etc/nginx`, `/var/lib/bind`, `/etc/bind`,
+`/srv/drumee` and `/etc/postfix` before and after. (The 12 files already under
+`/etc/drumee` in that image are `drumee-infra` conffiles, not render output.)
+
+Idempotence is `infra.js`'s own: `hasExistingSettings()` sees the `drumee.json` a previous
+run wrote and does nothing, so a restarted job is a no-op; `FORCE_RENDER=1` passes
+`--reconfigure=1`. That is deliberately the same contract as `dpkg-reconfigure` on the
+native channel — same behaviour, same reason.
+
+**`DRUMEE_BUILD_TIME` is what made this image possible at all.** `drumee-infra`'s postinst
+rightly refuses to configure a host without an answered domain question, so installing
+`drumee-role-infra` in a Dockerfile failed the whole apt transaction. `policy-rc.d`
+already stops a maintainer script *starting a service* during a build; nothing stopped one
+*configuring the machine*. The flag is set as `ENV` in `docker/Dockerfile.base` next to
+`policy-rc.d`, and infra's postinst delivers its payload and renders nothing when it sees
+it. It stays set in the running container on purpose — configuration there comes from the
+volume, not from dpkg.
+
+Three things the job's env contract depends on, each found by running it rather than
+reading it:
+
+- `--admin-email` **is not an `infra.js` option**; that value travels in the environment.
+  Passing it makes argparse exit 2 with a usage dump that reads like a crash.
+- A render with no public IP produces only the private branch — no `01-public.conf`, no
+  public zone. Compose must supply `PUBLIC_IP4` for a public deployment.
+- `drumee-infra` `Depends` on `g++` and `gyp`, so this job image carries build tooling
+  (716 MB). It is a run-once job rather than a running service, so it is tolerable, but
+  those two dependencies look wrong in a runtime package and are worth revisiting.
 
 ### Container images
 

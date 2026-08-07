@@ -1,0 +1,58 @@
+# drumee-infra-init — the run-once configuration rendering job.
+#
+# docs/distribution.md §5, made real: the package delivers the payload at build time and
+# this container executes it at deploy time. It installs one metapackage at an exact
+# version and contains no source checkout, no clone and no component version.
+#
+#   docker/build-role.sh infra
+#
+# It is the only role image that installs drumee-infra, and that is the whole reason
+# DRUMEE_BUILD_TIME exists: that package's postinst rightly refuses to configure a host
+# without an answered domain question, which fails a `docker build`. The base image sets
+# the flag, the postinst delivers its payload and renders nothing, and the entrypoint
+# below renders — into a mounted volume, never into this filesystem.
+#
+# Runs as root, unlike every other role: it chowns the rendered tree to 8000:8000 for the
+# roles that consume it, and a job that must set ownership cannot drop privilege first.
+# It exits when the render is done; nothing long-lived runs here.
+
+ARG BASE_IMAGE
+ARG BASE_DIGEST
+FROM ${BASE_IMAGE}@${BASE_DIGEST}
+
+ARG ROLE_VERSION
+ARG APT_URI=https://apt.drumee.net
+ARG APT_SUITE=trixie
+ARG APT_COMPONENTS=main
+
+USER root
+
+COPY docker/keyrings/drumee-archive-keyring.gpg /usr/share/keyrings/drumee-archive-keyring.gpg
+
+# opendkim-tools is here and not in drumee-role-infra's Depends because it is only
+# needed to GENERATE a key, which is this job's business and not the role's. infra.js
+# warns and emits an empty DKIM record without it, so its absence costs mail signing
+# rather than the render.
+RUN set -eu; \
+    : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
+        /usr/share/keyrings/drumee-archive-keyring.gpg; \
+    apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+        "drumee-role-infra=${ROLE_VERSION}" \
+        opendkim-tools \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN . /usr/share/drumee/release \
+ && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
+
+COPY docker/infra-init-entrypoint.sh /usr/local/sbin/drumee-infra-init
+RUN chmod 0755 /usr/local/sbin/drumee-infra-init
+
+LABEL org.opencontainers.image.title="drumee-infra-init" \
+      org.opencontainers.image.description="Drumee infra role: renders the configuration tree into the shared volume, once" \
+      org.opencontainers.image.source="https://github.com/drumee/debian"
+
+VOLUME ["/out"]
+ENTRYPOINT ["/usr/local/sbin/drumee-infra-init"]

@@ -1,3 +1,36 @@
+drumee-infra (1.2.32) stable; urgency=medium
+
+  * Deliver the payload and configure nothing when DRUMEE_BUILD_TIME is set. This
+    postinst refuses to configure a host without an answered domain question, which
+    is right for a host and fatal for a `docker build`: installing
+    drumee-role-infra inside a Dockerfile failed the whole apt transaction and left
+    five packages unconfigured. Measured while building the first role image.
+    .
+    docs/distribution.md §5 already says what should happen — "the package delivers
+    the payload, the job container executes it" — and policy-rc.d already stops a
+    maintainer script STARTING a service during a build. Nothing stopped one
+    CONFIGURING the machine. DRUMEE_BUILD_TIME is the companion flag, set by
+    docker/Dockerfile.base next to policy-rc.d, and the two cases are told apart
+    explicitly rather than guessed at from the environment.
+  * Carries two setup-infra fixes that a container render made visible, both of
+    which also affect a first native install:
+    .
+    domain_name and main_domain were written from sysEnv() — whatever the machine
+    already had — while every other file in the same render used the domain the run
+    resolved, so on a host with no prior configuration they came out "localhost".
+    One run produced DRUMEE_DOMAIN_NAME=example.com in drumee.sh and
+    "domain_name": "localhost" in drumee.json. It looked correct on every reinstall
+    of an existing box, because sysEnv() read the value a previous render had left
+    behind, which is why it survived this long.
+    .
+    getDkim() was a bare readFileSync, so any render on a public domain died with an
+    unhandled ENOENT on etc/opendkim/keys/<domain>/dkim.txt — no nginx config, no
+    drumee.sh, nothing — unless the caller had generated the key first. That
+    ordering requirement was undocumented. A missing key now costs mail signing
+    rather than the entire configuration.
+
+ -- somanos.sar@drumee.com  Fri, 07 Aug 2026 22:56:16 +0200
+
 drumee-infra (1.2.31) stable; urgency=medium
 
   * Make `dpkg-reconfigure drumee-infra` actually re-render. It did not, on any
