@@ -110,7 +110,9 @@
       "description": "Internal listener ports the reverse proxy targets. Must match the app's yp.sys_conf listeners.",
       "properties": {
         "api": { "type": "integer", "default": 24000, "description": "service.js REST listener (--restPort), proxied at /-/*." },
-        "ui": { "type": "integer", "default": 23000, "description": "index.js page + WebSocket listener (--pushPort)." }
+        "ui": { "type": "integer", "default": 23000, "description": "index.js page + WebSocket listener (--pushPort)." },
+        "http": { "type": "integer", "default": 80, "description": "The port Drumee serves HTTP on. setup-infra renders it into nginx's listen directive, so it is what nginx binds — and the roles stack publishes the same number on the host, because one name must not mean two things. The native channel uses it identically: 8080 when drumee-caddy owns 80." },
+        "https": { "type": "integer", "default": 443, "description": "The port Drumee serves HTTPS on. Bound by nginx and published unchanged, as with ports.http." }
       }
     },
     "versions": {
@@ -130,7 +132,10 @@
       "additionalProperties": false,
       "description": "Container image source. Set registry to where publish-images.sh pushed (e.g. ghcr.io/drumee).",
       "properties": {
-        "registry": { "type": "string", "default": "drumee", "description": "Image namespace/registry prefix for the drumee/* images." }
+        "registry": { "type": "string", "default": "drumee", "description": "Image namespace/registry prefix for the drumee/* images." },
+        "stack": { "enum": ["source", "roles"], "default": "source", "description": "Which compose topology to emit. 'roles' is the package-based stack of docs/distribution.md 2 (one role per container, each installing one drumee-role-* metapackage at an exact version). 'source' is the deprecated source-built stack, still the default because only two of the seven role images exist." },
+        "mariadb_tag": { "type": "string", "default": "11.8", "description": "Tag for the official mariadb image (roles stack). 11.8 is what Debian Trixie ships, so the schema is validated against a single branch." },
+        "redis_tag": { "type": "string", "default": "7", "description": "Tag for the official redis image (roles stack)." }
       }
     }
   }

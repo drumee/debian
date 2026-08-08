@@ -7,6 +7,19 @@ drumee_release
 drumee_env
 
 command -v nginx >/dev/null || die "nginx not found (drumee-role-web provides it)"
-nginx -t || die "nginx refused its configuration"
+
+# Debian's nginx expects to start as root and drop to www-data. This role runs as uid
+# 8000 (§7 — the config and MFS volumes are shared, so one identity owns them
+# everywhere), so nginx is the master AND the worker, and every path it writes has to
+# belong to that uid. Without this it died at startup with
+# `mkdir() "/var/lib/nginx/body" failed (13: Permission denied)`, then, once that was
+# fixed, on the pid file — both measured.
+#
+# Everything it writes — /var/lib/nginx, /var/log/nginx and /run/nginx.pid — is given to
+# that uid in the image. Deliberately NOT `-g "pid ..."`: nginx.conf already carries a
+# `pid` directive, so adding one on the command line fails with
+# `"pid" directive is duplicate in /etc/nginx/nginx.conf:4`. Ownership is the fix; the
+# command line is not.
+nginx -t -g 'daemon off;' || die "nginx refused its configuration"
 echo "[drumee] starting nginx in the foreground"
 exec nginx -g 'daemon off;'

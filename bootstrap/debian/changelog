@@ -1,3 +1,80 @@
+drumee-bootstrap (2.0.5) stable; urgency=medium
+
+  * entrypoint/web: do not override the pid path on the command line. 2.0.4 passed
+    `-g "pid /tmp/nginx.pid;"` so nginx could run as uid 8000, and nginx refused the
+    configuration outright: `"pid" directive is duplicate in /etc/nginx/nginx.conf:4`.
+    A -g directive is additive, not an override. Ownership is the fix — the image now
+    pre-creates /run/nginx.pid owned by that uid, along with /var/lib/nginx and
+    /var/log/nginx — and `nginx -t` runs with exactly the arguments the exec uses, so
+    the check and the run cannot disagree.
+
+
+  * lib.sh: source /etc/drumee/drumee.sh with `set -u` OFF. That file is generated per
+    deployment and legitimately references variables it does not define —
+    OWN_CERTS_DIR among them — so under `set -u` every entrypoint that calls
+    drumee_env() aborted with "OWN_CERTS_DIR: parameter not set" before starting
+    anything. Measured on the web role against a real rendered tree; the same trap has
+    bitten the native install harness for the same reason, which is why it is fixed in
+    the one shared place rather than in each role.
+
+
+  * entrypoint/web: start nginx as the uid the role actually runs as. Debian's nginx
+    expects to start as root and drop to www-data; this role runs as uid 8000, so
+    nginx is master AND worker and every path it writes must belong to that uid. It
+    crash-looped on `mkdir() "/var/lib/nginx/body" failed (13: Permission denied)`
+    and, once ownership was fixed in the image, on the pid file in root-owned /run.
+    The pid is the one of the three that ownership cannot fix, so it is redirected
+    with -g, which wins over nginx.conf without editing a distro conffile.
+    `nginx -t` now runs with the same -g as the exec, so the check and the run cannot
+    disagree.
+
+ -- packaging@drumee.com  Sat, 08 Aug 2026 08:33:03 +0200
+
+drumee-bootstrap (2.0.2) stable; urgency=medium
+
+  * entrypoint/infra: clear the 'auto' address sentinel from the ENVIRONMENT, not
+    just from the flags. 2.0.1 stopped passing --public-ip4=auto and a zone file
+    named `auto` was still produced, because infra.js reads PUBLIC_IP4 from the
+    environment as well (templates/utils.js) and the env value wins over detection.
+    Omitting the flag was not enough. render.mjs no longer emits the sentinel either,
+    but this entrypoint now stays correct whatever set it.
+
+ -- packaging@drumee.com  Sat, 08 Aug 2026 08:26:31 +0200
+
+drumee-bootstrap (2.0.1) stable; urgency=medium
+
+  * entrypoint/infra: the real implementation. It was a 16-line skeleton that ran
+    `infra.js --chroot="$OUT" --only-infra=1` with OUT defaulting to /etc/drumee —
+    which would have written the tree to /etc/drumee/etc/drumee — and passed neither
+    the domain nor any address, so it could not have rendered a usable
+    configuration for any deployment.
+    .
+    It now carries what building the role image actually taught: the domain and
+    address flags infra.js declares (and only those — --admin-email is not one, and
+    an undeclared flag makes argparse exit 2 with a usage dump that reads like a
+    crash); DKIM generation before the render, because the zone embeds the public
+    half; self-signed certificate creation via setup-infra's own
+    bin/create-local-certs, without which nginx in the web role has nothing to load
+    and refuses to start; ownership fixed to 8000:8000 with credentials 0640 inside
+    a 0750 directory; and idempotence delegated to infra.js's own
+    hasExistingSettings(), so a restarted job is a no-op and FORCE_RENDER=1 is the
+    one flag that re-renders — deliberately the same contract as dpkg-reconfigure on
+    the native channel.
+    .
+    PUBLIC_IP4/6 of 'auto' are IGNORED rather than forwarded. 'auto' is drumee.yaml's
+    sentinel for "detect at install time" and render.mjs emits it verbatim into .env;
+    forwarding it produced a BIND zone file literally named `auto` and a bogus
+    01-public.conf. Both observed in a running stack. A container cannot resolve
+    'auto' anyway — it sees a bridge address, so detection would publish an address
+    nothing can reach.
+    .
+    It deliberately does NOT call drumee_env(): that sources
+    /etc/drumee/drumee.sh, which is a file this job writes, and reading a previous
+    render's output before producing the next one lets a stale value survive a
+    deliberate reconfiguration.
+
+ -- packaging@drumee.com  Sat, 08 Aug 2026 08:21:36 +0200
+
 drumee-bootstrap (2.0.0) trixie; urgency=medium
 
   * Initial package under this name for the container distribution: per-role

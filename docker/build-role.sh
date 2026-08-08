@@ -47,6 +47,10 @@ REGISTRY_NAME="${REGISTRY_NAME:-drumee-local-registry}"
 APT_URI="${APT_URI:-https://apt.drumee.net}"
 APT_SUITE="${APT_SUITE:-${channel:-trixie}}"
 APT_COMPONENTS="${APT_COMPONENTS:-main}"
+# Which public keyring under docker/keyrings/ verifies APT_URI. Defaults to the project
+# archive key; point it at the throwaway key from scripts/apt-repo-local.sh to build
+# against a local repository, which is how a role is tested before anything is published.
+APT_KEYRING="${APT_KEYRING:-drumee-archive-keyring.gpg}"
 
 say "base image"
 docker buildx build -f "$root/docker/Dockerfile.base" -t drumee-base:latest --load "$root" >/dev/null
@@ -80,6 +84,7 @@ docker buildx build -f "$dockerfile" \
   --build-arg "APT_URI=$APT_URI" \
   --build-arg "APT_SUITE=$APT_SUITE" \
   --build-arg "APT_COMPONENTS=$APT_COMPONENTS" \
+  --build-arg "APT_KEYRING=$APT_KEYRING" \
   --load "$root"
 
 say "result"

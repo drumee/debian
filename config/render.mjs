@@ -210,6 +210,14 @@ function validate(cfg) {
     if (i.local_mode) errs.push('wireguard.enabled cannot be combined with instance.local_mode');
   }
 
+  // The roles stack has no TLS terminator in front of the web role: nginx inside it
+  // owns 80/443 and reads the certificates infra-init rendered. There is no caddy role,
+  // so accepting terminator=caddy here would emit a stack with nothing on those ports —
+  // the same failure the native postinst refuses for the same reason.
+  if (cfg.images?.stack === 'roles' && cfg.tls?.terminator === 'caddy') {
+    errs.push('images.stack=roles does not support tls.terminator=caddy — no caddy role image exists; the web role terminates TLS itself');
+  }
+
   if (errs.length) die('config invalid:\n  - ' + errs.join('\n  - '));
 }
 
@@ -250,8 +258,13 @@ function renderEnv(cfg) {
     DRUMEE_DOMAIN_NAME: cfg.instance.domain,
     LOCAL_MODE: cfg.instance.local_mode,
     ADMIN_EMAIL: cfg.instance.admin_email,
-    PUBLIC_IP4: cfg.network.ip4,
-    PUBLIC_IP6: cfg.network.ip6,
+    // 'auto' is a SENTINEL meaning "detect at install time", not a value. renderDebconf
+    // already strips it; renderEnv did not, and infra.js reads PUBLIC_IP4 straight from
+    // the environment — so a stack rendered with the default produced a BIND zone file
+    // literally named `auto` and a public vhost built from it. Observed in a running
+    // stack. Empty means "not declared", which every consumer already handles.
+    PUBLIC_IP4: cfg.network.ip4 === 'auto' ? '' : cfg.network.ip4,
+    PUBLIC_IP6: cfg.network.ip6 === 'auto' ? '' : cfg.network.ip6,
     SERVICES: cfg.network.services.join(','),
     TLS_MODE: cfg.tls.mode,
     ACME_EMAIL_ACCOUNT: cfg.tls.acme_email ?? '',
@@ -277,6 +290,11 @@ function renderEnv(cfg) {
     SMTP_PASSWORD: cfg.email.password ?? '',
     API_PORT: cfg.ports.api,
     UI_PORT: cfg.ports.ui,
+    // Host ports the web role publishes. Same names the native channel uses, where they
+    // move to 8080/8443 when drumee-caddy takes 80/443 — one vocabulary for both
+    // channels rather than two.
+    DRUMEE_HTTP_PORT: cfg.ports.http,
+    DRUMEE_HTTPS_PORT: cfg.ports.https,
     // Consumed by the wireguard service's entrypoint, which renders the same
     // conf.d/wireguard.json the native postinst writes.
     WIREGUARD_ENABLED: cfg.wireguard.enabled,
@@ -284,6 +302,13 @@ function renderEnv(cfg) {
     WIREGUARD_LISTEN_PORT: cfg.wireguard.listen_port,
     WIREGUARD_REFLECTOR_PORT: cfg.wireguard.reflector_port,
     IMAGE_REGISTRY: cfg.images.registry,
+    // ONE tag for every role, not one per component. drumee-release pins the release
+    // train and every role Depends on it at strict equality, so roles from two trains
+    // cannot be assembled — a per-role tag would invite exactly the mix the anchor
+    // exists to prevent. Read only by the roles stack.
+    ROLES_TAG: cfg.versions.product,
+    MARIADB_TAG: cfg.images.mariadb_tag,
+    REDIS_TAG: cfg.images.redis_tag,
     SERVER_TAG: cfg.versions.server ?? cfg.versions.product,
     UI_TAG: cfg.versions.ui ?? cfg.versions.product,
     SCHEMAS_TAG: cfg.versions.schemas ?? cfg.versions.product,
@@ -649,6 +674,227 @@ services:
 `;
 }
 
+// --------------------------------------------------------------- compose (roles)
+// The package-based stack of docs/distribution.md §2: one role per container, each
+// installing ONE metapackage at an exact version, with dpkg resolving the rest.
+//
+// Selected by `images.stack: roles`. It is not yet the default because only two of the
+// seven role images exist (web and infra) — emitting it by default would hand every
+// existing caller a stack that cannot pull. The source-based branch above stays until
+// the other five are built, which is criterion 1 of deploy/docker/DEPRECATED.md.
+//
+// Four differences from the source stack that are the whole point of the exercise:
+//
+//   * no ui-build. drumee-ui-pod already contains the webpack output, produced once
+//     when the package was built. Nothing compiles in a running deployment.
+//   * one tag for every role, not one per component. drumee-release pins the train and
+//     every role Depends on it at strict equality, so two roles from different trains
+//     cannot be assembled — a per-role tag would invite exactly that.
+//   * configuration comes from a volume that infra-init renders, not from packages
+//     configuring hosts. Consumers mount SUBPATHS of it read-only, so each role sees
+//     only the part of the tree it needs and cannot rewrite it.
+//   * mariadb and redis are the official images. mariadb:11.8 is what Trixie ships, so
+//     the 130 tables and 645 routines are validated against one branch.
+function renderComposeRoles(cfg) {
+  const redisCmd = cfg.redis.password
+    ? `command: ["redis-server", "--requirepass", "$\{REDIS_PASSWORD}"]` : 'command: ["redis-server"]';
+  // Mount a subtree of the rendered configuration volume at its real path. Requires
+  // Compose >= 2.26 / Engine >= 25 for `volume.subpath`; the alternative is an
+  // entrypoint in every role that copies or symlinks, which is logic in five places
+  // instead of a declaration in one.
+  const conf = (target, sub) => `      - type: volume
+        source: drumee_conf
+        target: ${target}
+        read_only: true
+        volume:
+          subpath: ${sub}`;
+  return `# Generated by config/render.mjs from drumee.yaml — do not edit by hand.
+# Package-based role stack (images.stack: roles). One role per container; each image
+# installs a single drumee-role-* metapackage at an exact version.
+#   docker compose --env-file .env up -d
+networks:
+  drumee: {}
+
+volumes:
+  # Rendered once by infra-init and read-only everywhere else. This is the only place
+  # configuration is produced, which is what lets the roles carry no host state.
+  drumee_conf: {}
+  db_data: {}
+  cache_data: {}
+  mfs_data: {}
+  # nginx's proxy cache. A named volume rather than the container filesystem so it
+  # survives a restart and does not grow inside the image layer.
+  web_cache: {}
+
+services:
+  # --- stateful services on their upstream images ----------------------------
+  db:
+    image: mariadb:\${MARIADB_TAG}
+    restart: unless-stopped
+    networks: [drumee]
+    # The app user and the yp/utils/mailserver/template/trash databases are created by
+    # the schemas role, not here: Drumee creates a database per entity at runtime, so
+    # the scoped MARIADB_USER/MARIADB_DATABASE model does not fit.
+    environment:
+      MARIADB_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  cache:
+    image: redis:\${REDIS_TAG}
+    restart: unless-stopped
+    networks: [drumee]
+    volumes:
+      - cache_data:/data
+    ${redisCmd}
+
+  # --- run-once jobs ---------------------------------------------------------
+  # Renders the configuration tree into drumee_conf and exits. Every other role waits
+  # for it, because without it they have no configuration at all.
+  #
+  # Mounted read-WRITE at /out and it is the only service that is: everything else
+  # mounts subpaths of the same volume read-only.
+  infra-init:
+    image: \${IMAGE_REGISTRY}/role-infra:\${ROLES_TAG}
+    networks: [drumee]
+    restart: "no"
+    env_file: [.env]
+    environment:
+      RENDER_TARGET: /out
+    volumes:
+      - drumee_conf:/out
+
+  # Schema restore, then migrations, as two ordered run-once jobs rather than one:
+  # docs/distribution.md §6 requires migrate to be separately re-runnable, and an
+  # upgrade runs it against a database schemas-init will never touch again.
+  schemas-init:
+    image: \${IMAGE_REGISTRY}/role-schemas:\${ROLES_TAG}
+    networks: [drumee]
+    restart: "no"
+    command: ["init"]
+    env_file: [.env]
+    depends_on:
+      db:
+        condition: service_healthy
+      infra-init:
+        condition: service_completed_successfully
+    volumes:
+${conf('/etc/drumee', 'etc/drumee')}
+
+  migrate:
+    image: \${IMAGE_REGISTRY}/role-schemas:\${ROLES_TAG}
+    networks: [drumee]
+    restart: "no"
+    command: ["migrate"]
+    env_file: [.env]
+    depends_on:
+      schemas-init:
+        condition: service_completed_successfully
+    volumes:
+${conf('/etc/drumee', 'etc/drumee')}
+
+  # --- long-running roles ----------------------------------------------------
+  app:
+    image: \${IMAGE_REGISTRY}/role-app:\${ROLES_TAG}
+    restart: unless-stopped
+    networks: [drumee]
+    depends_on:
+      cache:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
+    env_file: [.env]
+    volumes:
+      - mfs_data:/data/mfs
+${conf('/etc/drumee', 'etc/drumee')}
+      # Plugins are host-mounted so they survive an image upgrade and stay managed by
+      # drumee-plugin rather than baked into a layer.
+      - ./plugins:/srv/drumee/runtime/plugins/server
+
+  web:
+    image: \${IMAGE_REGISTRY}/role-web:\${ROLES_TAG}
+    restart: unless-stopped
+    networks: [drumee]
+    depends_on:
+      app:
+        condition: service_started
+    # The SAME number on both sides, deliberately. DRUMEE_HTTP_PORT is the port
+    # setup-infra renders into nginx's listen directive, so it is what nginx binds
+    # INSIDE the container — mapping it to 80 published a port nothing was listening on,
+    # and curl got connection-refused against a healthy container. Measured.
+    #
+    # (No backticks in this comment: it lives inside a JS template literal, and one
+    # closed the string, which broke every render.mjs command until it was found.)
+    #
+    # One name, one meaning: the config says which port Drumee serves on, and the
+    # container publishes exactly that.
+    ports:
+      - "\${DRUMEE_HTTP_PORT}:\${DRUMEE_HTTP_PORT}"
+      - "\${DRUMEE_HTTPS_PORT}:\${DRUMEE_HTTPS_PORT}"
+    env_file: [.env]
+    volumes:
+      - web_cache:/srv/drumee/cache
+${conf('/etc/nginx/sites-enabled', 'etc/nginx/sites-enabled')}
+${conf('/etc/drumee', 'etc/drumee')}
+
+  # Deliberately separate, and not negotiable per §2: this is the only component that
+  # parses untrusted documents, and it carries the heaviest dependencies in the
+  # platform. It gets no database credentials and no published port.
+  media:
+    image: \${IMAGE_REGISTRY}/role-media:\${ROLES_TAG}
+    restart: unless-stopped
+    networks: [drumee]
+    depends_on:
+      app:
+        condition: service_started
+    volumes:
+      - mfs_data:/data/mfs
+
+  # --- optional roles --------------------------------------------------------
+  # bind9 serving the zone infra-init rendered. Host networking because a nameserver
+  # answering on udp/53 for the LAN must be reachable at the host's own address.
+  dns:
+    profiles: ["dns"]
+    image: \${IMAGE_REGISTRY}/role-dns:\${ROLES_TAG}
+    restart: unless-stopped
+    network_mode: host
+    cap_add: [NET_BIND_SERVICE]
+    depends_on:
+      infra-init:
+        condition: service_completed_successfully
+    volumes:
+${conf('/etc/bind', 'etc/bind')}
+${conf('/var/lib/bind', 'var/lib/bind')}
+
+  mail:
+    profiles: ["mail"]
+    image: \${IMAGE_REGISTRY}/role-mail:\${ROLES_TAG}
+    restart: unless-stopped
+    networks: [drumee]
+    ports:
+      - "25:25"
+      - "587:587"
+    depends_on:
+      infra-init:
+        condition: service_completed_successfully
+    volumes:
+${conf('/etc/postfix', 'etc/postfix')}
+${conf('/etc/opendkim', 'etc/opendkim')}
+`;
+}
+
+// One place decides which stack is emitted, so `compose` and `all` cannot disagree —
+// they did in an earlier draft, and a stack that differs depending on which command
+// produced it is worse than either stack.
+function composeFor(cfg) {
+  return (cfg.images?.stack === 'roles') ? renderComposeRoles(cfg) : renderCompose(cfg);
+}
+
 // ------------------------------------------------------------------------ main
 function load(opts) {
   let text;
@@ -679,14 +925,14 @@ switch (command) {
     break;
   }
   case 'env': { emit(renderEnv(withSecrets(load(opts))), opts.out); break; }
-  case 'compose': { emit(renderCompose(load(opts)), opts.out); break; }
+  case 'compose': { const c = load(opts); emit(composeFor(c), opts.out); break; }
   case 'caddyfile': { emit(renderCaddyfile(load(opts)), opts.out); break; }
   case 'debconf': { emit(renderDebconf(load(opts)), opts.out); break; }
   case 'all': {
     const cfg = withSecrets(load(opts));
     emit(renderEnv(cfg), join(opts.outDir, '.env'));
     chmodSync(join(opts.outDir, '.env'), 0o600);  // holds DB root credentials
-    emit(renderCompose(cfg), join(opts.outDir, 'docker-compose.yml'));
+    emit(composeFor(cfg), join(opts.outDir, 'docker-compose.yml'));
     emit(renderCaddyfile(cfg), join(opts.outDir, 'Caddyfile'));
     emit(renderDebconf(cfg), join(opts.outDir, 'install.conf'));
     if (Array.isArray(cfg.plugins) && cfg.plugins.length) {

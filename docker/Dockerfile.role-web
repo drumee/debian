@@ -32,13 +32,19 @@ ARG ROLE_VERSION
 ARG APT_URI=https://apt.drumee.net
 ARG APT_SUITE=trixie
 ARG APT_COMPONENTS=main
+ARG APT_KEYRING=drumee-archive-keyring.gpg
 
 USER root
 
 # The public half of the archive key, committed rather than fetched — see
 # docker/keyrings/README.md. drumee-apt-source refuses to write a stanza whose keyring
 # is missing, so an unsigned source cannot be created by accident.
-COPY docker/keyrings/drumee-archive-keyring.gpg /usr/share/keyrings/drumee-archive-keyring.gpg
+# The whole keyring directory, and a named ARG, so a role can be built against a
+# repository signed by a different key — which is how it gets tested before publishing.
+# scripts/apt-repo-local.sh signs with a throwaway key generated on the spot; hardcoding
+# the production keyring here meant every local build failed signature verification, and
+# the only way to iterate was to publish. All of these are PUBLIC keys.
+COPY docker/keyrings/ /usr/share/keyrings/
 
 # One layer: update and install together, because a cached `apt-get update` layer paired
 # with a later install resolves against an index that no longer matches the repository.
@@ -47,7 +53,7 @@ COPY docker/keyrings/drumee-archive-keyring.gpg /usr/share/keyrings/drumee-archi
 RUN set -eu; \
     : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
     /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
-        /usr/share/keyrings/drumee-archive-keyring.gpg; \
+        "/usr/share/keyrings/$APT_KEYRING"; \
     apt-get update -qq \
  && apt-get install -y -qq --no-install-recommends \
         "drumee-role-web=${ROLE_VERSION}" \
@@ -56,6 +62,24 @@ RUN set -eu; \
 
 # Recorded in the image so `docker inspect` answers "which release is this" without
 # starting it. Read from the anchor package rather than restated, so it cannot disagree.
+# nginx's rendered config declares proxy_cache_path /srv/drumee/cache/<domain> and
+# CREATES it at startup, so without this directory nginx dies with
+# `mkdir() "/srv/drumee/cache/<domain>" failed (2: No such file or directory)` and the
+# role crash-loops. Measured against a real rendered tree.
+#
+# Owned by drumee at build time on purpose: a named volume mounted here inherits the
+# ownership of the image directory underneath it, so this is also what makes the volume
+# writable by uid 8000. Created here rather than shipped by a package because a cache is
+# a runtime artifact, not payload.
+# nginx runs as uid 8000 here (§7), not as root-dropping-to-www-data, so every path it
+# writes must belong to that uid: its temp trees under /var/lib/nginx and its logs.
+# Measured failures without this, in order: mkdir /var/lib/nginx/body (13), then the pid
+# file. The pid is redirected by the entrypoint, which is the only one of the three that
+# cannot be fixed with ownership.
+RUN install -d -o drumee -g drumee -m 0755 /srv/drumee/cache \
+ && chown -R drumee:drumee /var/lib/nginx /var/log/nginx \
+ && install -o drumee -g drumee -m 0644 /dev/null /run/nginx.pid
+
 RUN . /usr/share/drumee/release \
  && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
 
@@ -65,4 +89,6 @@ LABEL org.opencontainers.image.title="drumee-web" \
 
 USER drumee
 EXPOSE 80 443
-CMD ["nginx", "-g", "daemon off;"]
+# From drumee-bootstrap, not a COPY — §9.2. It validates the configuration, redirects the
+# pid away from root-owned /run, and execs nginx in the foreground.
+ENTRYPOINT ["/usr/lib/drumee/entrypoint/web"]

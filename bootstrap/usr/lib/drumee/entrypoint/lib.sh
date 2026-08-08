@@ -11,7 +11,18 @@ CRED=/etc/drumee/credential
 drumee_env() {
   # /etc/drumee/drumee.sh is written by the infra role; absent on a fresh stack,
   # which is not an error — the variables then come from the container env.
-  [ -f /etc/drumee/drumee.sh ] && . /etc/drumee/drumee.sh
+  #
+  # Sourced with `set -u` OFF and restored afterwards. That file is generated per
+  # deployment and legitimately references variables it does not define — OWN_CERTS_DIR
+  # among them — so under `set -u` sourcing it aborts the entrypoint with
+  # "OWN_CERTS_DIR: parameter not set" and the role crash-loops before it starts
+  # anything. Measured on the web role against a real rendered tree; the same trap has
+  # already bitten the native install harness for the same reason.
+  if [ -f /etc/drumee/drumee.sh ]; then
+    set +u
+    . /etc/drumee/drumee.sh
+    set -u
+  fi
   :
 }
 

@@ -193,3 +193,7 @@ bootstrap/build/
 # pool/dists repository staged by scripts/publish-pool.sh
 apt-pool/
 r
+
+# Throwaway signing key from scripts/apt-repo-local.sh, copied in to build role images
+# against the local repository. Never a project key.
+docker/keyrings/drumee-local-keyring.gpg

@@ -799,6 +799,60 @@ A second consequence: `role-web` is `Architecture: all` but transitively require
 `drumee-server-pod`, which is amd64-only — so it is **not installable on arm64** today,
 verified against the published `binary-arm64` index.
 
+### The role stack — `images.stack: roles`
+
+```yaml
+images:
+  registry: drumee
+  stack: roles        # default is still 'source'
+```
+
+`render.mjs compose` emits the package-based topology of `docs/distribution.md` §2 when
+this is set: **db, cache, infra-init, schemas-init, migrate, app, web, media** plus
+profile-gated **dns** and **mail**. `docker compose config` validates it, and
+`docker/build-role.sh` builds the images.
+
+It is not the default because only two of the seven role images exist (web, infra) —
+emitting it by default would hand every existing caller a stack that cannot pull. That is
+criterion 1 of `deploy/docker/DEPRECATED.md`.
+
+Four differences that are the point of the exercise:
+
+- **No `ui-build`.** `drumee-ui-pod` already contains the webpack output. Nothing compiles
+  in a running deployment.
+- **One tag for every role** (`ROLES_TAG`), not one per component. `drumee-release` pins
+  the train and every role depends on it at strict equality, so a per-role tag would
+  invite exactly the mix the anchor exists to prevent.
+- **Configuration comes from a volume**, not from packages configuring hosts. Consumers
+  mount `volume.subpath` of `drumee_conf` **read-only**, so each role sees only its part
+  of the tree and cannot rewrite it. Needs Compose ≥ 2.26 / Engine ≥ 25.
+- **mariadb and redis are the official images**, `mariadb:11.8` matching what Trixie
+  ships.
+
+Proven end to end with the two images that exist: `infra-init` renders 41 files into
+`drumee_conf`, the **web role serves 301 on HTTP and 502 on HTTPS** — 502 being exactly
+right, since it proxies to an `app` role that has no image yet — and the certificate it
+presents is `CN=roles.lan`, created by `infra-init` and read from the shared volume, not
+baked into the image.
+
+Five things bringing that up actually taught, each a measured failure:
+
+| Symptom | Cause |
+|---|---|
+| BIND zone file named `auto` | `network.ip4: auto` is a *sentinel*; `renderDebconf` stripped it, `renderEnv` did not — and `infra.js` reads `PUBLIC_IP4` from the environment, so dropping the flag alone was not enough |
+| `mkdir "/srv/drumee/cache/<domain>" failed` | nginx creates its `proxy_cache_path` at startup; the directory has to exist, owned by uid 8000 |
+| `mkdir "/var/lib/nginx/body" failed (13)` | Debian's nginx expects root→www-data; this role runs as 8000, so nginx is master *and* worker and every path it writes must belong to that uid |
+| `"pid" directive is duplicate` | `-g "pid ..."` is **additive**, not an override. Ownership of `/run/nginx.pid` is the fix |
+| `OWN_CERTS_DIR: parameter not set` | `drumee.sh` is generated per deployment and references variables it does not define; sourcing it under `set -u` aborts every entrypoint. Fixed once, in `lib.sh` |
+
+And one conflation worth remembering: **`DRUMEE_HTTP_PORT` is the port nginx binds**, because setup-infra renders it into the `listen` directive. Mapping it to container port 80 published a port nothing was listening on — a healthy container refusing connections. The roles stack publishes the same number on both sides, so one name keeps one meaning.
+
+**Iterate against a local repository, not by publishing.** `scripts/apt-repo-local.sh
+init|include|serve` plus `APT_URI=http://<docker-gateway>:8099
+APT_KEYRING=drumee-local-keyring.gpg docker/build-role.sh <role>`. Role image tags follow
+the release train, so every entrypoint or Dockerfile fix otherwise costs a release — four
+were burned before switching to this.
+
 ### infra-init — the configuration-rendering job
 
 `docs/distribution.md` §5 made real: the package delivers the payload at build time, this

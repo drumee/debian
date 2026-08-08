@@ -1,16 +1,134 @@
 #!/bin/sh
-# infra role: run-once. Renders the configuration tree the other roles mount,
-# then exits. Writes only into its output directory — never onto a host (§5).
+# infra role: run-once. Renders the configuration tree the other roles mount, then
+# exits. Writes only into its output directory — never onto a host (§5).
+#
+# It renders with setup-infra's OWN engine (infra.js --chroot). That is the point: the
+# 43-file tree under /etc/drumee, /etc/nginx, /var/lib/bind, /etc/postfix and friends has
+# one authoritative source, and the container channel must not grow a second one. Nothing
+# here reimplements a template.
+#
+# Env:
+#   DRUMEE_DOMAIN_NAME   required — the deployment's domain
+#   DRUMEE_INFRA_OUT     render target, default /out
+#   ADMIN_EMAIL          default admin@<domain>
+#   PUBLIC_IP4/6         serving addresses. 'auto' means "detect at install time" and is
+#                        IGNORED here on purpose: a container sees a bridge address, so
+#                        detection would publish an address nothing can reach.
+#   PRIVATE_IP4/6, DRUMEE_DATA_DIR, DRUMEE_DB_DIR, OWN_CERTS_DIR, LOCAL_MODE
+#   FORCE_RENDER=1       re-render over an existing tree
 set -eu
 . /usr/lib/drumee/entrypoint/lib.sh
 drumee_release
-drumee_env
 
-OUT="${DRUMEE_INFRA_OUT:-/etc/drumee}"
+OUT="${DRUMEE_INFRA_OUT:-/out}"
 SETUP=/var/lib/drumee/setup-infra
+UID_DRUMEE="${DRUMEE_UID:-8000}"
+GID_DRUMEE="${DRUMEE_GID:-8000}"
 
 [ -d "$SETUP" ] || die "$SETUP not found (drumee-infra provides it)"
 command -v node >/dev/null || die "node not found"
+[ -d "$OUT" ] || die "$OUT is not mounted — the shared configuration volume must be there"
+[ -n "${DRUMEE_DOMAIN_NAME:-}" ] || die "DRUMEE_DOMAIN_NAME is required"
+DOMAIN="$DRUMEE_DOMAIN_NAME"
 
-echo "[drumee] rendering the configuration tree into $OUT"
-cd "$SETUP" && exec node infra.js --chroot="$OUT" --only-infra=1
+# NOT drumee_env: that sources /etc/drumee/drumee.sh, which is a file THIS job writes.
+# Reading a previous render's output before producing the next one would let a stale
+# value survive a deliberate reconfiguration.
+export ADMIN_EMAIL="${ADMIN_EMAIL:-admin@$DOMAIN}"
+
+# Idempotence is infra.js's own: hasExistingSettings() sees the drumee.json a previous
+# run wrote and exits without touching anything unless --reconfigure=1 is passed. So a
+# restarted job is a no-op and a deliberate re-render is one flag — deliberately the same
+# contract as `dpkg-reconfigure` on the native channel, for the same reason.
+RECONF=""
+if [ "${FORCE_RENDER:-0}" = "1" ]; then
+  echo "[drumee] FORCE_RENDER=1 — re-rendering over the existing tree"
+  RECONF="--reconfigure=1"
+elif [ -f "$OUT/etc/drumee/drumee.json" ]; then
+  echo "[drumee] already rendered ($OUT/etc/drumee/drumee.json exists) — nothing to do"
+  echo "[drumee] set FORCE_RENDER=1 to render again"
+  exit 0
+fi
+
+# DKIM before the render. infra.js no longer dies on a missing key (it warns and emits an
+# empty record), but the zone embeds the public half, so a real key has to exist first or
+# the zone advertises nothing.
+KEYDIR="$OUT/etc/opendkim/keys/$DOMAIN"
+if [ ! -s "$KEYDIR/dkim.txt" ]; then
+  if command -v opendkim-genkey >/dev/null 2>&1; then
+    echo "[drumee] generating a DKIM key for $DOMAIN"
+    mkdir -p "$KEYDIR"
+    opendkim-genkey -b 2048 -d "$DOMAIN" -s dkim -D "$KEYDIR"
+    chmod 0640 "$KEYDIR/dkim.private"
+  else
+    echo "[drumee] opendkim-genkey absent — the render will emit an empty DKIM record"
+  fi
+fi
+
+# Only flags infra.js actually declares. --admin-email is NOT one of them (that value
+# travels in the environment), and an undeclared flag makes argparse exit 2 with a usage
+# dump that reads like a crash.
+#
+# 'auto' is dropped rather than forwarded. It is drumee.yaml's sentinel for "detect at
+# install time", and render.mjs emits it verbatim into .env — forwarding it produced a
+# BIND zone file literally named `auto` and a bogus 01-public.conf, both observed.
+set -- --chroot="$OUT" --public-domain="$DOMAIN"
+ip_ok() { [ -n "$1" ] && [ "$1" != auto ]; }
+# Not just the flags: infra.js reads PUBLIC_IP4/PUBLIC_IP6 from the ENVIRONMENT too
+# (templates/utils.js), where the env value wins over detection. Omitting the flag while
+# leaving PUBLIC_IP4=auto exported still produced a zone file named `auto` — measured. So
+# the sentinel is cleared here as well, and this entrypoint stays correct whatever set it.
+ip_ok "${PUBLIC_IP4:-}"  || unset PUBLIC_IP4  || true
+ip_ok "${PUBLIC_IP6:-}"  || unset PUBLIC_IP6  || true
+ip_ok "${PRIVATE_IP4:-}" || unset PRIVATE_IP4 || true
+ip_ok "${PRIVATE_IP6:-}" || unset PRIVATE_IP6 || true
+ip_ok "${PUBLIC_IP4:-}"  && set -- "$@" --public-ip4="$PUBLIC_IP4"
+ip_ok "${PUBLIC_IP6:-}"  && set -- "$@" --public-ip6="$PUBLIC_IP6"
+ip_ok "${PRIVATE_IP4:-}" && set -- "$@" --private-ip4="$PRIVATE_IP4"
+ip_ok "${PRIVATE_IP6:-}" && set -- "$@" --private-ip6="$PRIVATE_IP6"
+[ -n "${DRUMEE_DATA_DIR:-}" ] && set -- "$@" --data-dir="$DRUMEE_DATA_DIR"
+[ -n "${DRUMEE_DB_DIR:-}" ]   && set -- "$@" --db-dir="$DRUMEE_DB_DIR"
+[ -n "${OWN_CERTS_DIR:-}" ]   && set -- "$@" --own-certs-dir="$OWN_CERTS_DIR"
+[ "${LOCAL_MODE:-0}" = "1" ]  && set -- "$@" --localhost=1
+[ -n "$RECONF" ]              && set -- "$@" "$RECONF"
+
+echo "[drumee] rendering $DOMAIN into $OUT"
+echo "[drumee]   infra.js $*"
+( cd "$SETUP" && node infra.js "$@" )
+
+[ -f "$OUT/etc/drumee/drumee.json" ] \
+  || die "the render produced no $OUT/etc/drumee/drumee.json — refusing to report success"
+
+# Self-signed certificates, when nothing else will provide them. nginx in the web role
+# will not start without the files its ssl/*.conf includes, so a stack whose TLS mode is
+# self-signed needs them created here — on the native channel bin/install calls
+# create-local-certs at this exact point. Skipped when the operator supplies their own.
+if [ -z "${OWN_CERTS_DIR:-}" ] && [ -f "$SETUP/bin/create-local-certs" ]; then
+  echo "[drumee] creating self-signed certificates"
+  # Sourcing the drumee.sh THIS render just wrote is how create-local-certs learns the
+  # names to sign (PUBLIC_DOMAIN, PRIVATE_DOMAIN, VENDORS_DOMAIN, JITSI_DOMAIN). CERTS_DIR
+  # is then re-pointed into the render target: the value in that file is the path the
+  # ROLES see once the volume is mounted, not a path that exists in this container.
+  #
+  # `set +u` around the source, and a subshell: drumee.sh is generated per deployment and
+  # an unset variable inside it would abort this whole script under `set -u`.
+  ( set +u
+    . "$OUT/etc/drumee/drumee.sh"
+    CERTS_DIR="$OUT/etc/drumee/certs"; export CERTS_DIR
+    cd "$SETUP" && bash bin/create-local-certs
+  ) || echo "[drumee] WARNING: create-local-certs failed — the web role may not start" >&2
+fi
+
+# The other roles run as uid 8000 and only read this tree. Credentials stay 0640 inside a
+# 0750 directory: db.json and email.json carry passwords, and this volume is shared with
+# the media role — the one component that parses untrusted documents.
+echo "[drumee] fixing ownership to $UID_DRUMEE:$GID_DRUMEE"
+chown -R "$UID_DRUMEE:$GID_DRUMEE" "$OUT"
+[ -d "$OUT/etc/drumee/credential" ] && chmod 0750 "$OUT/etc/drumee/credential"
+find "$OUT/etc/drumee/credential" -type f -exec chmod 0640 {} + 2>/dev/null || true
+
+echo "[drumee] done — $(find "$OUT" -type f | wc -l) files"
+printf '[drumee]   %-14s %s\n' domain "$(grep -oE '"domain_name": "[^"]*"' "$OUT/etc/drumee/drumee.json" || echo '?')"
+printf '[drumee]   %-14s %s\n' nginx "$(ls "$OUT/etc/nginx/sites-enabled" 2>/dev/null | paste -sd, -)"
+printf '[drumee]   %-14s %s\n' zones "$(ls "$OUT/var/lib/bind" 2>/dev/null | paste -sd, -)"
+printf '[drumee]   %-14s %s\n' credentials "$(ls "$OUT/etc/drumee/credential" 2>/dev/null | paste -sd, -)"

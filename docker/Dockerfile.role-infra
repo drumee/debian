@@ -24,10 +24,16 @@ ARG ROLE_VERSION
 ARG APT_URI=https://apt.drumee.net
 ARG APT_SUITE=trixie
 ARG APT_COMPONENTS=main
+ARG APT_KEYRING=drumee-archive-keyring.gpg
 
 USER root
 
-COPY docker/keyrings/drumee-archive-keyring.gpg /usr/share/keyrings/drumee-archive-keyring.gpg
+# The whole keyring directory, and a named ARG, so a role can be built against a
+# repository signed by a different key — which is how it gets tested before publishing.
+# scripts/apt-repo-local.sh signs with a throwaway key generated on the spot; hardcoding
+# the production keyring here meant every local build failed signature verification, and
+# the only way to iterate was to publish. All of these are PUBLIC keys.
+COPY docker/keyrings/ /usr/share/keyrings/
 
 # opendkim-tools is here and not in drumee-role-infra's Depends because it is only
 # needed to GENERATE a key, which is this job's business and not the role's. infra.js
@@ -36,7 +42,7 @@ COPY docker/keyrings/drumee-archive-keyring.gpg /usr/share/keyrings/drumee-archi
 RUN set -eu; \
     : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
     /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
-        /usr/share/keyrings/drumee-archive-keyring.gpg; \
+        "/usr/share/keyrings/$APT_KEYRING"; \
     apt-get update -qq \
  && apt-get install -y -qq --no-install-recommends \
         "drumee-role-infra=${ROLE_VERSION}" \
@@ -47,12 +53,14 @@ RUN set -eu; \
 RUN . /usr/share/drumee/release \
  && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
 
-COPY docker/infra-init-entrypoint.sh /usr/local/sbin/drumee-infra-init
-RUN chmod 0755 /usr/local/sbin/drumee-infra-init
-
 LABEL org.opencontainers.image.title="drumee-infra-init" \
       org.opencontainers.image.description="Drumee infra role: renders the configuration tree into the shared volume, once" \
       org.opencontainers.image.source="https://github.com/drumee/debian"
 
 VOLUME ["/out"]
-ENTRYPOINT ["/usr/local/sbin/drumee-infra-init"]
+# The entrypoint comes from drumee-bootstrap, not from a COPY. docs/distribution.md §9.2
+# names `COPY ./opt/drumee/init.d/*` as the thing that package exists to replace: an
+# entrypoint copied into an image bypasses versioning entirely, so a fix to it cannot be
+# shipped, pinned or rolled back like everything else in the deployment. This one is
+# installed by a package at an exact version, same as the payload it drives.
+ENTRYPOINT ["/usr/lib/drumee/entrypoint/infra"]
