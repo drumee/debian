@@ -1,6 +1,7 @@
 # Channel parity — native and container from one configuration path
 
-Status: **proposal**. Change 1 is in progress; the rest are not started.
+Status: changes **1 and 3 are done** (releases 1.0.41 and 1.0.42); 2, 4 and 5 are not
+started. `tests/config-parity.sh` guards the result.
 Scope: how a deployment's settings reach the rendered configuration, on both channels.
 
 This document exists because the two channels currently answer the same question twice,
@@ -106,10 +107,37 @@ re-runs `infra-init` with `FORCE_RENDER=1`. The idempotence contract is already 
 by construction — `infra.js`'s own `hasExistingSettings()` governs both — so this is
 naming and a CLI verb, not new behaviour.
 
-### 3. `.env` keeps only what compose needs
+### 3. `.env` keeps only what compose and the host CLI need — DONE (1.0.42)
 
-Image tags, published ports, `COMPOSE_PROFILES`. Every Drumee-semantic fact moves to the
-preseed. This is what stops the two vocabularies re-diverging once change 1 lands.
+The rule as first written here was "only what compose needs", and that was wrong in a way
+worth recording: `bin/drumee-ctl` runs on the **host**, not in a container, and reads
+`DRUMEE_DOMAIN_NAME`, `DRUMEE_DATA_DIR` and `DB_ROOT_PASSWORD` from this file. Stripping
+them would have broken `doctor` and `backup`.
+
+The rule that survives contact is sharper and is what `tests/config-parity.sh` enforces:
+
+> **No container may learn a Drumee-semantic fact from `.env`.**
+
+On the roles stack, 16 names are dropped — `DRUMEE_DESCRIPTION`, `LOCAL_MODE`,
+`ADMIN_EMAIL`, `ACME_EMAIL_ACCOUNT`, `TLS_MODE`, `OWN_SSL`, `OWN_SSL_PATH`, `PUBLIC_IP4/6`,
+`SERVICES`, `BACKUP_LOCATION`, `EXCHANGE_LOCATION` and the four `WIREGUARD_*` — along with
+the per-component image tags, which the roles stack has no use for. 46 keys become 26. The
+source stack's `.env` is byte-identical apart from its freshly generated passwords, so
+nothing there regressed. `infra-init` has **no `env_file` at all**: the preseed is its only
+input, which is the statement of change 1 made structural.
+
+What stays, and why it does not reintroduce the problem: the host CLI's three names (no
+container reads them), and the DB/Redis/SMTP credentials — in a compose deployment the
+database is initialised from this file, so these are the authoritative values and
+infra-init's generated ones are not. `entrypoint/app` writes them into
+`/etc/drumee/credential`. Unifying *that* is the half of change 3 still outstanding.
+
+Doing this immediately exposed one more gap, of exactly the kind the exercise is for: the
+**ports nginx binds had no preseed key**. They were set in one place only — the caddy arm of
+`infra`'s postinst, defaulting to 8080/8443 — so once `infra-init` stopped reading `.env`
+it found no port, rendered nginx on the 80/443 default while compose published 8380/8343,
+and the web container reported healthy while answering on neither. `http_port` and
+`https_port` are debconf answers now, which also makes the caddy path preseedable natively.
 
 ### 4. Finish moving the misplaced `Depends`
 
@@ -131,9 +159,12 @@ Asserted, not trusted — the repository's existing pattern:
 - **No role image may contain a rendered configuration tree.** `drumee.json`,
   `drumee.sh` and `sites-enabled/*` must be absent from every image. This is §5 as a
   test, and it is what would catch a future "just configure it at build time".
-- **No Drumee-semantic fact may appear in both `renderEnv` and `renderDebconf`** — a diff
-  of the two key sets with the compose-only names allowlisted. That is the table in §1,
-  enforced.
+- **No Drumee-semantic fact may appear in both `renderEnv` and `renderDebconf`** —
+  `tests/config-parity.sh`, step 10 of `run-all.sh`. It also asserts the guard cannot pass
+  by breaking the source stack, that the host CLI keeps the three names it reads, and that
+  every dropped fact really does have a `drumee-infra/*` key in the preseed — otherwise
+  dropping it loses it. Verified in both directions: restoring `ADMIN_EMAIL`
+  unconditionally makes it fail and name that key.
 
 ## 6. What stays different, deliberately
 

@@ -1172,6 +1172,7 @@ tests/native/install-verify.sh        # native channel E2E (disposable Debian co
 tests/native/control-deps.sh         # inter-package dependency ordering check
 tests/native/verify-debconf-bridge.sh # preseed → debconf → DRUMEE_* env, in a real .deb install
 tests/native/make-seed.sh            # generate bootstrap seeds.tgz for schemas build
+tests/config-parity.sh       # one fact, one place: .env vs the debconf preseed
 tests/native/dns-zone-config.sh      # rendered BIND config vs. a real named-checkconf
 tests/native/upgrade-reconfigure.sh  # the lifecycle of an INSTALLED box: upgrade → reconfigure → reboot
 tests/native/lifecycle-remote.sh     # the same, on a REAL box over ssh (covers NM + a kernel reboot)
@@ -1181,7 +1182,7 @@ tests/wireguard/probe-port.sh        # endpoint probe against real kernel WireGu
 `run-all.sh` runs: shell syntax (`bash -n`, over `git ls-files '*.sh' 'bin/*'`
 excluding `*/src/*`) → ShellCheck → renderer parse → config smoke → version drift
 guard → end-to-end render → compose validity (if Docker available) → operator CLI
-guards → wizard render → `native/control-deps.sh`.
+guards → wizard render → `native/control-deps.sh` → `config-parity.sh`.
 
 The heavier suites are **not** in `run-all.sh` and must be run by hand:
 `smoke-container.sh`, `e2e-local.sh`, `demo-stack.sh`, `native/install-verify.sh`,

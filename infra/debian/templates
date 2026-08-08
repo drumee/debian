@@ -1,3 +1,17 @@
+Template: drumee-infra/http_port
+Type: string
+Default: 80
+Description: Port nginx should serve HTTP on
+ setup-infra renders this into every nginx listen directive, so it is the port nginx
+ BINDS. It moves to 8080 when drumee-caddy owns 80/443, and the container channel
+ publishes the same number on the host so one name keeps one meaning.
+
+Template: drumee-infra/https_port
+Type: string
+Default: 443
+Description: Port nginx should serve HTTPS on
+ As with http_port; 8443 when drumee-caddy is in front.
+
 Template: drumee-infra/description
 Type: string
 Default: My Great Drumee Team

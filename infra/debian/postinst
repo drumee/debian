@@ -75,6 +75,12 @@ bridge_debconf_env() {
         echo "  are replaced by the rendered versions. Existing passwords are kept."
     fi
     db_get drumee-infra/service          || true; export SERVICES="$RET"
+    # The ports nginx BINDS. Only ever set by the caddy arm below before now, which meant
+    # the container channel could not state them at all: infra-init takes its settings from
+    # the preseed, so with no key here nginx bound the 80/443 default while compose
+    # published something else — a healthy web container answering on neither. Measured.
+    db_get drumee-infra/http_port  || true; [ -n "$RET" ] && export DRUMEE_HTTP_PORT="$RET"
+    db_get drumee-infra/https_port || true; [ -n "$RET" ] && export DRUMEE_HTTPS_PORT="$RET"
     # setup-infra gates jitsi.js on USE_JITSI, and nothing was setting it — so the Jitsi
     # configuration and its nginx vhost were rendered on every install, wanted or not.
     # The services answer is where that intent lives, so derive it here rather than

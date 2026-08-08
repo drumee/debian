@@ -1,3 +1,22 @@
+drumee-infra (1.2.37) stable; urgency=medium
+
+  * The ports nginx binds are now debconf answers (http_port, https_port), not
+    environment-only values. They were set in exactly one place — the caddy arm of
+    this postinst, defaulting to 8080/8443 — so a deployment had no way to state
+    them through the preseed.
+    .
+    That surfaced the moment the container channel stopped reading .env
+    (docs/channel-parity.md change 3): infra-init takes its settings from the preseed,
+    found no port there, and rendered nginx on the 80/443 default while compose
+    published 8380/8343. The web container reported healthy and answered on neither
+    port. Measured, and the mirror image of the earlier bug where the same name meant
+    two different things.
+    .
+    Also useful natively: the caddy path's ports become preseedable instead of
+    settable only through the environment.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 16:01:14 +0200
+
 drumee-infra (1.2.36) stable; urgency=medium
 
   * Render the Jitsi tree only when conferencing is requested. jitsi.js ran

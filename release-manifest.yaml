@@ -14,7 +14,7 @@
 # `drumee-release` anchor and of every drumee-role-* metapackage, the tag all
 # container images are published under, and what `drumee.yaml` pins to. The
 # component versions below are internal; users only ever see `release`.
-release: 1.0.41
+release: 1.0.42
 
 # APT suite this release train publishes to: trixie | trixie-beta | trixie-edge.
 channel: trixie
@@ -28,8 +28,8 @@ components:
   static:       1.0.6
   schemas:      2.7.2
   patch:        1.1.6
-  infra:        1.2.36
-  roles:        1.0.41
+  infra:        1.2.37
+  roles:        1.0.42
 
   # Not built yet — created in increment 3. Declared here so the roles that
   # depend on them resolve, and so the version is chosen in the one place where
@@ -55,4 +55,4 @@ components:
   # Built by builder/, and named drumee-installer since 1.2.7.
   installer:    1.2.7
   # The native metapackage tracks `release` by definition (meta/make-control.sh).
-  meta:         1.0.41
+  meta:         1.0.42
