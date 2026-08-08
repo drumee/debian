@@ -128,9 +128,41 @@ input, which is the statement of change 1 made structural.
 
 What stays, and why it does not reintroduce the problem: the host CLI's three names (no
 container reads them), and the DB/Redis/SMTP credentials — in a compose deployment the
-database is initialised from this file, so these are the authoritative values and
-infra-init's generated ones are not. `entrypoint/app` writes them into
-`/etc/drumee/credential`. Unifying *that* is the half of change 3 still outstanding.
+official `mariadb` and `redis` images are initialised from this file, so `.env` is their
+authority, and putting them in the preseed would also write them in plaintext into
+debconf's `config.dat`. They reach the infra job through an explicit `environment:` block
+rather than an `env_file`, which keeps the settings channel closed.
+
+#### Credentials: one writer per file — DONE (1.0.43)
+
+`drumee_write_credentials` wrote `db.json` and `redis.json` from the environment in **both**
+the app and the schemas role. Two writers for one credential, and worse: the compose
+topology mounted a separate writable volume at `/etc/drumee/credential`, and **a mount
+replaces what is underneath it** — so the `email.json` and `postfix.json` that `infra-init`
+rendered were invisible to every role that mounted it. Confirmed with a two-volume mount
+test, not deduced.
+
+The blocker was that `infra.js` hardcoded `host: "localhost"` and `user: "drumee-app"` in
+`db.json` — correct for one box, wrong where the database is a container of its own, which
+is precisely why the app had to overwrite the file. It now honours
+`DB_HOST`/`DB_USER`/`DB_PORT`, with today's values as defaults, and consults `DB_PASSWORD`
+**after** `existingCredential` and **before** generating. That order is the whole design:
+
+1. an existing secret always wins — MariaDB already holds it;
+2. then the deployment's `DB_PASSWORD` — a compose database is initialised from it, so on a
+   first render a generated password would lock the application out immediately;
+3. generating is the last resort, exactly as on a native first install.
+
+So: `infra.js` owns `db.json`, `email.json` and `postfix.json`; the infra job owns
+`redis.json` (the render never touches it, and the package ships one pointing at
+localhost); every other role reads the tree read-only. `lib.sh`'s writer is replaced by
+`drumee_require_credentials`, which verifies and names the missing file — a missing
+credential otherwise surfaces as an access-denied from MariaDB with no hint which file was
+absent.
+
+Measured: the app now sees all four files, `db.json` reads `host: mariadb, port: 3306` with
+a password byte-identical to `.env`'s `DB_PASSWORD`, and on testbox the native `db.json` is
+unchanged — same password, `localhost`, no `port` key.
 
 Doing this immediately exposed one more gap, of exactly the kind the exercise is for: the
 **ports nginx binds had no preseed key**. They were set in one place only — the caddy arm of

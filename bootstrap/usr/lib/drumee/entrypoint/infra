@@ -27,6 +27,14 @@
 #   /etc/drumee/install.conf   the preseed, mounted read-only (render.mjs debconf)
 #   DRUMEE_INFRA_OUT           render target, default /out
 #   FORCE_RENDER=1             re-render over an existing tree
+#   DB_HOST/DB_PORT/DB_USER/DB_PASSWORD, REDIS_HOST/REDIS_PORT/REDIS_PASSWORD
+#                              the deployment's credentials. NOT Drumee-semantic settings —
+#                              those come from the preseed. These are secrets shared with
+#                              the official mariadb and redis images, which are initialised
+#                              from the same .env, so .env is their authority and the
+#                              preseed is not (debconf would also store them in plaintext
+#                              in config.dat). infra.js honours DB_* when it renders
+#                              db.json; redis.json is written below.
 #
 # Domain, addresses, TLS method, directories and WireGuard all come from the preseed. There
 # is deliberately no environment fallback for them: a second way to say the same thing is
@@ -103,6 +111,25 @@ if [ -z "${OWN_CERTS_DIR:-}" ] && [ -f "$SETUP/bin/create-local-certs" ]; then
     CERTS_DIR="$OUT/etc/drumee/certs"; export CERTS_DIR
     cd "$SETUP" && bash bin/create-local-certs
   ) || echo "[drumee] WARNING: create-local-certs failed — the web role may not start" >&2
+fi
+
+# redis.json, which the render does not touch: infra.js writes db.json, email.json and
+# postfix.json, and drumee-infra SHIPS a redis.json pointing at localhost:6379. Correct on
+# one box, wrong where Redis is a container of its own — so the infra job owns this file in
+# the container channel. One writer per credential, which is the whole point: the app and
+# schemas roles used to write it themselves, from two places, over a rendered tree they
+# could not even see.
+if [ -n "${REDIS_HOST:-}" ]; then
+  echo "[drumee] writing redis.json for ${REDIS_HOST}:${REDIS_PORT:-6379}"
+  mkdir -p "$OUT/etc/drumee/credential"
+  cat > "$OUT/etc/drumee/credential/redis.json" <<JSON
+{
+  "redisHost": "${REDIS_HOST}",
+  "redisPort": ${REDIS_PORT:-6379},
+  "redisAuth": $( [ -n "${REDIS_PASSWORD:-}" ] && printf '"%s"' "$REDIS_PASSWORD" || printf 'null' ),
+  "liveUpdateChannel": "${LIVE_UPDATE_CHANNEL:-LIVE_UPDATE_CHANNEL}"
+}
+JSON
 fi
 
 # The other roles run as uid 8000 and only read this tree. Credentials stay 0640 inside a

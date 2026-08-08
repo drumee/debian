@@ -765,14 +765,16 @@ volumes:
   # nginx's proxy cache. A named volume rather than the container filesystem so it
   # survives a restart and does not grow inside the image layer.
   web_cache: {}
-  # Credentials, WRITABLE, mounted over the read-only config tree.
+  # There is deliberately NO credential volume.
   #
-  # infra-init renders a db.json too, with a password it generated — but in a compose
-  # deployment the database is initialised from .env, so the app must use those
-  # credentials and not infra-init's. entrypoint/app writes them from the environment,
-  # which it cannot do into a read-only mount. Nesting a writable volume inside the
-  # read-only one is what keeps the rest of the tree unwritable.
-  drumee_cred: {}
+  # There was one, mounted writable at /etc/drumee/credential so the app and schemas roles
+  # could write db.json and redis.json from .env. Two problems, the second measured with a
+  # two-volume mount test: it made two writers for one credential, and a mount REPLACES
+  # what is underneath it — so the email.json and postfix.json infra-init rendered were
+  # invisible to every role that mounted it.
+  #
+  # One writer now: infra.js renders db.json honouring DB_HOST/DB_USER/DB_PORT/DB_PASSWORD,
+  # and the infra job writes redis.json. Everyone else reads the shared tree read-only.
 
 services:
   # --- stateful services on their upstream images ----------------------------
@@ -825,9 +827,23 @@ services:
     image: \${IMAGE_REGISTRY}/role-infra:\${ROLES_TAG}
     networks: [drumee]
     restart: "no"
-    # Deliberately NO env_file. This job learns the deployment from the preseed below and
-    # from nothing else — that is the whole point of channel-parity change 1, and an
-    # env_file here would quietly re-open the second channel for settings to arrive by.
+    # Deliberately NO env_file. This job learns the deployment's SETTINGS from the preseed
+    # below and from nothing else — that is the point of channel-parity change 1, and an
+    # env_file here would quietly re-open the second channel for them to arrive by.
+    #
+    # The credentials are listed explicitly instead, which is a different category and not a
+    # loophole: these are secrets shared with the official mariadb and redis images, which
+    # compose initialises from the same .env, so .env is their authority. Putting them in
+    # the preseed would also write them in plaintext into debconf's config.dat. infra.js
+    # honours DB_* when rendering db.json; the entrypoint writes redis.json.
+    environment:
+      DB_HOST: \${DB_HOST}
+      DB_PORT: \${DB_PORT}
+      DB_USER: \${DB_USER}
+      DB_PASSWORD: \${DB_PASSWORD}
+      REDIS_HOST: \${REDIS_HOST}
+      REDIS_PORT: \${REDIS_PORT}
+      REDIS_PASSWORD: \${REDIS_PASSWORD}
     volumes:
       - drumee_conf:/out
       # The DEBCONF PRESEED, which is how this job learns the deployment's settings — the
@@ -854,7 +870,6 @@ services:
         condition: service_completed_successfully
     volumes:
 ${conf('/etc/drumee', 'etc/drumee')}
-      - drumee_cred:/etc/drumee/credential
 
   migrate:
     image: \${IMAGE_REGISTRY}/role-schemas:\${ROLES_TAG}
@@ -867,7 +882,6 @@ ${conf('/etc/drumee', 'etc/drumee')}
         condition: service_completed_successfully
     volumes:
 ${conf('/etc/drumee', 'etc/drumee')}
-      - drumee_cred:/etc/drumee/credential
 
   # --- long-running roles ----------------------------------------------------
   app:
@@ -883,7 +897,6 @@ ${conf('/etc/drumee', 'etc/drumee')}
     volumes:
       - mfs_data:/data/mfs
 ${conf('/etc/drumee', 'etc/drumee')}
-      - drumee_cred:/etc/drumee/credential
       # Plugins are host-mounted so they survive an image upgrade and stay managed by
       # drumee-plugin rather than baked into a layer.
       - ./plugins:/srv/drumee/runtime/plugins/server

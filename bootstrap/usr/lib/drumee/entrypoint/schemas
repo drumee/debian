@@ -6,7 +6,7 @@ set -eu
 . /usr/lib/drumee/entrypoint/lib.sh
 drumee_release
 drumee_env
-drumee_write_credentials
+drumee_require_credentials db.json
 
 PATCHES="${DRUMEE_PATCHES_DIR:-/usr/share/drumee/patches}"
 

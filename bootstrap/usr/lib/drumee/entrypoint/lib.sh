@@ -37,28 +37,33 @@ drumee_release() {
   fi
 }
 
-# Writes the JSON credential files the application reads. Only roles that talk to
-# the database call this: the media role deliberately gets none (§2).
-drumee_write_credentials() {
-  mkdir -p "$CRED"
-  cat > "$CRED/db.json" <<JSON
-{
-  "user": "${DB_USER:-drumee-app}",
-  "host": "${DB_HOST:-drumee-db}",
-  "port": ${DB_PORT:-3306},
-  "password": "${DB_PASSWORD:-}"
-}
-JSON
-  cat > "$CRED/redis.json" <<JSON
-{
-  "redisHost": "${REDIS_HOST:-drumee-cache}",
-  "redisPort": ${REDIS_PORT:-6379},
-  "redisAuth": $( [ -n "${REDIS_PASSWORD:-}" ] && printf '"%s"' "$REDIS_PASSWORD" || printf 'null' ),
-  "liveUpdateChannel": "${LIVE_UPDATE_CHANNEL:-LIVE_UPDATE_CHANNEL}"
-}
-JSON
-  chmod 0640 "$CRED/db.json" "$CRED/redis.json"
-  echo "[drumee] credentials written to $CRED"
+# Credentials are READ here, never written.
+#
+# This used to write db.json and redis.json from the environment, in both the app and the
+# schemas role — which made two writers for one file and, worse, meant the copy the infra
+# render produced was never the one in use. The compose topology hid the consequence: the
+# roles mounted a separate writable volume over /etc/drumee/credential, and a mount
+# replaces what is underneath it, so email.json and postfix.json — rendered, correct, and
+# never overwritten by anyone — were simply invisible to the application. Verified with a
+# two-volume mount test, not deduced.
+#
+# One writer now: the infra job seeds db.json before the render (so infra.js keeps that
+# password through existingCredential) and writes redis.json after it. Every other role
+# reads the shared volume. So this checks, and fails loudly and specifically, because a
+# missing credential otherwise surfaces as an access-denied from MariaDB with no hint
+# about which file was absent.
+drumee_require_credentials() {
+  local missing=""
+  for f in "$@"; do
+    [ -s "$CRED/$f" ] || missing="$missing $f"
+  done
+  if [ -n "$missing" ]; then
+    echo "[drumee] missing credential(s) in $CRED:$missing" >&2
+    echo "[drumee] they are produced by the infra role — has infra-init run against" >&2
+    echo "[drumee] this deployment's configuration volume?" >&2
+    exit 1
+  fi
+  echo "[drumee] credentials present: $*"
 }
 
 # A role must refuse to run against a schema older than its code expects (§6).

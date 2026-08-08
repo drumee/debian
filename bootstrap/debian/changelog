@@ -1,3 +1,20 @@
+drumee-bootstrap (2.0.8) stable; urgency=medium
+
+  * One writer per credential. drumee_write_credentials wrote db.json and redis.json
+    from the environment in BOTH the app and the schemas role, over a rendered tree
+    those roles could not even see: the compose topology mounted a separate writable
+    volume at /etc/drumee/credential, and a mount replaces what is underneath it, so
+    the email.json and postfix.json infra-init had rendered were invisible. Confirmed
+    with a two-volume mount test rather than deduced.
+    .
+    It is replaced by drumee_require_credentials, which verifies and fails with the
+    name of the missing file — a missing credential otherwise surfaces as an
+    access-denied from MariaDB with no hint about which file was absent. The infra job
+    writes redis.json (the render does not touch it, and the shipped one points at
+    localhost), and infra.js renders db.json honouring DB_*.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 16:32:12 +0200
+
 drumee-bootstrap (2.0.7) stable; urgency=medium
 
   * entrypoint/infra renders by RECONFIGURING THE PACKAGE:

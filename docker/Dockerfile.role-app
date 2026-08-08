@@ -38,15 +38,12 @@ RUN set -eu; \
 # belongs to uid 8000 (§7) — the same lesson the web role taught with /var/lib/nginx:
 # a role that does not run as root must own every path it writes, or it crash-loops on
 # the first write with no clue in the logs about which path.
-# /etc/drumee/credential is created here for a reason that is not obvious: compose mounts
-# a WRITABLE volume over it (the app writes db.json and redis.json from the environment,
-# because in a compose deployment the database credentials come from .env and not from
-# infra-init's generated ones). A fresh named volume inherits the ownership of the image
-# directory underneath it — and drumee-infra is deliberately not installed in this role, so
-# without this the directory did not exist, Docker created the mountpoint root-owned, and
-# the entrypoint died on `cannot create /etc/drumee/credential/db.json: Permission denied`.
-RUN install -d -o drumee -g drumee -m 0750 /etc/drumee/credential \
- && install -d -o drumee -g drumee -m 0755 \
+# No /etc/drumee/credential here any more: this role does not write credentials. It used
+# to, from a writable volume mounted over the read-only config tree — which needed this
+# directory to exist so the fresh volume would inherit uid 8000 — and that arrangement both
+# created a second writer and hid infra-init's own email.json and postfix.json behind the
+# mount. The credentials now arrive in the shared tree, read-only, with one writer.
+RUN install -d -o drumee -g drumee -m 0755 \
         /srv/drumee/runtime/tmp \
         /srv/drumee/cache \
         /var/log/drumee \

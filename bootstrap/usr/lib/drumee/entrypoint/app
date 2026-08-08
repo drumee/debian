@@ -5,7 +5,7 @@ set -eu
 . /usr/lib/drumee/entrypoint/lib.sh
 drumee_release
 drumee_env
-drumee_write_credentials
+drumee_require_credentials db.json redis.json
 drumee_require_schema
 
 # Pending schema patches are applied by the schemas role, not here: this role

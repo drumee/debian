@@ -1,3 +1,19 @@
+drumee-infra (1.2.38) stable; urgency=medium
+
+  * db.json records where the database actually is. host and user were hardcoded to
+    localhost/drumee-app — right for one box, wrong where the database is a container
+    of its own, so the container channel overwrote the rendered file from its own
+    entrypoint. Two writers for one credential, and the rendered copy was never the
+    one in use. DB_HOST/DB_USER/DB_PORT are honoured with today's values as defaults,
+    so a native install renders exactly what it did before.
+    .
+    DB_PASSWORD is consulted after existingCredential and before generating: an
+    existing secret always wins because MariaDB holds it; a compose deployment
+    initialises its database from DB_PASSWORD, so on a first render that is the
+    authoritative value; generating stays the last resort.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 16:32:12 +0200
+
 drumee-infra (1.2.37) stable; urgency=medium
 
   * The ports nginx binds are now debconf answers (http_port, https_port), not
