@@ -725,13 +725,33 @@ volumes:
   # nginx's proxy cache. A named volume rather than the container filesystem so it
   # survives a restart and does not grow inside the image layer.
   web_cache: {}
+  # Credentials, WRITABLE, mounted over the read-only config tree.
+  #
+  # infra-init renders a db.json too, with a password it generated — but in a compose
+  # deployment the database is initialised from .env, so the app must use those
+  # credentials and not infra-init's. entrypoint/app writes them from the environment,
+  # which it cannot do into a read-only mount. Nesting a writable volume inside the
+  # read-only one is what keeps the rest of the tree unwritable.
+  drumee_cred: {}
 
 services:
   # --- stateful services on their upstream images ----------------------------
   db:
     image: mariadb:\${MARIADB_TAG}
     restart: unless-stopped
-    networks: [drumee]
+    # An ALIAS from the configured hostname, not a renamed service. database.host is what
+    # the application actually dials — it is written into /etc/drumee/credential/db.json
+    # by the app entrypoint — and it defaults to 'mariadb'. The §2 service name is 'db',
+    # so without this the app resolved nothing: measured as
+    # "getaddrinfo ENOTFOUND redis" on the cache side, with the app crash-looping inside
+    # a container that pm2 reported as running. (No backticks in comments inside this
+    # template literal — one closes the string and breaks every render.mjs command.)
+    #
+    # An alias rather than a rename keeps both vocabularies true: the topology uses the
+    # design's names and the deployment keeps whatever hostname its config declares.
+    networks:
+      drumee:
+        aliases: ["\${DB_HOST}"]
     # The app user and the yp/utils/mailserver/template/trash databases are created by
     # the schemas role, not here: Drumee creates a database per entity at runtime, so
     # the scoped MARIADB_USER/MARIADB_DATABASE model does not fit.
@@ -748,7 +768,9 @@ services:
   cache:
     image: redis:\${REDIS_TAG}
     restart: unless-stopped
-    networks: [drumee]
+    networks:
+      drumee:
+        aliases: ["\${REDIS_HOST}"]
     volumes:
       - cache_data:/data
     ${redisCmd}
@@ -785,6 +807,7 @@ services:
         condition: service_completed_successfully
     volumes:
 ${conf('/etc/drumee', 'etc/drumee')}
+      - drumee_cred:/etc/drumee/credential
 
   migrate:
     image: \${IMAGE_REGISTRY}/role-schemas:\${ROLES_TAG}
@@ -797,6 +820,7 @@ ${conf('/etc/drumee', 'etc/drumee')}
         condition: service_completed_successfully
     volumes:
 ${conf('/etc/drumee', 'etc/drumee')}
+      - drumee_cred:/etc/drumee/credential
 
   # --- long-running roles ----------------------------------------------------
   app:
@@ -812,6 +836,7 @@ ${conf('/etc/drumee', 'etc/drumee')}
     volumes:
       - mfs_data:/data/mfs
 ${conf('/etc/drumee', 'etc/drumee')}
+      - drumee_cred:/etc/drumee/credential
       # Plugins are host-mounted so they survive an image upgrade and stay managed by
       # drumee-plugin rather than baked into a layer.
       - ./plugins:/srv/drumee/runtime/plugins/server

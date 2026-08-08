@@ -1,0 +1,66 @@
+# drumee-app — the REST API (24000) and the page/WebSocket server (23000).
+#
+# One metapackage at an exact version, no source checkout, no clone, no component version
+# written here. drumee-role-app pulls drumee-server-pod and drumee-node-runtime; dpkg
+# resolves the rest.
+#
+#   docker/build-role.sh app
+#
+# It notably does NOT pull drumee-schemas — that dependency was removed at 2.9.99 because
+# it dragged mariadb-server into this role, and the database belongs in its own container
+# on the official image (§2). The schema is created and migrated by the schemas role.
+
+ARG BASE_IMAGE
+ARG BASE_DIGEST
+FROM ${BASE_IMAGE}@${BASE_DIGEST}
+
+ARG ROLE_VERSION
+ARG APT_URI=https://apt.drumee.net
+ARG APT_SUITE=trixie
+ARG APT_COMPONENTS=main
+ARG APT_KEYRING=drumee-archive-keyring.gpg
+
+USER root
+
+COPY docker/keyrings/ /usr/share/keyrings/
+
+RUN set -eu; \
+    : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
+        "/usr/share/keyrings/$APT_KEYRING"; \
+    apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+        "drumee-role-app=${ROLE_VERSION}" \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# pm2 writes its own state and logs, and the app writes the runtime tmp tree. All of it
+# belongs to uid 8000 (§7) — the same lesson the web role taught with /var/lib/nginx:
+# a role that does not run as root must own every path it writes, or it crash-loops on
+# the first write with no clue in the logs about which path.
+# /etc/drumee/credential is created here for a reason that is not obvious: compose mounts
+# a WRITABLE volume over it (the app writes db.json and redis.json from the environment,
+# because in a compose deployment the database credentials come from .env and not from
+# infra-init's generated ones). A fresh named volume inherits the ownership of the image
+# directory underneath it — and drumee-infra is deliberately not installed in this role, so
+# without this the directory did not exist, Docker created the mountpoint root-owned, and
+# the entrypoint died on `cannot create /etc/drumee/credential/db.json: Permission denied`.
+RUN install -d -o drumee -g drumee -m 0750 /etc/drumee/credential \
+ && install -d -o drumee -g drumee -m 0755 \
+        /srv/drumee/runtime/tmp \
+        /srv/drumee/cache \
+        /var/log/drumee \
+ && chown -R drumee:drumee /srv/drumee/runtime/server 2>/dev/null || true
+
+RUN . /usr/share/drumee/release \
+ && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
+
+LABEL org.opencontainers.image.title="drumee-app" \
+      org.opencontainers.image.description="Drumee application role: REST API and page/WebSocket server under pm2" \
+      org.opencontainers.image.source="https://github.com/drumee/debian"
+
+USER drumee
+EXPOSE 23000 24000
+# From drumee-bootstrap, not a COPY — §9.2. It writes the credentials from the
+# environment, checks the pm2 ecosystem infra-init rendered, and execs pm2-runtime.
+ENTRYPOINT ["/usr/lib/drumee/entrypoint/app"]

@@ -15,4 +15,6 @@ ECOSYSTEM="${DRUMEE_ECOSYSTEM:-/etc/drumee/infrastructure/ecosystem.json}"
 
 command -v pm2-runtime >/dev/null || die "pm2-runtime not found (drumee-node-runtime provides it)"
 echo "[drumee] starting pm2-runtime with $ECOSYSTEM"
-exec pm2-runtime start "$ECOSYSTEM" --no-daemon
+# No --no-daemon: pm2-runtime IS the no-daemon entry point, and passing it makes pm2 exit
+# with `error: unknown option '--no-daemon'`, which crash-looped the role.
+exec pm2-runtime start "$ECOSYSTEM"

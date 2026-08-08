@@ -1,3 +1,12 @@
+drumee-bootstrap (2.0.6) stable; urgency=medium
+
+  * entrypoint/app: drop --no-daemon from the pm2-runtime invocation. pm2-runtime IS
+    the no-daemon entry point and rejects the flag with
+    `error: unknown option '--no-daemon'`, so the app role crash-looped before ever
+    reaching the application.
+
+ -- packaging@drumee.com  Sat, 08 Aug 2026 11:00:37 +0200
+
 drumee-bootstrap (2.0.5) stable; urgency=medium
 
   * entrypoint/web: do not override the pid path on the command line. 2.0.4 passed

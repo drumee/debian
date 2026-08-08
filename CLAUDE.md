@@ -756,9 +756,10 @@ docker/build-role.sh infra                # the configuration-rendering job
 APT_URI=http://localhost:8099 docker/build-role.sh web   # against a local repo
 ```
 
-Two of the seven exist: `docker/Dockerfile.role-web` and `docker/Dockerfile.role-infra`.
+Three of the seven exist: `docker/Dockerfile.role-web`, `docker/Dockerfile.role-infra`
+and `docker/Dockerfile.role-app`.
 
-`docker/Dockerfile.role-web` is the first of the seven. It contains **no source
+Three of the seven exist: `web`, `infra` and `app`. It contains **no source
 checkout, no git clone, no webpack and not one component version** — it installs one
 metapackage at an exact version and lets dpkg resolve the rest. `ROLE_VERSION` has no
 default on purpose: a default would be a component version written outside
@@ -852,6 +853,55 @@ init|include|serve` plus `APT_URI=http://<docker-gateway>:8099
 APT_KEYRING=drumee-local-keyring.gpg docker/build-role.sh <role>`. Role image tags follow
 the release train, so every entrypoint or Dockerfile fix otherwise costs a release — four
 were burned before switching to this.
+
+### The app role — how far the stack gets
+
+`docker/build-role.sh app` builds `drumee/role-app` (2.6 GB): `drumee-server-pod`,
+`drumee-node-runtime`, `drumee-bootstrap`, `drumee-release`, uid 8000, no build tooling,
+**no `mariadb-server`** — the database lives in its own container on the official image,
+which is what dropping `server-pod → drumee-schemas` at 2.9.99 bought.
+
+Running it against `db`, `cache` and `infra-init` gets to:
+
+```
+Successfully connected to Redis redis:6379          ← the alias works
+Access denied for user 'drumee-app'@'172.23.0.4'    ← the schemas role has not run
+loadUiinfo: app UI information file was not found under /srv/drumee/runtime/ui/main
+```
+
+That is the correct place to stop: the `drumee-app` database user and the `yp`/`utils`/
+`mailserver`/`template`/`trash` databases are created by **`drumee-role-schemas`**, which
+has no image yet. The app is not broken, it is unprovisioned.
+
+Three things the bring-up taught, each already fixed where it belongs:
+
+- **Named volumes inherit ownership from the image directory beneath them.**
+  `/etc/drumee/credential` is mounted writable over the read-only config tree (the app
+  writes `db.json`/`redis.json` from `.env`, because a compose deployment's credentials
+  come from there and not from infra-init's generated ones). `drumee-infra` is
+  deliberately absent from this role, so that directory did not exist and Docker created
+  the mountpoint root-owned — `cannot create /etc/drumee/credential/db.json: Permission
+  denied`. The Dockerfile creates it owned by 8000.
+- **`pm2-runtime` IS the no-daemon entry point.** `--no-daemon` makes it exit with
+  `unknown option`, which crash-looped the role before it reached any application code.
+- **The service names and `database.host`/`redis.host` must agree.** The config says
+  `mariadb` and `redis`; §2 names the services `db` and `cache`. The app dials what the
+  config says, so it resolved nothing (`getaddrinfo ENOTFOUND redis`) inside a container
+  pm2 reported as running. Fixed with network **aliases** rather than renaming the
+  services, so the topology keeps the design's names and the deployment keeps its config's
+  hostnames.
+
+Two findings left open, both in `drumee-server-pod`'s `Depends` rather than in the image:
+
+- It still pulls **`nginx`, `redis-server`** and the whole **media stack** (LibreOffice,
+  ffmpeg, GraphicsMagick), which is most of the 2.6 GB. nginx and redis-server are pure
+  declaration errors — this role runs neither. The media tools are not: `server-pod`'s code
+  shells out to them, so moving them to the media role needs a change in `server-team`,
+  not just a control file.
+- `loadUiinfo` reads `/srv/drumee/runtime/ui/main`, which is `drumee-ui-pod`'s payload and
+  belongs to the web role. Either the app needs that manifest mounted, or the lookup
+  belongs on the web side. It logs a warning today, so it is not blocking, but it is a
+  cross-role coupling the split has not resolved.
 
 ### infra-init — the configuration-rendering job
 
