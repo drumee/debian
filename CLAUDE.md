@@ -903,6 +903,45 @@ Two findings left open, both in `drumee-server-pod`'s `Depends` rather than in t
   belongs on the web side. It logs a warning today, so it is not blocking, but it is a
   cross-role coupling the split has not resolved.
 
+### Channel parity — one configuration path
+
+Design: @docs/channel-parity.md. **Change 1 is done**: the container channel no longer has
+its own configuration vocabulary. `infra-init` renders by reconfiguring the package:
+
+```
+debconf-set-selections < install.conf
+DEBCONF_RECONFIGURE=1 DRUMEE_CHROOT=/out dpkg-reconfigure drumee-infra
+```
+
+so both channels drive the same preseed, the same debconf→`DRUMEE_*` bridge, the same
+`bin/install` and the same renderers. `install.conf` is mounted read-only into the job.
+The hand-mapped env→`infra.js`-flags translation is gone, and with it the five defects
+`channel-parity.md` §2 lists — all of which came from having a second mapping.
+
+`DRUMEE_CHROOT` does double duty, deliberately: `bin/install` forwards it as `--chroot`,
+and `postinst` reads it as *"this is a render, not a host configure"* and skips
+`ensure_nginx_stream_module`, `finish_dns`, `setup_wireguard` and `reload_nginx`.
+`bin/install` skips the crontab and the host steps below it for the same reason. One
+signal rather than a new flag — rendering into a target and reconfiguring the machine you
+are on are different operations, and the target is what distinguishes them.
+
+Adopting the native path immediately surfaced **three bugs that were invisible while the
+two channels were separate**, and every one of them also affected native installs:
+
+| Defect | Why it hid |
+|---|---|
+| `DRUMEE_BUILD_TIME` beat `DRUMEE_CHROOT`, so a deploy-time reconfigure was treated as an image build and rendered nothing | The two flags were added days apart for different purposes and had never met. A render target is the more specific signal and is never the host, so it wins |
+| `bin/install` reported `Setup has failed` after rendering the entire tree | Its postcondition read the absolute `/etc/drumee/drumee.sh`. An absolute path hides until something renders somewhere else |
+| nginx refused **all** configuration: `open() "/etc/jitsi/meet.public.conf" failed` | `jitsi.js` ran unconditionally and emits a vhost that includes the Jitsi tree. Natively the same run rendered that tree too, so nginx was satisfied and nobody looked. Now gated on `USE_JITSI`, derived from the services answer |
+
+Note the Jitsi gate changes **fresh** renders only — a render adds files, it does not prune,
+so an upgraded box keeps a `20-jitsi.public.conf` it already had (harmlessly, since its
+`/etc/jitsi` tree is there too).
+
+Verified both ways at 1.0.41: the container job renders 41 files and exits 0 with the host
+steps skipped, the web role serves 301/502 against it, and `lifecycle-remote.sh` on testbox
+is 15/15 with `https://` still 200.
+
 ### infra-init — the configuration-rendering job
 
 `docs/distribution.md` §5 made real: the package delivers the payload at build time, this

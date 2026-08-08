@@ -1,3 +1,18 @@
+drumee-bootstrap (2.0.7) stable; urgency=medium
+
+  * entrypoint/infra renders by RECONFIGURING THE PACKAGE:
+    debconf-set-selections < install.conf, then DEBCONF_RECONFIGURE=1
+    DRUMEE_CHROOT=$OUT dpkg-reconfigure drumee-infra. The hand-mapped
+    environment-to-infra.js-flags translation is gone, and with it the class of bug it
+    produced — see docs/channel-parity.md §2 for the five measured instances.
+    .
+    The domain is read back from debconf rather than from the environment, so this
+    script has one source of truth for it and it is the same one the postinst uses.
+    There is deliberately no environment fallback for the settings the preseed carries:
+    a second way to say the same thing is what this replaced.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 15:22:36 +0200
+
 drumee-bootstrap (2.0.6) stable; urgency=medium
 
   * entrypoint/app: drop --no-daemon from the pm2-runtime invocation. pm2-runtime IS

@@ -786,10 +786,15 @@ services:
     networks: [drumee]
     restart: "no"
     env_file: [.env]
-    environment:
-      RENDER_TARGET: /out
     volumes:
       - drumee_conf:/out
+      # The DEBCONF PRESEED, which is how this job learns the deployment's settings — the
+      # same file the native channel installs from (render.mjs debconf). It preseeds it and
+      # runs dpkg-reconfigure drumee-infra, so both channels drive the same postinst,
+      # the same bridge and the same renderers. See docs/channel-parity.md; the previous
+      # arrangement hand-mapped .env onto infra.js flags and every container-side
+      # configuration bug came from that second mapping.
+      - ./install.conf:/etc/drumee/install.conf:ro
 
   # Schema restore, then migrations, as two ordered run-once jobs rather than one:
   # docs/distribution.md §6 requires migrate to be separately re-runnable, and an

@@ -1,58 +1,73 @@
 #!/bin/sh
-# infra role: run-once. Renders the configuration tree the other roles mount, then
-# exits. Writes only into its output directory — never onto a host (§5).
+# infra role: run-once. Renders the configuration tree the other roles mount, then exits.
+# Writes only into its output directory — never onto a host (§5).
 #
-# It renders with setup-infra's OWN engine (infra.js --chroot). That is the point: the
-# 43-file tree under /etc/drumee, /etc/nginx, /var/lib/bind, /etc/postfix and friends has
-# one authoritative source, and the container channel must not grow a second one. Nothing
-# here reimplements a template.
+# It renders by RECONFIGURING THE PACKAGE, not by calling infra.js directly:
 #
-# Env:
-#   DRUMEE_DOMAIN_NAME   required — the deployment's domain
-#   DRUMEE_INFRA_OUT     render target, default /out
-#   ADMIN_EMAIL          default admin@<domain>
-#   PUBLIC_IP4/6         serving addresses. 'auto' means "detect at install time" and is
-#                        IGNORED here on purpose: a container sees a bridge address, so
-#                        detection would publish an address nothing can reach.
-#   PRIVATE_IP4/6, DRUMEE_DATA_DIR, DRUMEE_DB_DIR, OWN_CERTS_DIR, LOCAL_MODE
-#   FORCE_RENDER=1       re-render over an existing tree
+#   debconf-set-selections < install.conf
+#   DEBCONF_RECONFIGURE=1 DRUMEE_CHROOT=$OUT dpkg-reconfigure drumee-infra
+#
+# so the container channel walks exactly the path the native channel walks on every
+# install — the same preseed file, the same debconf→DRUMEE_* bridge in drumee-infra's
+# postinst, the same bin/install, the same renderers.
+#
+# docs/channel-parity.md has the argument; the short version is that this script used to
+# hand-map environment variables onto infra.js flags, and every container-side
+# configuration bug came from that second mapping: a BIND zone file literally named
+# `auto`, "domain_name": "localhost" in one file and the real domain in another, an
+# argparse usage dump because --admin-email is not an option, and a lost render because a
+# DKIM ordering requirement was undocumented. The postinst had none of them, because every
+# native install exercises it.
+#
+# DRUMEE_CHROOT does double duty, deliberately: bin/install turns it into --chroot, and the
+# postinst reads it as "this is a render, not a host configure" and skips DNS, WireGuard
+# and nginx.
+#
+# Input:
+#   /etc/drumee/install.conf   the preseed, mounted read-only (render.mjs debconf)
+#   DRUMEE_INFRA_OUT           render target, default /out
+#   FORCE_RENDER=1             re-render over an existing tree
+#
+# Domain, addresses, TLS method, directories and WireGuard all come from the preseed. There
+# is deliberately no environment fallback for them: a second way to say the same thing is
+# what this replaced.
 set -eu
 . /usr/lib/drumee/entrypoint/lib.sh
 drumee_release
 
 OUT="${DRUMEE_INFRA_OUT:-/out}"
+PRESEED="${DRUMEE_PRESEED:-/etc/drumee/install.conf}"
 SETUP=/var/lib/drumee/setup-infra
 UID_DRUMEE="${DRUMEE_UID:-8000}"
 GID_DRUMEE="${DRUMEE_GID:-8000}"
 
 [ -d "$SETUP" ] || die "$SETUP not found (drumee-infra provides it)"
 command -v node >/dev/null || die "node not found"
+command -v debconf-set-selections >/dev/null || die "debconf-set-selections not found"
 [ -d "$OUT" ] || die "$OUT is not mounted — the shared configuration volume must be there"
-[ -n "${DRUMEE_DOMAIN_NAME:-}" ] || die "DRUMEE_DOMAIN_NAME is required"
-DOMAIN="$DRUMEE_DOMAIN_NAME"
+[ -f "$PRESEED" ] || die "no preseed at $PRESEED — generate it with: render.mjs debconf"
 
-# NOT drumee_env: that sources /etc/drumee/drumee.sh, which is a file THIS job writes.
-# Reading a previous render's output before producing the next one would let a stale
-# value survive a deliberate reconfiguration.
-export ADMIN_EMAIL="${ADMIN_EMAIL:-admin@$DOMAIN}"
-
-# Idempotence is infra.js's own: hasExistingSettings() sees the drumee.json a previous
-# run wrote and exits without touching anything unless --reconfigure=1 is passed. So a
-# restarted job is a no-op and a deliberate re-render is one flag — deliberately the same
-# contract as `dpkg-reconfigure` on the native channel, for the same reason.
-RECONF=""
-if [ "${FORCE_RENDER:-0}" = "1" ]; then
-  echo "[drumee] FORCE_RENDER=1 — re-rendering over the existing tree"
-  RECONF="--reconfigure=1"
-elif [ -f "$OUT/etc/drumee/drumee.json" ]; then
+# Idempotence is infra.js's own: hasExistingSettings() sees the drumee.json a previous run
+# wrote and exits without touching anything unless --reconfigure=1. A restarted job is a
+# no-op and a deliberate re-render is one flag — the same contract as dpkg-reconfigure
+# natively, which is now literally the same code path.
+if [ "${FORCE_RENDER:-0}" != "1" ] && [ -f "$OUT/etc/drumee/drumee.json" ]; then
   echo "[drumee] already rendered ($OUT/etc/drumee/drumee.json exists) — nothing to do"
   echo "[drumee] set FORCE_RENDER=1 to render again"
   exit 0
 fi
 
-# DKIM before the render. infra.js no longer dies on a missing key (it warns and emits an
-# empty record), but the zone embeds the public half, so a real key has to exist first or
-# the zone advertises nothing.
+echo "[drumee] preseeding debconf from $PRESEED"
+debconf-set-selections < "$PRESEED"
+
+# The domain is read back FROM DEBCONF rather than from the environment, so this script has
+# exactly one source of truth for it — the same one the postinst will use.
+DOMAIN="$(echo get drumee-infra/domain | debconf-communicate drumee-infra 2>/dev/null | cut -d' ' -f2-)"
+[ -n "$DOMAIN" ] || die "the preseed carries no drumee-infra/domain"
+echo "[drumee] domain from the preseed: $DOMAIN"
+
+# DKIM before the render: infra.js no longer dies without a key, but the zone embeds the
+# public half, so a real key must exist first or the zone advertises nothing.
 KEYDIR="$OUT/etc/opendkim/keys/$DOMAIN"
 if [ ! -s "$KEYDIR/dkim.txt" ]; then
   if command -v opendkim-genkey >/dev/null 2>&1; then
@@ -65,53 +80,24 @@ if [ ! -s "$KEYDIR/dkim.txt" ]; then
   fi
 fi
 
-# Only flags infra.js actually declares. --admin-email is NOT one of them (that value
-# travels in the environment), and an undeclared flag makes argparse exit 2 with a usage
-# dump that reads like a crash.
-#
-# 'auto' is dropped rather than forwarded. It is drumee.yaml's sentinel for "detect at
-# install time", and render.mjs emits it verbatim into .env — forwarding it produced a
-# BIND zone file literally named `auto` and a bogus 01-public.conf, both observed.
-set -- --chroot="$OUT" --public-domain="$DOMAIN"
-ip_ok() { [ -n "$1" ] && [ "$1" != auto ]; }
-# Not just the flags: infra.js reads PUBLIC_IP4/PUBLIC_IP6 from the ENVIRONMENT too
-# (templates/utils.js), where the env value wins over detection. Omitting the flag while
-# leaving PUBLIC_IP4=auto exported still produced a zone file named `auto` — measured. So
-# the sentinel is cleared here as well, and this entrypoint stays correct whatever set it.
-ip_ok "${PUBLIC_IP4:-}"  || unset PUBLIC_IP4  || true
-ip_ok "${PUBLIC_IP6:-}"  || unset PUBLIC_IP6  || true
-ip_ok "${PRIVATE_IP4:-}" || unset PRIVATE_IP4 || true
-ip_ok "${PRIVATE_IP6:-}" || unset PRIVATE_IP6 || true
-ip_ok "${PUBLIC_IP4:-}"  && set -- "$@" --public-ip4="$PUBLIC_IP4"
-ip_ok "${PUBLIC_IP6:-}"  && set -- "$@" --public-ip6="$PUBLIC_IP6"
-ip_ok "${PRIVATE_IP4:-}" && set -- "$@" --private-ip4="$PRIVATE_IP4"
-ip_ok "${PRIVATE_IP6:-}" && set -- "$@" --private-ip6="$PRIVATE_IP6"
-[ -n "${DRUMEE_DATA_DIR:-}" ] && set -- "$@" --data-dir="$DRUMEE_DATA_DIR"
-[ -n "${DRUMEE_DB_DIR:-}" ]   && set -- "$@" --db-dir="$DRUMEE_DB_DIR"
-[ -n "${OWN_CERTS_DIR:-}" ]   && set -- "$@" --own-certs-dir="$OWN_CERTS_DIR"
-[ "${LOCAL_MODE:-0}" = "1" ]  && set -- "$@" --localhost=1
-[ -n "$RECONF" ]              && set -- "$@" "$RECONF"
-
-echo "[drumee] rendering $DOMAIN into $OUT"
-echo "[drumee]   infra.js $*"
-( cd "$SETUP" && node infra.js "$@" )
+echo "[drumee] rendering into $OUT via dpkg-reconfigure drumee-infra"
+DEBIAN_FRONTEND=noninteractive \
+DEBCONF_RECONFIGURE=1 \
+DRUMEE_CHROOT="$OUT" \
+  dpkg-reconfigure drumee-infra
 
 [ -f "$OUT/etc/drumee/drumee.json" ] \
   || die "the render produced no $OUT/etc/drumee/drumee.json — refusing to report success"
 
-# Self-signed certificates, when nothing else will provide them. nginx in the web role
-# will not start without the files its ssl/*.conf includes, so a stack whose TLS mode is
-# self-signed needs them created here — on the native channel bin/install calls
-# create-local-certs at this exact point. Skipped when the operator supplies their own.
+# Self-signed certificates, when nothing else will provide them. nginx in the web role will
+# not start without the files its ssl/*.conf includes, so a self-signed deployment needs
+# them here — natively bin/install calls create-local-certs at this exact point.
 if [ -z "${OWN_CERTS_DIR:-}" ] && [ -f "$SETUP/bin/create-local-certs" ]; then
   echo "[drumee] creating self-signed certificates"
-  # Sourcing the drumee.sh THIS render just wrote is how create-local-certs learns the
-  # names to sign (PUBLIC_DOMAIN, PRIVATE_DOMAIN, VENDORS_DOMAIN, JITSI_DOMAIN). CERTS_DIR
-  # is then re-pointed into the render target: the value in that file is the path the
-  # ROLES see once the volume is mounted, not a path that exists in this container.
-  #
-  # `set +u` around the source, and a subshell: drumee.sh is generated per deployment and
-  # an unset variable inside it would abort this whole script under `set -u`.
+  # The names to sign come from the drumee.sh this render just wrote; CERTS_DIR is
+  # re-pointed into the target, because the value in that file is the path the ROLES see
+  # once the volume is mounted, not a path in this container. `set +u` because that file is
+  # generated per deployment and references variables it does not define.
   ( set +u
     . "$OUT/etc/drumee/drumee.sh"
     CERTS_DIR="$OUT/etc/drumee/certs"; export CERTS_DIR
@@ -120,8 +106,8 @@ if [ -z "${OWN_CERTS_DIR:-}" ] && [ -f "$SETUP/bin/create-local-certs" ]; then
 fi
 
 # The other roles run as uid 8000 and only read this tree. Credentials stay 0640 inside a
-# 0750 directory: db.json and email.json carry passwords, and this volume is shared with
-# the media role — the one component that parses untrusted documents.
+# 0750 directory: db.json and email.json carry passwords, and this volume is shared with the
+# media role — the one component that parses untrusted documents.
 echo "[drumee] fixing ownership to $UID_DRUMEE:$GID_DRUMEE"
 chown -R "$UID_DRUMEE:$GID_DRUMEE" "$OUT"
 [ -d "$OUT/etc/drumee/credential" ] && chmod 0750 "$OUT/etc/drumee/credential"

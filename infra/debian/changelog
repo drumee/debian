@@ -1,3 +1,71 @@
+drumee-infra (1.2.36) stable; urgency=medium
+
+  * Render the Jitsi tree only when conferencing is requested. jitsi.js ran
+    unconditionally and emits an nginx vhost that includes /etc/jitsi/*.conf, so an
+    instance with no conferencing still got a vhost pointing at a Jitsi tree.
+    Natively that was invisible — the same run rendered /etc/jitsi too, so nginx was
+    satisfied. In the container channel the web role mounts the nginx configuration
+    and not the Jitsi tree, and nginx refused EVERYTHING with
+    `open() "/etc/jitsi/meet.public.conf" failed`: an instance serving nothing because
+    of a vhost nobody asked for.
+    .
+    USE_JITSI already existed as the intent flag and nothing set it; postinst now
+    derives it from the services answer, so both channels gate on the same fact.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 15:36:14 +0200
+
+drumee-infra (1.2.35) stable; urgency=medium
+
+  * Carries setup-infra's chroot-aware bin/install. Its success check read the
+    absolute /etc/drumee/drumee.sh, so a chroot render printed "Setup has failed"
+    after producing the entire tree — including, on this path, the Jitsi, Prosody and
+    Coturn configuration that the container channel's previous hand-mapped call never
+    reached at all. The crontab and the host steps below it are skipped for a render:
+    a render produces files, and in a container there is no cron to install them into.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 15:30:52 +0200
+
+drumee-infra (1.2.34) stable; urgency=medium
+
+  * DRUMEE_CHROOT takes precedence over DRUMEE_BUILD_TIME. The two flags added for
+    the container channel collided on the first run of the preseed path:
+    Dockerfile.base sets DRUMEE_BUILD_TIME=1 as ENV so it persists into the running
+    container — deliberately, since configuration there comes from the shared volume
+    and not from dpkg — but the infra-init job reconfigures the package at DEPLOY time
+    to produce that volume, and it inherited the flag. dpkg-reconfigure printed
+    "delivering the payload only", rendered nothing, and the job failed with "the
+    render produced no drumee.json".
+    .
+    A render target is the more specific signal and it is never the host, so honouring
+    it first is safe whatever the build flag says: rendering into a directory cannot
+    touch the machine.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 15:26:43 +0200
+
+drumee-infra (1.2.33) stable; urgency=medium
+
+  * DRUMEE_CHROOT means "render into that directory", not "configure this host". The
+    container channel can now reuse this postinst — preseed, debconf bridge,
+    bin/install, renderers — instead of hand-mapping environment variables onto
+    infra.js flags, which is where every container-side configuration bug came from
+    (docs/channel-parity.md §2): a BIND zone file named `auto`, "domain_name":
+    "localhost" beside the real domain in the same render, an argparse usage dump
+    because --admin-email is not an option, and a lost render on an undocumented DKIM
+    ordering requirement. None of those could happen on this path, because every
+    native install exercises it.
+    .
+    When it is set, the four host operations are skipped: ensure_nginx_stream_module,
+    finish_dns, setup_wireguard and reload_nginx. There is no nginx to reload in a
+    render, named is a container of its own, and the WireGuard units belong to a
+    machine. One signal rather than a new flag — rendering into a target and
+    reconfiguring the machine you are running on are different operations, and the
+    target is exactly what distinguishes them.
+    .
+    setup-infra's bin/install forwards it as --chroot, mirroring the existing
+    DRUMEE_RECONFIGURE forwarding. Unset natively, so nothing changes there.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 15:22:36 +0200
+
 drumee-infra (1.2.32) stable; urgency=medium
 
   * Deliver the payload and configure nothing when DRUMEE_BUILD_TIME is set. This

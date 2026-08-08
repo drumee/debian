@@ -75,6 +75,13 @@ bridge_debconf_env() {
         echo "  are replaced by the rendered versions. Existing passwords are kept."
     fi
     db_get drumee-infra/service          || true; export SERVICES="$RET"
+    # setup-infra gates jitsi.js on USE_JITSI, and nothing was setting it — so the Jitsi
+    # configuration and its nginx vhost were rendered on every install, wanted or not.
+    # The services answer is where that intent lives, so derive it here rather than
+    # letting each channel decide separately.
+    case ",$SERVICES," in
+      *,jitsi,*|*,conference,*|*,jit,*) export USE_JITSI=1 ;;
+    esac
     db_get drumee-infra/admin_email      || true; export ADMIN_EMAIL="$RET"
     db_get drumee-infra/acme_email       || true; export ACME_EMAIL_ACCOUNT="$RET"
     db_get drumee-infra/db_dir           || true; export DRUMEE_DB_DIR="$RET"
@@ -504,14 +511,26 @@ case "$1" in
     # comes from the shared volume the infra-init job renders, not from dpkg. An
     # operator who really wants to reconfigure inside a container must unset it.
     # ---------------------------------------------------------------------------
-    if [ "${DRUMEE_BUILD_TIME:-0}" = "1" ]; then
+    # DRUMEE_CHROOT beats DRUMEE_BUILD_TIME, and the order matters.
+    #
+    # Dockerfile.base sets DRUMEE_BUILD_TIME=1 as ENV, so it persists into the RUNNING
+    # container — deliberately, because configuration there comes from the shared volume
+    # and not from dpkg. But the infra-init job reconfigures the package at DEPLOY time to
+    # produce that volume, and it inherited the flag: dpkg-reconfigure printed
+    # "delivering the payload only", rendered nothing, and the job failed with "the render
+    # produced no drumee.json". Measured on the first run of the preseed path.
+    #
+    # A render target is the more specific signal and it is never the host, so it is safe
+    # whatever the build flag says: rendering into a directory cannot touch the machine.
+    if [ -z "${DRUMEE_CHROOT:-}" ] && [ "${DRUMEE_BUILD_TIME:-0}" = "1" ]; then
         echo "  DRUMEE_BUILD_TIME=1 — delivering the payload only."
         echo "  Nothing is rendered and nothing on this filesystem is touched."
         echo "  The infra-init job renders the configuration tree at deploy time."
         exit 0
     fi
     bridge_debconf_env
-    ensure_nginx_stream_module
+    # Also a host operation — it installs an nginx module — so not in render mode.
+    [ -n "${DRUMEE_CHROOT:-}" ] || ensure_nginx_stream_module
     if [ -z "$DRUMEE_DOMAIN_NAME" ]; then
         echo "drumee-infra: no domain configured (debconf drumee-infra/domain is empty)." >&2
         echo "  Preseed it first, e.g.: debconf-set-selections < install.conf  (from: render.mjs debconf)" >&2
@@ -539,9 +558,28 @@ case "$1" in
         exit 1
     fi
     /var/lib/drumee/setup-infra/bin/install
-    finish_dns
-    setup_wireguard
-    reload_nginx
+    # ---------------------------------------------------------------------------
+    # DRUMEE_CHROOT set means "render into that directory", not "configure this host".
+    #
+    # It is how the container channel reuses this whole path — preseed, bridge,
+    # renderers — instead of hand-mapping environment variables to infra.js flags, which
+    # is where every container-side configuration bug came from
+    # (docs/channel-parity.md §2). bin/install turns it into --chroot.
+    #
+    # The four steps below are host operations and must not run in that mode: nginx does
+    # not exist to reload, named is a container of its own, and the WireGuard units
+    # belong to a machine. One signal rather than a new flag, because rendering into a
+    # target and reconfiguring the machine you are on are genuinely different
+    # operations and the target is exactly what tells them apart.
+    # ---------------------------------------------------------------------------
+    if [ -n "${DRUMEE_CHROOT:-}" ]; then
+        echo "  rendered into $DRUMEE_CHROOT — skipping DNS, WireGuard and nginx,"
+        echo "  which are operations on a host and not on a configuration tree."
+    else
+        finish_dns
+        setup_wireguard
+        reload_nginx
+    fi
     ;;
 
     # There is deliberately no `reconfigure)` arm. There used to be, it passed
