@@ -87,7 +87,13 @@ This tree goes when all of the following are true, and not before — it is curr
    **Done** — `images.stack: roles`, eight services plus profile-gated `dns` and `mail`.
    Still not the default, because of 4.
 3. `tests/smoke-container.sh` and `tests/e2e-local.sh` pass against role images.
-   Both still target the source stack.
+   Both still target the source stack. **This is now the binding criterion.**
 4. Images are published and signed for the architectures the roles claim.
-   None are published — every role image so far is built against a local repository
-   (`scripts/apt-repo-local.sh`). This is now the binding criterion.
+   **Published at 1.0.55** — all seven, `drumee/role-*:1.0.55` over a digest-pinned
+   `drumee/drumee-base`, each verified by pulling it back from the registry rather than
+   trusting the build cache (`docker/publish-roles.sh`). Two halves outstanding:
+   **not signed** (cosign keyless + SBOM belongs to `release.yml`, which has the OIDC
+   identity this machine does not), and **amd64 only**, because `drumee-server-pod` is
+   (§9.1) — serving arm64 means building the packages for arm64 first.
+   Registry is Docker Hub `drumee/` rather than the `ghcr.io/drumee` named in §8: the
+   GHCR token available lacked `write:packages`. Moving them needs only `REGISTRY=`.

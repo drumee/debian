@@ -761,10 +761,37 @@ seeing new versions; nothing breaks.
 ### Package-based role images (the replacement path)
 
 ```bash
-docker/build-role.sh web                  # version from release-manifest.yaml
+docker/build-role.sh web                  # build ONE role locally (--load)
 docker/build-role.sh infra                # the configuration-rendering job
 APT_URI=http://localhost:8099 docker/build-role.sh web   # against a local repo
+
+docker/publish-roles.sh                   # build ALL seven from apt.drumee.net and push
+docker/publish-roles.sh --dry-run         # pre-flight checks + Dockerfiles, no push
+docker/publish-roles.sh --roles="web app" --also=stable
 ```
+
+`publish-roles.sh` differs from `build-role.sh` in four ways that each cost a mistake:
+
+- **The base image is published**, not faked. `FROM name@<image id>` is rejected for an
+  image that was never pushed, so a role's pinned digest can only come from a registry —
+  `build-role.sh` stands up a throwaway local one, this pushes the real thing, and the base
+  becomes a published artifact in its own right.
+- **The packages are checked live first.** Otherwise the failure is `apt-get install` not
+  finding a version, forty minutes into a build, surfacing as a Docker error.
+- **One tag for every role**, per §2's anchor argument.
+- **The cache is left alone** — against `apt.drumee.net` a version is immutable, so there is
+  nothing to bust.
+
+It verifies by **pulling each image back** and reading `/usr/share/drumee/image-release` and
+the installed package version. That is not a formality: the local build cache will satisfy a
+`docker run` from content that was never uploaded, so a pull into a clean state is the only
+check that the registry holds what the script says it does.
+
+Two things it deliberately does not do. **Signing** — cosign keyless + SBOM is `release.yml`'s
+job (§8), since it has the OIDC identity; a locally-signed image would assert a provenance
+this machine cannot back. And **arm64** — `drumee-server-pod` is amd64-only (§9.1), so an
+arm64 `role-app` could not install its own package. Serving arm64 means building the
+packages for arm64 first, not adding a platform to the build.
 
 **All seven now exist**: `docker/Dockerfile.role-{web,infra,app,schemas,dns,mail,converter}`.
 Each contains **no source checkout, no git clone, no webpack and not one component
@@ -821,9 +848,23 @@ this is set: **db, cache, infra-init, schemas-init, migrate, app, web, converter
 profile-gated **dns** and **mail**. `docker compose config` validates it, and
 `docker/build-role.sh` builds the images.
 
-It is not the default because none of the role images are **published** yet — every one is
-built locally against a local repository. Emitting it by default would hand every existing
-caller a stack that cannot pull. That is criterion 1 of `deploy/docker/DEPRECATED.md`.
+**All seven images are published** as of 1.0.55 — `drumee/role-{infra,schemas,app,web,converter,dns,mail}:1.0.55`
+over `drumee/drumee-base@sha256:143e42c6…`, each verified by pulling it back and reading both
+`/usr/share/drumee/image-release` and the installed package version. So the stack can pull,
+and `render.mjs compose` emits image references that resolve.
+
+It is still **not the default**, and the reason has changed rather than gone away:
+
+- `tests/smoke-container.sh` and `tests/e2e-local.sh` still target the source stack, so
+  nothing exercises the role topology end to end (criterion 3).
+- Provisioning stops at `createHub` (see the schemas role above), so a stack brought up
+  from these images reaches a schema, a pool and accounts but no workspace.
+- The images are **unsigned** — cosign keyless + SBOM is `release.yml`'s job (§8), so
+  criterion 4 is half-met.
+- amd64 only, because `drumee-server-pod` is (§9.1).
+
+Making it the default before the first two are answered would hand every existing caller a
+stack that pulls and then does not work, which is worse than one that plainly cannot pull.
 
 Four differences that are the point of the exercise:
 
