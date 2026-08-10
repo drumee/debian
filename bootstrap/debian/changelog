@@ -1,3 +1,121 @@
+drumee-bootstrap (2.0.14) stable; urgency=medium
+
+  * entrypoint/schemas init now populates as well as bootstraps, because "initialise the
+    database" means both halves — natively bin/install runs the bootstrap and then
+    populate.js. A schema with no sys_conf, no entity pool and no system accounts is not
+    a usable instance: the application answers 500 with
+    `call undefined.get_fonts_faces()`, which is what an empty sys_conf looks like from
+    the outside.
+    .
+    It runs setup-schemas' OWN populate, not a container fork. That became possible with
+    drumee-schemas 2.7.4, which taught lib/utils.js and lib/schema.js to pass the
+    connection flags from db.json instead of assuming a local socket — so one populate
+    serves both channels, which is the point of docs/channel-parity.md.
+    .
+    Idempotent: an instance whose yp.sys_conf already has rows is left alone. Re-running
+    would mint new system accounts and a second entity pool every time a run-once job
+    restarted.
+
+ -- packaging@drumee.com  Mon, 10 Aug 2026 11:18:03 +0200
+
+drumee-bootstrap (2.0.13) stable; urgency=medium
+
+  * entrypoint/app starts pm2 the way the native channel does, because pm2-runtime
+    cannot be used here. As PID 1 its argv is inherited by pm2's cluster wrapper, so
+    every main/service worker received the ecosystem path as its OWN argv and Drumee's
+    argparse rejected it: `ProcessContainer.js: error: unrecognized arguments: ...`,
+    sixteen unstable restarts, then "errored" — while the container reported running and
+    the web role answered 502.
+    .
+    Four invocations were eliminated by measurement, not by reading docs: `start <file>`,
+    the bare `<file>`, a .js wrapper around it, and --no-daemon (2.0.6). Fork-mode apps
+    survive the extra argument; cluster-mode ones do not, which is why `main` looked
+    healthy while the entire REST tier was dead.
+    .
+    So it runs the same `pm2 start <ecosystem>` that /usr/sbin/drumee runs natively and
+    holds PID 1 with `pm2 logs --raw`. The daemon spawns workers with no CLI argv to
+    inherit. It also fails fast if anything is errored after eight seconds, because a
+    role whose REST tier is dead otherwise reports healthy.
+    .
+    The underlying fault is not pm2's: an application should not die because its
+    supervisor added an argument. parse_known_args in the Drumee apps would let
+    pm2-runtime work directly, and that is a server-team change.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 18:12:44 +0200
+
+drumee-bootstrap (2.0.12) stable; urgency=medium
+
+  * entrypoint/app: pm2-runtime takes the ecosystem file and nothing else. With `start`
+    in front of it, pm2 passes "start <file>" down to each application as its OWN argv
+    — and the Drumee processes parse argv, so every one of them exited with
+    `ProcessContainer.js: error: unrecognized arguments: start
+    /etc/drumee/infrastructure/ecosystem.json` and pm2 gave up after 16 unstable
+    restarts, while the container itself reported running. The bare form brings main,
+    main/service and factory online; verified before changing the package.
+    .
+    That is the second correction to this one line (2.0.6 removed --no-daemon), and
+    both were the same mistake: assuming a pm2 invocation instead of running it.
+
+ -- packaging@drumee.com  Sat, 08 Aug 2026 17:56:57 +0200
+
+drumee-bootstrap (2.0.11) stable; urgency=medium
+
+  * entrypoint/schemas points FACTORY_DIR at the package. The init script defaults to
+    /factory, which is where the deprecated image COPYs the schemas source; the package
+    installs that tree under /var/lib/drumee/schemas/templates/factory. So init created
+    the base databases and then died on "/factory/seed/yp.sql: No such file or
+    directory" — having already made half the change, which is the worst place for a
+    run-once job to stop.
+    .
+    Exported by the role rather than changed in the script, so the deprecated image
+    keeps working unchanged, and checked before use so a missing tree is named instead
+    of discovered five statements in.
+
+ -- packaging@drumee.com  Sat, 08 Aug 2026 17:48:59 +0200
+
+drumee-bootstrap (2.0.10) stable; urgency=medium
+
+  * Parse the port out of db.json as digits, and say why a connection failed. A quoted
+    JSON string ends at its closing quote so it extracts cleanly, but an unquoted
+    number does not: "port": 3306 yielded "3306 " with the trailing space, and mariadb
+    read that as a unit suffix — `Unknown suffix '' used for variable 'port'`.
+    .
+    Nobody saw that message, and that is the more important half. schemas/init's wait
+    loop mutes its probe so 60 retries do not produce 60 errors, so the job waited two
+    minutes and reported only "MariaDB not reachable" — with the actual reason
+    discarded on every attempt. It now runs the probe once more unmuted before giving
+    up, which turns a class of failure (bad port, wrong password, unresolvable name)
+    from a timeout into a message.
+
+ -- packaging@drumee.com  Sat, 08 Aug 2026 17:17:32 +0200
+
+drumee-bootstrap (2.0.9) stable; urgency=medium
+
+  * Ships the container channel's database bootstrap, and entrypoint/schemas runs it.
+    schemas-init.sh and container-populate.js moved here from deploy/docker as
+    /usr/lib/drumee/schemas/{init,populate.js}: they are role logic, so they belong in
+    a package where they are versioned, pinned and rollback-able (§9.2), not copied
+    into an image. They also survive the deletion of that tree.
+    .
+    One copy, three consumers: this package, the deprecated schemas/populate images
+    (repointed to a `pkg` build context), and scripts/build-seed.sh. Reusing the same
+    vetted script for all three is deliberate — a fork is how the seed and the running
+    stack drift apart.
+    .
+    entrypoint/schemas takes `init` or `migrate`, because §6 needs migrate separately
+    re-runnable. init deliberately does NOT run setup-schemas/bin/install: that
+    restores a mariabackup PHYSICAL snapshot with --copy-back, which cannot work when
+    the database is in another container. It creates the base databases from the
+    schemas repo's own templates/factory/ tree instead, over TCP as root.
+    .
+    The application credentials are read from the rendered volume's db.json rather than
+    from the environment, which is what keeps one writer per credential: db.json is
+    authoritative and already records where the database is. The domain comes from the
+    volume's drumee.sh. Only DB_ROOT_PASSWORD arrives from the deployment, because
+    creating databases is the one thing that needs root.
+
+ -- packaging@drumee.com  Sat, 08 Aug 2026 16:59:07 +0200
+
 drumee-bootstrap (2.0.8) stable; urgency=medium
 
   * One writer per credential. drumee_write_credentials wrote db.json and redis.json

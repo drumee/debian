@@ -15,6 +15,35 @@ ECOSYSTEM="${DRUMEE_ECOSYSTEM:-/etc/drumee/infrastructure/ecosystem.json}"
 
 command -v pm2-runtime >/dev/null || die "pm2-runtime not found (drumee-node-runtime provides it)"
 echo "[drumee] starting pm2-runtime with $ECOSYSTEM"
-# No --no-daemon: pm2-runtime IS the no-daemon entry point, and passing it makes pm2 exit
-# with `error: unknown option '--no-daemon'`, which crash-looped the role.
-exec pm2-runtime start "$ECOSYSTEM"
+# pm2-runtime cannot be used here, and the reason is specific: as PID 1 its argv is
+# inherited by pm2's cluster wrapper, so every `main/service` worker receives the ecosystem
+# path as ITS OWN argv and Drumee's argparse rejects it —
+# `ProcessContainer.js: error: unrecognized arguments: /etc/drumee/.../ecosystem.json`,
+# sixteen unstable restarts, then "errored", while the container reported running.
+#
+# Measured, and three invocations were eliminated before this one: `start <file>`, the bare
+# `<file>`, and a .js wrapper around it. All leak. Fork-mode apps survive it; cluster-mode
+# ones do not, which is why `main` looked fine and the REST workers never came up.
+#
+# So the daemon is started exactly as the native channel starts it — the same
+# `pm2 start <ecosystem>` /usr/sbin/drumee runs — and PID 1 becomes the log tail. The
+# daemon spawns workers without a CLI argv to inherit, and both channels now bring the
+# stack up the same way.
+#
+# The underlying fault is not pm2's: an application should not die because its supervisor
+# added an argument. Making Drumee's argparse use parse_known_args is a server-team change
+# and would let pm2-runtime work directly; until then this is the honest arrangement.
+export HOME="${DRUMEE_SERVER_HOME:-/srv/drumee/runtime/server/main}"
+pm2 start "$ECOSYSTEM" || die "pm2 could not start $ECOSYSTEM"
+
+# Fail fast if the workers did not survive their first seconds — otherwise a role whose
+# REST tier is dead reports healthy and answers 502 through the web role.
+sleep 8
+if pm2 jlist 2>/dev/null | grep -q '"status":"errored"'; then
+  echo "[drumee] one or more processes are errored:" >&2
+  pm2 list >&2 || true
+  exit 1
+fi
+
+echo "[drumee] pm2 daemon up; tailing logs as PID 1"
+exec pm2 logs --raw

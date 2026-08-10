@@ -27,7 +27,8 @@ ENV MAIN=/srv/drumee/runtime/server/main
 # setup-schemas (lib + asset) and the schemas genesis templates.
 COPY --from=setup . ${MAIN}/setup-schemas/
 COPY --from=schemas templates/factory /factory
-COPY --from=helpers container-populate.js ${MAIN}/container-populate.js
+# From the `pkg` context — see Dockerfile.schemas.
+COPY --from=pkg populate.js ${MAIN}/container-populate.js
 COPY --from=helpers container-factory.js ${MAIN}/container-factory.js
 COPY --from=helpers populate-entrypoint.sh /usr/local/bin/drumee-populate
 

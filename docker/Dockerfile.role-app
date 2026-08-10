@@ -49,6 +49,14 @@ RUN install -d -o drumee -g drumee -m 0755 \
         /var/log/drumee \
  && chown -R drumee:drumee /srv/drumee/runtime/server 2>/dev/null || true
 
+# /data/mfs and /data/tmp owned by drumee at build time. A fresh named volume inherits the
+# ownership of the image directory underneath it, so without these the mount arrives
+# root-owned and the process running as uid 8000 cannot write: populate died with
+# `EACCES: permission denied, mkdir '/data/mfs/238b/...'` after having already stocked the
+# entity pool. Third instance of this same rule in this tree (see /etc/drumee/credential in
+# the app role and /srv/drumee/cache in the web role).
+RUN install -d -o drumee -g drumee -m 0755 /data /data/mfs /data/tmp
+
 RUN . /usr/share/drumee/release \
  && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
 

@@ -198,6 +198,35 @@ Asserted, not trusted — the repository's existing pattern:
   dropping it loses it. Verified in both directions: restoring `ADMIN_EMAIL`
   unconditionally makes it fail and name that key.
 
+## 5b. What the parity argument bought — the single-box table
+
+Adopting the native path for the container channel surfaced **seven** places where a
+rendered artifact or a shipped script assumed everything lives on one host. Every one was
+invisible natively, and every one was found by running the decomposition rather than
+reviewing it:
+
+| Artifact | Assumed | Fixed in |
+| --- | --- | --- |
+| `db.json` `host` | `localhost` | infra 1.2.38 |
+| `redis.json` | shipped, `localhost` | bootstrap 2.0.8 |
+| `ecosystem.config.js` | chroot-prefixed `require()` | infra 1.2.39 |
+| nginx `proxy_pass` ×6 | `127.0.0.1` | infra 1.2.40 |
+| `bin/install` postcondition | absolute `/etc/drumee/drumee.sh` | infra 1.2.35 |
+| jitsi vhost | rendered unconditionally | infra 1.2.36 |
+| `setup-schemas` CLI calls ×16 | local unix socket | schemas 2.7.4 |
+
+The last one is the clearest vindication of the approach. `container-populate.js` existed
+**only** because `setup-schemas` could not reach a remote database — and it could not run in
+any role, because it needs `server-pod`'s `node_modules` *and* `setup-schemas`' lib and no
+single role has both. Teaching `setup-schemas` to pass the connection flags from `db.json`
+deleted the fork instead of maintaining it: one populate now serves both channels.
+
+Three volume-ownership traps belong in the same list, since they have one cause — **a fresh
+named volume inherits the ownership of the image directory beneath it**, so a role running
+as uid 8000 cannot write a mount whose underlying directory does not exist:
+`/etc/drumee/credential` (app), `/srv/drumee/cache` (web), `/data/mfs` and `/data/tmp`
+(schemas and app).
+
 ## 6. What stays different, deliberately
 
 Symmetry is not the goal everywhere, and forcing it would be wrong twice over.

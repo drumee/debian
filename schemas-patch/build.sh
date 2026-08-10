@@ -69,6 +69,17 @@ else
 fi
 
 # bundle_schmas_patches $base $src $manifest "var/lib/drumee/patches/schemas"
+#
+# ${base}/var only exists once a build has staged patches into it, so on a release with NO
+# pending migrations this rsync failed with `link_stat ... No such file or directory` and
+# took the whole build with it. An empty patch set is a normal state — most releases have
+# no schema change — and drumee-role-schemas Depends on drumee-patch at an exact version,
+# so an unbuildable empty package makes the entire schemas role uninstallable.
+#
+# The package is still worth producing when empty: it is what pins "this release carries no
+# migrations", and entrypoint/schemas already treats an absent patch directory as nothing
+# to do.
+mkdir -p ${base}/var/lib/drumee/patches/schemas
 rsync -arv --exclude ".git:.npmrc" ${base}/var $build_dir/files/
 if [ -f $schemas_src/patches/manifest.txt ]; then
   schemas_dir=$build_dir/files/var/lib/drumee/patches/schemas

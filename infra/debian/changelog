@@ -1,3 +1,33 @@
+drumee-infra (1.2.40) stable; urgency=medium
+
+  * The nginx upstream host is a value instead of 127.0.0.1. Six proxy_pass directives
+    in the route templates named 127.0.0.1 — correct on one box, and guaranteed wrong
+    when nginx and the application are separate containers: the web role proxied to
+    ITSELF and answered 502 with a healthy app one hostname away, REST tier listening
+    and all.
+    .
+    Same shape as db.json's hardcoded host, and found the same way: by running the split
+    and reading what the rendered file actually said rather than what it was meant to
+    say. backend_host comes from APP_HOST and defaults to 127.0.0.1, so every native
+    install renders byte-identical output.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 18:22:49 +0200
+
+drumee-infra (1.2.39) stable; urgency=medium
+
+  * Stop baking the chroot prefix into rendered file contents.
+    srv/drumee/runtime/server/ecosystem.config.js is a one-line wrapper that requires
+    the ecosystem JSON, and it was handed the CHROOT path — so a container render
+    produced require("/out/etc/drumee/infrastructure/ecosystem.json"), a path that
+    exists only on the machine that did the rendering. Native installs never saw it
+    because the prefix is empty there.
+    .
+    The rule: a path written INTO a rendered file must be the path its reader will see,
+    which is never the chroot-prefixed one. The prefix belongs to where we write and
+    nowhere else.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 18:12:44 +0200
+
 drumee-infra (1.2.38) stable; urgency=medium
 
   * db.json records where the database actually is. host and user were hardcoded to

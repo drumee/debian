@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # deploy/docker): the DB initializer. Kept identical to the compose channel so both
 # channels' base databases come from the same vetted code path. seed-entrypoint.sh
 # is seed-specific and lives here in scripts/.
-COPY --from=helpers schemas-init.sh        /usr/local/bin/schemas-init
+COPY --from=helpers init                   /usr/local/bin/schemas-init
 COPY seed-entrypoint.sh                    /usr/local/bin/seed-entrypoint
 RUN chmod +x /usr/local/bin/schemas-init /usr/local/bin/seed-entrypoint \
     && mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld

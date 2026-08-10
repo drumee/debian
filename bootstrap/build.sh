@@ -33,7 +33,8 @@ rsync -ar --exclude ".git" "${base}/usr" "$build_dir/files/"
 # error that says nothing about the cause, so set the modes here rather than
 # relying on what git recorded.
 chmod 0755 "$build_dir"/files/usr/lib/drumee/entrypoint/* \
-           "$build_dir"/files/usr/lib/drumee/healthcheck/*
+           "$build_dir"/files/usr/lib/drumee/healthcheck/* \
+           "$build_dir"/files/usr/lib/drumee/schemas/init
 chmod 0644 "$build_dir/files/usr/lib/drumee/entrypoint/lib.sh"
 
 # Every role must have both an entrypoint and, where it serves traffic, a probe.

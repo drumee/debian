@@ -31,7 +31,15 @@ for _ in $(seq 1 60); do
   root -e 'SELECT 1' >/dev/null 2>&1 && break
   sleep 2
 done
-root -e 'SELECT 1' >/dev/null 2>&1 || { echo "MariaDB not reachable" >&2; exit 1; }
+if ! root -e 'SELECT 1' >/dev/null 2>&1; then
+  # Say WHY. The loop above mutes its probe so 60 retries do not produce 60 errors, and the
+  # cost of that was a two-minute wait ending in "MariaDB not reachable" while the real
+  # message — a malformed --port, a wrong password, a name that does not resolve — was
+  # discarded every time. Run it once more, unmuted, before giving up.
+  echo "MariaDB not reachable at $DB_HOST:$DB_PORT — the last attempt said:" >&2
+  root -e 'SELECT 1' >&2 || true
+  exit 1
+fi
 
 # --- base databases + factory seed (skip if already initialized) ---
 FRESH=0

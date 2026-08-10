@@ -12,10 +12,25 @@ bad()  { printf '  \033[1;31mFAIL\033[0m %s\n' "$1"; fail=$((fail+1)); }
 run()  { if eval "$2" >/dev/null 2>&1; then good "$1"; else bad "$1"; fi; }
 
 hdr "1. Shell syntax (bash -n)"
-for f in $(git ls-files '*.sh' 'bin/*' 2>/dev/null | grep -v '/src/'); do
+# The extensionless scripts matter as much as the *.sh ones and were never swept: the
+# role entrypoints, the healthchecks and the schemas bootstrap are all shell, all shipped
+# in drumee-bootstrap, and all run as PID 1 of a container. A syntax error there is a
+# crash-loop with no output. Noticed when a script moved out of *.sh and the pass count
+# silently dropped by one.
+# ...filtered by type, not by name: that directory also holds populate.js, and `bash -n`
+# on JavaScript fails for the obvious reason. Node files are checked below.
+for f in $(git ls-files '*.sh' 'bin/*' 'bootstrap/usr/lib/drumee/*/*' 'infra/debian/config' 2>/dev/null | grep -v '/src/' | grep -vE '\.js$'); do
   [ -f "$f" ] || continue   # skip files deleted from the worktree (e.g. unstaged removals)
   run "$f" "bash -n '$f'"
 done
+
+# The shipped JavaScript, checked the same way for the same reason: populate.js runs inside
+# a run-once job where a syntax error is an exit code and nothing else.
+if command -v node >/dev/null 2>&1; then
+  for f in $(git ls-files 'bootstrap/usr/lib/drumee/*/*.js' 2>/dev/null); do
+    run "$f" "node --check '$f'"
+  done
+fi
 
 hdr "2. Renderer parses"
 run "config/render.mjs (node --check)" "node --check config/render.mjs"

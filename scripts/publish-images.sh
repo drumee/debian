@@ -74,6 +74,7 @@ say "Registry=$REGISTRY Tag=$TAG Push=$PUSH Platforms=$PLATFORMS"
 say "server-pod"
 docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.server" \
   --build-context "helpers=$root/deploy/docker" \
+  --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
   --build-arg "INSTALL_DEPS=$INSTALL_DEPS" --build-arg "MEDIA_DEPS=$MEDIA_DEPS" \
   $(tags server-pod) "${out_flag[@]}" "$SERVER_SRC"
 
@@ -84,11 +85,13 @@ docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.ui" \
 say "schemas"
 docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.schemas" \
   --build-context "helpers=$root/deploy/docker" \
+  --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
   $(tags schemas) "${out_flag[@]}" "$SCHEMAS_SRC"
 
 say "schemas-populate (FROM published server-pod)"
 docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.populate" \
   --build-context "helpers=$root/deploy/docker" \
+  --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
   --build-context "setup=$SETUP_SCHEMAS_SRC" \
   --build-context "schemas=$SCHEMAS_SRC" \
   --build-arg "SERVER_IMAGE=$REGISTRY/server-pod:$TAG" \

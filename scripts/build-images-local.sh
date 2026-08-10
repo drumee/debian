@@ -40,12 +40,14 @@ say "Building drumee/schemas:$TAG from $SCHEMAS_SRC (factory templates + init)"
 docker buildx build \
   -f "$root/deploy/docker/Dockerfile.schemas" \
   --build-context "helpers=$root/deploy/docker" \
+  --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
   -t "drumee/schemas:$TAG" --load "$SCHEMAS_SRC"
 
 say "Building drumee/server-pod:$TAG from $SERVER_SRC (INSTALL_DEPS=0, MEDIA_DEPS=$MEDIA_DEPS)"
 docker buildx build \
   -f "$root/deploy/docker/Dockerfile.server" \
   --build-context "helpers=$root/deploy/docker" \
+  --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
   --build-arg INSTALL_DEPS=0 \
   --build-arg "MEDIA_DEPS=$MEDIA_DEPS" \
   -t "drumee/server-pod:$TAG" --load "$SERVER_SRC"
@@ -69,6 +71,7 @@ say "Building drumee/schemas-populate:$TAG (FROM server-pod + setup-schemas + ge
 docker buildx build \
   -f "$root/deploy/docker/Dockerfile.populate" \
   --build-context "helpers=$root/deploy/docker" \
+  --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
   --build-context "setup=$SETUP_SCHEMAS_SRC" \
   --build-context "schemas=$SCHEMAS_SRC" \
   --build-arg "SERVER_IMAGE=drumee/server-pod:$TAG" \

@@ -1,3 +1,39 @@
+drumee-schemas (2.7.4) stable; urgency=medium
+
+  * setup-schemas connects where db.json says. Sixteen mariadb invocations in
+    lib/utils.js and lib/schema.js were a bare `mariadb`, which uses the local unix
+    socket — right for a native install and impossible when the database is a container
+    of its own. populate.js died with "Can't connect to local server through socket
+    '/run/mysqld/mysqld.sock'" on a stack whose db.json said host=mariadb, and no
+    configuration could have helped because the host never reached the client.
+    .
+    dbConnFlags() returns "" for a local database, which is every native install, so
+    those commands stay byte-identical and keep authenticating by unix_socket. It
+    reports a malformed db.json rather than silently falling back to the socket.
+    .
+    This is what lets ONE populate serve both channels instead of the container fork
+    that existed only because of this assumption.
+
+ -- somanos.sar@drumee.com  Mon, 10 Aug 2026 11:11:50 +0200
+
+drumee-schemas (2.7.3) stable; urgency=medium
+
+  * Deliver the payload and touch no database when DRUMEE_BUILD_TIME is set — the same
+    flag and the same reason as drumee-infra (§5). bin/install restores a mariabackup
+    PHYSICAL snapshot into /var/lib/mysql with --copy-back, creates the system accounts
+    and sends a welcome email; none of that can happen in a `docker build`, and it did
+    not fail quietly. It stopped a MariaDB that was never running, could not find
+    /srv/db or /var/log/drumee, and ended with "FATAL: seed restore (mariabackup
+    --copy-back) failed", leaving drumee-role-schemas unconfigured and failing the whole
+    image build. Measured.
+    .
+    The container channel bootstraps logically instead — the base databases from the
+    schemas repo's own templates/factory/ tree, over TCP, from the schemas role's
+    entrypoint — because a physical restore cannot reach a database that lives in
+    another container.
+
+ -- somanos.sar@drumee.com  Sat, 08 Aug 2026 17:02:56 +0200
+
 drumee-schemas (2.7.2) stable; urgency=medium
 
   * Build from schemas' regenerated host-neutral templates. 2.7.1 shipped a

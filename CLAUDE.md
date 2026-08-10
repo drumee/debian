@@ -854,6 +854,48 @@ APT_KEYRING=drumee-local-keyring.gpg docker/build-role.sh <role>`. Role image ta
 the release train, so every entrypoint or Dockerfile fix otherwise costs a release — four
 were burned before switching to this.
 
+### The schemas role — the database, and how far provisioning gets
+
+`docker/build-role.sh schemas` builds `drumee/role-schemas`, a run-once job taking `init`
+or `migrate` (two invocations of one image, because §6 needs `migrate` separately
+re-runnable). It installs `drumee-schemas` and `drumee-patch`, and it deliberately does
+**not** run `setup-schemas/bin/install`: that restores a mariabackup **physical** snapshot
+with `--copy-back`, which cannot reach a database living in another container. The image
+deletes the 35 MB seed it will never use.
+
+`init` does both halves, as `bin/install` does natively — bootstrap, then populate:
+
+- **bootstrap** is `/usr/lib/drumee/schemas/init`, shipped by `drumee-bootstrap` (it moved
+  out of `deploy/docker/` so it is versioned in a package rather than copied into an image,
+  §9.2). It creates the base databases from the schemas repo's own `templates/factory/`
+  tree over TCP as root, configures the domain and grants the application user. One copy,
+  three consumers: this role, the deprecated images, and the offline seed builder.
+- **populate** is `setup-schemas`' **own** `populate.js` — not a container fork. See
+  `docs/channel-parity.md` §5b.
+
+It reads the application credentials from the rendered volume's `db.json` and the domain
+from `drumee.sh`; only `DB_ROOT_PASSWORD` comes from the deployment, because creating
+databases is the one thing that needs root. Populate is skipped when `yp.sys_conf` already
+has rows — otherwise a restarted run-once job would mint new system accounts and a second
+entity pool every time. The job mounts the config tree **read-write** and the storage
+volume, because provisioning creates the MFS roots and the RSA keypair; every long-running
+role still mounts that tree read-only.
+
+**Verified:** 5 databases, **143 tables in `yp`**, the `drumee-app` user authenticates,
+**20 factory pool entities** stocked, and the four system accounts (`nobody`, `guest`,
+`system`, `admin`) created.
+
+**Where provisioning stops today**, and it is not a channel problem: `createHub` returns
+undefined for the system user's media hub and `createAdmin` then fails with
+`Cannot read properties of undefined (reading 'id')` at `lib/organization.js:264`. The log
+prints `Failed to create hub` beside a result set that looks successful — `failed: 0`,
+permissions granted, a `db_name` and an `mfs_root` — so `createHub` is rejecting its own
+result. Answering why needs `setup-schemas`/`server-core` domain knowledge about what that
+function expects, not more container work. Until it is answered the instance has a schema,
+a pool and accounts but no workspace, and the app answers 500 with
+`call undefined.get_fonts_faces()` — which is what an empty `yp.sys_conf` looks like from
+the outside.
+
 ### The app role — how far the stack gets
 
 `docker/build-role.sh app` builds `drumee/role-app` (2.6 GB): `drumee-server-pod`,

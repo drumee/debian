@@ -1,0 +1,67 @@
+# drumee-schemas-job — the run-once database bootstrap and, later, the migration job.
+#
+# Two invocations of one image, because §6 needs `migrate` to be separately re-runnable:
+# an upgrade runs it against a database `init` will never touch again.
+#
+#   docker/build-role.sh schemas
+#
+# It installs drumee-schemas, which carries the schemas repo's templates/factory/ tree, and
+# drumee-patch, which carries the pending migrations and nothing else (§5 — the package
+# delivers the payload, this container executes it).
+#
+# What it deliberately does NOT do is run setup-schemas/bin/install. That restores a
+# mariabackup PHYSICAL snapshot with --copy-back, which cannot work when the database lives
+# in another container on the official image. The entrypoint runs the logical bootstrap
+# instead — create the base databases from the factory templates, configure the domain,
+# grant the application user — over TCP as root. Same script the offline seed builder uses,
+# so both channels and the seed share one vetted code path.
+
+ARG BASE_IMAGE
+ARG BASE_DIGEST
+FROM ${BASE_IMAGE}@${BASE_DIGEST}
+
+ARG ROLE_VERSION
+ARG APT_URI=https://apt.drumee.net
+ARG APT_SUITE=trixie
+ARG APT_COMPONENTS=main
+ARG APT_KEYRING=drumee-archive-keyring.gpg
+
+USER root
+
+COPY docker/keyrings/ /usr/share/keyrings/
+
+RUN set -eu; \
+    : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
+        "/usr/share/keyrings/$APT_KEYRING"; \
+    apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+        "drumee-role-schemas=${ROLE_VERSION}" \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# drumee-schemas ships a 35 MB mariabackup seed for the native channel's physical restore.
+# This role never uses it — see the note above — and an unused snapshot of a database is not
+# something to leave lying in an image that mounts a real one.
+RUN rm -f /var/tmp/drumee/seeds.tgz
+
+# /data/mfs and /data/tmp owned by drumee at build time. A fresh named volume inherits the
+# ownership of the image directory underneath it, so without these the mount arrives
+# root-owned and the process running as uid 8000 cannot write: populate died with
+# `EACCES: permission denied, mkdir '/data/mfs/238b/...'` after having already stocked the
+# entity pool. Third instance of this same rule in this tree (see /etc/drumee/credential in
+# the app role and /srv/drumee/cache in the web role).
+RUN install -d -o drumee -g drumee -m 0755 /data /data/mfs /data/tmp
+
+RUN . /usr/share/drumee/release \
+ && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
+
+LABEL org.opencontainers.image.title="drumee-schemas-job" \
+      org.opencontainers.image.description="Drumee schemas role: creates the databases, then applies migrations" \
+      org.opencontainers.image.source="https://github.com/drumee/debian"
+
+USER drumee
+# From drumee-bootstrap, not a COPY — §9.2. Takes `init` or `migrate`; compose runs it once
+# as each.
+ENTRYPOINT ["/usr/lib/drumee/entrypoint/schemas"]
+CMD ["init"]

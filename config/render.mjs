@@ -837,6 +837,11 @@ services:
     # the preseed would also write them in plaintext into debconf's config.dat. infra.js
     # honours DB_* when rendering db.json; the entrypoint writes redis.json.
     environment:
+      # Where the application tier is, for the nginx upstreams infra.js renders. Topology,
+      # like DB_HOST — the deployment's own shape, not a Drumee setting — so it travels the
+      # same narrow path. Without it the rendered nginx proxies to 127.0.0.1 and the web
+      # role answers 502 while proxying to itself.
+      APP_HOST: app
       DB_HOST: \${DB_HOST}
       DB_PORT: \${DB_PORT}
       DB_USER: \${DB_USER}
@@ -862,21 +867,37 @@ services:
     networks: [drumee]
     restart: "no"
     command: ["init"]
-    env_file: [.env]
+    # DB_ROOT_PASSWORD only, and explicitly — creating the databases and granting the
+    # application user is the one thing that needs root, and compose initialises the
+    # mariadb container from this same value. Everything else this job needs it reads from
+    # the rendered volume: the domain from drumee.sh, the application credentials from
+    # db.json. No env_file, for the reason infra-init has none.
+    environment:
+      DB_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
       infra-init:
         condition: service_completed_successfully
+    # The config tree read-WRITE here, and the storage volume: this job provisions the
+    # instance, which means creating the MFS roots and writing the RSA keypair. Every
+    # long-running role still mounts the same tree read-only — provisioning is a job, and a
+    # job that has to write is not the same as a service that must not.
     volumes:
-${conf('/etc/drumee', 'etc/drumee')}
+      - type: volume
+        source: drumee_conf
+        target: /etc/drumee
+        volume:
+          subpath: etc/drumee
+      - mfs_data:/data/mfs
 
   migrate:
     image: \${IMAGE_REGISTRY}/role-schemas:\${ROLES_TAG}
     networks: [drumee]
     restart: "no"
     command: ["migrate"]
-    env_file: [.env]
+    environment:
+      DB_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
     depends_on:
       schemas-init:
         condition: service_completed_successfully

@@ -22,6 +22,92 @@ if [ -d "$PATCHES" ]; then
   fi
 fi
 
-echo "[drumee] NOT IMPLEMENTED: schema init + migrate land in increment 6"
-echo "[drumee] payload checked: $PATCHES"
-exit 0
+# The two phases, as two invocations of this entrypoint, because §6 needs `migrate` to be
+# separately re-runnable: an upgrade runs it against a database `init` will never touch
+# again.
+MODE="${1:-init}"
+
+case "$MODE" in
+  init)
+    # /usr/lib/drumee/schemas/init is the container channel's own DB bootstrap, and it is
+    # deliberately NOT setup-schemas/bin/install: that restores a mariabackup PHYSICAL
+    # snapshot with --copy-back, which cannot work when the database lives in another
+    # container. This creates the base databases from the schemas repo's own
+    # templates/factory/ tree, configures the domain and grants the application user —
+    # logical, over TCP, as root.
+    #
+    # It moved here from deploy/docker/schemas-init.sh so it is versioned in a package
+    # rather than copied into an image (§9.2), and so it survives that tree's deletion. It
+    # is the same script the offline seed builder runs, which is the point: both channels
+    # and the seed are bootstrapped by one vetted code path, never by a fork of it.
+    INIT=/usr/lib/drumee/schemas/init
+    [ -x "$INIT" ] || die "$INIT missing (drumee-bootstrap provides it)"
+
+    # The credentials come from the rendered volume, which the infra role owns. Reading
+    # them here rather than from the environment is what keeps one writer per credential:
+    # db.json is authoritative, and it already records where the database is.
+    CRED_DB="$CRED/db.json"
+    [ -s "$CRED_DB" ] || die "no $CRED_DB — has the infra role rendered this deployment?"
+    # Values are trimmed, and the port reduced to digits. A quoted JSON string ends at its
+    # closing quote so it comes out clean; an unquoted number does not — "port": 3306 gave
+    # "3306 " and mariadb read the trailing space as a unit suffix, failing with
+    # `Unknown suffix '' used for variable 'port'`. Which nobody saw, because the wait loop
+    # in schemas/init mutes its probe: it retried for two minutes and said only
+    # "MariaDB not reachable".
+    json(){ sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\{0,1\}\([^\",}]*\).*/\1/p" "$CRED_DB" | head -1 | sed 's/[[:space:]]*$//'; }
+    DB_HOST="$(json host)"; DB_USER="$(json user)"; DB_PASSWORD="$(json password)"
+    DB_PORT="$(json port | tr -dc '0-9')"; DB_PORT="${DB_PORT:-3306}"
+    export DB_HOST DB_USER DB_PASSWORD DB_PORT
+    [ -n "${DB_ROOT_PASSWORD:-}" ] || die "DB_ROOT_PASSWORD is required to create the databases"
+    [ -n "${DRUMEE_DOMAIN_NAME:-}" ] || die "DRUMEE_DOMAIN_NAME is required"
+
+    # Where the factory SQL lives. The script defaults to /factory, which is where the
+    # deprecated image COPYs the schemas source; the PACKAGE installs it under
+    # /var/lib/drumee/schemas, so the role has to say so — otherwise init creates the
+    # databases and then dies on "/factory/seed/yp.sql: No such file or directory", having
+    # already made half the change. Exported rather than defaulted differently in the
+    # script, so the deprecated image keeps working unchanged.
+    FACTORY_DIR="${FACTORY_DIR:-/var/lib/drumee/schemas/templates/factory}"
+    [ -d "$FACTORY_DIR/seed" ] || die "no factory seed at $FACTORY_DIR/seed (drumee-schemas provides it)"
+    export FACTORY_DIR
+
+    echo "[drumee] initialising the schema on $DB_HOST:$DB_PORT as root, app user $DB_USER"
+    echo "[drumee] factory SQL from $FACTORY_DIR"
+    "$INIT" || die "the database bootstrap failed"
+
+    # Then populate, because "initialise the database" means both halves — natively
+    # bin/install runs the bootstrap and then `node populate.js`, and a schema with no
+    # sys_conf, no entity pool and no system accounts is not a usable instance: the app
+    # answers 500 with `call undefined.get_fonts_faces()`, which is what an empty
+    # sys_conf looks like from the outside.
+    #
+    # This is setup-schemas' OWN populate, not a container fork. It became usable here when
+    # drumee-schemas 2.7.4 taught lib/utils.js and lib/schema.js to pass the connection
+    # flags from db.json instead of assuming a local socket — so one populate now serves
+    # both channels, which is the point of docs/channel-parity.md.
+    POP=/var/lib/drumee/setup-schemas/populate.js
+    if [ ! -f "$POP" ]; then
+      echo "[drumee] no $POP — skipping populate" >&2
+    elif [ -n "$(mariadb $(printf '%s' "--host=$DB_HOST --port=$DB_PORT") \
+                 -u"$DB_USER" -p"$DB_PASSWORD" -N -B \
+                 -e 'SELECT 1 FROM yp.sys_conf LIMIT 1' 2>/dev/null)" ]; then
+      # Idempotent: a populated instance is left alone. Re-running it would mint new
+      # system accounts and a second entity pool on every restart of a run-once job.
+      echo "[drumee] already populated (yp.sys_conf has rows) — skipping"
+    else
+      echo "[drumee] populating: system accounts, RSA keypair, entity pool"
+      ( cd /var/lib/drumee/setup-schemas && node populate.js ) \
+        || die "populate failed — the instance has a schema but no data"
+    fi
+    echo "[drumee] schemas init complete"
+    exit 0
+    ;;
+  migrate)
+    echo "[drumee] NOT IMPLEMENTED: applying $PATCHES lands with the migrate job"
+    echo "[drumee] payload checked: $PATCHES"
+    exit 0
+    ;;
+  *)
+    die "unknown mode '$MODE' (expected init or migrate)"
+    ;;
+esac

@@ -30,7 +30,10 @@ COPY utils/      /schemas/utils/
 COPY mailserver/ /schemas/mailserver/
 COPY patches/    /schemas/patches/
 
-COPY --from=helpers schemas-init.sh /usr/local/bin/schemas-init
+# From the `pkg` context, not `helpers`: this script moved into drumee-bootstrap, which is
+# where it survives the deletion of this tree. One copy, and the role image installs it as
+# a package instead of copying it (§9.2).
+COPY --from=pkg init /usr/local/bin/schemas-init
 RUN chmod +x /usr/local/bin/schemas-init
 
 ENTRYPOINT ["schemas-init"]

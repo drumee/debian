@@ -45,7 +45,9 @@ docker buildx version >/dev/null 2>&1 || { echo "docker buildx required" >&2; ex
 say "Building drumee/seed:$TAG"
 docker buildx build \
   -f "$root/scripts/Dockerfile.seed" \
-  --build-context "helpers=$root/deploy/docker" \
+  # schemas-init and populate.js now live in drumee-bootstrap, which is where they
+  # survive the deletion of deploy/docker. One copy, three consumers.
+  --build-context "helpers=$root/bootstrap/usr/lib/drumee/schemas" \
   -t "drumee/seed:$TAG" --load "$root/scripts"
 
 out_dir="$(dirname "$OUT")"
