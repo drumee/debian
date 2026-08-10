@@ -641,7 +641,17 @@ scripts/release-status.sh              # local (left) vs live (right)
 scripts/release-status.sh --no-remote  # no network calls
 ```
 
-One table answering "is what I have what users get". Local is three separate columns
+One table answering "is what I have what users get". Two details are load-bearing rather
+than cosmetic, both found by a release that was correct while the table said otherwise:
+**`drumee-roles` is a source package**, whose binaries are `drumee-release` plus seven
+`drumee-role-*`, so the row tracks `drumee-release` (the anchor every role depends on at
+strict equality) and a separate `└ role packages` line counts the seven — equality cannot
+reveal a *partial* publish. And the **Debian revision never decides the verdict**: roles
+are versioned `<release>-1~<channel>1`, so comparing that literally against the manifest's
+`1.0.55` painted a correct release red, which teaches the reader to ignore the one column
+that matters.
+
+Local is three separate columns
 because they drift independently: **manifest** (authoritative), **built** (newest
 `.deb` under `<pkg>/build/` — a bump with no rebuild ships nothing), **staged** (what
 `apt-pool/` advertises). The right column is what `apt.drumee.net` actually

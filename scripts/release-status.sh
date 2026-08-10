@@ -46,10 +46,26 @@ hdr() { printf '\n%s── %s%s\n' "$B" "$1" "$Z"; }
 # "?" means we could not look (--no-remote, or the fetch failed); empty means we
 # looked and it is not there. Collapsing the two reads as a problem when it is not:
 # several components in the manifest are deliberately unpublished.
+# The Debian revision is not part of the upstream version, so it must not decide the
+# verdict. roles/ is versioned <release>-1~<channel>1, so a correctly published
+# 1.0.55-1~trixie1 compared literally against the manifest's 1.0.55 reads "differs" —
+# a red row on a release that is exactly right, which trains the reader to ignore the
+# column that matters.
+# Placeholders pass through untouched: "-" and "?" are not versions, and ${x%%-*} turns a
+# bare "-" into the empty string, which silently erased the "not published" placeholder
+# from three columns.
+upstream_of() {
+  case "$1" in
+    -|?|'') printf '%s' "$1" ;;
+    *)      printf '%s' "${1%%-*}" ;;
+  esac
+}
+
 verdict() { # verdict <local> <live>
+  local a b; a="$(upstream_of "$1")"; b="$(upstream_of "$2")"
   if   [ "$2" = "?" ];  then printf '%sunknown%s'       "$Y" "$Z"
   elif [ -z "$2" ];     then printf '%snot published%s' "$D" "$Z"
-  elif [ "$1" = "$2" ]; then printf '%sin sync%s'       "$G" "$Z"
+  elif [ "$a" = "$b" ]; then printf '%sin sync%s'       "$G" "$Z"
   else                       printf '%sdiffers%s'       "$R" "$Z"; fi
 }
 
@@ -118,22 +134,66 @@ while read -r name version; do
   [ -f "$cl" ] || continue
   pkg="$(head -1 "$cl" | awk '{print $1}')"
 
-  built="$(find "$root/$dir/build" -maxdepth 2 -name "${pkg}_*.deb" -printf '%f\n' 2>/dev/null \
-    | sed -E "s/^${pkg}_(.+)_[a-z0-9]+\.deb$/\1/" | sort -V | tail -1)"
-  read -r staged _        < <(across local "$pkg")
-  read -r live live_arch  < <(across live  "$pkg")
+  # The changelog's first field is the SOURCE package name, which for most components is
+  # also the binary name. `roles` is the exception: it is one source producing
+  # drumee-release plus seven drumee-role-* binaries, and "drumee-roles" appears in no
+  # Packages index anywhere. Left alone, that row read "not published" forever — including
+  # immediately after a release in which the roles demonstrably published, verified with a
+  # real apt client. A row that is permanently wrong is worse than no row, because this
+  # table is the thing that answers "is what I have what users get".
+  #
+  # drumee-release is the right stand-in: every role Depends on it at strict equality, so
+  # if it is live at the train version the set is coherent by construction. The role count
+  # is reported separately below, because equality alone cannot show a PARTIAL publish.
+  binpkg="$pkg"; debdir="$root/$dir/build"
+  if [ "$name" = roles ]; then
+    binpkg=drumee-release
+    # roles/build.sh leaves its .deb files beside the source tree, where dpkg-buildpackage
+    # puts them, not under roles/build/.
+    debdir="$root"
+  fi
+
+  built="$(find "$debdir" -maxdepth 2 -name "${binpkg}_*.deb" -printf '%f\n' 2>/dev/null \
+    | sed -E "s/^${binpkg}_(.+)_[a-z0-9]+\.deb$/\1/" | sort -V | tail -1)"
+  read -r staged _        < <(across local "$binpkg")
+  read -r live live_arch  < <(across live  "$binpkg")
   [ "$staged" = __NONE__ ] && staged=""
   [ "$live"   = __NONE__ ] && live=""
   if [ "$REMOTE" != 1 ]; then live="?"; live_arch="?"; fi
 
   label="$pkg"; [ "$name" = meta ] && label="$pkg (release train)"
+  [ "$name" = roles ] && label="$pkg -> release"
+  # Displayed WITHOUT the Debian revision, for the same reason the verdict ignores it, plus
+  # one of its own: 1.0.55-1~trixie1 is 17 characters in a 9-wide column, and one long cell
+  # shifts every field after it so the whole row stops lining up with the header.
   printf '  %-24s %-9s %-9s %-9s   %-9s %-12s %s\n' \
-    "$label" "$version" "${built:--}" "${staged:--}" "${live:--}" "${live_arch:--}" \
+    "$label" "$(upstream_of "$version")" "$(upstream_of "${built:--}")" \
+    "$(upstream_of "${staged:--}")" "$(upstream_of "${live:--}")" "${live_arch:--}" \
     "$(verdict "$version" "$live")"
 done < <(sed -E 's/#.*$//' "$manifest" | tr -d '\r' \
   | awk '/^components:/ {inc=1; next}
          /^[^[:space:]#]/ {inc=0}
          inc && NF==2 {gsub(/:$/,"",$1); print $1, $2}')
+
+# The seven roles, counted rather than inferred. drumee-release being live says the train
+# is coherent; it cannot say every role reached the repository, and a role missing from the
+# index is invisible until someone tries to build that image.
+roles_expected="app web converter dns mail schemas infra"
+roles_want=$(echo $roles_expected | wc -w)
+roles_live=0; roles_missing=""
+for r in $roles_expected; do
+  read -r v _ < <(across live "drumee-role-$r")
+  if [ "$v" != "__NONE__" ]; then roles_live=$((roles_live+1)); else roles_missing="$roles_missing $r"; fi
+done
+if [ "$REMOTE" = 1 ]; then
+  if [ "$roles_live" = "$roles_want" ]; then
+    printf '  %-26s %-9s %-9s %-9s   %-9s %-12s %s\n' \
+      "  └ role packages" "$roles_want" "" "" "$roles_live" "" "all live"
+  else
+    printf '  %-26s %-9s %-9s %-9s   %-9s %-12s %s\n' \
+      "  └ role packages" "$roles_want" "" "" "$roles_live" "" "MISSING:$roles_missing"
+  fi
+fi
 
 # ---------------------------------------------------------------- installer
 # debian.sh is served from the flat repo, and publish-apt.sh does NOT copy it —
