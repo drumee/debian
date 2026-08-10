@@ -139,9 +139,31 @@ if [ -z "${OWN_CERTS_DIR:-}" ] && [ -f "$SETUP/bin/create-local-certs" ]; then
   # re-pointed into the target, because the value in that file is the path the ROLES see
   # once the volume is mounted, not a path in this container. `set +u` because that file is
   # generated per deployment and references variables it does not define.
+  # DRUMEE_TLS_METHOD has to be supplied here, and its absence was silent.
+  #
+  # create-local-certs signs the apex and jit.<domain> from PRIVATE_DOMAIN, but the PUBLIC
+  # names — including vendors.<domain> — only when DRUMEE_TLS_METHOD is exactly
+  # "self-signed". That is deliberate: on an ACME path a self-signed file at those paths
+  # would mean an instance whose issuance failed serves a certificate no client accepts
+  # instead of failing visibly.
+  #
+  # Natively postinst exports it before calling bin/install. This entrypoint calls
+  # create-local-certs ITSELF, and the rendered drumee.sh does not carry the value — it has
+  # PUBLIC_DOMAIN and PRIVATE_DOMAIN and nothing about the method. So the public branch was
+  # skipped, no vendors certificate was written, and infra.js had meanwhile rendered
+  # 03-vendors.public.conf which requires one. nginx then refuses its ENTIRE configuration:
+  #
+  #   [emerg] cannot load certificate "/etc/drumee/certs/vendors.<domain>_ecc/fullchain.cer"
+  #
+  # Read from debconf rather than from the environment: this job just ran
+  # dpkg-reconfigure against the preseed, so debconf is the authority on what was answered.
+  tls_method="$(debconf-show drumee-infra 2>/dev/null \
+                | sed -n 's/^[* ] drumee-infra\/tls_method: *//p' | head -1)"
+  echo "[drumee]   tls_method: ${tls_method:-<unset>}"
   ( set +u
     . "$OUT/etc/drumee/drumee.sh"
     CERTS_DIR="$OUT/etc/drumee/certs"; export CERTS_DIR
+    DRUMEE_TLS_METHOD="$tls_method"; export DRUMEE_TLS_METHOD
     cd "$SETUP" && bash bin/create-local-certs
   ) || echo "[drumee] WARNING: create-local-certs failed — the web role may not start" >&2
 fi
@@ -180,6 +202,25 @@ JSON
   cp "$OUT/etc/drumee/credential/redis.json" \
      "$OUT/etc/drumee/credential/converter/redis.json"
 fi
+
+# Directories the PACKAGE SHIPS under /etc/drumee that the RENDER cannot produce.
+#
+# infra.js writes rendered FILES. It does not recreate the empty directories that are part
+# of drumee-infra's own file list — `credential/crypto` (the RSA keypair populate.js
+# generates) and `credential/prosody` among them. Natively they exist because dpkg
+# unpacked them, which is exactly why nobody noticed: `dpkg -S
+# /etc/drumee/credential/crypto` names drumee-infra. In a render there is no unpack, so
+# provisioning died on `ENOENT: open '/etc/drumee/credential/crypto/public.pem'` after
+# having already created every database, the entity pool and all four system accounts.
+#
+# Taken from the package's file list rather than a list written here, so a directory added
+# to the package arrives without anyone remembering to add it twice.
+echo "[drumee] creating the directories the package ships but the render does not"
+dpkg -L drumee-infra 2>/dev/null | while read -r shipped; do
+  case "$shipped" in
+    /etc/drumee/*) [ -d "$shipped" ] && mkdir -p "$OUT$shipped" ;;
+  esac
+done
 
 # The other roles run as uid 8000 and only read this tree. Credentials stay 0640 inside a
 # 0750 directory: db.json and email.json carry passwords.

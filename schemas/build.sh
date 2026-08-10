@@ -83,6 +83,21 @@ dh_make --native --yes --indep --packagename $package --email $email
 for f in $(ls ${base}/debian); do
   cp -r ${base}/debian/$f $build_dir/debian/
 done
-dpkg-buildpackage -k$email
+# DEB_UNSIGNED=1 builds without a maintainer signature.
+#
+# What apt actually verifies is the REPOSITORY's Release signature, not the .deb's — which
+# is why reprepro re-signs on include and why an unsigned .deb installs perfectly well from
+# a signed suite. So a local iteration loop (scripts/apt-repo-local.sh, which signs with a
+# throwaway key of its own) does not need the project maintainer key at all, and requiring
+# it means every image rebuild waits on a passphrase prompt that cannot be answered from a
+# non-interactive shell.
+#
+# Deliberately opt-IN: a release build must stay signed, so the default is unchanged.
+if [ "${DEB_UNSIGNED:-0}" = "1" ]; then
+  echo "DEB_UNSIGNED=1 — building without a maintainer signature (not for release)"
+  dpkg-buildpackage -us -uc
+else
+  dpkg-buildpackage -k$email
+fi
 
 copyToTarget $base/build/${package}

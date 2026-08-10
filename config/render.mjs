@@ -962,6 +962,14 @@ ${conf('/etc/drumee', 'etc/drumee')}
   # WebSocket sessions live in the app role, and a short-lived converter process could
   # not hold one open anyway.
   converter:
+    # Profile-gated, and this is temporary rather than a change of mind about §2's
+    # topology. The role is real and its toolchain self-tests, but HOW a job reaches it is
+    # still a server-team question, so entrypoint/converter refuses to start until
+    # DRUMEE_CONVERTER_CMD names a worker. Combined with restart: unless-stopped that is a
+    # crash loop, measured: every deployment would ship a container retrying forever.
+    # A container that cannot start is not a topology. Enable with:
+    #   COMPOSE_PROFILES=converter  (and DRUMEE_CONVERTER_CMD set)
+    profiles: ["converter"]
     image: \${IMAGE_REGISTRY}/role-converter:\${ROLES_TAG}
     restart: unless-stopped
     networks: [drumee]

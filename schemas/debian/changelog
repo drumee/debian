@@ -1,3 +1,21 @@
+drumee-schemas (2.7.5) stable; urgency=medium
+
+  * setup-schemas: createHub matches the yp.entity row from desk_create_hub instead of the
+    MFS node row that the nested mfs_trash_init leaks into the same result. In that node row
+    actual_home_id is NULL (the trash node's home is itself), so the old condition
+    `r.vhost && r.actual_home_id` never held, createHub returned undefined, and createAdmin
+    died three frames later on `wp.id` with "Cannot read properties of undefined". It read
+    like a database fault because the log printed "Failed to create hub" beside a result set
+    showing failed:0, a db_name and an mfs_root — everything HAD worked except this loop.
+    It now also throws rather than returning undefined: every caller uses the result
+    immediately as wp.id, so an undefined return only moved the failure somewhere that could
+    not explain it.
+  * This is what blocked provisioning on the container channel. Verified end to end: five
+    databases, the entity pool, all four system accounts, the admin, the RSA keypair and the
+    welcome file, and the stack then serves HTTP 301 / HTTPS 200 with the real page.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Mon, 10 Aug 2026 16:40:41 +0200
+
 drumee-schemas (2.7.4) stable; urgency=medium
 
   * setup-schemas connects where db.json says. Sixteen mariadb invocations in

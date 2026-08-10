@@ -1,3 +1,12 @@
+drumee-roles (1.0.56-1~trixie1) stable; urgency=medium
+
+  * No change to the role definitions. This release exists to carry drumee-schemas 2.7.5
+    (the createHub fix) and drumee-bootstrap 2.0.18 (the shipped-directory fix) into the
+    role images, since every role pins drumee-release at strict equality and the images
+    share one tag.
+
+ -- Drumee Packaging <packaging@drumee.com>  Mon, 10 Aug 2026 16:40:41 +0200
+
 drumee-roles (1.0.55-1~trixie1) stable; urgency=medium
 
   * drumee-role-media is now drumee-role-converter. The old name was the name of a

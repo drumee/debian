@@ -1,3 +1,18 @@
+drumee-bootstrap (2.0.18) stable; urgency=medium
+
+  * entrypoint/infra creates the directories drumee-infra SHIPS under /etc/drumee that the
+    render cannot produce. infra.js writes rendered FILES; it does not recreate empty
+    directories that are part of the package's file list — credential/crypto, where
+    populate.js writes the RSA keypair, and credential/prosody. Natively they exist because
+    dpkg unpacked them, which is exactly why this never showed up: `dpkg -S
+    /etc/drumee/credential/crypto` names drumee-infra. In a render there is no unpack, so
+    provisioning died on `ENOENT: open '/etc/drumee/credential/crypto/public.pem'` AFTER
+    having created every database, the entity pool and all four system accounts.
+    Taken from `dpkg -L drumee-infra` rather than a list written here, so a directory added
+    to the package arrives without anyone having to remember it twice.
+
+ -- Drumee Packaging <packaging@drumee.com>  Mon, 10 Aug 2026 16:40:41 +0200
+
 drumee-bootstrap (2.0.17) stable; urgency=medium
 
   * entrypoint/media is now entrypoint/converter, and it does real work instead of
@@ -20,6 +35,17 @@ drumee-bootstrap (2.0.17) stable; urgency=medium
     one writer per credential: the same job, the same values, the same run.
   * HOME points at the scratch volume, because soffice picks its profile location from
     it and that is what lets this role take a read-only rootfs later.
+  * entrypoint/infra exports DRUMEE_TLS_METHOD into create-local-certs, read back from
+    debconf (this job just ran dpkg-reconfigure against the preseed, so debconf is the
+    authority on what was answered). create-local-certs signs the apex and jit.<domain> from
+    PRIVATE_DOMAIN, but the PUBLIC names — vendors.<domain> among them — only when that
+    variable is exactly "self-signed", deliberately, so an ACME path never gets a
+    self-signed file at a location where a failed issuance would then serve a certificate no
+    client accepts. Natively postinst exports it before calling bin/install; this entrypoint
+    calls create-local-certs ITSELF and the rendered drumee.sh does not carry the value. So
+    no vendors certificate was written while infra.js had rendered 03-vendors.public.conf,
+    which requires one, and nginx refused its entire configuration:
+    [emerg] cannot load certificate ".../vendors.<domain>_ecc/fullchain.cer".
   * healthcheck/converter probes the TOOLCHAIN, not a listener — nothing connects to this
     role, so there is no port. It checks soffice, gm, gs and 7z are present and that the
     scratch directory is writable, which is the failure that produces no output and no
