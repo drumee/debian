@@ -43,7 +43,7 @@ PACKAGE_SUBSTVARS = {
         "drumee:StaticVersion",
         "drumee:BootstrapVersion",
     ],
-    "drumee-role-media": [
+    "drumee-role-converter": [
         "drumee:BootstrapVersion",
         "drumee:NodeRuntimeVersion",
     ],

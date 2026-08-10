@@ -25,6 +25,12 @@ ARG APT_URI=https://apt.drumee.net
 ARG APT_SUITE=trixie
 ARG APT_COMPONENTS=main
 ARG APT_KEYRING=drumee-archive-keyring.gpg
+# Set by docker/build-role.sh when the repository is LOCAL, to a hash of its Release file.
+# Iterating re-includes a package at the same version, which leaves this Dockerfile and every
+# other build-arg unchanged — so buildx would reuse the apt layer and the new package would
+# never reach the image, with the build reporting success. Empty against apt.drumee.net,
+# where a version is immutable and the cache is worth keeping.
+ARG APT_CACHEBUST=
 
 USER root
 
@@ -35,18 +41,25 @@ USER root
 # the only way to iterate was to publish. All of these are PUBLIC keys.
 COPY docker/keyrings/ /usr/share/keyrings/
 
-# opendkim-tools is here and not in drumee-role-infra's Depends because it is only
-# needed to GENERATE a key, which is this job's business and not the role's. infra.js
-# warns and emits an empty DKIM record without it, so its absence costs mail signing
-# rather than the render.
+# The key-generation tools, and they are here rather than in drumee-role-infra's Depends
+# because generating a key is this JOB's business, not the role's: opendkim-tools for the
+# DKIM key, and bind9 for tsig-keygen — which ships in bind9 itself, not in bind9-utils as
+# one would guess (measured: the job reported "tsig-keygen absent" with bind9-utils
+# installed). Nothing starts either daemon here; policy-rc.d sees to that.
+#
+# Carrying a nameserver in a run-once job to generate one key is not free, and the
+# alternative — hand-rolling named's key format in shell — puts the format somewhere other
+# than the tool that defines it. The tool wins.
 RUN set -eu; \
     : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    : "${APT_CACHEBUST:-}"; \
     /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
         "/usr/share/keyrings/$APT_KEYRING"; \
     apt-get update -qq \
  && apt-get install -y -qq --no-install-recommends \
         "drumee-role-infra=${ROLE_VERSION}" \
         opendkim-tools \
+        bind9 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 

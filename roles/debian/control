@@ -95,7 +95,7 @@ Description: Drumee web role (reverse proxy and static assets)
  No build step happens here: drumee-ui-pod already contains the webpack
  output, produced once when the package was built in CI.
 
-Package: drumee-role-media
+Package: drumee-role-converter
 Architecture: all
 Section: video
 Provides: drumee-role
@@ -106,28 +106,63 @@ Depends: ${misc:Depends},
          drumee-node-runtime (= ${drumee:NodeRuntimeVersion}),
          nodejs (>= 22),
          nodejs (<< 23),
-         ffmpeg,
-         graphicsmagick,
          libreoffice-core,
          libreoffice-writer,
          libreoffice-calc,
          libreoffice-impress,
+         fonts-liberation,
          poppler-utils,
-         dcraw,
-         p7zip-full,
-         fonts-liberation
-Description: Drumee media role (document and media conversion)
- Runtime role for the conversion workers: video and audio transcoding,
- raster and RAW image handling, archive extraction, and office document
- rendering.
+         graphicsmagick,
+         ghostscript,
+         ffmpeg,
+         7zip
+Description: Drumee converter role (file format conversion)
+ Runtime role for the PURE converters: office document rendering, PDF text
+ extraction and rasterising, image resizing, video and audio transcoding,
+ archive creation and extraction. File in, file out.
  .
- This role is deliberately isolated from the application role. It carries
- the heaviest dependencies in the whole platform, and it is the only
+ Named for what it does rather than for the subsystem it came from. The
+ offline/media tree in drumee-server-pod mixes two different jobs: format
+ conversion, which needs nothing but the file, and CONTENT operations
+ (add, download, purge, transfer, backfill-posters) which need the database
+ and the MFS model. Only the first kind belongs here — that is what makes
+ the isolation below true rather than aspirational.
+ .
+ It carries the heaviest dependencies in the platform and is the only
  component that parses untrusted user documents, so it runs with no
- database credentials and no inbound network exposure.
+ database credentials and no inbound network exposure. Progress and results
+ travel out over the Redis live-update channel, which the platform already
+ uses to reach the browser: the WebSocket sessions belong to the app role
+ and a short-lived worker could not hold them anyway.
  .
- Only the LibreOffice modules actually used for conversion are pulled in,
- not the libreoffice metapackage.
+ Every dependency here is a binary something actually shells out to, measured
+ against server-team and against the wrapper scripts in /usr/share/drumee/bin
+ rather than assumed:
+ .
+   libreoffice-*   soffice, 41 call sites — the bulk of the conversion work
+   fonts-liberation  soffice substitutes these for the Microsoft core fonts;
+                   without them page breaks move and the PDF stops matching
+   poppler-utils   pdftotext (4), pdfinfo (3)
+   graphicsmagick  gm (3) — and note that every bare "convert" and "mogrify"
+                   in the source is "gm convert" / "gm mogrify", so no
+                   ImageMagick and no graphicsmagick-imagemagick-compat
+   ghostscript     NOT optional, and the reason it is listed explicitly is a
+                   trap this role walked into. create-doc-preview.sh rasterises
+                   the first PDF page with "gm convert -density 200 file.pdf[0]",
+                   which gm performs by shelling out to gs. graphicsmagick only
+                   RECOMMENDS ghostscript, and every apt-get here runs with
+                   --no-install-recommends; measured on Trixie, that
+                   combination fails with "Postscript delegate failed" and no
+                   preview. The native channel never noticed because it installs
+                   the libreoffice METAPACKAGE, which depends on ghostscript —
+                   so taking only the modules we use silently removed it
+   ffmpeg          ffmpeg (8), ffprobe (2)
+   7zip            7z (16). Not p7zip-full: that is a transitional package on
+                   Trixie, and 7zip itself owns /usr/bin/7z
+ .
+ Only the LibreOffice modules used for conversion are pulled in, not the
+ libreoffice metapackage. dcraw was dropped: nothing in the platform invokes
+ it, so it was carrying a RAW decoder no code path could reach.
 
 Package: drumee-role-dns
 Architecture: all

@@ -19,6 +19,12 @@ ARG APT_URI=https://apt.drumee.net
 ARG APT_SUITE=trixie
 ARG APT_COMPONENTS=main
 ARG APT_KEYRING=drumee-archive-keyring.gpg
+# Set by docker/build-role.sh when the repository is LOCAL, to a hash of its Release file.
+# Iterating re-includes a package at the same version, which leaves this Dockerfile and every
+# other build-arg unchanged — so buildx would reuse the apt layer and the new package would
+# never reach the image, with the build reporting success. Empty against apt.drumee.net,
+# where a version is immutable and the cache is worth keeping.
+ARG APT_CACHEBUST=
 
 USER root
 
@@ -26,6 +32,7 @@ COPY docker/keyrings/ /usr/share/keyrings/
 
 RUN set -eu; \
     : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    : "${APT_CACHEBUST:-}"; \
     /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
         "/usr/share/keyrings/$APT_KEYRING"; \
     apt-get update -qq \

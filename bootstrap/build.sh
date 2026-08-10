@@ -42,11 +42,11 @@ chmod 0644 "$build_dir/files/usr/lib/drumee/entrypoint/lib.sh"
 # first started, which may be a long way from this build.
 say "Checking every role has an entrypoint"
 missing=""
-for role in app web media dns mail schemas infra; do
+for role in app web converter dns mail schemas infra; do
   [ -f "$build_dir/files/usr/lib/drumee/entrypoint/$role" ] || missing="$missing $role"
 done
 [ -z "$missing" ] || { echo "FATAL: no entrypoint for:$missing" >&2; exit 1; }
-echo "  app web media dns mail schemas infra"
+echo "  app web converter dns mail schemas infra"
 
 say "Verifying the scripts parse"
 for f in "$build_dir"/files/usr/lib/drumee/entrypoint/* "$build_dir"/files/usr/lib/drumee/healthcheck/*; do

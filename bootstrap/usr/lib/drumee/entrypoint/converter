@@ -1,0 +1,140 @@
+#!/bin/sh
+# converter role: file format conversion. File in, file out.
+#
+#   /usr/lib/drumee/entrypoint/converter verify     self-test the toolchain, then exit
+#   /usr/lib/drumee/entrypoint/converter worker     run the conversion worker
+#
+# Named for what it does, not for the subsystem it came from. server-team's offline/media
+# tree mixes two jobs that happen to share a directory:
+#
+#   PURE CONVERSION   to-pdf.js, chat-export-odt.js, normalize-docx-sections.js
+#                     — office/PDF/image/video/archive handling. Needs the file and the
+#                       tools, nothing else.
+#   CONTENT OPS       add.js, download.js, purge.js, transfer.js, recover.js,
+#                     backfill-posters.js, serverimport.js, serverexport.js
+#                     — need the database and the MFS model. They stay in the app role.
+#
+# Only the first kind belongs here, and that split is what makes §2's isolation true
+# rather than aspirational: this is the one component that parses untrusted user
+# documents, so it runs with NO database credentials and no inbound network exposure.
+# Progress travels out over the Redis live-update channel, which is how every other
+# background job already reaches the browser.
+set -eu
+. /usr/lib/drumee/entrypoint/lib.sh
+drumee_release
+
+# LibreOffice will not run headless without a writable profile directory, and it picks the
+# location from HOME. Pointing it at the scratch volume rather than the container
+# filesystem is what lets this role take a read-only rootfs later without anything moving.
+TMP="${DRUMEE_TMP_DIR:-/data/tmp}"
+mkdir -p "$TMP/profile"
+HOME="$TMP/profile"; export HOME
+
+# ── the toolchain, and what each tool is here for ──────────────────────────────────────
+# One line per Depends in roles/debian/control. A tool listed there and missing here (or
+# the reverse) means the role and its entrypoint have drifted.
+TOOLS='soffice:office documents to PDF and ODT
+pdftotext:PDF text extraction
+pdfinfo:PDF page count and geometry
+gm:image resize, rotate and thumbnailing
+ffmpeg:video and audio transcoding
+ffprobe:media stream inspection
+7z:archive creation and extraction'
+
+check_tools() {
+  # The loop below runs in a subshell (it is the far end of a pipe), so it reports what it
+  # finds through a file rather than a variable. Clear it first or a previous run's
+  # findings would be read back as this run's.
+  rm -f "$TMP/.missing"
+  echo "$TOOLS" | while IFS=: read -r tool what; do
+    if command -v "$tool" >/dev/null 2>&1; then
+      printf '[drumee]   %-10s %-46s %s\n' "$tool" "$what" ok
+    else
+      printf '[drumee]   %-10s %-46s %s\n' "$tool" "$what" MISSING
+      echo "$tool" >> "$TMP/.missing"
+    fi
+  done
+  if [ -s "$TMP/.missing" ]; then
+    missing="$(tr '\n' ' ' < "$TMP/.missing")"; rm -f "$TMP/.missing"
+    die "conversion tools missing: $missing — the image does not match roles/debian/control"
+  fi
+}
+
+# A present binary is not a working one: LibreOffice in particular fails at its first real
+# conversion when its profile directory is not writable, which is an ownership problem no
+# `--version` will show. So the self-test converts something.
+convert_once() {
+  work="$TMP/selftest"; rm -rf "$work"; mkdir -p "$work"
+  printf 'Drumee converter self-test\n' > "$work/in.txt"
+
+  soffice --headless --norestore -env:UserInstallation="file://$TMP/profile" \
+          --convert-to pdf --outdir "$work" "$work/in.txt" >/dev/null 2>&1 || true
+  [ -s "$work/in.pdf" ] || die "soffice produced no PDF — profile dir not writable, or a broken LibreOffice install"
+
+  pages="$(pdftotext "$work/in.pdf" - 2>/dev/null | tr -d '\f' | head -1)"
+  case "$pages" in
+    *"self-test"*) : ;;
+    *) die "pdftotext could not read back the PDF soffice just wrote (got: '$pages')" ;;
+  esac
+
+  pdfinfo "$work/in.pdf" >/dev/null 2>&1 || die "pdfinfo could not read the PDF"
+
+  # Exactly what create-doc-preview.sh does — gm rasterises the first PDF page itself,
+  # through its own Ghostscript delegate, rather than going via pdftoppm.
+  gm convert -density 50 "$work/in.pdf[0]" "$work/reader-0.png" >/dev/null 2>&1 || true
+  [ -s "$work/reader-0.png" ] || die "gm could not rasterise the PDF (its Ghostscript delegate is missing)"
+  gm convert "$work/reader-0.png" -resize 16x16 "$work/thumb.png" >/dev/null 2>&1 \
+    || die "gm could not resize the rasterised page"
+
+  printf 'archive test\n' > "$work/a.txt"
+  7z a -bso0 -bsp0 -tzip "$work/a.zip" "$work/a.txt" >/dev/null 2>&1 || true
+  [ -s "$work/a.zip" ] || die "7z produced no archive"
+
+  echo "[drumee]   txt -> pdf -> text -> png -> thumbnail -> zip: ok"
+  rm -rf "$work"
+}
+
+case "${1:-worker}" in
+  verify)
+    echo "[drumee] converter self-test"
+    check_tools
+    convert_once
+    echo "[drumee] toolchain ok"
+    exit 0
+    ;;
+  worker)
+    echo "[drumee] converter role starting"
+    check_tools
+
+    # The credential the role IS allowed. Its absence is worth reporting rather than
+    # discovering at the first job: without it server-essentials falls back to
+    # localhost:6379, where nothing is listening, and progress silently goes nowhere.
+    cred="${credential_dir:-/etc/drumee/credential/converter}"
+    if [ -r "$cred/redis.json" ]; then
+      echo "[drumee]   redis credential: $cred/redis.json"
+    else
+      echo "[drumee]   WARNING: no readable $cred/redis.json — progress reporting will not reach the browser" >&2
+    fi
+    # And the one it must NOT have. Cheap to check, and it is the property the whole role
+    # exists for, so a mount that quietly widened is worth failing on.
+    # Written as an `if`, not `[ -r … ] && die`: an && list whose left side fails is the
+    # last command in the loop body, so under `set -e` the NOT-readable case — the one we
+    # want — would exit the script.
+    for forbidden in /etc/drumee/credential/db.json /etc/drumee/credential/email.json; do
+      if [ -r "$forbidden" ]; then
+        die "$forbidden is readable in the converter role — see docs/distribution.md §2"
+      fi
+    done
+
+    # Deliberately not guessed. How a job REACHES this role is still open: the pure
+    # converters in server-team are spawned per job by the app today, and packaging them
+    # for this container is a change in server-team, not here. Inventing a queue protocol
+    # in an entrypoint would bake a wrong contract into the package.
+    [ -n "${DRUMEE_CONVERTER_CMD:-}" ] || die "DRUMEE_CONVERTER_CMD is not set — the worker entry point is still an open question (see docs/distribution.md §2). Run this image with 'verify' to self-test the toolchain."
+    echo "[drumee] exec: $DRUMEE_CONVERTER_CMD"
+    exec sh -c "$DRUMEE_CONVERTER_CMD"
+    ;;
+  *)
+    die "usage: converter verify|worker"
+    ;;
+esac

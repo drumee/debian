@@ -756,12 +756,10 @@ docker/build-role.sh infra                # the configuration-rendering job
 APT_URI=http://localhost:8099 docker/build-role.sh web   # against a local repo
 ```
 
-Three of the seven exist: `docker/Dockerfile.role-web`, `docker/Dockerfile.role-infra`
-and `docker/Dockerfile.role-app`.
-
-Three of the seven exist: `web`, `infra` and `app`. It contains **no source
-checkout, no git clone, no webpack and not one component version** — it installs one
-metapackage at an exact version and lets dpkg resolve the rest. `ROLE_VERSION` has no
+**All seven now exist**: `docker/Dockerfile.role-{web,infra,app,schemas,dns,mail,converter}`.
+Each contains **no source checkout, no git clone, no webpack and not one component
+version** — it installs one metapackage at an exact version and lets dpkg resolve the
+rest. `ROLE_VERSION` has no
 default on purpose: a default would be a component version written outside
 `release-manifest.yaml`.
 
@@ -790,7 +788,7 @@ role-web → drumee-ui-pod → drumee-server-pod → drumee-schemas → mariadb-
 Those `Depends` are native-channel assumptions from when everything was one box, and
 they are harmless there because the metapackage installs the whole set anyway. In the
 container channel they defeat the entire decomposition — including the security argument
-for splitting out `drumee-media` (`docs/distribution.md` §2), since the web role would
+for splitting out `drumee-converter` (`docs/distribution.md` §2), since the web role would
 carry the document parsers. **Fixing this means `drumee-ui-pod` dropping
 `Depends: drumee-server-pod` and `drumee-static` dropping `Depends: drumee-infra`** (plus
 the `binutils`/`git`/`nodejs` build-time leftovers). Neither has a postinst that needs
@@ -809,13 +807,13 @@ images:
 ```
 
 `render.mjs compose` emits the package-based topology of `docs/distribution.md` §2 when
-this is set: **db, cache, infra-init, schemas-init, migrate, app, web, media** plus
+this is set: **db, cache, infra-init, schemas-init, migrate, app, web, converter** plus
 profile-gated **dns** and **mail**. `docker compose config` validates it, and
 `docker/build-role.sh` builds the images.
 
-It is not the default because only two of the seven role images exist (web, infra) —
-emitting it by default would hand every existing caller a stack that cannot pull. That is
-criterion 1 of `deploy/docker/DEPRECATED.md`.
+It is not the default because none of the role images are **published** yet — every one is
+built locally against a local repository. Emitting it by default would hand every existing
+caller a stack that cannot pull. That is criterion 1 of `deploy/docker/DEPRECATED.md`.
 
 Four differences that are the point of the exercise:
 
@@ -853,6 +851,19 @@ init|include|serve` plus `APT_URI=http://<docker-gateway>:8099
 APT_KEYRING=drumee-local-keyring.gpg docker/build-role.sh <role>`. Role image tags follow
 the release train, so every entrypoint or Dockerfile fix otherwise costs a release — four
 were burned before switching to this.
+
+Two traps that come with that loop, both measured:
+
+- **reprepro refuses to re-include a version it already has.** `reprepro -b .apt-local
+  --gnupghome .apt-local/gnupg remove trixie <pkg>` first, then include.
+- **buildx will happily reuse the apt layer** once the package is replaced, because the
+  Dockerfile and every build-arg are unchanged — so the new package never reaches the
+  image and the build prints the version it *believes* it installed. A rebuilt
+  `role-converter` still carried the previous entrypoint, and the check meant to catch
+  that passed against stale content. `docker/build-role.sh` now passes an
+  `APT_CACHEBUST` derived from the local repository's `Release` file whenever `APT_URI`
+  is not `apt.drumee.net` (and takes `--no-cache`); against the real repository a version
+  is immutable, so the cache stays.
 
 ### The schemas role — the database, and how far provisioning gets
 

@@ -1,3 +1,56 @@
+drumee-roles (1.0.55-1~trixie1) stable; urgency=medium
+
+  * drumee-role-media is now drumee-role-converter. The old name was the name of a
+    SOURCE DIRECTORY (server-team/offline/media), and that directory holds two
+    unrelated jobs: pure conversion, which needs the file and a toolchain, and content
+    operations (add, download, purge, transfer, backfill-posters, serverimport/export)
+    which need the database and the MFS model. While the role was defined by the
+    directory, distribution.md §2's "runs with no database credentials" was a claim its
+    own contents contradicted. Defined by the job — file in, file out — the boundary is
+    checkable, and the entrypoint checks it.
+  * The dependency set is now measured rather than assumed, counted across server-team
+    and the wrapper scripts in /usr/share/drumee/bin: soffice 41, 7z 16, ffmpeg 8,
+    pdftotext 4, pdfinfo 3, gm 3, ffprobe 2.
+    - ADDED ghostscript, and it is the trap in this role. create-doc-preview.sh
+      rasterises the first PDF page with `gm convert -density 200 file.pdf[0]`, which
+      GraphicsMagick performs by shelling out to gs. graphicsmagick only RECOMMENDS
+      ghostscript and every apt-get in the image builds runs with
+      --no-install-recommends; measured on Trixie, that combination fails with
+      "Postscript delegate failed" and produces no preview at all. The native channel
+      never noticed because it installs the libreoffice METAPACKAGE, which depends on
+      ghostscript — so this role's "only the modules we use" optimisation had silently
+      removed the delegate.
+    - p7zip-full -> 7zip. The former is transitional on Trixie; 7zip owns /usr/bin/7z.
+    - DROPPED dcraw: nothing in the platform invokes it, so it was carrying a RAW
+      decoder no code path could reach.
+    - No ImageMagick and no graphicsmagick-imagemagick-compat: every bare "convert" and
+      "mogrify" in the source is "gm convert" / "gm mogrify".
+    - No zip: make-zip.sh's $ZIP resolves to 7zz or 7z.
+  * docker/Dockerfile.role-converter added, so all seven roles now have an image
+    definition. It carries no EXPOSE, deliberately, and creates /data/tmp owned by 8000
+    because a fresh named volume inherits the ownership of the directory beneath it.
+  * docker/build-role.sh gained --no-cache, and busts the apt layer automatically when
+    APT_URI is not apt.drumee.net. Iterating against a local repository means
+    re-including a package at the SAME version, which leaves the Dockerfile and every
+    build-arg unchanged — so buildx reused the apt layer and the new package never
+    reached the image, while the build printed the version it believed it installed.
+    Measured: a rebuilt role-converter still carried the previous entrypoint, and the
+    check that should have caught it passed against stale content.
+
+ -- Drumee Packaging <packaging@drumee.com>  Mon, 10 Aug 2026 14:23:36 +0200
+
+drumee-roles (1.0.54-1~trixie1) stable; urgency=medium
+
+  * Release 1.0.54 (synced from release-manifest.yaml)
+
+ -- Drumee Packaging <packaging@drumee.com>  Mon, 10 Aug 2026 12:12:53 +0200
+
+drumee-roles (1.0.53-1~trixie1) stable; urgency=medium
+
+  * Release 1.0.53 (synced from release-manifest.yaml)
+
+ -- Drumee Packaging <packaging@drumee.com>  Mon, 10 Aug 2026 12:02:17 +0200
+
 drumee-roles (1.0.52-1~trixie1) stable; urgency=medium
 
   * Release 1.0.52 (synced from release-manifest.yaml)

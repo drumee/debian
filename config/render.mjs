@@ -765,6 +765,11 @@ volumes:
   # nginx's proxy cache. A named volume rather than the container filesystem so it
   # survives a restart and does not grow inside the image layer.
   web_cache: {}
+  # The converter's scratch space. LibreOffice, ffmpeg and 7z all write large
+  # intermediates, and a headless soffice additionally insists on a writable profile
+  # directory; keeping that off the container filesystem means the role can run with a
+  # read-only rootfs later without any of it moving.
+  converter_tmp: {}
   # There is deliberately NO credential volume.
   #
   # There was one, mounted writable at /etc/drumee/credential so the app and schemas roles
@@ -950,16 +955,36 @@ ${conf('/etc/drumee', 'etc/drumee')}
 
   # Deliberately separate, and not negotiable per §2: this is the only component that
   # parses untrusted documents, and it carries the heaviest dependencies in the
-  # platform. It gets no database credentials and no published port.
-  media:
-    image: \${IMAGE_REGISTRY}/role-media:\${ROLES_TAG}
+  # platform. File in, file out — no database credentials, no published port.
+  #
+  # It reaches the browser the same way every other progress report does, over the
+  # Redis live-update channel, so it needs the cache service and nothing else. The
+  # WebSocket sessions live in the app role, and a short-lived converter process could
+  # not hold one open anyway.
+  converter:
+    image: \${IMAGE_REGISTRY}/role-converter:\${ROLES_TAG}
     restart: unless-stopped
     networks: [drumee]
     depends_on:
-      app:
+      cache:
         condition: service_started
+      # Not for ordering alone: it mounts a subpath of the rendered tree, and a subpath
+      # that does not exist yet fails the mount rather than starting empty.
+      infra-init:
+        condition: service_completed_successfully
+    # NO env_file, deliberately. .env carries DB_PASSWORD, and handing it to this role
+    # would undo the one property it exists for.
+    environment:
+      # server-essentials resolves its Redis credential from this directory. It is the
+      # ONLY credential the converter can see: infra-init writes a scoped copy holding
+      # redis.json and nothing else, because a volume subpath mounts directories and
+      # there is no way to mount one file out of the shared credential dir.
+      credential_dir: /etc/drumee/credential/converter
+      DRUMEE_TMP_DIR: /data/tmp
     volumes:
       - mfs_data:/data/mfs
+      - converter_tmp:/data/tmp
+${conf('/etc/drumee/credential/converter', 'etc/drumee/credential/converter')}
 
   # --- optional roles --------------------------------------------------------
   # bind9 serving the zone infra-init rendered. Host networking because a nameserver
@@ -973,8 +998,12 @@ ${conf('/etc/drumee', 'etc/drumee')}
     depends_on:
       infra-init:
         condition: service_completed_successfully
+    # A SIDE path, not /etc/bind. bind9 ships /etc/bind/named.conf — the top-level file that
+    # includes the rendered ones — and a mount replaces what is underneath it, so mounting
+    # the volume there hid it. Mounting the three files individually is not an option
+    # either: Docker's volume subpath mounts directories only. entrypoint/dns places them.
     volumes:
-${conf('/etc/bind', 'etc/bind')}
+${conf('/etc/drumee/bind', 'etc/bind')}
 ${conf('/var/lib/bind', 'var/lib/bind')}
 
   mail:

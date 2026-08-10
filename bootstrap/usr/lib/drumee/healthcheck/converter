@@ -1,0 +1,32 @@
+#!/bin/sh
+# The converter role has no listener — nothing connects to it — so there is no port to
+# probe. Two things are worth checking instead, in this order:
+#
+#   1. the toolchain is still usable. It is the role's entire reason to exist, and it can
+#      break without the process dying: an unwritable profile directory makes soffice
+#      produce no output and no error, and a missing ghostscript delegate makes gm fail
+#      only on PDFs. A container that is up but cannot convert is not healthy.
+#   2. the worker process is alive, once there is one to name.
+#
+# Cheap version of (1): soffice's own startup, not a full conversion — a healthcheck runs
+# every few seconds and a LibreOffice document conversion takes seconds on its own.
+set -eu
+
+command -v soffice >/dev/null || { echo "soffice missing" >&2; exit 1; }
+command -v gm      >/dev/null || { echo "gm missing" >&2; exit 1; }
+command -v gs      >/dev/null || { echo "ghostscript missing — gm cannot rasterise PDFs" >&2; exit 1; }
+command -v 7z      >/dev/null || { echo "7z missing" >&2; exit 1; }
+
+# The profile directory soffice needs. Unwritable is the failure that produces no output
+# and no error, so it is checked directly rather than inferred.
+TMP="${DRUMEE_TMP_DIR:-/data/tmp}"
+[ -w "$TMP" ] || { echo "$TMP is not writable — soffice would silently produce nothing" >&2; exit 1; }
+
+# Only meaningful once the transport question is settled and a worker is named. Until then
+# the container runs no long-lived process of its own, and reporting that as unhealthy
+# would be reporting the open design question as a fault.
+if [ -n "${DRUMEE_CONVERTER_CMD:-}" ]; then
+  pgrep -f "$DRUMEE_CONVERTER_CMD" >/dev/null \
+    || { echo "converter worker not running" >&2; exit 1; }
+fi
+exit 0

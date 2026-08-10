@@ -1,3 +1,59 @@
+drumee-bootstrap (2.0.17) stable; urgency=medium
+
+  * entrypoint/media is now entrypoint/converter, and it does real work instead of
+    refusing to start. Two modes:
+    - "verify" self-tests the toolchain by actually converting, not by running
+      --version on each binary: txt -> pdf (soffice) -> text (pdftotext) -> page count
+      (pdfinfo) -> png (gm, via its ghostscript delegate) -> thumbnail -> zip (7z). A
+      present binary is not a working one; soffice in particular produces no output and
+      no error when its profile directory is unwritable.
+    - "worker" still refuses to start until DRUMEE_CONVERTER_CMD names an entry point.
+      How a job REACHES this container is a server-team question, and inventing a queue
+      protocol in an entrypoint would bake a wrong contract into a published package.
+  * The converter asserts its own isolation at startup: it reports the one credential it
+    is allowed (redis.json, from credential_dir) and DIES if db.json or email.json is
+    readable. distribution.md §2's claim is now enforced by the thing it describes.
+  * entrypoint/infra writes a second, scoped copy of redis.json under
+    credential/converter/. Docker's volume subpath mounts directories only, so there is
+    no way to mount one file out of the shared credential directory — without a
+    directory of its own, the converter would have to be handed db.json as well. Still
+    one writer per credential: the same job, the same values, the same run.
+  * HOME points at the scratch volume, because soffice picks its profile location from
+    it and that is what lets this role take a read-only rootfs later.
+  * healthcheck/converter probes the TOOLCHAIN, not a listener — nothing connects to this
+    role, so there is no port. It checks soffice, gm, gs and 7z are present and that the
+    scratch directory is writable, which is the failure that produces no output and no
+    error, and only then checks for a worker process (and only if one is named).
+
+ -- Drumee Packaging <packaging@drumee.com>  Mon, 10 Aug 2026 14:23:36 +0200
+
+drumee-bootstrap (2.0.16) stable; urgency=medium
+
+  * entrypoint/dns places the rendered zone configuration into /etc/bind from a side
+    mount, instead of the volume being mounted over that directory. Two measured
+    reasons: bind9 ships /etc/bind/named.conf — the top-level file that includes the
+    three rendered ones — and a mount replaces what is underneath it, so named died with
+    "open: /etc/bind/named.conf: file not found"; and mounting the three files
+    individually is not possible, because Docker's volume subpath mounts DIRECTORIES
+    only and a single file fails with "not a directory".
+
+ -- Drumee Packaging <packaging@drumee.com>  Mon, 10 Aug 2026 12:12:53 +0200
+
+drumee-bootstrap (2.0.15) stable; urgency=medium
+
+  * entrypoint/infra refuses to ship a rendered tree that embeds the render target as a
+    path, and prints which files and which paths. Three instances of that mistake were
+    found by grepping the tree, so the grep is now part of the job: it is the cheapest
+    possible guard, and it fails where the mistake is made rather than in named or in the
+    application hours later.
+  * It also generates the TSIG update key. named.conf.local includes it
+    unconditionally, and natively init-named creates it — a HOST step this job skips, so
+    a container render produced a zone configuration pointing at a file nobody had
+    created. A key is a file, not a host action, so producing it belongs here.
+    drumee-role-infra's image gains bind9-utils for tsig-keygen.
+
+ -- somanos.sar@drumee.com  Mon, 10 Aug 2026 12:02:17 +0200
+
 drumee-bootstrap (2.0.14) stable; urgency=medium
 
   * entrypoint/schemas init now populates as well as bootstraps, because "initialise the

@@ -37,7 +37,7 @@ drumee-role` so only one can be installed per image:
 | --- | --- |
 | `drumee/server-pod` (`Dockerfile.server`) | `drumee-role-app` |
 | `drumee/ui-build` + `drumee/static` (`Dockerfile.ui`, `Dockerfile.static`) | `drumee-role-web` |
-| — (media work ran inside server-pod) | `drumee-role-media` |
+| — (conversion ran inside server-pod) | `drumee-role-converter` |
 | `drumee/schemas` + `drumee/schemas-populate` | `drumee-role-schemas` |
 | `drumee/infra-init` (`Dockerfile.infra-init`) | `drumee-role-infra` |
 | — (bind9 ran on the host or not at all) | `drumee-role-dns` |
@@ -80,7 +80,14 @@ an arm64 `server-pod` to depend on.
 This tree goes when all of the following are true, and not before — it is currently the
 **only** working container path:
 
-1. Per-role Dockerfiles exist over `docker/Dockerfile.base` and build the seven roles.
-2. `config/render.mjs compose` emits the role services instead of the 15 current ones.
+1. ~~Per-role Dockerfiles exist over `docker/Dockerfile.base` and build the seven roles.~~
+   **Done at 1.0.55.** All seven build:
+   `docker/Dockerfile.role-{web,infra,app,schemas,dns,mail,converter}`.
+2. ~~`config/render.mjs compose` emits the role services instead of the 15 current ones.~~
+   **Done** — `images.stack: roles`, eight services plus profile-gated `dns` and `mail`.
+   Still not the default, because of 4.
 3. `tests/smoke-container.sh` and `tests/e2e-local.sh` pass against role images.
+   Both still target the source stack.
 4. Images are published and signed for the architectures the roles claim.
+   None are published — every role image so far is built against a local repository
+   (`scripts/apt-repo-local.sh`). This is now the binding criterion.

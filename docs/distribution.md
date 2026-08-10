@@ -36,7 +36,7 @@ the monolith impossible to reassemble by accident.
 | --- | --- | --- |
 | `drumee-app` | `drumee-role-app` | Node 22, `drumee-server-pod`, pm2 fork mode, REST 24000 / push 23000 |
 | `drumee-web` | `drumee-role-web` | nginx, `drumee-ui-pod`, `drumee-static` |
-| `drumee-media` | `drumee-role-media` | ffmpeg, GraphicsMagick, LibreOffice, poppler, dcraw, p7zip |
+| `drumee-converter` | `drumee-role-converter` | LibreOffice, ghostscript, poppler, GraphicsMagick, ffmpeg, 7zip |
 | `drumee-dns` | `drumee-role-dns` | bind9, TSIG dynamic updates |
 | `drumee-mail` | `drumee-role-mail` | postfix, opendkim, spamass-milter |
 | `drumee-db` | — | official `mariadb:11.8` image |
@@ -48,10 +48,83 @@ MariaDB and Redis stay on their official images. `mariadb:11.8` matches the
 version Trixie ships, so the 130 tables and 645 routines in `yp` are validated
 against a single branch.
 
-Splitting out `drumee-media` is deliberate and not negotiable: it carries the
+Splitting out `drumee-converter` is deliberate and not negotiable: it carries the
 heaviest dependencies in the platform, and it is the only component that
 parses untrusted documents. It runs with no database credentials and no
 inbound network exposure.
+
+### Why it is `converter` and not `media`
+
+It was `drumee-role-media` up to release 1.0.54, named after the source
+directory the work lives in — `server-team/offline/media/`. That directory holds
+**two unrelated jobs**, and a container named after it would have to carry both:
+
+| | needs | goes to |
+| --- | --- | --- |
+| **pure conversion** — `to-pdf.js`, `chat-export-odt.js`, `normalize-docx-sections.js` | the file and a toolchain | `drumee-converter` |
+| **content operations** — `add.js`, `download.js`, `purge.js`, `transfer.js`, `recover.js`, `backfill-posters.js`, `serverimport.js`, `serverexport.js` | the database and the MFS model | `drumee-app` |
+
+So the rename is what makes the isolation decidable rather than aspirational: as
+long as the role was defined by a directory, "runs with no database credentials"
+was a claim the contents contradicted. Defined by the job — file in, file out —
+the boundary is a property you can check, and the entrypoint does check it (it
+refuses to start if `db.json` or `email.json` is readable).
+
+The one place the line is not obvious is `to-pdf.js`, which does open a database
+handle. It uses it for **exactly two calls** — `get_user` and `entity_sockets`
+— i.e. to work out who to notify. That is recipient resolution, not conversion,
+and it belongs on the app side; the conversion itself never touches the schema.
+Progress travels over the Redis live-update channel, which is already how every
+background job reaches a browser, so nothing is lost by moving the lookup: a
+short-lived converter process could not hold a WebSocket session open anyway.
+
+**Its dependencies are measured, not assumed.** Every entry in the table above is
+a binary something actually shells out to, counted across `server-team` and the
+wrapper scripts in `/usr/share/drumee/bin/`: soffice 41, 7z 16, ffmpeg 8,
+pdftotext 4, pdfinfo 3, gm 3, ffprobe 2. Four consequences:
+
+- **`ghostscript` is required, and is the trap in this role.**
+  `create-doc-preview.sh` rasterises the first PDF page with
+  `gm convert -density 200 file.pdf[0]`, which GraphicsMagick performs by
+  shelling out to `gs`. GraphicsMagick only *Recommends* ghostscript, and §
+  *Forbidden* requires `--no-install-recommends` everywhere; measured on Trixie,
+  that combination fails with `Postscript delegate failed` and produces no
+  preview. The native channel never noticed, because it installs the
+  **`libreoffice` metapackage**, which Depends on ghostscript — so this role's
+  "only the modules we use" optimisation silently removed the delegate.
+- **No ImageMagick.** Every bare `convert` and `mogrify` in the source is
+  `gm convert` / `gm mogrify`, so neither `imagemagick` nor
+  `graphicsmagick-imagemagick-compat` is needed.
+- **`7zip`, not `p7zip-full`.** The latter is transitional on Trixie; `7zip`
+  itself owns `/usr/bin/7z`. And `zip` is not needed at all — `make-zip.sh`'s
+  `$ZIP` resolves to `7zz` or `7z`.
+- **`dcraw` dropped.** Nothing in the platform invokes it, so it was carrying a
+  RAW decoder no code path could reach.
+
+**Verified at 1.0.55**, with the two halves mounted the way compose mounts them:
+
+| | |
+| --- | --- |
+| image | `drumee/role-converter:1.0.55`, 1.31 GB, uid 8000, no `EXPOSE` |
+| `verify` | the whole chain converts: `txt → pdf → text → page count → png → 16px thumbnail → zip`, exit 0 |
+| scratch volume | a *fresh named volume* at `/data/tmp` is writable — the Dockerfile creates the mountpoint owned by 8000, which is the fourth instance of that rule in this tree |
+| `infra-init` | writes `credential/converter/redis.json`, `0640` inside a `0750` directory, owned `8000:8000` |
+| what the container can see | `ls` of its credential directory returns exactly `redis.json`; `/etc/drumee/credential/db.json` does not exist in the container at all |
+| the guard fires | with `db.json` made readable, `worker` refuses to start and names this section |
+
+`tests/config-parity.sh` holds the standing check, because the property is one careless
+line from being false: adding `env_file: [.env]` to the service, or widening the mount from
+`etc/drumee/credential/converter` to `etc/drumee/credential`, would hand it `DB_PASSWORD`
+or `db.json` without looking wrong to a reader.
+
+What is still open is not the boundary but the **transport**: how a job reaches
+this container. The pure converters are spawned per job by the app today, and
+packaging them for a container of their own is a change in `server-team`, not
+here. So `entrypoint/converter` takes `verify` — which self-tests the whole
+toolchain by actually converting, `txt → pdf → text → png → thumbnail → zip` —
+and `worker`, which refuses to start until `DRUMEE_CONVERTER_CMD` names an entry
+point. Inventing a queue protocol in an entrypoint would bake a wrong contract
+into a published package.
 
 ## 3. Version coherence
 

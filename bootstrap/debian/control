@@ -12,7 +12,7 @@ Architecture: all
 Depends: ${misc:Depends}
 Description: Role entrypoints and healthchecks for Drumee containers
  The scripts each Drumee role container runs at start, and the probes that say
- whether it is serving. One entrypoint per role — app, web, media, dns, mail,
+ whether it is serving. One entrypoint per role — app, web, converter, dns, mail,
  schemas, infra — plus a shared library holding the credential provisioning that
  was previously duplicated in every image's entrypoint.
  .

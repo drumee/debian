@@ -1,0 +1,74 @@
+# drumee-converter — file format conversion, and nothing else.
+#
+#   docker/build-role.sh converter
+#   docker run --rm drumee/role-converter:<release> verify     # self-test the toolchain
+#
+# Renamed from role-media, and the rename is the point rather than cosmetic. "Media" was the
+# name of a source directory (server-team's offline/media), and that directory holds two
+# unrelated jobs: format conversion, which needs the file and a toolchain, and content
+# operations (add, download, purge, transfer, backfill-posters, serverimport/serverexport)
+# which need the database and the MFS model. A container named after the directory would
+# have to carry both, and then §2's claim — "runs with no database credentials" — could not
+# be true. Named after the job, the boundary is decidable: file in, file out.
+#
+# This is the only component that parses untrusted user documents, so it is also the one
+# where code execution is a realistic outcome of a user upload. What it can reach is
+# therefore deliberately narrow: the MFS data volume, a scratch volume, and exactly one
+# credential — see the compose service in config/render.mjs.
+
+ARG BASE_IMAGE
+ARG BASE_DIGEST
+FROM ${BASE_IMAGE}@${BASE_DIGEST}
+
+ARG ROLE_VERSION
+ARG APT_URI=https://apt.drumee.net
+ARG APT_SUITE=trixie
+ARG APT_COMPONENTS=main
+ARG APT_KEYRING=drumee-archive-keyring.gpg
+# Set by docker/build-role.sh when the repository is LOCAL, to a hash of its Release file.
+# Iterating re-includes a package at the same version, which leaves this Dockerfile and every
+# other build-arg unchanged — so buildx would reuse the apt layer and the new package would
+# never reach the image, with the build reporting success. Empty against apt.drumee.net,
+# where a version is immutable and the cache is worth keeping.
+ARG APT_CACHEBUST=
+
+USER root
+
+COPY docker/keyrings/ /usr/share/keyrings/
+
+RUN set -eu; \
+    : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    : "${APT_CACHEBUST:-}"; \
+    /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
+        "/usr/share/keyrings/$APT_KEYRING"; \
+    apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+        "drumee-role-converter=${ROLE_VERSION}" \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# The scratch volume's mountpoint, owned by 8000 at build time.
+#
+# A fresh named volume inherits the ownership of the image directory underneath it, so
+# without this the mount arrives root-owned and uid 8000 cannot write — the fourth instance
+# of this same rule in this tree (see /etc/drumee/credential in the app role,
+# /srv/drumee/cache in the web role, /data/mfs in the schemas role). It bites harder here
+# than anywhere else: soffice does not fail loudly on an unwritable profile directory, it
+# just produces no output.
+RUN install -d -o drumee -g drumee -m 0755 /data /data/mfs /data/tmp
+
+RUN . /usr/share/drumee/release \
+ && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
+
+LABEL org.opencontainers.image.title="drumee-converter" \
+      org.opencontainers.image.description="Drumee converter role: office, PDF, image, media and archive conversion" \
+      org.opencontainers.image.source="https://github.com/drumee/debian"
+
+# No EXPOSE, deliberately: nothing connects TO this role. Work arrives as files on the
+# shared volume and results are announced on the Redis live-update channel, which is an
+# outbound connection. §2's "no inbound network exposure", stated in the one place a reader
+# would look for a port.
+USER drumee
+# From drumee-bootstrap, not a COPY — §9.2.
+ENTRYPOINT ["/usr/lib/drumee/entrypoint/converter"]
+CMD ["worker"]

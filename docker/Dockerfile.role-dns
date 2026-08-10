@@ -1,0 +1,65 @@
+# drumee-dns — BIND9, authoritative for the deployment's zone.
+#
+#   docker/build-role.sh dns
+#
+# One metapackage at an exact version; the zone itself comes from the shared configuration
+# volume that infra-init rendered, never from this image.
+#
+# Only needed when the deployment answers its own DNS-01 challenges, or when the zone is
+# delegated nowhere and the instance is the only thing that knows its own name — the
+# self-signed/LAN case, where the nameserver IS the product rather than an ACME detail.
+# Hence the `dns` compose profile.
+
+ARG BASE_IMAGE
+ARG BASE_DIGEST
+FROM ${BASE_IMAGE}@${BASE_DIGEST}
+
+ARG ROLE_VERSION
+ARG APT_URI=https://apt.drumee.net
+ARG APT_SUITE=trixie
+ARG APT_COMPONENTS=main
+ARG APT_KEYRING=drumee-archive-keyring.gpg
+# Set by docker/build-role.sh when the repository is LOCAL, to a hash of its Release file.
+# Iterating re-includes a package at the same version, which leaves this Dockerfile and every
+# other build-arg unchanged — so buildx would reuse the apt layer and the new package would
+# never reach the image, with the build reporting success. Empty against apt.drumee.net,
+# where a version is immutable and the cache is worth keeping.
+ARG APT_CACHEBUST=
+
+USER root
+
+COPY docker/keyrings/ /usr/share/keyrings/
+
+RUN set -eu; \
+    : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    : "${APT_CACHEBUST:-}"; \
+    /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
+        "/usr/share/keyrings/$APT_KEYRING"; \
+    apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+        "drumee-role-dns=${ROLE_VERSION}" \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# named's own writable state. It logs into /var/log/named on this platform because that is
+# where setup-infra's rendered named.conf.log points it, and the directory is not part of
+# the package.
+RUN install -d -o bind -g bind -m 0755 /var/log/named /var/cache/bind /run/named
+
+RUN . /usr/share/drumee/release \
+ && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
+
+LABEL org.opencontainers.image.title="drumee-dns" \
+      org.opencontainers.image.description="Drumee DNS role: BIND9 authoritative for the instance zone" \
+      org.opencontainers.image.source="https://github.com/drumee/debian"
+
+# Deliberately root, unlike the web and app roles.
+#
+# named is built to start privileged and drop to `bind` itself — that is what `named -u bind`
+# in the entrypoint does, and it cannot be done from uid 8000. §7's fixed uid exists so the
+# SHARED VOLUMES have one owner everywhere; this role only ever READS that tree, so nothing
+# about it depends on the container's uid. Making named run as 8000 instead would mean
+# fighting the distro packaging for no benefit, which is the trade the web role took the
+# other way round because nginx's workers do read the shared config.
+EXPOSE 53/tcp 53/udp
+ENTRYPOINT ["/usr/lib/drumee/entrypoint/dns"]

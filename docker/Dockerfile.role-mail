@@ -1,0 +1,60 @@
+# drumee-mail — postfix with OpenDKIM signing.
+#
+#   docker/build-role.sh mail
+#
+# One metapackage at an exact version. The postfix and opendkim trees come from the shared
+# configuration volume that infra-init rendered, including the DKIM key it generated — never
+# from this image, which is the whole point: a signing key baked into a layer is the same
+# key for every deployment built from it.
+#
+# Gated by the `mail` compose profile: an instance can perfectly well deliver nothing.
+
+ARG BASE_IMAGE
+ARG BASE_DIGEST
+FROM ${BASE_IMAGE}@${BASE_DIGEST}
+
+ARG ROLE_VERSION
+ARG APT_URI=https://apt.drumee.net
+ARG APT_SUITE=trixie
+ARG APT_COMPONENTS=main
+ARG APT_KEYRING=drumee-archive-keyring.gpg
+# Set by docker/build-role.sh when the repository is LOCAL, to a hash of its Release file.
+# Iterating re-includes a package at the same version, which leaves this Dockerfile and every
+# other build-arg unchanged — so buildx would reuse the apt layer and the new package would
+# never reach the image, with the build reporting success. Empty against apt.drumee.net,
+# where a version is immutable and the cache is worth keeping.
+ARG APT_CACHEBUST=
+
+USER root
+
+COPY docker/keyrings/ /usr/share/keyrings/
+
+# postfix's postinst asks for a mail configuration type interactively. Preseeded to "No
+# configuration" so it installs its binaries and leaves /etc/postfix alone: the rendered
+# tree arrives on the volume at deploy time, and a main.cf written during the image build
+# would be a machine-specific artifact baked into a layer — §5.
+RUN set -eu; \
+    : "${ROLE_VERSION:?ROLE_VERSION must be set — see release-manifest.yaml}"; \
+    : "${APT_CACHEBUST:-}"; \
+    /usr/local/sbin/drumee-apt-source "$APT_URI" "$APT_SUITE" "$APT_COMPONENTS" \
+        "/usr/share/keyrings/$APT_KEYRING"; \
+    echo "postfix postfix/main_mailer_type select No configuration" | debconf-set-selections; \
+    apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+        "drumee-role-mail=${ROLE_VERSION}" \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN . /usr/share/drumee/release \
+ && printf '%s\n' "$DRUMEE_RELEASE" > /usr/share/drumee/image-release
+
+LABEL org.opencontainers.image.title="drumee-mail" \
+      org.opencontainers.image.description="Drumee mail role: postfix and OpenDKIM" \
+      org.opencontainers.image.source="https://github.com/drumee/debian"
+
+# Root, for the same reason as the dns role: postfix's master runs privileged and drops to
+# the `postfix` user itself, and several of its components are setuid by design. This role
+# only reads the shared configuration tree, so §7's fixed uid — which exists to give the
+# shared VOLUMES one owner — does not constrain it.
+EXPOSE 25 587
+ENTRYPOINT ["/usr/lib/drumee/entrypoint/mail"]

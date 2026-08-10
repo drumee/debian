@@ -105,6 +105,61 @@ for pair in "LOCAL_MODE:local_mode" "ADMIN_EMAIL:admin_email" "TLS_MODE:tls_meth
 done
 ok "each dropped fact has a matching drumee-infra/* key in the preseed"
 
+printf '\033[1;36m── the converter role cannot learn a database credential\033[0m\n'
+# docs/distribution.md §2: the converter is the only component that parses untrusted user
+# documents, so code execution there is a realistic outcome of an upload. "Runs with no
+# database credentials" is the reason the role exists, and it is one careless line away from
+# being false: adding `env_file: [.env]` to the service, or widening its conf mount from
+# etc/drumee/credential/converter to etc/drumee/credential, would hand it DB_PASSWORD or
+# db.json without changing anything a reader would look at twice.
+# Comments stripped, or the check reads the prose instead of the configuration: the
+# service carries a comment saying "NO env_file, deliberately", which matched.
+conv="$(node "$root/config/render.mjs" compose --config "$tmp/roles.yaml" 2>/dev/null \
+        | sed -n '/^  converter:/,/^  [a-z-]*:$/p' | grep -v '^[[:space:]]*#')"
+if [ -z "$conv" ]; then
+  no "the roles compose has no converter service"
+else
+  printf '%s\n' "$conv" | grep -q 'env_file' \
+    && no "the converter service has an env_file — .env carries DB_PASSWORD" \
+    || ok "no env_file on the converter service"
+
+  # The mount must name the scoped directory. A subpath of the shared credential dir, or
+  # of /etc/drumee as a whole, would expose db.json and email.json.
+  if printf '%s\n' "$conv" | grep -qE 'subpath: etc/drumee/credential/converter'; then
+    ok "its only credential mount is the scoped converter directory"
+  else
+    no "the converter's credential mount is not the scoped etc/drumee/credential/converter"
+    printf '%s\n' "$conv" | grep -E 'subpath|source:' | sed 's/^/       /'
+  fi
+  printf '%s\n' "$conv" | grep -qE 'subpath: etc/drumee$|subpath: etc/drumee/credential$' \
+    && no "the converter mounts the whole credential tree — db.json would be readable" \
+    || ok "it does not mount the shared credential tree"
+
+  printf '%s\n' "$conv" | grep -qE '^\s+ports:' \
+    && no "the converter publishes a port — §2 says no inbound network exposure" \
+    || ok "no published port"
+fi
+
+# And the writer half: infra-init has to actually create that directory, or the subpath
+# mount fails and the service never starts.
+if grep -q 'credential/converter' "$root/bootstrap/usr/lib/drumee/entrypoint/infra"; then
+  ok "infra-init writes the scoped credential directory the mount needs"
+else
+  no "nothing creates etc/drumee/credential/converter — the subpath mount would fail"
+fi
+
+printf '\033[1;36m── no stray backtick inside the compose template literals\033[0m\n'
+# render.mjs's compose renderers are JS template literals, and a backtick in a COMMENT
+# inside one closes the string. That has broken every render.mjs command four separate
+# times in one sitting; `node --check` catches it, but only if someone runs it. Now
+# something does, on every CI run.
+if node --check "$root/config/render.mjs" 2>/dev/null; then
+  ok "config/render.mjs parses"
+else
+  no "config/render.mjs does not parse — most likely a backtick in a template-literal comment"
+  node --check "$root/config/render.mjs" 2>&1 | head -4 | sed 's/^/       /'
+fi
+
 echo
 printf '\033[1m== config parity: %d passed, %d failed ==\033[0m\n' "$pass" "$fail"
 [ "$fail" = "0" ] || exit 1

@@ -88,6 +88,22 @@ if [ ! -s "$KEYDIR/dkim.txt" ]; then
   fi
 fi
 
+# The TSIG key named.conf.local includes unconditionally. Natively init-named generates it,
+# and that is a HOST step this job skips — so a container render produced a zone
+# configuration whose include pointed at a file nobody had created, and named refused
+# everything. The key is a FILE, not a host action, so producing it belongs here.
+KEYDIR_TSIG="$OUT/etc/bind/keys"
+if [ ! -s "$KEYDIR_TSIG/update.key" ]; then
+  if command -v tsig-keygen >/dev/null 2>&1; then
+    echo "[drumee] generating the TSIG update key"
+    mkdir -p "$KEYDIR_TSIG"
+    tsig-keygen -a hmac-sha512 update > "$KEYDIR_TSIG/update.key"
+    chmod 0640 "$KEYDIR_TSIG/update.key"
+  else
+    echo "[drumee] tsig-keygen absent — the dns role will refuse its configuration" >&2
+  fi
+fi
+
 echo "[drumee] rendering into $OUT via dpkg-reconfigure drumee-infra"
 DEBIAN_FRONTEND=noninteractive \
 DEBCONF_RECONFIGURE=1 \
@@ -96,6 +112,23 @@ DRUMEE_CHROOT="$OUT" \
 
 [ -f "$OUT/etc/drumee/drumee.json" ] \
   || die "the render produced no $OUT/etc/drumee/drumee.json — refusing to report success"
+
+# No rendered file may contain the render TARGET as a path. A value taken from
+# Template.chroot() and written into a file's CONTENTS produces a path that exists only on
+# the machine that rendered it — and it fails far away from here: named refused its whole
+# configuration over `include "/out/etc/bind/keys/update.key"`, and drumee.sh exported
+# `/out/etc/drumee/credential` to an application that then found no credentials.
+#
+# Three instances of that one mistake were found by grepping the rendered tree, so the grep
+# lives here now. It is the cheapest possible guard and it fails the job rather than
+# shipping a tree that cannot work.
+leaked="$(grep -rl "$OUT/" "$OUT" 2>/dev/null || true)"
+if [ -n "$leaked" ]; then
+  echo "[drumee] these rendered files embed the render target '$OUT' as a path:" >&2
+  printf '  %s\n' $leaked >&2
+  grep -rhoE "$OUT/[a-zA-Z0-9/._-]*" "$OUT" 2>/dev/null | sort -u | sed 's/^/    /' >&2
+  die "a path written into a rendered file must be the path its reader will see"
+fi
 
 # Self-signed certificates, when nothing else will provide them. nginx in the web role will
 # not start without the files its ssl/*.conf includes, so a self-signed deployment needs
@@ -130,14 +163,29 @@ if [ -n "${REDIS_HOST:-}" ]; then
   "liveUpdateChannel": "${LIVE_UPDATE_CHANNEL:-LIVE_UPDATE_CHANNEL}"
 }
 JSON
+
+  # A SECOND copy, in a directory of its own, holding nothing else.
+  #
+  # docs/distribution.md §2 says the converter role runs with no database credentials, and
+  # that is the reason it exists: it is the one component that parses untrusted documents,
+  # so code execution there must not reach the database. Mounting the shared credential
+  # directory would hand it db.json as well — and Docker's volume subpath mounts
+  # DIRECTORIES only, so there is no way to mount one file out of it.
+  #
+  # server-essentials honours `credential_dir` (lib/redis-store.js:6), so the converter
+  # points at this directory and can read exactly one credential. Still one writer per
+  # credential: this job, from the same values, in the same run.
+  echo "[drumee] writing credential/converter/redis.json (no db.json — see §2)"
+  mkdir -p "$OUT/etc/drumee/credential/converter"
+  cp "$OUT/etc/drumee/credential/redis.json" \
+     "$OUT/etc/drumee/credential/converter/redis.json"
 fi
 
 # The other roles run as uid 8000 and only read this tree. Credentials stay 0640 inside a
-# 0750 directory: db.json and email.json carry passwords, and this volume is shared with the
-# media role — the one component that parses untrusted documents.
+# 0750 directory: db.json and email.json carry passwords.
 echo "[drumee] fixing ownership to $UID_DRUMEE:$GID_DRUMEE"
 chown -R "$UID_DRUMEE:$GID_DRUMEE" "$OUT"
-[ -d "$OUT/etc/drumee/credential" ] && chmod 0750 "$OUT/etc/drumee/credential"
+find "$OUT/etc/drumee/credential" -type d -exec chmod 0750 {} + 2>/dev/null || true
 find "$OUT/etc/drumee/credential" -type f -exec chmod 0640 {} + 2>/dev/null || true
 
 echo "[drumee] done — $(find "$OUT" -type f | wc -l) files"

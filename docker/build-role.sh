@@ -19,15 +19,16 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 say(){ printf '\033[1;36m==>\033[0m %s\n' "$*"; }
 die(){ printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
-ROLE=""; TAG=""
+ROLE=""; TAG=""; NOCACHE=""
 for a in "$@"; do
   case "$a" in
-    --tag=*) TAG="${a#*=}" ;;
-    -*)      die "unknown option: $a" ;;
-    *)       ROLE="$a" ;;
+    --tag=*)    TAG="${a#*=}" ;;
+    --no-cache) NOCACHE=1 ;;
+    -*)         die "unknown option: $a" ;;
+    *)          ROLE="$a" ;;
   esac
 done
-[ -n "$ROLE" ] || die "usage: $0 <role> [--tag=X]   (role: web, app, media, dns, mail, schemas, infra)"
+[ -n "$ROLE" ] || die "usage: $0 <role> [--tag=X] [--no-cache]   (role: web, app, converter, dns, mail, schemas, infra)"
 dockerfile="$root/docker/Dockerfile.role-$ROLE"
 [ -f "$dockerfile" ] || die "no $dockerfile — only the roles with a Dockerfile can be built yet"
 
@@ -75,8 +76,31 @@ case "$digest" in
   *) die "could not resolve a digest for the base image" ;;
 esac
 
+# When the repository is LOCAL, always miss the cache on the apt layer.
+#
+# Iterating means re-including a package at the SAME version — that is what a local
+# repository is for. The Dockerfile and every build-arg are then unchanged, so buildx
+# reuses the cached apt layer and the new package never reaches the image, while the build
+# reports success and prints the version it believes it installed. Measured: a rebuilt
+# role-converter still carried the previous entrypoint, and the test that should have
+# caught it passed against stale content.
+#
+# Only for a local URI: against apt.drumee.net a version is immutable, so the cache is
+# both safe and worth keeping.
+cachebust=""
+case "$APT_URI" in
+  https://apt.drumee.net*) : ;;
+  *) if [ -z "$NOCACHE" ]; then
+       cachebust="$(cat "$root/.apt-local/dists/$APT_SUITE/Release" 2>/dev/null \
+                    | sha256sum | cut -c1-16)"
+       [ -n "$cachebust" ] && say "local repository: busting the apt layer cache ($cachebust)"
+     fi ;;
+esac
+
 say "role image: drumee/role-$ROLE:$TAG  (drumee-role-$ROLE=$ROLE_VERSION from $APT_URI $APT_SUITE)"
 docker buildx build -f "$dockerfile" \
+  ${NOCACHE:+--no-cache} \
+  ${cachebust:+--build-arg "APT_CACHEBUST=$cachebust"} \
   -t "drumee/role-$ROLE:$TAG" \
   --build-arg "BASE_IMAGE=$REGISTRY/drumee-base" \
   --build-arg "BASE_DIGEST=$digest" \

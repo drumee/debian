@@ -7,6 +7,36 @@ drumee_release
 drumee_env
 
 command -v named >/dev/null || die "named not found (drumee-role-dns provides it)"
+
+# The rendered configuration is mounted at a SIDE path and placed into /etc/bind here,
+# rather than mounted over /etc/bind directly. Two reasons, both measured:
+#
+#   * a mount replaces what is underneath it, and bind9 ships /etc/bind/named.conf — the
+#     top-level file that includes the three rendered ones. Mounting the volume's etc/bind
+#     over that directory hid it and named died with
+#     "open: /etc/bind/named.conf: file not found".
+#   * mounting the three files individually instead does not work: Docker's volume subpath
+#     mounts DIRECTORIES only, and a single file fails with
+#     "open /var/lib/docker/tmp/safe-mount...: not a directory".
+#
+# So the job copies. Three files and a key directory, from a read-only source, by the role
+# that owns /etc/bind at runtime — which is what an entrypoint is for.
+SRC="${DRUMEE_BIND_CONF:-/etc/drumee/bind}"
+if [ -d "$SRC" ]; then
+  echo "[drumee] placing the rendered zone configuration from $SRC"
+  for f in named.conf.local named.conf.options named.conf.log; do
+    [ -f "$SRC/$f" ] && cp "$SRC/$f" "/etc/bind/$f"
+  done
+  if [ -d "$SRC/keys" ]; then
+    mkdir -p /etc/bind/keys
+    cp "$SRC"/keys/* /etc/bind/keys/ 2>/dev/null || true
+  fi
+  chown -R root:bind /etc/bind 2>/dev/null || true
+  chmod 0640 /etc/bind/keys/* 2>/dev/null || true
+else
+  echo "[drumee] no rendered configuration at $SRC — using whatever is in /etc/bind" >&2
+fi
+
 named-checkconf || die "named refused its configuration"
 echo "[drumee] starting named in the foreground"
 exec named -g -u bind

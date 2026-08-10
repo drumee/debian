@@ -1,3 +1,19 @@
+drumee-infra (1.2.41) stable; urgency=medium
+
+  * Two more chroot prefixes removed from rendered file CONTENTS, found by grepping the
+    rendered tree rather than by reading the code:
+    .
+    named.conf.local carried `include "/out/etc/bind/keys/update.key"`, so named refused
+    its entire configuration over a missing include; and credential_dir leaked
+    "/out/etc/drumee/credential" into drumee.sh, drumee.json and ecosystem.json, all
+    three of which the application reads.
+    .
+    Same rule as the ecosystem wrapper in 1.2.39: the chroot prefix belongs to where we
+    WRITE and nowhere else. writeCredentials() resolves its own write target
+    independently, so credential_dir only ever needed to be the reader's path.
+
+ -- somanos.sar@drumee.com  Mon, 10 Aug 2026 12:02:17 +0200
+
 drumee-infra (1.2.40) stable; urgency=medium
 
   * The nginx upstream host is a value instead of 127.0.0.1. Six proxy_pass directives

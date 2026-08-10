@@ -175,9 +175,14 @@ and the web container reported healthy while answering on neither. `http_port` a
 
 `drumee-server-pod` still pulls `nginx` and `redis-server`, which this role runs neither
 of — the same declaration error already fixed for `drumee-schemas` and `drumee-static`.
-The media stack is **not** the same case: `server-pod`'s code shells out to LibreOffice,
-ffmpeg and GraphicsMagick, so moving them decides whether `drumee-media` is a separate
-image or merely a separate process, and needs a change in `server-team`.
+The conversion stack is **not** the same case: `server-pod`'s code shells out to
+LibreOffice, ffmpeg and GraphicsMagick, so moving them decides whether
+`drumee-converter` is a separate image or merely a separate process, and needs a change
+in `server-team`. The role and its dependency set now exist and self-test
+(`docs/distribution.md` §2, "Why it is converter and not media"); what is still on the
+`server-team` side is the transport — how a conversion job reaches the container — plus
+lifting the two `get_user`/`entity_sockets` calls out of `to-pdf.js`, which are the only
+reason a converter would need the database at all.
 
 ### 5. One healthcheck definition
 
