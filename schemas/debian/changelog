@@ -1,3 +1,20 @@
+drumee-schemas (2.7.6) stable; urgency=medium
+
+  * setup-schemas: create_vfs_root no longer fails where only root could succeed. It chowns
+    the MFS root to the system user, which natively (bin/install runs as root) is what puts
+    those trees under www-data. In a container the process IS the runtime user (uid 8000) and
+    already owns everything it just created, so every call failed with
+    "chown: ... Operation not permitted", create_vfs_root returned false BEFORE
+    create_media_root, and create_entity marked the entity pool_state=clean regardless — so
+    the pool filled with entities whose storage was never finished. The guard distinguishes
+    the two cases rather than ignoring the error: already owning the tree is fine, not owning
+    it and being unable to change that still fails.
+    Why testing missed it: "CREATING ROOT" appears ZERO times in a run against a database
+    that already has a stocked pool, so the path is only reached by a genuinely fresh
+    install.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Tue, 11 Aug 2026 09:18:34 +0200
+
 drumee-schemas (2.7.5) stable; urgency=medium
 
   * setup-schemas: createHub matches the yp.entity row from desk_create_hub instead of the

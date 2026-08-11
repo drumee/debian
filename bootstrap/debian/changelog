@@ -1,3 +1,10 @@
+drumee-bootstrap (2.0.19) stable; urgency=medium
+
+  * No change from 2.0.18 beyond the version. Carried by the 1.0.57 train because the role
+    images pin drumee-release at strict equality and share one tag.
+
+ -- Drumee Packaging <packaging@drumee.com>  Tue, 11 Aug 2026 09:18:34 +0200
+
 drumee-bootstrap (2.0.18) stable; urgency=medium
 
   * entrypoint/infra creates the directories drumee-infra SHIPS under /etc/drumee that the

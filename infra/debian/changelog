@@ -1,3 +1,27 @@
+drumee-infra (1.2.42) stable; urgency=medium
+
+  * setup-infra: nginx no longer refuses its ENTIRE configuration on a single-domain
+    instance. proxy_cache_path must be unique, and public_domain == private_domain is the
+    NORMAL case — one domain reachable on both interfaces — so both halves derived
+    "<cache_dir>/<domain>" and nginx would not start:
+      [emerg] the same path name "/srv/drumee/cache/<domain>" used in
+              01-public.conf:11 and in 02-private.conf:11
+    Exactly the shape of the duplicate reverse-zone bug that stopped named. Only the PUBLIC
+    half is suffixed ("-public", plus a matching keys_zone), so an install that already has
+    a cache under "<domain>" keeps it; the keys_zone was never referenced by a proxy_cache
+    directive, so nothing else changes.
+  * setup-infra: the ADMIN ACCOUNT is no longer created as admin@localhost.
+    acme_email_account fell back to the bare ADMIN_EMAIL constant, which is sysEnv's and
+    defaults to admin@localhost. When the answered admin email arrives as an ARGUMENT rather
+    than in the environment — which is what dpkg-reconfigure does — the render wrote
+    acme_email_account=admin@localhost beside a correct admin_email in the same file, and
+    setup-schemas' createAdmin resolves ADMIN_EMAIL || ACME_EMAIL_ACCOUNT || admin@<domain>.
+    So the operator's login identity and the destination of the welcome and password-reset
+    mail were both wrong on an instance whose every other domain field was right. Same class
+    as the domain_name/main_domain fix; this key was missed.
+
+ -- Somanos Sar <somanos.sar@drumee.com>  Tue, 11 Aug 2026 09:18:34 +0200
+
 drumee-infra (1.2.41) stable; urgency=medium
 
   * Two more chroot prefixes removed from rendered file CONTENTS, found by grepping the

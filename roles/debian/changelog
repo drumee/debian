@@ -1,3 +1,11 @@
+drumee-roles (1.0.57-1~trixie1) stable; urgency=medium
+
+  * No change to the role definitions. This release carries drumee-infra 1.2.42 (the nginx
+    proxy_cache_path collision and the admin@localhost fallback) and drumee-schemas 2.7.6
+    (the create_vfs_root chown guard) into the role images.
+
+ -- Drumee Packaging <packaging@drumee.com>  Tue, 11 Aug 2026 09:18:34 +0200
+
 drumee-roles (1.0.56-1~trixie1) stable; urgency=medium
 
   * No change to the role definitions. This release exists to carry drumee-schemas 2.7.5

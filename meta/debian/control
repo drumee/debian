@@ -3,14 +3,14 @@ Section: non-free
 Priority: optional
 Maintainer: Somanos Sar <somanos.sar@drumee.com>
 Build-Depends: debhelper (>= 11)
-Standards-Version: 1.0.56
+Standards-Version: 1.0.57
 Homepage: https://drumee.org
 
 Package: drumee
 Architecture: all
 Depends: ${misc:Depends},
-  drumee-infra (= 1.2.41),
-  drumee-schemas (= 2.7.5),
+  drumee-infra (= 1.2.42),
+  drumee-schemas (= 2.7.6),
   drumee-static (= 1.0.6),
   drumee-server-pod (= 2.9.99),
   drumee-ui-pod (= 3.3.75),
@@ -18,7 +18,7 @@ Depends: ${misc:Depends},
 Description: Drumee sovereign data platform (metapackage)
  Installs the full Drumee runtime: infrastructure, database schemas, static
  assets, backend server and frontend UI. This metapackage pins every component
- to the release-train version (1.0.56) so the set installs coherently.
+ to the release-train version (1.0.57) so the set installs coherently.
  .
  It also pulls in drumee-archive-keyring, which carries the keys apt uses to verify
  apt.drumee.net. That dependency is a minimum rather than an exact pin: it is how a
