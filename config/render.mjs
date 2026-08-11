@@ -290,7 +290,20 @@ function renderEnv(cfg) {
     PUBLIC_IP6: cfg.network.ip6 === 'auto' ? '' : cfg.network.ip6,
     SERVICES: cfg.network.services.join(','),
     TLS_MODE: cfg.tls.mode,
-    ACME_EMAIL_ACCOUNT: cfg.tls.acme_email ?? '',
+    // Falls back to the ADMIN email, not to nothing.
+    //
+    // Empty here does not mean "unset" downstream: sysEnv defaults ACME_EMAIL_ACCOUNT to
+    // admin@localhost, and infra.js writes acme_email_account from that value — which is
+    // non-empty, so its own fallback to the answered admin email is dead code. The result
+    // was acme_email_account=admin@localhost beside a correct admin_email in one rendered
+    // file, and setup-schemas' createAdmin resolves
+    // ADMIN_EMAIL || ACME_EMAIL_ACCOUNT || admin@<domain> — so the ADMIN ACCOUNT was
+    // created as admin@localhost. The operator's login identity and the destination of the
+    // welcome and password-reset mail, both wrong. Measured on a real install, twice.
+    //
+    // Defaulting it here is also the honest semantics: the account an ACME registration is
+    // filed under is the administrator's, unless someone says otherwise.
+    ACME_EMAIL_ACCOUNT: cfg.tls.acme_email ?? cfg.instance.admin_email ?? '',
     OWN_SSL: cfg.tls.mode === 'own',
     OWN_SSL_PATH: cfg.tls.own_cert_path ?? '',
     BACKUP_LOCATION: cfg.storage.backup_location ?? '',
@@ -377,7 +390,11 @@ function renderDebconf(cfg) {
     dc('local_mode', 'boolean', cfg.instance.local_mode),
     dc('service', 'string', cfg.network.services.join(',')),
     dc('admin_email', 'string', cfg.instance.admin_email),
-    dc('acme_email', 'string', cfg.tls.acme_email ?? ''),
+    // Same default as ACME_EMAIL_ACCOUNT above, and it has to be in BOTH: the container
+    // channel renders from this preseed via dpkg-reconfigure, the native channel from the
+    // same preseed via apt, and one of them silently keeping admin@localhost is exactly the
+    // two-vocabularies problem tests/config-parity.sh exists to prevent.
+    dc('acme_email', 'string', cfg.tls.acme_email ?? cfg.instance.admin_email ?? ''),
     dc('db_dir', 'string', cfg.storage.db_dir),
     dc('data_dir', 'string', cfg.storage.data_dir),
     dc('backup_location', 'string', cfg.storage.backup_location ?? ''),

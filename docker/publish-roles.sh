@@ -156,8 +156,19 @@ done
 say "verifying the published images"
 for r in $built; do
   docker rmi "$REGISTRY/role-$r:$TAG" >/dev/null 2>&1 || true
+  # One retry, because a registry can throttle. role-mail failed this check once while a
+  # second machine was pulling the same repository in parallel, and pulling it again by hand
+  # worked and verified — so with no retry a flaky network reports a FAILED publish for an
+  # image that is fine, which is the kind of false alarm that teaches people to ignore the
+  # check. Two attempts, and the second is reported so a real failure still looks like one.
   if ! docker pull -q "$REGISTRY/role-$r:$TAG" >/dev/null 2>&1; then
-    no "role-$r: could not be pulled back"; failed="$failed $r"; continue
+    note_retry="retrying"
+    printf '       [2m%s[0m
+' "role-$r: pull failed, retrying once ($note_retry)"
+    sleep 5
+    if ! docker pull -q "$REGISTRY/role-$r:$TAG" >/dev/null 2>&1; then
+      no "role-$r: could not be pulled back (two attempts)"; failed="$failed $r"; continue
+    fi
   fi
   got="$(docker run --rm --entrypoint cat "$REGISTRY/role-$r:$TAG" \
            /usr/share/drumee/image-release 2>/dev/null | tr -d '\r\n')"

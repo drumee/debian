@@ -105,6 +105,19 @@ for pair in "LOCAL_MODE:local_mode" "ADMIN_EMAIL:admin_email" "TLS_MODE:tls_meth
 done
 ok "each dropped fact has a matching drumee-infra/* key in the preseed"
 
+printf '\033[1;36m── the preseed carries an admin-derived acme_email\033[0m\n'
+# An EMPTY acme_email is not neutral downstream. sysEnv defaults ACME_EMAIL_ACCOUNT to
+# admin@localhost, infra.js writes acme_email_account from it, and setup-schemas' createAdmin
+# resolves ADMIN_EMAIL || ACME_EMAIL_ACCOUNT || admin@<domain> — so an empty answer here
+# created the ADMIN ACCOUNT as admin@localhost, on an instance whose admin_email was correct
+# in the very same file. Measured twice on a real install before it was understood.
+acme="$(printf '%s\n' "$preseed" | sed -n 's/^drumee-infra[[:space:]]*drumee-infra\/acme_email[[:space:]]*string[[:space:]]*//p')"
+if [ -n "$acme" ]; then
+  ok "acme_email is answered ($acme)"
+else
+  no "acme_email is empty — the admin account will be created as admin@localhost"
+fi
+
 printf '\033[1;36m── the converter role cannot learn a database credential\033[0m\n'
 # docs/distribution.md §2: the converter is the only component that parses untrusted user
 # documents, so code execution there is a realistic outcome of an upload. "Runs with no
