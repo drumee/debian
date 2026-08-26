@@ -139,3 +139,7 @@ tests/         config + container + end-to-end test suites
 docs/          documentation (see above)
 <component>/   per-package build dir (infra, schemas, server, ui, static, …)
 ```
+
+## License
+
+AGPL-3.0 — see [LICENSE](LICENSE).
