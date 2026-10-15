@@ -198,6 +198,24 @@ next/latest both alpha.1. Alpha.2 remains available as a proposed candidate
 version. Full distribution/SQL/recovery qualification blocks candidate release
 readiness; no tag, npm/dist-tag change or image publication was performed.
 
+Final Infra Layer checkpoint:
+`35fe3d0e6b6311d43940338b65a7e5ae74c0d222`, runtime implementation
+`adf56e04961c3974e0bd0ad481b1700a15d99c09`. A final guard validates malformed
+resource records before sorting so diagnostics remain stable. Its complete
+clean standalone sequence passed again. The final development tarball has SRI
+`sha512-yQD6QsmHoI0sMtqCJvbPGwf5Nc527kpEJwsEbZkHwwAugfKqQnE5O/58yXSPfHmHLLxhbRyBXWZbeg2xnuxD1A==`;
+it remains private alpha.1 metadata, not registry alpha.1 or a release candidate.
+
+The real fixture's first run against this guard stopped after nine groups with
+`DOCKER_LIFECYCLE_COMMAND_FAILED`; cause unestablished. Its sequential diagnostic
+retry passed all 25 groups, actual interrupted Redis rotation, three Chromium
+stages and isolated recovery. Successful project `drumee-il3-kernel-6faacb7e`
+used loopback HTTPS 45625/DNS 36623; all owned resources were cleaned. No test
+failure is concealed or attributed to concurrency without proof. Exact final
+artifacts and attempted-run evidence live in Infra Layer
+`docs/IL-4-validation-evidence.json`. This still tests acceptance identities,
+not the absent production first-operator enrollment operation.
+
 Resume checkpoints IL-4.2 through IL-4.6 after the owner supplies/approves the
 first-operator contract. Keep the IL-3 fixture until Debian demonstrates
 equivalent or stronger real-kernel acceptance. Oxymotion D0 remains gated.
