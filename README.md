@@ -139,3 +139,11 @@ tests/         config + container + end-to-end test suites
 docs/          documentation (see above)
 <component>/   per-package build dir (infra, schemas, server, ui, static, …)
 ```
+
+## Minimal-kernel qualification
+
+The explicit minimal-kernel profile is under IL-4 qualification and is currently
+**INTEGRATION_BLOCKED** on the canonical first-operator enrollment contract.
+See [the qualification report](docs/minimal-kernel-il4.md) and
+[pinned input inventory](profiles/minimal-kernel/README.md). This does not change
+existing Team release channels or provide a production installer with test accounts.
