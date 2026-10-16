@@ -22,8 +22,9 @@ implied. The selected evidence is in [qualification](IL-5-qualification.md).
    merge either PR automatically. The feature branches retain ordinary additive
    commits; no history rewrite or release tag is created.
 
-PR links will be added in the final review-link commit. The PR commits tabs and final execution
-report identify exact review HEADs; the immutable implementation/artifact pins
+[Infra Layer PR #2](https://github.com/drumee/infra-layer/pull/2) and
+[Debian PR #7](https://github.com/drumee/debian/pull/7) are open and mutually linked.
+The PR commits tabs and final execution report identify exact review HEADs; the immutable implementation/artifact pins
 below do not change when evidence-only commits are appended.
 
 ## Checkpoint commits
@@ -125,3 +126,17 @@ is fully green; the existing debt requires its owning distribution follow-up.
   the documented host topology and must be repeated on another target.
 - Oxymotion D0 is neither started nor qualified. This application distribution
   does not replace Hub/MFS/Finder/crawling/agentic distribution acceptance.
+
+## GitHub submission and environment observations
+
+Both feature branches and evidence commits were pushed without rewriting history.
+CLI creation initially returned `Resource not accessible by personal access token
+(createPullRequest)`; the already-authorized GitHub connector created both PRs.
+No credential was changed or additional user permission required. Neither PR is
+merged. Existing CI reservations above remain visible.
+
+Final resource inspection shows no IL-5-owned container or network remaining.
+Testbox still has only the three previously observed stopped historical
+initialization containers; no IL-5 service/resource was installed there. Build
+images and the local npm archive are retained as explicitly identified review
+artifacts. The cleanroom worktree remains clean.
