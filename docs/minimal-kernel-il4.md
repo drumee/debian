@@ -1,6 +1,10 @@
 # IL-4 minimal kernel distribution qualification
 
-Status: **IL-4 — INTEGRATION_BLOCKED**. This is an implementation checkpoint,
+Current resume: see [IL-4R validation ledger](minimal-kernel-il4r-ledger.md).
+KB-01B resolves the historical first-human contract described below. The
+original inventory and qualification evidence remain preserved verbatim.
+
+Historical status: **IL-4 — INTEGRATION_BLOCKED**. This was an implementation checkpoint,
 not a release-qualified installation profile. IL-3's approved disposable profile
 remains valid within its documented scope.
 

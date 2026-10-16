@@ -1,0 +1,40 @@
+{
+  "name": "@drumee/debian-minimal-kernel",
+  "version": "0.0.0-il4",
+  "private": true,
+  "type": "commonjs",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "sources": "node scripts/sources.js",
+    "build:browser": "node scripts/browser.js",
+    "verify": "node scripts/verify.js"
+  },
+  "dependencies": {
+    "@drumee/server-runtime": "0.1.0-alpha.4",
+    "@drumee/system-mfs": "https://codeload.github.com/drumee/system-mfs/tar.gz/53101c4a995ffca9118f795ab5d4c7c731200a2f",
+    "@drumee/ui-runtime": "0.1.0-alpha.2",
+    "@drumee/finder": "0.1.0-alpha.4",
+    "@drumee/window-manager": "0.1.0-alpha.2",
+    "jsonfile": "5.0.0",
+    "lodash": "4.18.1",
+    "mariadb": "3.5.4",
+    "redis": "4.7.1",
+    "websocket": "1.0.35"
+  },
+  "devDependencies": {
+    "@drumee/infra-layer": "https://codeload.github.com/drumee/infra-layer/tar.gz/35fe3d0e6b6311d43940338b65a7e5ae74c0d222",
+    "css-loader": "6.11.0",
+    "postcss": "8.5.6",
+    "postcss-loader": "8.1.1",
+    "sass": "1.93.3",
+    "sass-loader": "16.0.8",
+    "style-loader": "3.3.4",
+    "webpack": "5.110.1",
+    "webpack-cli": "4.10.0"
+  },
+  "description": "Explicit Debian minimal-kernel distribution profile; IL-4 qualification in progress"
+}

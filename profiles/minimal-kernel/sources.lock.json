@@ -1,0 +1,19 @@
+{
+  "repository": "https://github.com/drumee/transient.git",
+  "revision": "59985d4a78e142b64f5976cc7460a723cca29a79",
+  "paths": {
+    "target/control-plane/bootstrap": "platform-bootstrap",
+    "target/control-plane/hub-lifecycle": "hub-lifecycle",
+    "target/modules/host-filesystem": "host-filesystem",
+    "target/modules/mfs-service": "mfs-service",
+    "target/modules/mfs-transfer": "mfs-transfer",
+    "target/modules/media-service": "media-service",
+    "target/tooling/ui-build": "ui-build",
+    "sources/server-essentials/lib/lex/constants.js": "essentials/lex/constants.js",
+    "sources/server-essentials/lib/lex/permission.js": "essentials/lex/permission.js",
+    "sources/server-essentials/lib/lex/functions.js": "essentials/lex/functions.js",
+    "sources/server-essentials/lib/redis-store.js": "essentials/redis-store.js",
+    "sources/server-essentials/LICENSE": "essentials/LICENSE",
+    "target/control-plane/operator-bootstrap": "operator-bootstrap"
+  }
+}
