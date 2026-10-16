@@ -64,3 +64,65 @@ PTY/concurrency/interruption tests, LAN/browser acceptance and candidate package
 qualification. Prior IL-3/KB-01B results are retained evidence, not newly executed
 IL-4R acceptance. SMTP recovery and automatic trust/resolver changes remain out
 of scope. No permanent testbox installation or Oxymotion work is authorized here.
+
+## IL-4R.2–5 implementation checkpoints
+
+- `7823e0a`: explicit minimal profile, shared YAML parser/schema selection,
+  canonical Infra Layer composition, kernel/frontend assembly.
+- `15f75fe`: intrinsic/platform/KB-01A/KB-01B initialization, canonical enrollment
+  and real-runtime authentication jobs.
+- `237016b`: named SQL role policy and separate private Hub provisioner.
+- `2c9f603`: existing drumee-ctl profile dispatch and canonical lifecycle commands.
+- `2c7a006`, `664f752`, `3e7a654`: demonstrated installation corrections, retained
+  acceptance suite and stable image-build provenance.
+
+Infra Layer correction `9d8462b428db8c8421579067e7cb53b46630d39e` reproduces and
+fixes the single-account/private-service integration limitation. Separate managed
+accounts use its secret store; private supplied services use its lifecycle. No
+distribution planner, credential hash, session or ACL implementation was added.
+127/127 Infra Layer unit/security cases pass, zero failures/skips.
+
+Normal distribution initialization contains no direct-SQL owner fixture and
+creates no Hub. Canonical alpha.4 sign-in uses UID/email; the distribution's
+email sign-in correction follows that existing contract. Ordinary runtime gets
+no schema, bootstrap, enrollment, provisioner or infrastructure-admin credential.
+
+## Preliminary complete automatic installation
+
+At Debian `3e7a6547e9d7626fcbf54881894a6388541d7e69`, owned project
+`drumee-il4-fbe29923`, HTTPS 43609 / DNS 33425 on loopback, explicit physical LAN
+`wlp3s0=192.168.5.201`:
+
+```sh
+IL4_INTERFACE=wlp3s0 IL4_LAN_ADDRESS=192.168.5.201 node tests/minimal-kernel/run.js
+```
+
+28 grouped functional checks pass (10 fresh, nine restart, nine isolated restore),
+including three real Chromium LETC/Finder/WebSocket scenarios. Ten SQL negative
+cases pass both fresh and restored; these repeated executions are ten distinct
+cases, not twenty unique tests. Canonical identity/ACL/MFS digests, credential
+resource bytes and CA identity are preserved. Actual Redis rotation interruption
+and recovery pass. All owned project/restoration resources are cleaned.
+
+This run predates the candidate metadata pin, configuration-backup extension,
+additional foreign-Hub/unrelated-schema assertions and real-PTY mode. Those
+changes require the final acceptance rerun; this preliminary result is not
+silently promoted to full final qualification.
+
+## Regression and failure disclosure
+
+- Canonical KB-01B units: 18 passed, zero failures/skips.
+- Unchanged published runtime source units: 56 passed, zero failures/skips.
+- Retained platform/Hub/runtime/FileIo/MFS/transfer/media units: 85 passed,
+  zero failures/skips (17 platform/Hub plus the retained 68 runtime/capability).
+- Legacy Debian clean checkout: 331 checks passed, zero failures/no reported
+  skips. The original eight-check inventory remains included in profile units.
+
+Early real-install explorations found an unexported runtime schema import,
+username-vs-email sign-in mismatch and missing provisioner permission converter;
+all were corrected without changing runtime/control-plane source. The schema
+wrapper also exposed a Team default-rendering regression: nine aggregate checks
+failed before the correction, followed by 331/331 passing. A failed-install
+retry across changed frontend artifacts refused an asset conflict; it did not
+replace identities or credentials. Failed smoke projects were inspected and
+cleaned by exact ownership. These attempts are excluded from successful counts.

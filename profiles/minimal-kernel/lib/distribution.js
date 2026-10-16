@@ -57,7 +57,7 @@ function compose(cfg) {
   const readiness = port => ({ test: ["CMD", "node", "-e", `fetch('http://127.0.0.1:${port}/${port === 3103 ? "-/svc/health.ready" : "__ready"}').then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(1))`], interval: "2s", timeout: "3s", retries: 30 });
   const requires = ["database", "redis", ...jobs.map(value => value.id)];
   const distribution = { contract_version: "1", id: "debian-minimal-kernel", profile: "kernel", helper_image: images.node, external_writers: "none", init_jobs: jobs,
-    persistent_resources: ["content", "operator-state", "public"].map(id => ({ id, source: durable(id), uid, gid, backup_required: true })),
+    persistent_resources: ["content", "distribution-state", "operator-state", "public"].map(id => ({ id, source: durable(id), uid, gid, backup_required: true })),
     schema_versions: { runtime: "kb01a-platform-authority-1", operator: "kb01b-initial-operator-1", platform: "git-59985d4a78e142b64f5976cc7460a723cca29a79", hub: "git-59985d4a78e142b64f5976cc7460a723cca29a79", mfs: "phase4.8-system-mfs-2" },
     provenance: { repository: "https://github.com/drumee/debian", revision: cfg.provenance.revision, path: "profiles/minimal-kernel", acceptance: "real-kernel" },
     services: [{ id: "provisioner", image: cfg.images.kernel, uid, gid, entrypoint: ["node"], command: ["lib/provisioner.js"], environment: { DRUMEE_SQL_ROLE: "provisioner" }, requires, mounts: [], secret_mounts: [sql("provisioner")], listener_ports: [3103], healthcheck: readiness(3103) }],

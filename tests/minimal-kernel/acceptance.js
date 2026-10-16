@@ -1,11 +1,12 @@
 "use strict";
-const assert = require("node:assert/strict");
+const { assert, counts, setScope } = require("./assertions");
 const fs = require("node:fs"), path = require("node:path"), https = require("node:https"), crypto = require("node:crypto");
 const { spawn, spawnSync } = require("node:child_process");
 const fixture_root = path.resolve(__dirname, "../../profiles/minimal-kernel");
 const { client: WebSocketClient } = require(require.resolve("websocket", { paths: [fixture_root] }));
 const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 async function verify({ prepared, directory, driver, baseline, accounts, operation_id }) {
+  const starting_counts = { ...counts };
   const config = prepared.composition.plan.inputs.adapter_input;
   const binding = config.gateway.bindings[0], port = binding.host_port;
   const ca = fs.readFileSync(path.join(prepared.candidate, "ca-public.pem"));
@@ -49,6 +50,11 @@ async function verify({ prepared, directory, driver, baseline, accounts, operati
     await service("mfs.list", { location: b }, "reader", 403);
     await service("mfs.list", { location: a }, null, 404);
     await service("mfs.mkdir", { destination: a, name: "reader-cannot-write" }, "reader", 403);
+  });
+  await check("platform-remit-cannot-bypass-foreign-hub-mfs-acl", async () => {
+    await service("mfs.list", { location: accounts.foreign_root }, "owner", 403);
+    await service("mfs.list", { location: accounts.foreign_root }, "outsider", 403);
+    await service("mfs.list", { location: accounts.foreign_root }, "reader");
   });
   let node = baseline?.node;
   const bytes = Buffer.alloc(2 * 1024 * 1024 + 17, 0x51); bytes.write("Drumee IL3 persistent original\n");
@@ -152,9 +158,10 @@ async function verify({ prepared, directory, driver, baseline, accounts, operati
     else await browser({ origin, binding, prepared, directory, account: accounts.principals.owner });
   });
   console.log("KERNEL_ACCEPTANCE_CHECKS " + checks);
-  return { node, inventory_digest, credential_resource_digest, ca_fingerprint: prepared.certificate.ca_fingerprint, checks };
+  return { node, inventory_digest, credential_resource_digest, ca_fingerprint: prepared.certificate.ca_fingerprint, checks, assertions: { functional: counts.functional - starting_counts.functional, browser: counts.browser - starting_counts.browser } };
 }
 async function browser({ origin, binding, prepared, directory, account }) {
+  const previous_scope = setScope("browser");
   const { once } = require("node:events");
   const certificate_mount = prepared.compose.services.gateway.volumes.find(mount => mount.target === "/run/secrets/tls-certificate");
   const cert = new crypto.X509Certificate(fs.readFileSync(path.resolve(prepared.candidate, certificate_mount.source)));
@@ -177,13 +184,17 @@ async function browser({ origin, binding, prepared, directory, account }) {
     for (let attempt = 0; attempt < 100 && !await evaluate("typeof openDrumee==='function'"); attempt++) await sleep(100);
     console.log("BROWSER_BOOTSTRAP_STATE " + JSON.stringify({ ...(await evaluate("({title:document.title,bundle:document.body?.dataset.bundle,error:document.body?.dataset.error,entry:typeof openDrumee})")), responses, failures }));
     assert.equal(await evaluate("typeof openDrumee"), "function", "Frontend bootstrap unavailable");
-    const result = await evaluate("openDrumee(" + JSON.stringify({ uid: account.id, password: account.password }) + ")");
+    await evaluate("(()=>{const form=document.getElementById('login');form.elements.username.value=" + JSON.stringify(account.email) + ";form.elements.password.value=" + JSON.stringify(account.password) + ";form.requestSubmit();return true})()");
+    for (let attempt = 0; attempt < 100 && !await evaluate("document.body.dataset.ready==='true'"); attempt++) await sleep(100);
+    const result = await evaluate("({ready:document.body.dataset.ready==='true',hubs:window.kernelAcceptance?.context.hubs.length,kind:window.kernelAcceptance?.view?'finder':null})");
     assert.equal(result.ready, true); assert.equal(result.hubs, 2); assert.equal(result.kind, "finder");
+    assert.equal(await evaluate("document.getElementById('login').elements.password.value.length"), 0);
     assert.equal(await evaluate("kernelAcceptance.websocket.connected || document.body.dataset.ready==='true'"), true);
     assert.deepEqual(failures, []);
     console.log("BROWSER_LETC_FINDER_WEBSOCKET_VERIFIED");
     await send("Browser.close").catch(() => {});
   } finally {
+    setScope(previous_scope);
     socket?.close();
     // Only this detached process group is owned; never kill by executable name.
     if (chrome.exitCode === null) { try { process.kill(-chrome.pid, "SIGTERM"); } catch (_) {} await Promise.race([once(chrome, "exit"), sleep(2000)]); }
@@ -198,7 +209,8 @@ async function externalBrowser({ origin, binding, prepared, account }) {
   assert.ok(stat.isDirectory() && !stat.isSymbolicLink() && stat.uid === process.getuid() && !(stat.mode & 0o077));
   const nonce = crypto.randomBytes(16).toString("hex");
   const mount = prepared.compose.services.gateway.volumes.find(value => value.target === "/run/secrets/tls-certificate");
-  const request = { nonce, origin, binding, project: prepared.project, revision: prepared.revision, ca: fs.readFileSync(path.join(prepared.candidate, "ca-public.pem"), "utf8"), certificate: fs.readFileSync(path.resolve(prepared.candidate, mount.source), "utf8"), account };
+  const dns = prepared.composition.plan.inputs.adapter_input.services.dns.bindings[0];
+  const request = { nonce, origin, binding, dns, project: prepared.project, revision: prepared.revision, ca: fs.readFileSync(path.join(prepared.candidate, "ca-public.pem"), "utf8"), certificate: fs.readFileSync(path.resolve(prepared.candidate, mount.source), "utf8"), account };
   fs.writeFileSync(path.join(root, "request-" + nonce + ".json"), JSON.stringify(request), { mode: 0o600, flag: "wx" });
   console.log("EXTERNAL_LAN_BROWSER_REQUESTED " + nonce);
   try {

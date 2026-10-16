@@ -29,7 +29,11 @@ async function main() {
           tunnel = spawn("ssh", ["-o", "BatchMode=yes", "-o", "ConnectTimeout=10", "-o", "ExitOnForwardFailure=yes", "-N", "-L", `127.0.0.1:${port}:127.0.0.1:${port}`, "testbox"], { stdio: "ignore" });
           await sleep(1000); assert.equal(tunnel.exitCode, null);
         } else {
-          const dns = execFileSync("dig", ["@192.168.5.202", "drumee.lan", "A", "+short"], { encoding: "utf8" }); assert.equal(dns.trim(), "192.168.5.202");
+          assert.equal(request.dns.host_address, "192.168.5.202");
+          for (const protocol of ["+notcp", "+tcp"]) {
+            const dns = execFileSync("dig", ["@192.168.5.202", "-p", String(request.dns.host_port), "drumee.lan", "A", "+norecurse", protocol], { encoding: "utf8" });
+            assert.match(dns, /flags: qr aa[; ]/); assert.match(dns, /drumee\.lan\.\s+\d+\s+IN\s+A\s+192\.168\.5\.202/);
+          }
           console.log("LAN_DNS_VERIFIED 192.168.5.202");
         }
         fs.writeFileSync(path.join(directory, "ca-public.pem"), request.ca);

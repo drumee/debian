@@ -78,6 +78,10 @@ async function run(opts) {
   if (opts.command === "restore") {
     if (!opts.backup) fail("MINIMAL_BACKUP_SOURCE_REQUIRED");
     const restored = await lifecycle.restoreDeployment(path.resolve(opts.backup), composition, { ...context, create_resources: true });
+    const snapshot = path.join(cfg.storage.root, "durable/distribution-state/config.json");
+    const source_snapshot = F.read(snapshot);
+    F.atomic(path.join(cfg.storage.root, "durable/distribution-state/restored-from-config.json"), source_snapshot, 0o600, true);
+    F.atomic(snapshot, JSON.stringify(cfg));
     const state = await lifecycle.activateDeployment(restored.prepared, { ...context, create_resources: false });
     if (!state.ready) fail("MINIMAL_APPLICATION_NOT_READY");
     return { ...state, restored: true, enrollment_authentication_validated: true };
@@ -96,7 +100,14 @@ async function run(opts) {
     return lifecycle.activateDeployment(active.prepared, context);
   }
   if (opts.command === "upgrade" && (!active || !opts.backup)) fail("VERIFIED_BACKUP_REQUIRED");
+  if (opts.command === "upgrade") {
+    const manifest = lifecycle.validateBackup(path.resolve(opts.backup), active.prepared.composition.distribution.schema_versions, context);
+    if (manifest.owner !== cfg.deployment.id || manifest.source_revision !== active.revision) fail("VERIFIED_BACKUP_REQUIRED");
+  }
   const prepared = await lifecycle.prepareDeployment(composition, { ...context, create_resources: opts.command === "install" });
+  const snapshot = path.join(prepared.root, "durable/distribution-state/config.json"), config_bytes = Buffer.from(JSON.stringify(cfg));
+  if (fs.existsSync(snapshot)) { if (!F.read(snapshot).equals(config_bytes)) fail("MINIMAL_CONFIGURATION_SNAPSHOT_CONFLICT"); }
+  else F.atomic(snapshot, config_bytes, 0o600, true);
   assets(prepared, driver);
   const backup_evidence = opts.backup ? { directory: path.resolve(opts.backup), manifest_digest: JSON.parse(F.read(path.join(path.resolve(opts.backup), "backup.json"))).digest } : undefined;
   const state = await lifecycle.activateDeployment(prepared, { ...context, backup_evidence });

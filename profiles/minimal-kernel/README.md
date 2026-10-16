@@ -1,8 +1,16 @@
-# Minimal kernel profile — IL-4 qualification inputs
+# Minimal kernel profile — IL-4R qualification channel
 
-Status: **INTEGRATION_BLOCKED**, inventory and SQL investigation only.
-This directory is not an installer or an activated release channel. Existing
-Team configuration, role packages and `drumee-ctl` behavior are unchanged.
+The explicitly selected profile now integrates canonical KB-01B enrollment,
+runtime alpha.4, separate SQL roles and the Infra Layer lifecycle. Full release
+qualification remains in progress. Team remains the default profile.
+
+See [operator/clean-install guide](../../docs/minimal-kernel-operator.md),
+[SQL matrix](../../docs/minimal-kernel-sql.md),
+[recovery guide](../../docs/minimal-kernel-recovery.md) and
+[validation ledger](../../docs/minimal-kernel-il4r-ledger.md).
+
+`dependency-alignment.json` additively pins the current artifacts and 93 source
+files. The original inventory described below remains historical evidence.
 
 `dependency-manifest.json` inventories the approved transient fixture at
 `c5ee4591c87e7be2a7d91398cfcaa277787558e0`: all 213 locked npm artifacts
@@ -39,5 +47,5 @@ provenance is retained and the omission is recorded rather than guessed.
 `backbone.radio` also lacks license metadata in the npm lockfile. Release
 qualification must resolve these metadata omissions using the original notices.
 
-See [the IL-4 integration report](../../docs/minimal-kernel-il4.md) for the missing
-first-operator contract, SQL evidence and proposed integration boundary.
+See [the historical IL-4 report](../../docs/minimal-kernel-il4.md) for the original
+blocker and retained SQL evidence. KB-01B has resolved that enrollment contract.
