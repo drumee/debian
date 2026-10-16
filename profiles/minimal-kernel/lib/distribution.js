@@ -41,7 +41,7 @@ function compose(cfg) {
   if (!plan.applicable) throw Object.assign(Error("MINIMAL_INFRASTRUCTURE_PLAN_REJECTED"), { code: "MINIMAL_INFRASTRUCTURE_PLAN_REJECTED", diagnostics: plan.diagnostics });
   const mount = (resource, target, read_only) => ({ resource, target, read_only });
   const sql = (name, consumer = name) => ({ ref: keys[name], consumer, target: "/run/infra/database", format: "raw" });
-  const environment = { DRUMEE_OPERATOR_INTENT: JSON.stringify({ domain: cfg.instance.domain, ...cfg.operator }), DRUMEE_ACCEPTANCE: String(cfg.deployment.acceptance) };
+  const environment = { DRUMEE_OPERATOR_INTENT: JSON.stringify({ domain: cfg.instance.domain, ...cfg.operator }), DRUMEE_ACCEPTANCE: String(cfg.deployment.acceptance), DRUMEE_SQL_POLICY_VERSION: "il4-sql-roles-1" };
   const jobs = [], job = (id, role, command, mounts = []) => {
     const result = { id, image: cfg.images.kernel, uid, gid, entrypoint: ["node"], command: ["lib/jobs.js", command, "install"], validation_command: ["node", "lib/jobs.js", command, "validate"], effect: "idempotent", artifact_revision: cfg.provenance.revision,
       environment: { ...environment, DRUMEE_SQL_ROLE: role }, requires: ["database", "redis", ...jobs.map(value => value.id)], mounts, secret_mounts: [sql(role, role === "schema" ? "schema-job" : role)] };
@@ -58,7 +58,7 @@ function compose(cfg) {
   const requires = ["database", "redis", ...jobs.map(value => value.id)];
   const distribution = { contract_version: "1", id: "debian-minimal-kernel", profile: "kernel", helper_image: images.node, external_writers: "none", init_jobs: jobs,
     persistent_resources: ["content", "distribution-state", "operator-state", "public"].map(id => ({ id, source: durable(id), uid, gid, backup_required: true })),
-    schema_versions: { runtime: "kb01a-platform-authority-1", operator: "kb01b-initial-operator-1", platform: "git-59985d4a78e142b64f5976cc7460a723cca29a79", hub: "git-59985d4a78e142b64f5976cc7460a723cca29a79", mfs: "phase4.8-system-mfs-2" },
+    schema_versions: { runtime: "kb01a-platform-authority-1", operator: "kb01b-initial-operator-1", platform: "git-59985d4a78e142b64f5976cc7460a723cca29a79", hub: "git-59985d4a78e142b64f5976cc7460a723cca29a79", mfs: "phase4.8-system-mfs-2", sql_roles: "il4-sql-roles-1" },
     provenance: { repository: "https://github.com/drumee/debian", revision: cfg.provenance.revision, path: "profiles/minimal-kernel", acceptance: "real-kernel" },
     services: [{ id: "provisioner", image: cfg.images.kernel, uid, gid, entrypoint: ["node"], command: ["lib/provisioner.js"], environment: { DRUMEE_SQL_ROLE: "provisioner" }, requires, mounts: [], secret_mounts: [sql("provisioner")], listener_ports: [3103], healthcheck: readiness(3103) }],
     kernel: { id: "kernel", image: cfg.images.kernel, uid, gid, entrypoint: ["node"], command: ["lib/host.js"], environment: { DRUMEE_SQL_ROLE: "runtime", DRUMEE_DOMAIN: cfg.instance.domain }, requires: [...requires, "provisioner"], mounts: [mount("content", "/content", false), mount("public", "/public", true)], secret_mounts: [sql("runtime"), { ref: keys.redis, consumer: "kernel", target: "/run/infra/redis-config.json", format: "redis-client-config" }], listener_ports: [3101, 3102], healthcheck: readiness(3102) }

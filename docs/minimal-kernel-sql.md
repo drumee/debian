@@ -11,9 +11,9 @@ credential or socket is mounted in the ordinary kernel or private provisioner.
 | Infrastructure administrator | Engine/account administration, scoped grant installation, cold backup | Infra Layer owned database socket only; no published SQL port |
 | `kernel_schema` | CREATE/ALTER/DROP/INDEX, CREATE/ALTER ROUTINE, EXECUTE and table SELECT/INSERT/UPDATE/DELETE on `yp.*`; no global administrative grant | Schema initialization/migration jobs only; owns Yellow Page routine DEFINERs |
 | `kernel_bootstrap` | CREATE/SELECT/INSERT on organisation; SELECT/INSERT on domain/sys_conf/entity/drumate/privilege; EXECUTE uniqueId | Canonical reserved-platform bootstrap job only |
-| `kernel_enrollment` | Named-table SELECT; INSERT entity/drumate/privilege; UPDATE drumate(remit); SELECT/UPDATE initial_operator_enrollment; named-function EXECUTE; read-only mysql.proc | KB-01B enrollment job only; no schema/account creation |
-| `kernel_provisioner` | Named-table observation/session transport; Hub lifecycle, plan, capability and system-mfs provisioning DML; entity INSERT/UPDATE; DDL/DML/routine privileges on escaped `hub\_%` namespace | Separate private service. No drumate/privilege/enrollment writes; no infrastructure-account creation |
-| `kernel_runtime` | SELECT on the named Yellow Page runtime/ACL/MFS registry tables; INSERT/UPDATE/DELETE on cookie/authn/socket; exact intrinsic function/procedure EXECUTE; exact provisioned-shard media/permission SELECT and manifest routine EXECUTE | Ordinary kernel only; no DBA, schema-install, remit, enrollment or ACL-write privilege |
+| `kernel_enrollment` | SELECT on domain/sys_conf/organisation/entity/drumate/privilege; INSERT entity/drumate/privilege; UPDATE drumate(remit); SELECT/UPDATE initial_operator_enrollment; uniqueId EXECUTE; read-only mysql.proc | KB-01B enrollment job only; no transport, schema or account creation |
+| `kernel_provisioner` | Named-table observation; Hub lifecycle/plan/capability/MFS provisioning INSERT and exact UPDATE columns; Hub ACL DELETE; entity INSERT and UPDATE(status,mtime); scoped shard DDL/DML/routines and namespace GRANT OPTION | Separate private service. No direct transport, drumate/privilege/enrollment writes; no infrastructure-account creation |
+| `kernel_runtime` | SELECT on the named Yellow Page runtime/ACL/MFS registry tables; DELETE on authn for expiry; exact intrinsic function/procedure EXECUTE; exact provisioned-shard media/permission SELECT and manifest routine EXECUTE | Ordinary kernel only; no direct cookie/socket writes, DBA, schema-install, remit, enrollment or ACL-write privilege |
 
 Runtime's exact Yellow Page read tables are domain, sys_conf, organisation, entity,
 drumate, privilege, cookie, authn, socket, hub, hub_lifecycle, hub_acl, hub_plan,
@@ -24,8 +24,10 @@ socket_list_session/socket_refresh. No EXECUTE wildcard on `yp.*` is granted.
 
 After authorized HubLifecycle creation and system-mfs validation, the provisioner
 grants runtime SELECT on that exact shard's manifest tables and EXECUTE on its
-manifest functions/procedures. The provisioner has GRANT OPTION only for SELECT
-and EXECUTE in the escaped Hub namespace, not global/account/identity grants.
+manifest functions/procedures. MariaDB database-level GRANT OPTION applies to
+all privileges the provisioner holds in the escaped Hub namespace, even though
+the final GRANT statement names SELECT/EXECUTE. It has no global or Yellow Page
+GRANT OPTION. Runtime receives neither DDL nor GRANT OPTION.
 It is an intentionally privileged control-plane account, never described as an
 ordinary least-privileged runtime. The canonical SqlHubStore's optional broad
 `runtime_user` GRANT ALL path is not enabled.
@@ -45,3 +47,12 @@ runtime DDL, platform-remit writes, enrollment metadata access/modification and
 Hub ACL deletion. Separate HTTP tests verify readers/outsiders cannot provision
 Hubs and platform remit/Hub administration do not bypass unrelated MFS grants.
 See the IL-4R ledger for executed counts and remaining qualifications.
+
+The final source audit removes the older probe's unnecessary direct cookie and
+socket DML. Alpha.4's sole direct transport write is `OTAK_EXPIRE_QUERY`'s DELETE
+from authn; all other writes execute the canonical DEFINER routines. The private
+provisioner needs only SELECT-based session resolution and the canonical
+session_ensure compatibility routine. Its Yellow Page UPDATE column sets are
+derived from SqlHubStore and SqlMfsStore statements. This policy is recorded as
+`il4-sql-roles-1` in job artifacts and schema compatibility; older unqualified
+projection backups cannot be silently adopted under this policy.
