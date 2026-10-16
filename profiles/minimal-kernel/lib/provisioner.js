@@ -1,7 +1,7 @@
 "use strict";
 const path = require("node:path");
 const { connect, identifier, fail } = require("./database");
-const { runtime, components, system_mfs } = require("./components");
+const { runtime, components, system_mfs, permissionValue } = require("./components");
 async function grantRuntime(database, hub) {
   if (!/^hub_[a-f0-9]{16}$/.test(hub.database_name)) fail("HUB_SHARD_IDENTIFIER_INVALID");
   const root = path.dirname(require.resolve("@drumee/system-mfs/package.json"));
@@ -13,7 +13,7 @@ async function grantRuntime(database, hub) {
 async function start() {
   const db = await connect(), { lifecycle, hub_store, mfs_store, yellow_page, sessions } = components(db);
   if (!(await system_mfs.validateInstallation({ store: mfs_store })).valid) fail("SYSTEM_MFS_SCHEMA_INVALID");
-  const descriptors = new runtime.DescriptorRegistry();
+  const descriptors = new runtime.DescriptorRegistry({ permissionValue });
   descriptors.registerDescriptor("hub", { modules: { private: "provisioner-worker.js" }, services: { create: { scope: "platform", permission: { src: "PLATFORM_ADMINISTRATOR" } } } }, { workdir: __dirname });
   descriptors.registerDescriptor("health", { modules: { public: "provisioner-worker.js" }, services: { ready: { scope: "kernel", permission: { src: "anonymous", fast_check: "public-api" } } } }, { workdir: __dirname });
   class Worker {
@@ -39,5 +39,5 @@ async function start() {
   for (const signal of ["SIGTERM", "SIGINT"]) process.once(signal, () => server.close(() => db.close().finally(() => process.exit(0))));
   return server;
 }
-if (require.main === module) start().catch(error => { console.error(/^[A-Z0-9_]+$/.test(error.code || "") ? error.code : "PROVISIONER_START_FAILED"); process.exitCode = 1; });
+if (require.main === module) start().catch(error => { console.error(/^[A-Z0-9_]+$/.test(error.code || "") ? error.code : "PROVISIONER_START_FAILED"); process.exit(1); });
 module.exports = { start, grantRuntime };
