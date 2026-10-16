@@ -1,0 +1,41 @@
+# Explicit minimal profile. Copy to config/drumee.yaml; Team remains the default.
+# Replace every host, ownership, storage, image and provenance value intentionally.
+# Build with scripts/build-minimal-kernel.sh; copy IDs from its .cache/images.json.
+# No passwords or infrastructure secrets belong in this file.
+distribution:
+  profile: minimal-kernel
+instance:
+  domain: drumee.lan
+deployment:
+  id: minimal-kernel-local
+  project: minimal-kernel-local
+  owner_uid: 1000
+  owner_gid: 1000
+  acceptance: false
+network:
+  interface: wlp2s0
+  lan_address: 192.168.5.202
+  bind_address: 192.168.5.202
+  clients: [127.0.0.0/8, 172.16.0.0/12, 192.168.5.0/24]
+dns:
+  mode: local
+tls:
+  provider: local
+storage:
+  root: /srv/drumee/minimal-kernel
+  backup_location: /srv/backup/drumee-minimal-kernel
+  retention_days: 14
+ports:
+  https: 443
+  dns: 53
+images:
+  kernel: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  tools: sha256:0000000000000000000000000000000000000000000000000000000000000000
+provenance:
+  revision: 0000000000000000000000000000000000000000
+  alignment_sha256: REPLACE_WITH_BUILD_ALIGNMENT_SHA256
+operator:
+  mode: interactive
+  username: administrator
+  email: administrator@drumee.lan
+  operation_id: minimal-initial-administrator-1

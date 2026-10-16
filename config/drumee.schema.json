@@ -3,139 +3,373 @@
   "$id": "https://drumee.org/config/drumee.schema.json",
   "title": "Drumee instance configuration",
   "description": "Single source of truth for a Drumee deployment. Rendered by config/render.mjs into a container .env, a docker-compose.yml, and a native debconf preseed (install.conf).",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["instance"],
-  "properties": {
-    "instance": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["description", "domain", "admin_email"],
-      "properties": {
-        "description": { "type": "string", "minLength": 1, "description": "Human-friendly label for the instance/team." },
-        "domain": { "type": "string", "minLength": 1, "description": "Primary domain. Use 'local' for a non-Internet-reachable install." },
-        "local_mode": { "type": "boolean", "default": false, "description": "True for local-only (not reachable from the public Internet)." },
-        "admin_email": { "type": "string", "format": "email", "description": "Administrator login identifier and notification address." }
-      }
+  "oneOf": [
+    {
+      "$ref": "#/$defs/team"
     },
-    "network": {
+    {
+      "$ref": "drumee.minimal-kernel.schema.json"
+    }
+  ],
+  "$defs": {
+    "team": {
       "type": "object",
       "additionalProperties": false,
+      "required": [
+        "instance"
+      ],
       "properties": {
-        "ip4": { "type": "string", "default": "auto", "description": "Public IPv4, or 'auto' to detect at install time." },
-        "ip6": { "type": "string", "default": "auto", "description": "Public IPv6, or 'auto' to detect at install time." },
-        "services": { "type": "array", "items": { "type": "string" }, "default": [], "description": "Optional named services to enable." }
-      }
-    },
-    "tls": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "mode": { "enum": ["acme", "own", "self-signed"], "default": "acme", "description": "acme = auto-issue via ZeroSSL/Let's Encrypt; own = bring your own wildcard certs; self-signed = local dev." },
-        "acme_email": { "type": "string", "format": "email", "description": "Required when mode=acme. Account email for the ACME provider." },
-        "own_cert_path": { "type": "string", "description": "Required when mode=own. Path to wildcard certs for the domain." },
-        "dns_challenge": { "enum": ["nsupdate", "api"], "default": "nsupdate", "description": "Native channel only. How the DNS-01 challenge is answered when mode=acme (the certificate is a wildcard, so DNS-01 is the only possibility). nsupdate = this host runs BIND9 as the zone master, needing inbound udp/53 plus NS delegation; api = the record is created through the DNS provider's API, which needs outbound access only and therefore works behind NAT." },
-        "acme_env_file": { "type": "string", "description": "Required when dns_challenge=api. Path ON THE TARGET HOST to a shell file exporting ACME_PROVIDER (an acme.sh dnsapi name without the dns_ prefix) plus that provider's credentials. Never generated from this config: it holds secrets and is created out of band with mode 0600." },
-        "terminator": { "enum": ["nginx", "caddy"], "default": "nginx", "description": "Native channel only. Which server terminates TLS. nginx (default) serves 80/443 itself and certificates come from acme.sh. caddy puts the drumee-caddy binary in front on 80/443 \u2014 it obtains and renews certificates over DNS-01 using the caddy-dns module it was compiled with, exports them into the acme.sh layout nginx already reads, and proxies to nginx on internal ports." },
-        "dns_provider": { "type": "string", "description": "Required when terminator=caddy. Name of the caddy-dns provider module (e.g. ovh, cloudflare, gandi). The API token is NOT part of this config: it is asked by debconf and stored in /etc/drumee/credential/caddy-dns.env at 0600." }
-      }
-    },
-    "storage": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "data_dir": { "type": "string", "default": "/data", "description": "Drumee filesystem (MFS) storage root." },
-        "db_dir": { "type": "string", "default": "/srv/db", "description": "Database storage path." },
-        "backup_location": { "type": "string", "description": "Backup target; should be a different partition. May be a remote rsync target." },
-        "exchange_location": { "type": "string", "default": "/exchangearea", "description": "Host <-> Drumee file exchange directory." }
-      }
-    },
-    "database": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "host": { "type": "string", "default": "mariadb", "description": "DB host. 'mariadb' (compose service) for containers, 'localhost' for native." },
-        "port": { "type": "integer", "default": 3306 },
-        "name": { "type": "string", "default": "drumee" },
-        "user": { "type": "string", "default": "drumee-app" },
-        "password": { "type": ["string", "null"], "default": null, "description": "App user password. Null = generate. The user is granted broad privileges (the app creates per-hub/drumate DBs at runtime)." },
-        "root_password": { "type": ["string", "null"], "default": null, "description": "MariaDB root/admin password used by schemas-init to create DBs + grant the app user. Null = generate." }
-      }
-    },
-    "redis": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "host": { "type": "string", "default": "redis" },
-        "port": { "type": "integer", "default": 6379 },
-        "password": { "type": ["string", "null"], "default": null, "description": "Null = generate a strong random password at render time." }
-      }
-    },
-    "email": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Outbound SMTP for notifications and the welcome email.",
-      "properties": {
-        "host": { "type": "string" },
-        "port": { "type": "integer", "default": 587 },
-        "secure": { "type": "boolean", "default": false },
-        "user": { "type": "string" },
-        "password": { "type": ["string", "null"], "default": null }
-      }
-    },
-    "optional_services": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Heavy/optional services. In the container channel these map to docker-compose profiles.",
-      "properties": {
-        "jitsi": { "type": "boolean", "default": false },
-        "prosody": { "type": "boolean", "default": false },
-        "coturn": { "type": "boolean", "default": false }
-      }
-    },
-    "wireguard": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "WireGuard peer coordination (native channel). Lets the node be reached without opening a router port; ignored by the container channel.",
-      "properties": {
-        "enabled": { "type": "boolean", "default": false },
-        "coordinator": { "type": "string", "default": "coord.drumee.tech", "description": "Coordination server host (signaling only; never sees traffic content)." },
-        "listen_port": { "type": "integer", "minimum": 1, "maximum": 65535, "default": 51820, "description": "Fixed local UDP port. Must not change: the NAT mapping is probed from it." },
-        "reflector_port": { "type": "integer", "minimum": 1, "maximum": 65535, "default": 51821, "description": "UDP port of the endpoint reflector on the coordination server." }
-      }
-    },
-    "ports": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Internal listener ports the reverse proxy targets. Must match the app's yp.sys_conf listeners.",
-      "properties": {
-        "api": { "type": "integer", "default": 24000, "description": "service.js REST listener (--restPort), proxied at /-/*." },
-        "ui": { "type": "integer", "default": 23000, "description": "index.js page + WebSocket listener (--pushPort)." },
-        "http": { "type": "integer", "default": 80, "description": "The port Drumee serves HTTP on. setup-infra renders it into nginx's listen directive, so it is what nginx binds — and the roles stack publishes the same number on the host, because one name must not mean two things. The native channel uses it identically: 8080 when drumee-caddy owns 80." },
-        "https": { "type": "integer", "default": 443, "description": "The port Drumee serves HTTPS on. Bound by nginx and published unchanged, as with ports.http." }
-      }
-    },
-    "versions": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Image tags for the container channel. Set `product` to the release-train version (the tag all images share); the per-component keys are optional overrides that default to `product`.",
-      "properties": {
-        "product": { "type": "string", "default": "latest", "description": "Release-train version — the tag all drumee/* images share (e.g. 1.0.0). Pin this for reproducible deploys + rollback." },
-        "server": { "type": "string", "description": "Override server-pod image tag (defaults to product)." },
-        "ui": { "type": "string", "description": "Override ui-build image tag (defaults to product)." },
-        "schemas": { "type": "string", "description": "Override schemas image tag (defaults to product)." },
-        "static": { "type": "string", "description": "Override static image tag (defaults to product)." }
-      }
-    },
-    "images": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Container image source. Set registry to where publish-images.sh pushed (e.g. ghcr.io/drumee).",
-      "properties": {
-        "registry": { "type": "string", "default": "drumee", "description": "Image namespace/registry prefix for the drumee/* images." },
-        "stack": { "enum": ["source", "roles"], "default": "source", "description": "Which compose topology to emit. 'roles' is the package-based stack of docs/distribution.md 2 (one role per container, each installing one drumee-role-* metapackage at an exact version). 'source' is the deprecated source-built stack, still the default because only two of the seven role images exist." },
-        "mariadb_tag": { "type": "string", "default": "11.8", "description": "Tag for the official mariadb image (roles stack). 11.8 is what Debian Trixie ships, so the schema is validated against a single branch." },
-        "redis_tag": { "type": "string", "default": "7", "description": "Tag for the official redis image (roles stack)." }
+        "instance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "description",
+            "domain",
+            "admin_email"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Human-friendly label for the instance/team."
+            },
+            "domain": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Primary domain. Use 'local' for a non-Internet-reachable install."
+            },
+            "local_mode": {
+              "type": "boolean",
+              "default": false,
+              "description": "True for local-only (not reachable from the public Internet)."
+            },
+            "admin_email": {
+              "type": "string",
+              "format": "email",
+              "description": "Administrator login identifier and notification address."
+            }
+          }
+        },
+        "network": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ip4": {
+              "type": "string",
+              "default": "auto",
+              "description": "Public IPv4, or 'auto' to detect at install time."
+            },
+            "ip6": {
+              "type": "string",
+              "default": "auto",
+              "description": "Public IPv6, or 'auto' to detect at install time."
+            },
+            "services": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "Optional named services to enable."
+            }
+          }
+        },
+        "tls": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "acme",
+                "own",
+                "self-signed"
+              ],
+              "default": "acme",
+              "description": "acme = auto-issue via ZeroSSL/Let's Encrypt; own = bring your own wildcard certs; self-signed = local dev."
+            },
+            "acme_email": {
+              "type": "string",
+              "format": "email",
+              "description": "Required when mode=acme. Account email for the ACME provider."
+            },
+            "own_cert_path": {
+              "type": "string",
+              "description": "Required when mode=own. Path to wildcard certs for the domain."
+            },
+            "dns_challenge": {
+              "enum": [
+                "nsupdate",
+                "api"
+              ],
+              "default": "nsupdate",
+              "description": "Native channel only. How the DNS-01 challenge is answered when mode=acme (the certificate is a wildcard, so DNS-01 is the only possibility). nsupdate = this host runs BIND9 as the zone master, needing inbound udp/53 plus NS delegation; api = the record is created through the DNS provider's API, which needs outbound access only and therefore works behind NAT."
+            },
+            "acme_env_file": {
+              "type": "string",
+              "description": "Required when dns_challenge=api. Path ON THE TARGET HOST to a shell file exporting ACME_PROVIDER (an acme.sh dnsapi name without the dns_ prefix) plus that provider's credentials. Never generated from this config: it holds secrets and is created out of band with mode 0600."
+            },
+            "terminator": {
+              "enum": [
+                "nginx",
+                "caddy"
+              ],
+              "default": "nginx",
+              "description": "Native channel only. Which server terminates TLS. nginx (default) serves 80/443 itself and certificates come from acme.sh. caddy puts the drumee-caddy binary in front on 80/443 \u2014 it obtains and renews certificates over DNS-01 using the caddy-dns module it was compiled with, exports them into the acme.sh layout nginx already reads, and proxies to nginx on internal ports."
+            },
+            "dns_provider": {
+              "type": "string",
+              "description": "Required when terminator=caddy. Name of the caddy-dns provider module (e.g. ovh, cloudflare, gandi). The API token is NOT part of this config: it is asked by debconf and stored in /etc/drumee/credential/caddy-dns.env at 0600."
+            }
+          }
+        },
+        "storage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "data_dir": {
+              "type": "string",
+              "default": "/data",
+              "description": "Drumee filesystem (MFS) storage root."
+            },
+            "db_dir": {
+              "type": "string",
+              "default": "/srv/db",
+              "description": "Database storage path."
+            },
+            "backup_location": {
+              "type": "string",
+              "description": "Backup target; should be a different partition. May be a remote rsync target."
+            },
+            "exchange_location": {
+              "type": "string",
+              "default": "/exchangearea",
+              "description": "Host <-> Drumee file exchange directory."
+            }
+          }
+        },
+        "database": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "host": {
+              "type": "string",
+              "default": "mariadb",
+              "description": "DB host. 'mariadb' (compose service) for containers, 'localhost' for native."
+            },
+            "port": {
+              "type": "integer",
+              "default": 3306
+            },
+            "name": {
+              "type": "string",
+              "default": "drumee"
+            },
+            "user": {
+              "type": "string",
+              "default": "drumee-app"
+            },
+            "password": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null,
+              "description": "App user password. Null = generate. The user is granted broad privileges (the app creates per-hub/drumate DBs at runtime)."
+            },
+            "root_password": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null,
+              "description": "MariaDB root/admin password used by schemas-init to create DBs + grant the app user. Null = generate."
+            }
+          }
+        },
+        "redis": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "host": {
+              "type": "string",
+              "default": "redis"
+            },
+            "port": {
+              "type": "integer",
+              "default": 6379
+            },
+            "password": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null,
+              "description": "Null = generate a strong random password at render time."
+            }
+          }
+        },
+        "email": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Outbound SMTP for notifications and the welcome email.",
+          "properties": {
+            "host": {
+              "type": "string"
+            },
+            "port": {
+              "type": "integer",
+              "default": 587
+            },
+            "secure": {
+              "type": "boolean",
+              "default": false
+            },
+            "user": {
+              "type": "string"
+            },
+            "password": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null
+            }
+          }
+        },
+        "optional_services": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Heavy/optional services. In the container channel these map to docker-compose profiles.",
+          "properties": {
+            "jitsi": {
+              "type": "boolean",
+              "default": false
+            },
+            "prosody": {
+              "type": "boolean",
+              "default": false
+            },
+            "coturn": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "wireguard": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "WireGuard peer coordination (native channel). Lets the node be reached without opening a router port; ignored by the container channel.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "coordinator": {
+              "type": "string",
+              "default": "coord.drumee.tech",
+              "description": "Coordination server host (signaling only; never sees traffic content)."
+            },
+            "listen_port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535,
+              "default": 51820,
+              "description": "Fixed local UDP port. Must not change: the NAT mapping is probed from it."
+            },
+            "reflector_port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535,
+              "default": 51821,
+              "description": "UDP port of the endpoint reflector on the coordination server."
+            }
+          }
+        },
+        "ports": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Internal listener ports the reverse proxy targets. Must match the app's yp.sys_conf listeners.",
+          "properties": {
+            "api": {
+              "type": "integer",
+              "default": 24000,
+              "description": "service.js REST listener (--restPort), proxied at /-/*."
+            },
+            "ui": {
+              "type": "integer",
+              "default": 23000,
+              "description": "index.js page + WebSocket listener (--pushPort)."
+            },
+            "http": {
+              "type": "integer",
+              "default": 80,
+              "description": "The port Drumee serves HTTP on. setup-infra renders it into nginx's listen directive, so it is what nginx binds \u2014 and the roles stack publishes the same number on the host, because one name must not mean two things. The native channel uses it identically: 8080 when drumee-caddy owns 80."
+            },
+            "https": {
+              "type": "integer",
+              "default": 443,
+              "description": "The port Drumee serves HTTPS on. Bound by nginx and published unchanged, as with ports.http."
+            }
+          }
+        },
+        "versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Image tags for the container channel. Set `product` to the release-train version (the tag all images share); the per-component keys are optional overrides that default to `product`.",
+          "properties": {
+            "product": {
+              "type": "string",
+              "default": "latest",
+              "description": "Release-train version \u2014 the tag all drumee/* images share (e.g. 1.0.0). Pin this for reproducible deploys + rollback."
+            },
+            "server": {
+              "type": "string",
+              "description": "Override server-pod image tag (defaults to product)."
+            },
+            "ui": {
+              "type": "string",
+              "description": "Override ui-build image tag (defaults to product)."
+            },
+            "schemas": {
+              "type": "string",
+              "description": "Override schemas image tag (defaults to product)."
+            },
+            "static": {
+              "type": "string",
+              "description": "Override static image tag (defaults to product)."
+            }
+          }
+        },
+        "images": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Container image source. Set registry to where publish-images.sh pushed (e.g. ghcr.io/drumee).",
+          "properties": {
+            "registry": {
+              "type": "string",
+              "default": "drumee",
+              "description": "Image namespace/registry prefix for the drumee/* images."
+            },
+            "stack": {
+              "enum": [
+                "source",
+                "roles"
+              ],
+              "default": "source",
+              "description": "Which compose topology to emit. 'roles' is the package-based stack of docs/distribution.md 2 (one role per container, each installing one drumee-role-* metapackage at an exact version). 'source' is the deprecated source-built stack, still the default because only two of the seven role images exist."
+            },
+            "mariadb_tag": {
+              "type": "string",
+              "default": "11.8",
+              "description": "Tag for the official mariadb image (roles stack). 11.8 is what Debian Trixie ships, so the schema is validated against a single branch."
+            },
+            "redis_tag": {
+              "type": "string",
+              "default": "7",
+              "description": "Tag for the official redis image (roles stack)."
+            }
+          }
+        }
       }
     }
   }

@@ -20,7 +20,7 @@ function create(repository) {
     contract_version: 1, profile: "minimal-kernel", release_qualified: false,
     baseline: { path: "dependency-manifest.json", sha256: digest(fs.readFileSync(path.join(root, "dependency-manifest.json"))), npm_artifacts: 213, source_files: 71 },
     runtime: { version: "0.1.0-alpha.4", repository: "https://github.com/drumee/server-runtime.git", revision: "f961f6214432c2e6dbbcde2b926544c076935950", integrity: runtime_integrity, authority_schema: "kb01a-platform-authority-1" },
-    infrastructure: { repository: "https://github.com/drumee/infra-layer.git", revision: "35fe3d0e6b6311d43940338b65a7e5ae74c0d222", artifact: lock.packages["node_modules/@drumee/infra-layer"], qualification: "unpublished-qualified-development-source; registry alpha.1 lacks lifecycle" },
+    infrastructure: { repository: "https://github.com/drumee/infra-layer.git", revision: lock.packages["node_modules/@drumee/infra-layer"].resolved.split("/").pop(), artifact: lock.packages["node_modules/@drumee/infra-layer"], qualification: "unpublished-qualified-development-source; registry alpha.1 lacks lifecycle" },
     operator: { repository: source.repository, revision: source.revision, path: "target/control-plane/operator-bootstrap", schema: "kb01b-initial-operator-1", mode: "canonical-api-only" },
     package_sha256: digest(fs.readFileSync(path.join(root, "package.json"))), lock_sha256: digest(fs.readFileSync(path.join(root, "package-lock.json"))), sources_sha256: digest(fs.readFileSync(path.join(root, "sources.lock.json"))),
     npm: Object.entries(lock.packages).filter(([location]) => location).map(([location, entry]) => ({ location, ...entry })),

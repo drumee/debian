@@ -15,7 +15,11 @@
 
 import { readFileSync, writeFileSync, mkdirSync, chmodSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+export { parseYaml };
 
 // ---------------------------------------------------------------- arg parsing
 function parseArgs(argv) {
@@ -1052,6 +1056,7 @@ ${conf('/etc/opendkim', 'etc/opendkim')}
 // they did in an earlier draft, and a stack that differs depending on which command
 // produced it is worse than either stack.
 function composeFor(cfg) {
+  if (cfg.distribution?.profile === 'minimal-kernel') return JSON.stringify(require('../profiles/minimal-kernel/lib/distribution').compose(cfg), null, 2) + '\n';
   return (cfg.images?.stack === 'roles') ? renderComposeRoles(cfg) : renderCompose(cfg);
 }
 
@@ -1060,7 +1065,9 @@ function load(opts) {
   let text;
   try { text = readFileSync(opts.config, 'utf8'); }
   catch { die(`cannot read config: ${opts.config}`); }
-  const cfg = applyDefaults(parseYaml(text));
+  const raw = parseYaml(text);
+  if (raw.distribution?.profile === 'minimal-kernel') return require('../profiles/minimal-kernel/lib/config').validate(raw);
+  const cfg = applyDefaults(raw);
   validate(cfg);
   return cfg;
 }
@@ -1075,7 +1082,9 @@ function emit(content, out) {
   }
 }
 
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 const { command, opts } = parseArgs(process.argv.slice(2));
+if (['env', 'debconf', 'caddyfile'].includes(command) && load(opts).distribution?.profile === 'minimal-kernel') die('minimal-kernel uses Infra Layer lifecycle composition; this Team-only output is unsupported');
 
 switch (command) {
   case 'validate': {
@@ -1090,6 +1099,7 @@ switch (command) {
   case 'debconf': { emit(renderDebconf(load(opts)), opts.out); break; }
   case 'all': {
     const cfg = withSecrets(load(opts));
+    if (cfg.distribution?.profile === 'minimal-kernel') { emit(composeFor(cfg), join(opts.outDir, 'composition.json')); break; }
     emit(renderEnv(cfg), join(opts.outDir, '.env'));
     chmodSync(join(opts.outDir, '.env'), 0o600);  // holds DB root credentials
     emit(composeFor(cfg), join(opts.outDir, 'docker-compose.yml'));
@@ -1105,8 +1115,10 @@ switch (command) {
     die(`unknown command: ${command ?? '(none)'}\n` +
         'usage: render.mjs validate|env|compose|caddyfile|debconf|all [--config FILE] [--out FILE] [--out-dir DIR]');
 }
+}
 
 function withSecrets(cfg) {
+  if (cfg.distribution?.profile === 'minimal-kernel') return cfg;
   const generated = fillSecrets(cfg);
   if (generated.length) {
     console.error(`note: generated random secrets for: ${generated.join(', ')}`);

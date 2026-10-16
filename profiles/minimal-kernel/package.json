@@ -26,7 +26,7 @@
     "websocket": "1.0.35"
   },
   "devDependencies": {
-    "@drumee/infra-layer": "https://codeload.github.com/drumee/infra-layer/tar.gz/35fe3d0e6b6311d43940338b65a7e5ae74c0d222",
+    "@drumee/infra-layer": "https://codeload.github.com/drumee/infra-layer/tar.gz/9d8462b428db8c8421579067e7cb53b46630d39e",
     "css-loader": "6.11.0",
     "postcss": "8.5.6",
     "postcss-loader": "8.1.1",
