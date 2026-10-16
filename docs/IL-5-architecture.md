@@ -1,6 +1,7 @@
 # IL-5.0 — minimal application distribution architecture
 
-Status: architecture selected; implementation and qualification pending.
+Status: additive architecture implemented. Measured results and remaining gates
+are recorded in [qualification](IL-5-qualification.md).
 
 ## Inspected baseline and ownership
 

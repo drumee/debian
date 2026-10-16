@@ -1,0 +1,45 @@
+{
+  "project": "drumee-il4-e5935f11",
+  "source_revision": "4a0efba6193912ce5b0487db51fb541ca79638d0",
+  "image_ids": {
+    "kernel": "sha256:254c6e84ebcff71415ffce2a95edb3ee6e364d7a58c63904f069f99e8899dde6",
+    "tools": "sha256:93d08f7b2e9f6d8922b7a3f498dd9b16e633d8387d4a084b5136ab64370748f2"
+  },
+  "mode": "automatic",
+  "initialization_interruption": true,
+  "sql_negative_cases": 16,
+  "stages": {
+    "fresh": {
+      "groups": 11,
+      "assertions": {
+        "functional": 78,
+        "browser": 8
+      }
+    },
+    "restart": {
+      "groups": 10,
+      "assertions": {
+        "functional": 73,
+        "browser": 8
+      }
+    },
+    "restore": {
+      "groups": 10,
+      "assertions": {
+        "functional": 73,
+        "browser": 8
+      }
+    }
+  },
+  "total_harness_assertions": {
+    "functional": 260,
+    "browser": 24
+  },
+  "browser_scenarios": 3,
+  "credential_preserved": true,
+  "ca_preserved": true,
+  "isolated_restore": true,
+  "https_port": 32939,
+  "dns_port": 36615,
+  "lan_address": "192.168.5.201"
+}

@@ -2,8 +2,9 @@
 
 Implemented profile: `profiles/minimal-application`, selected explicitly with
 `bin/drumee-ctl --profile minimal-application`. Team remains the default and
-minimal-kernel source/dependency pins remain unchanged. Full clean-checkout
-acceptance is pending; no production installation or release is claimed here.
+minimal-kernel source/dependency pins remain unchanged. Clean-checkout acceptance and limits are recorded in
+[qualification](IL-5-qualification.md); no production installation or publication
+is performed by this work.
 
 ## Inputs and canonical ownership
 
@@ -28,7 +29,11 @@ installed. The private Docker network uses the canonical internal role name
 `kernel`; its configured resource name is application-specific and does not
 install kernel capabilities. `operator-state` is an explicit persistent resource
 for protected revision-bound configuration snapshots and coordinated backup.
-Application resources and secret references are separately explicit.
+Application resources and secret references are separately explicit. The existing
+canonical supplied-service policy bounds memory to 512 MiB and PIDs to 128, with
+a read-only root, dropped capabilities and private temporary storage. Persistent
+resource UID/GID and backup mappings are operator inputs; this profile adds no
+parallel resource allocator.
 
 ## Dependency and image acquisition
 

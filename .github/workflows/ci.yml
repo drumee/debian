@@ -58,3 +58,16 @@ jobs:
         with: { node-version: '20' }
       - name: Full test suite (tests/run-all.sh)
         run: tests/run-all.sh
+
+  minimal-application-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install immutable application/operator dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund --prefix profiles/minimal-application
+      - name: Public profile and operator contracts
+        run: npm test --prefix profiles/minimal-application
+      - name: Plugin archive integrity and extraction boundaries
+        run: python3 tests/minimal-application/plugin-artifact.test.py

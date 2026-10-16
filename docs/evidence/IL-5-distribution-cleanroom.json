@@ -1,0 +1,45 @@
+{
+  "project": "drumee-il5-debian-981f618e",
+  "source_revision": "cfb993dd3979122e4ff7915b8627ff669ef90a96",
+  "infrastructure": {
+    "revision": "c6ef6e9b8d33921ffa39c289490067adfc63a8b0",
+    "integrity": "sha512-/XFgDPrCJkuk9sEbLf5GGJ1Z55mueK85t77swiB4i/0s6OvdlrGqd9MUE9e8AnyMOi0nBUOl+W2h8FlqDZdX2Q=="
+  },
+  "image": "sha256:b98ae69b0a39ce4edb26fefa2a60ba28620ab12fe6ccd28d2f6daade4be6901d",
+  "runtime": {
+    "version": "0.1.0-alpha.4",
+    "integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ=="
+  },
+  "groups": [
+    "selector-public-plan-and-operator-authorization",
+    "install-real-runtime-native-rpc-and-authorization",
+    "docker-host-and-separate-lan-network-observations",
+    "operator-proxy-fragment-with-real-host-nginx-and-verified-tls",
+    "restart-stop-start-and-idempotent-install-preserve-data",
+    "configuration-rollback-and-failed-plugin-startup-preserve-state",
+    "operator-backup-and-isolated-restore",
+    "unknown-existing-installation-and-owner-mismatch-refused",
+    "optional-canonical-smtp-dkim-isolation-and-failure-preservation"
+  ],
+  "internet_delivery": "not-tested",
+  "network": {
+    "control_route": true,
+    "application_non_loopback": "ECONNREFUSED"
+  },
+  "socket_observation": "LISTEN 0      4096   127.0.0.1:34927 0.0.0.0:*",
+  "host_proxy": {
+    "containerized": false,
+    "ca_san_verified": true,
+    "operator_fragment": true
+  },
+  "smtp": {
+    "starttls_auth": true,
+    "no_open_relay": true,
+    "optional_failure_isolated": true,
+    "backend_failure_preserves_queue": true,
+    "smtp_recovery": "explicitly-unsupported",
+    "internet_delivery": false
+  },
+  "status": "passed",
+  "assertions": 90
+}
