@@ -22,7 +22,10 @@ contains credentials; it must remain outside source control and public storage.
 All checksums and schema versions are validated before restoration.
 
 For isolated restoration, copy the configuration to a new file, choose a new
-project name, new empty owned storage root and unoccupied explicit ports. Preserve
+project name, new empty owned storage root and unoccupied explicit ports above
+1023. Set `network.bind_address: 127.0.0.1`: the canonical restore API requires
+loopback isolation and refuses a LAN/public binding. Inspect a restored project
+over a scoped SSH tunnel when using a remote acceptance host. Preserve
 the logical instance ID, initial username/email, mode and operation ID. Do not
 point at customer databases or reuse existing deployment resources.
 

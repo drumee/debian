@@ -149,7 +149,7 @@ async function run() {
     assert.equal(receipt.protected, true);
     assert.equal((await operator.run({ command: "upgrade", config: file, execute: true, backup })).ready, true);
     assert.equal((await operator.run({ command: "rollback", config: file, execute: true, revision: prepared.revision })).ready, true);
-    const restore_cfg = structuredClone(cfg); restore_cfg.deployment.project = project + "-restored"; restore_cfg.storage.root = path.join(directory, "restored"); restore_cfg.ports = { https: await port(), dns: await port() };
+    const restore_cfg = structuredClone(cfg); restore_cfg.deployment.project = project + "-restored"; restore_cfg.storage.root = path.join(directory, "restored"); restore_cfg.network.bind_address = "127.0.0.1"; restore_cfg.ports = { https: await port(), dns: await port() };
     const restore_file = path.join(directory, "restore.yaml"); fs.writeFileSync(restore_file, yaml(restore_cfg), { mode: 0o600 });
     const result = await operator.run({ command: "restore", config: restore_file, backup, execute: true });
     assert.equal(result.ready, true); restored = A.readActive(restore_cfg.storage.root).prepared;
