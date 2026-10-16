@@ -15,7 +15,7 @@ async function run(job, mode) {
     const runtime_root = path.dirname(require.resolve("@drumee/server-runtime/package.json"));
     if (job === "intrinsic") {
       if (mode === "install") for (const entry of manifestEntries(runtime_root).filter(value => value.order < 30)) await db.executeScript(fs.readFileSync(entry.file, "utf8"));
-      const manifest = require("@drumee/server-runtime/schemas/SCHEMA_MANIFEST.json");
+      const manifest = JSON.parse(fs.readFileSync(path.join(runtime_root, "schemas/SCHEMA_MANIFEST.json"), "utf8"));
       const tables = await db.query("SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE()");
       const routines = await db.query("SELECT routine_name FROM information_schema.routines WHERE routine_schema=DATABASE()");
       if (manifest.objects.tables.some(name => !tables.some(row => row.table_name === name)) || [...manifest.objects.functions, ...manifest.objects.procedures].filter(name => name !== "get_remit").some(name => !routines.some(row => row.routine_name === name))) fail("INTRINSIC_SCHEMA_INVALID");
