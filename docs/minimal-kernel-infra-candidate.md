@@ -47,3 +47,8 @@ documentation commits. The candidate is ready for release review within this
 documented scope; publication still requires explicit approval and a fresh npm
 version-availability check. One unreproduced local Docker restart failure and
 the qualified profile's operational limits are disclosed in the ledger.
+
+Infra evidence-only branch HEAD is
+`94216fb59c83114ab97fff51dbfa36f63e2316f2`; the pinned shipped artifact remains
+the identical `ad8f2ba…` source/tarball above. The supporting original main
+checkout remains clean at `35fe3d0…`.

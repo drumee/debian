@@ -16,7 +16,8 @@
     "production_dependencies": 0,
     "published": false,
     "clean_source_tarball_identical": true,
-    "strict_typescript_installed_consumer": true
+    "strict_typescript_installed_consumer": true,
+    "evidence_branch_head": "94216fb59c83114ab97fff51dbfa36f63e2316f2"
   },
   "images": {
     "revision": "4a0efba6193912ce5b0487db51fb541ca79638d0",
@@ -267,7 +268,8 @@
       "drumee-schemas-init-1",
       "drumee-infra-init-1"
     ],
-    "host_resolver_firewall_trust_unchanged": true
+    "host_resolver_firewall_trust_unchanged": true,
+    "marker_verified_test_workspace_removed": true
   },
   "tap_suites": {
     "debian_profile_including_original_inventory": 15,
@@ -369,7 +371,8 @@
     "Docker filesystem byte-for-byte reproduction not asserted; pinned inputs, no-cache builds and immutable export verified.",
     "Backup retention is explicit policy metadata; no automatic deletion scheduler.",
     "Crashed exclusive locks and partial canonical DDL require owner investigation; no automatic takeover or identity repair.",
-    "One unreproduced local Docker restart failure is disclosed; final unchanged-source PTY run and independent remote run passed."
+    "One unreproduced local Docker restart failure is disclosed; final unchanged-source PTY run and independent remote run passed.",
+    "Private transitional source license declarations remain absent; notice/rights review is required before public distribution. Installed backbone.radio LICENSE supplies its MIT notice."
   ],
   "logs": {
     "automatic": {

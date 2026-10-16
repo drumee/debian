@@ -177,6 +177,14 @@ require explicit owner investigation; no stale-lock stealing, administrator
 repair or password recreation is implemented. No publication, permanent testbox
 installation or Oxymotion work occurred.
 
+The alignment manifest retains its inventory-only `release_qualified: false`
+contract; executed readiness is recorded here, not inferred from an inventory.
+Private transitional modules' absent license declarations are preserved rather
+than guessed; notice/rights review remains a prerequisite before public
+distribution. backbone.radio's installed LICENSE supplies its MIT notice despite
+the missing lock metadata. This is independent of the AGPL-licensed Infra
+candidate's verified package allowlist and license.
+
 ## Historical progress entries (superseded by final qualification above)
 
 ## Inspected baseline, 2026-10-15/16
