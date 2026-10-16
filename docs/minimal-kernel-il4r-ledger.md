@@ -1,6 +1,183 @@
 # IL-4R integration validation ledger
 
-Status: in progress; no release qualification or publication claimed.
+Status, 2026-10-16: **IL-4 — READY_FOR_RELEASE_REVIEW**. No publication or
+release tag. Qualified implementation source:
+`4a0efba6193912ce5b0487db51fb541ca79638d0`. Later evidence-only commits do not
+change the built profile. Machine-readable reports, image identities, sanitized
+SQL observations and log hashes are in
+[`minimal-kernel-il4r-evidence.json`](minimal-kernel-il4r-evidence.json).
+
+## Final checkpoint disposition
+
+| Checkpoint | Result and evidence |
+|---|---|
+| IL-4R.1 | Original 213 npm/71 source inventory retained; additive lock has 213 npm artifacts/93 verified source files. Runtime alpha.4, exact KB-01B and immutable Infra candidate source verified. |
+| IL-4R.2 | Explicit minimal container profile, drumee.lan/local DNS/persistent local CA, physical LAN validation, Nginx/BIND9/MariaDB/Redis, real runtime/control-plane/MFS/FileIo/LETC/Finder/Window Manager. Team remains default. |
+| IL-4R.3 | Canonical initialization and credential providers only; automatic and real-PTY interactive enrollment; no implicit Hub. Actual interruption, missing committed resource and concurrent resume preserve canonical state. |
+| IL-4R.4 | Six responsibilities separated: infrastructure administration plus schema/bootstrap/enrollment/provisioner/runtime accounts. Real positive and 16 unique negative SQL cases pass fresh and restored. |
+| IL-4R.5 | Existing drumee-ctl dispatch: plan/validate/install/status/doctor/start/stop/backup/restore/upgrade/rollback plus private credential retrieval. Explicit execute/ownership guards, JSON codes, canonical lifecycle. |
+| IL-4R.6 | Clean GitHub checkout, npm/source integrity verification, image builds, both enrollment modes, restart, cold backup and independent isolated restore pass without siblings or historical identity DBs. |
+| IL-4R.7 | testbox physical LAN 192.168.5.202, authoritative TCP/UDP DNS, strict HTTPS CA/SAN, real external Chromium, protocol/ACL/MFS/restart/restore pass. Owned projects cleaned; unrelated resources preserved. |
+| IL-4R.8 | Infra alpha.2 candidate packaged, installed-consumer/type/security/lifecycle tests pass; clean-source npm tarball reproduces identical SRI. Registry still has only alpha.1 as latest/next. Nothing published. |
+
+Infra source is `ad8f2baecb65e5e8782bb60fa92f1653bcc9f724`, **not** published
+alpha.1. Its candidate tarball has 39 allowlisted files, no production npm
+dependencies, and SRI
+`sha512-KuNELBJcKBA69RN65qoej4Wxw+lMN5NJO5d50ooHwydZMB90Rq42MyavDgOwpWqG12bPKjJKH0b01tvN17nsnw==`.
+See [candidate evidence](minimal-kernel-infra-candidate.md),
+[operator/clean installation guide](minimal-kernel-operator.md),
+[SQL matrix](minimal-kernel-sql.md) and [recovery guide](minimal-kernel-recovery.md).
+
+## Final validation counts
+
+Counts are separate; **no combined total** is claimed because coverage overlaps.
+All final selected runs below passed with zero reported skips.
+
+| TAP suite | Cases passed |
+|---|---:|
+| Debian profile (includes original inventory eight) | 15 |
+| Infra unit/security | 127 |
+| Infra gateway | 17 |
+| Infra native services | 17 |
+| Infra lifecycle | 16 |
+| KB-01B units / real MariaDB | 18 / 31 |
+| Published runtime source units / KB-01A real MariaDB | 56 / 16 |
+| Retained kernel/control-plane/runtime/capability regression | 85 |
+| Installed system-mfs units | 7 |
+| Exact pinned Finder source | 31 |
+
+The retained capability run of 68 is included in the 85; it is not added again.
+SQL TAP counts include their parent cases. Finder's installed npm tarball omits
+tests: its zero-test discovery is excluded; source revision
+`b46e2c94b615a1993b6162716d9e8965d0029564` actually executes 31 cases.
+
+Other validation: Debian shared suite **331 checks**, OCI archive security
+**five Python cases**, Infra HTTPS/jobs **four scenarios**, strict JSON Schema
+**three checks**, and strict NodeNext TypeScript installed-consumer compilation.
+ShellCheck is unavailable; shell syntax checks and the legacy suite ran. Heavy
+historical native/Team/WireGuard suites were not run for this explicit container
+profile. SMTP recovery is excluded, not represented by unrelated mail tests.
+
+| Real distribution run | Direct functional assertions | Browser assertions / scenarios | Stage groups | SQL denial cases |
+|---|---:|---:|---:|---:|
+| Clean automatic, enrollment interruption/concurrency | 260 | 24 / 3 | 11 fresh + 10 restart + 10 restore | 16 unique |
+| Clean interactive, real PTY | 254 | 24 / 3 | 11 + 10 + 10 | 16 unique |
+| testbox automatic, separate LAN browser client | 258 | external / 3 | 11 + 10 + 10 | 16 unique |
+
+PTY assertions execute in the Python subprocess and are not silently added to
+the JavaScript assertion count. SQL denial subprocess assertions are separate;
+repeating the same 16 after restore does not make 32 unique cases. Browser
+assertions and scenarios are separate measures. Remote acceptance covers the
+**14 named requirement criteria** recorded in the evidence JSON; it is not 14
+additional TAP cases. Fresh/restart browser access is direct over the physical
+LAN; restored access uses a scoped SSH tunnel to the deliberately loopback-only
+restoration. No LAN claim is made for that restored binding.
+
+All three final runs preserve administrator UID, operation ID, credential bytes,
+remit, reserved identities, Hub/MFS state and CA identity. Real authentication,
+authorized Hub creation and reader/outsider/cross-Hub denial pass. Binary chunks,
+FileIo/ZIP/Range, OTAK/Redis/WebSocket and normal email/password browser login
+pass. SQL metadata confirms no global application privileges, separate schema
+and provisioner DEFINERs, and INVOKER get_remit. Runtime cannot write remit,
+enrollment metadata, ACLs, SQL accounts, schemas, cookie/socket transport rows or
+unrelated databases. The provisioner is intentionally privileged inside the
+escaped Hub namespace; its database-level GRANT OPTION is explicitly documented.
+
+## Reproduction commands
+
+Run from a fresh Debian checkout with Node 22 and an authorized Docker account:
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund --prefix profiles/minimal-kernel
+node profiles/minimal-kernel/scripts/sources.js
+node profiles/minimal-kernel/scripts/verify.js
+node profiles/minimal-kernel/scripts/build.js
+node --test profiles/minimal-kernel/inventory.test.js profiles/minimal-kernel/test/*.test.js
+python3 tests/minimal-kernel/image-archive.test.py
+tests/run-all.sh
+IL4_INTERFACE=wlp3s0 IL4_LAN_ADDRESS=192.168.5.201 IL4_INTERRUPT=1 node tests/minimal-kernel/run.js
+IL4_INTERFACE=wlp3s0 IL4_LAN_ADDRESS=192.168.5.201 IL4_MODE=interactive node tests/minimal-kernel/run.js
+node profiles/minimal-kernel/scripts/export.js /owned-artifacts/minimal-kernel.tar.gz
+```
+
+The interface/address are explicit acceptance-host observations, not portable
+defaults. Archive SHA-256 for the qualified export:
+`d177af5c880993cbcc633dbb75d66dccf11400d50c9906f6a9b4b7f6c3f17203`.
+The receipt records both classic config IDs and portable OCI manifest references.
+Testbox verified that hash before loading; its clean checkout resolved the same
+213-artifact graph and 93 source files. Pinned official helper/base digests were
+pulled explicitly. No local sibling is needed by those commands.
+
+On the already approved owned testbox workspace, after current port/resource
+inspection and image verification:
+
+```sh
+IL4_IMAGES=/tmp/drumee-il4-testbox-6555f18/minimal-kernel-4a0efba.tar.gz.json \
+IL4_INTERFACE=wlp2s0 IL4_LAN_ADDRESS=192.168.5.202 \
+IL4_BIND_ADDRESS=192.168.5.202 IL4_HTTPS_PORT=443 IL4_DNS_PORT=53 \
+IL4_EXTERNAL_BROWSER_DIRECTORY=/tmp/drumee-il4-testbox-6555f18/browser \
+node tests/minimal-kernel/run.js
+# Separate LAN client, during that run:
+node tests/minimal-kernel/remote-browser.js /tmp/drumee-il4-testbox-6555f18/browser
+```
+
+Supporting repositories, at the revisions above:
+
+```sh
+# Infra Layer candidate, including fresh-clone repetition and packed consumer:
+npm ci --ignore-scripts --no-audit --no-fund
+npm test
+npm run test:integration
+npm run test:package
+npm pack --json
+# transient, canonical KB-01B:
+npm test --prefix target/control-plane/operator-bootstrap
+npm run test:integration --prefix target/control-plane/operator-bootstrap
+# Retained transient regression (85, including the earlier subset of 68):
+node --test target/control-plane/bootstrap/test/*.test.js target/control-plane/hub-lifecycle/test/*.test.js target/foundation/server-runtime/test/*.test.js target/modules/host-filesystem/test/*.test.js target/modules/mfs-service/test/*.test.js target/modules/mfs-transfer/test/*.test.js target/modules/media-service/test/*.test.js
+# Unchanged server-runtime source:
+npm test
+npm run test:platform:integration
+# Exact Finder source checkout:
+node --test test/*.test.js
+# Installed system-mfs, from the Debian profile:
+node --test node_modules/@drumee/system-mfs/test/*.test.js
+```
+
+The npm candidate reproduces byte-for-byte from a fresh remote source clone.
+Both image recipes also build without Docker cache. Pinned dependency/image
+inputs and integrity are established; Docker filesystem timestamp identity is
+not asserted across rebuilds.
+
+## Failures, exclusions and operational limits
+
+Earlier progress entries below remain historical evidence and are superseded
+by the final runs. They are not added into final counts. Corrected attempts
+include the schema import, canonical email sign-in, permission conversion,
+Team default rendering, immutable cross-store image references, isolated remote
+restore binding and MariaDB upsert column privileges. No runtime/control-plane
+identity or authorization workaround was added.
+
+One final local PTY attempt failed with DOCKER_LIFECYCLE_COMMAND_FAILED after
+Redis rotation at restart. The lifecycle returned no underlying child detail;
+historical Docker events were unavailable, so its cause is **unconfirmed**.
+Owned resources were cleaned. A credential-free diagnostic rerun of unchanged
+source completed all stages, as did independent final automatic and remote runs.
+This failed attempt remains disclosed; it is not counted as a passing run or
+hidden by weakening tests. An optional metadata observer missed a cleaned-up
+deployment; a separate canonical owned SQL probe captured the published grant
+observation without credentials or authentication hashes.
+
+Review limitations: explicit experimental container profile; no native minimal
+package claim; SMTP recovery excluded; no host trust/resolver/firewall changes;
+no automatic backup deletion scheduler or additional-account secret rotation;
+unqualified engine/schema/kernel transitions fail closed. Same-revision upgrade
+and rollback were exercised. Crashed exclusive locks and partial canonical DDL
+require explicit owner investigation; no stale-lock stealing, administrator
+repair or password recreation is implemented. No publication, permanent testbox
+installation or Oxymotion work occurred.
+
+## Historical progress entries (superseded by final qualification above)
 
 ## Inspected baseline, 2026-10-15/16
 

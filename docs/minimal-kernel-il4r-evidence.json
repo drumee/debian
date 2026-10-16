@@ -1,0 +1,444 @@
+{
+  "status": "READY_FOR_RELEASE_REVIEW",
+  "date": "2026-10-16",
+  "qualified_debian_source": "4a0efba6193912ce5b0487db51fb541ca79638d0",
+  "runtime": {
+    "version": "0.1.0-alpha.4",
+    "git_head": "f961f6214432c2e6dbbcde2b926544c076935950",
+    "integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ=="
+  },
+  "canonical_kb01b": "59985d4a78e142b64f5976cc7460a723cca29a79",
+  "infra_candidate": {
+    "version": "0.1.0-alpha.2",
+    "source": "ad8f2baecb65e5e8782bb60fa92f1653bcc9f724",
+    "integrity": "sha512-KuNELBJcKBA69RN65qoej4Wxw+lMN5NJO5d50ooHwydZMB90Rq42MyavDgOwpWqG12bPKjJKH0b01tvN17nsnw==",
+    "allowlisted_files": 39,
+    "production_dependencies": 0,
+    "published": false,
+    "clean_source_tarball_identical": true,
+    "strict_typescript_installed_consumer": true
+  },
+  "images": {
+    "revision": "4a0efba6193912ce5b0487db51fb541ca79638d0",
+    "alignment_sha256": "24d157c61dbbb456eeeafaca71a67e46de6a81e876487377158a15c25bf5d934",
+    "kernel": "drumee-minimal-kernel@sha256:522c2d56ca8372d2c03318dff5c3b931b54d67209315a8e6497c283af7c9f08b",
+    "tools": "drumee-minimal-tools@sha256:fb785a4f33c3f9b4ddec87463818e94fc86a81b15bcf41e661263d1aef4c52ae",
+    "tags": {
+      "kernel": "drumee-minimal-kernel:4a0efba6193912ce5b0487db51fb541ca79638d0",
+      "tools": "drumee-minimal-tools:ad8f2baecb65e5e8782bb60fa92f1653bcc9f724"
+    },
+    "owner": "drumee-il4-build-4a0efba6193912ce5b0487db51fb541ca79638d0",
+    "exported_images": {
+      "kernel": {
+        "reference": "drumee-minimal-kernel@sha256:522c2d56ca8372d2c03318dff5c3b931b54d67209315a8e6497c283af7c9f08b",
+        "manifest_digest": "sha256:522c2d56ca8372d2c03318dff5c3b931b54d67209315a8e6497c283af7c9f08b",
+        "config_digest": "sha256:254c6e84ebcff71415ffce2a95edb3ee6e364d7a58c63904f069f99e8899dde6",
+        "platform": "linux/amd64",
+        "layers": [
+          "sha256:e58989146fcec76699871403b9897b5c014af1ccd85f5a9300a215e7975525d7",
+          "sha256:4990a62cab1587a2ed690c9d4f41675b9216d68120e99033d664b558662e90c8",
+          "sha256:3714bbaf32038e259cddcddea09e13fc9aaa1a86a644274a6c6e263b00972240",
+          "sha256:f6becc1249c39a0f6d687460220dcfcf9f2a46d01770a70fc0a8ed4c98a6fd49",
+          "sha256:cae24708e29a74f04cc1ec51fc52e2d283c35f243ab21912e036095a2b50dbde",
+          "sha256:a71a9e5d986a49df83de137f93e58aa75549b7dd77f02a041b86cb00ea469610",
+          "sha256:dadba5d3aa86106581dee3b74b4900f70768693330738f6273719fa55a107e90",
+          "sha256:9910b594e60ab7503efc780ce910a5fd5adc64570b7f4e9d79be228b8cff164f",
+          "sha256:e5d4db8023a61e6d475d24f08cd30556c9a9a40da61245ad0390d6d7e51258e9",
+          "sha256:0c51303de8957ebd4361b4ff85c376859e83838b1edef8cff905d2332e000fc3",
+          "sha256:ba5f547ec6e2e30302a1997fbabc25c23e9f145c3e3e448b8acc52eb1bd8fa88",
+          "sha256:d06e0e52c15f739eecd8c4d8ac702a561d8d1dd5283c6c92ac64fdca3a98b025",
+          "sha256:614147080d1038708ae5519094da1ec304ab9b85c1527e97b1cd818760c2ef9a"
+        ]
+      },
+      "tools": {
+        "reference": "drumee-minimal-tools@sha256:fb785a4f33c3f9b4ddec87463818e94fc86a81b15bcf41e661263d1aef4c52ae",
+        "manifest_digest": "sha256:fb785a4f33c3f9b4ddec87463818e94fc86a81b15bcf41e661263d1aef4c52ae",
+        "config_digest": "sha256:93d08f7b2e9f6d8922b7a3f498dd9b16e633d8387d4a084b5136ab64370748f2",
+        "platform": "linux/amd64",
+        "layers": [
+          "sha256:81f823b9617547261c907396f63f770deaa554748ff739bedfa650e3bb74595a",
+          "sha256:46b7fea9ec8c24138e17a107e243745cc2304fb005f001bcb371ec79169db36f"
+        ]
+      }
+    },
+    "archive_sha256": "d177af5c880993cbcc633dbb75d66dccf11400d50c9906f6a9b4b7f6c3f17203"
+  },
+  "acceptance_runs": {
+    "automatic": {
+      "project": "drumee-il4-c49172f1",
+      "source_revision": "4a0efba6193912ce5b0487db51fb541ca79638d0",
+      "image_ids": {
+        "kernel": "sha256:254c6e84ebcff71415ffce2a95edb3ee6e364d7a58c63904f069f99e8899dde6",
+        "tools": "sha256:93d08f7b2e9f6d8922b7a3f498dd9b16e633d8387d4a084b5136ab64370748f2"
+      },
+      "mode": "automatic",
+      "initialization_interruption": true,
+      "sql_negative_cases": 16,
+      "stages": {
+        "fresh": {
+          "groups": 11,
+          "assertions": {
+            "functional": 78,
+            "browser": 8
+          }
+        },
+        "restart": {
+          "groups": 10,
+          "assertions": {
+            "functional": 73,
+            "browser": 8
+          }
+        },
+        "restore": {
+          "groups": 10,
+          "assertions": {
+            "functional": 73,
+            "browser": 8
+          }
+        }
+      },
+      "total_harness_assertions": {
+        "functional": 260,
+        "browser": 24
+      },
+      "browser_scenarios": 3,
+      "credential_preserved": true,
+      "ca_preserved": true,
+      "isolated_restore": true,
+      "https_port": 45051,
+      "dns_port": 37757,
+      "lan_address": "192.168.5.201"
+    },
+    "interactive": {
+      "project": "drumee-il4-e85201e1",
+      "source_revision": "4a0efba6193912ce5b0487db51fb541ca79638d0",
+      "image_ids": {
+        "kernel": "sha256:254c6e84ebcff71415ffce2a95edb3ee6e364d7a58c63904f069f99e8899dde6",
+        "tools": "sha256:93d08f7b2e9f6d8922b7a3f498dd9b16e633d8387d4a084b5136ab64370748f2"
+      },
+      "mode": "interactive",
+      "initialization_interruption": false,
+      "sql_negative_cases": 16,
+      "stages": {
+        "fresh": {
+          "groups": 11,
+          "assertions": {
+            "functional": 78,
+            "browser": 8
+          }
+        },
+        "restart": {
+          "groups": 10,
+          "assertions": {
+            "functional": 73,
+            "browser": 8
+          }
+        },
+        "restore": {
+          "groups": 10,
+          "assertions": {
+            "functional": 73,
+            "browser": 8
+          }
+        }
+      },
+      "total_harness_assertions": {
+        "functional": 254,
+        "browser": 24
+      },
+      "browser_scenarios": 3,
+      "credential_preserved": true,
+      "ca_preserved": true,
+      "isolated_restore": true,
+      "https_port": 46377,
+      "dns_port": 45287,
+      "lan_address": "192.168.5.201"
+    },
+    "remote": {
+      "project": "drumee-il4-3cbffde3",
+      "source_revision": "4a0efba6193912ce5b0487db51fb541ca79638d0",
+      "image_ids": {
+        "kernel": "drumee-minimal-kernel@sha256:522c2d56ca8372d2c03318dff5c3b931b54d67209315a8e6497c283af7c9f08b",
+        "tools": "drumee-minimal-tools@sha256:fb785a4f33c3f9b4ddec87463818e94fc86a81b15bcf41e661263d1aef4c52ae"
+      },
+      "mode": "automatic",
+      "initialization_interruption": false,
+      "sql_negative_cases": 16,
+      "stages": {
+        "fresh": {
+          "groups": 11,
+          "assertions": {
+            "functional": 81,
+            "browser": 0
+          }
+        },
+        "restart": {
+          "groups": 10,
+          "assertions": {
+            "functional": 76,
+            "browser": 0
+          }
+        },
+        "restore": {
+          "groups": 10,
+          "assertions": {
+            "functional": 76,
+            "browser": 0
+          }
+        }
+      },
+      "total_harness_assertions": {
+        "functional": 258,
+        "browser": 0
+      },
+      "browser_scenarios": 3,
+      "credential_preserved": true,
+      "ca_preserved": true,
+      "isolated_restore": true,
+      "https_port": 443,
+      "dns_port": 53,
+      "lan_address": "192.168.5.202"
+    }
+  },
+  "remote_criteria": [
+    {
+      "criterion": "BIND9 TCP/UDP authoritative DNS",
+      "passed": true
+    },
+    {
+      "criterion": "Correct physical LAN A record",
+      "passed": true
+    },
+    {
+      "criterion": "HTTPS actual CA and SAN verification",
+      "passed": true
+    },
+    {
+      "criterion": "Normal human administrator login",
+      "passed": true
+    },
+    {
+      "criterion": "Platform-authorized Hub creation",
+      "passed": true
+    },
+    {
+      "criterion": "Reader/outsider denial",
+      "passed": true
+    },
+    {
+      "criterion": "Cross-Hub/MFS isolation",
+      "passed": true
+    },
+    {
+      "criterion": "Binary uploads/downloads",
+      "passed": true
+    },
+    {
+      "criterion": "ZIP/Range/FileIo",
+      "passed": true
+    },
+    {
+      "criterion": "WebSocket/OTAK",
+      "passed": true
+    },
+    {
+      "criterion": "Finder/LETC/Window Manager in Chromium",
+      "passed": true
+    },
+    {
+      "criterion": "Persistent restart",
+      "passed": true
+    },
+    {
+      "criterion": "Isolated restoration",
+      "passed": true
+    },
+    {
+      "criterion": "Credential preservation",
+      "passed": true
+    }
+  ],
+  "remote_criteria_count": 14,
+  "remote_browser_scenarios": 3,
+  "remote_cleanup": {
+    "owned_projects_removed": true,
+    "unrelated_stopped_containers_preserved": [
+      "drumee-migrate-1",
+      "drumee-schemas-init-1",
+      "drumee-infra-init-1"
+    ],
+    "host_resolver_firewall_trust_unchanged": true
+  },
+  "tap_suites": {
+    "debian_profile_including_original_inventory": 15,
+    "infra_unit_security": 127,
+    "infra_gateway": 17,
+    "infra_native_services": 17,
+    "infra_lifecycle": 16,
+    "kb01b_unit": 18,
+    "kb01b_real_sql_including_parent_cases": 31,
+    "runtime_unit": 56,
+    "kb01a_real_sql_including_parent_case": 16,
+    "retained_kernel_controlplane_and_capabilities": 85,
+    "system_mfs": 7,
+    "finder_exact_source": 31
+  },
+  "other_suites": {
+    "debian_legacy_checks": 331,
+    "image_archive_python_security_cases": 5,
+    "infra_https_job_scenarios": 4,
+    "schema_validator_checks": 3
+  },
+  "counting_rules": [
+    "No grand total: suites overlap.",
+    "Retained capability 68 is included in retained kernel 85; do not add it.",
+    "Eight inventory cases are included in profile 15.",
+    "Fresh/restart/restore groups are stages, not unique test cases.",
+    "16 unique SQL denial cases are repeated after restore; not 32 unique cases.",
+    "Browser scenarios include asserted UI operations; do not add scenarios to assertions.",
+    "Remote 14 criteria map requirement coverage; they are not TAP tests.",
+    "Installed Finder tarball test discovery of zero is excluded; exact source ran 31 cases."
+  ],
+  "observed_sql": {
+    "global": "kernel_bootstrap\tN\tN\tN\tN\tN\tN\tN\tN\nkernel_enrollment\tN\tN\tN\tN\tN\tN\tN\tN\nkernel_provisioner\tN\tN\tN\tN\tN\tN\tN\tN\nkernel_runtime\tN\tN\tN\tN\tN\tN\tN\tN\nkernel_schema\tN\tN\tN\tN\tN\tN\tN\tN\n",
+    "tables": "kernel_bootstrap\typ\tdomain\tSelect,Insert\t\nkernel_bootstrap\typ\tdrumate\tSelect,Insert\t\nkernel_bootstrap\typ\tentity\tSelect,Insert\t\nkernel_bootstrap\typ\torganisation\tSelect,Insert,Create\t\nkernel_bootstrap\typ\tprivilege\tSelect,Insert\t\nkernel_bootstrap\typ\tsys_conf\tSelect,Insert\t\nkernel_enrollment\tmysql\tproc\tSelect\t\nkernel_enrollment\typ\tdomain\tSelect\t\nkernel_enrollment\typ\tdrumate\tSelect,Insert\tUpdate\nkernel_enrollment\typ\tentity\tSelect,Insert\t\nkernel_enrollment\typ\tinitial_operator_enrollment\tSelect,Update\t\nkernel_enrollment\typ\torganisation\tSelect\t\nkernel_enrollment\typ\tprivilege\tSelect,Insert\t\nkernel_enrollment\typ\tsys_conf\tSelect\t\nkernel_provisioner\typ\tcookie\tSelect\t\nkernel_provisioner\typ\tdomain\tSelect\t\nkernel_provisioner\typ\tdrumate\tSelect\t\nkernel_provisioner\typ\tentity\tSelect,Insert\tUpdate\nkernel_provisioner\typ\thub\tSelect,Insert\t\nkernel_provisioner\typ\thub_acl\tSelect,Insert,Delete\tUpdate\nkernel_provisioner\typ\thub_capability\tSelect,Insert\tUpdate\nkernel_provisioner\typ\thub_idempotency\tSelect,Insert\t\nkernel_provisioner\typ\thub_lifecycle\tSelect,Insert\tUpdate\nkernel_provisioner\typ\thub_plan\tSelect,Insert\tUpdate\nkernel_provisioner\typ\thub_schema_object\tSelect,Insert\t\nkernel_provisioner\typ\torganisation\tSelect\t\nkernel_provisioner\typ\tprivilege\tSelect\t\nkernel_provisioner\typ\tsys_conf\tSelect\t\nkernel_provisioner\typ\tsystem_mfs_installation\tSelect\t\nkernel_provisioner\typ\tsystem_mfs_provisioning\tSelect,Insert\tUpdate\nkernel_runtime\thub_715ed6ea715ed6ee\tmedia\tSelect\t\nkernel_runtime\thub_715ed6ea715ed6ee\tpermission\tSelect\t\nkernel_runtime\thub_717658c5717658ca\tmedia\tSelect\t\nkernel_runtime\thub_717658c5717658ca\tpermission\tSelect\t\nkernel_runtime\thub_71cd410771cd410b\tmedia\tSelect\t\nkernel_runtime\thub_71cd410771cd410b\tpermission\tSelect\t\nkernel_runtime\typ\tauthn\tSelect,Delete\t\nkernel_runtime\typ\tcookie\tSelect\t\nkernel_runtime\typ\tdomain\tSelect\t\nkernel_runtime\typ\tdrumate\tSelect\t\nkernel_runtime\typ\tentity\tSelect\t\nkernel_runtime\typ\thub\tSelect\t\nkernel_runtime\typ\thub_acl\tSelect\t\nkernel_runtime\typ\thub_capability\tSelect\t\nkernel_runtime\typ\thub_lifecycle\tSelect\t\nkernel_runtime\typ\thub_plan\tSelect\t\nkernel_runtime\typ\torganisation\tSelect\t\nkernel_runtime\typ\tprivilege\tSelect\t\nkernel_runtime\typ\tsocket\tSelect\t\nkernel_runtime\typ\tsys_conf\tSelect\t\nkernel_runtime\typ\tsystem_mfs_installation\tSelect\t\nkernel_runtime\typ\tsystem_mfs_provisioning\tSelect\t\n",
+    "databases": "kernel_provisioner\thub\\\\_%\tY\tY\tY\tY\tY\tY\tY\nkernel_schema\typ\tY\tY\tY\tY\tY\tY\tN\n",
+    "routines": "hub_715ed6ea715ed6ee\tkernel_provisioner@%\tDEFINER\t14\nhub_717658c5717658ca\tkernel_provisioner@%\tDEFINER\t14\nhub_71cd410771cd410b\tkernel_provisioner@%\tDEFINER\t14\nyp\tkernel_schema@%\tDEFINER\t10\nyp\tkernel_schema@%\tINVOKER\t1\n"
+  },
+  "observed_sql_columns": {
+    "global": [
+      "User",
+      "Select_priv",
+      "Insert_priv",
+      "Update_priv",
+      "Delete_priv",
+      "Create_priv",
+      "Drop_priv",
+      "Grant_priv",
+      "Create_user_priv"
+    ],
+    "tables": [
+      "User",
+      "Db",
+      "Table_name",
+      "Table_priv",
+      "Column_priv"
+    ],
+    "databases": [
+      "User",
+      "Db",
+      "Select_priv",
+      "Insert_priv",
+      "Update_priv",
+      "Delete_priv",
+      "Create_priv",
+      "Drop_priv",
+      "Grant_priv"
+    ],
+    "routines": [
+      "ROUTINE_SCHEMA",
+      "DEFINER",
+      "SECURITY_TYPE",
+      "COUNT"
+    ]
+  },
+  "final_failures": 0,
+  "executed_suite_skips": 0,
+  "not_executed": [
+    "ShellCheck unavailable; shell syntax and all legacy checks executed.",
+    "Heavy historical Team/native/WireGuard suites unrelated to this explicit container profile.",
+    "SMTP recovery qualification."
+  ],
+  "failed_attempts": [
+    "Early schema import, email sign-in and permission-converter integration errors corrected without upstream runtime changes.",
+    "Team schema defaults regression: nine aggregate failures corrected; final legacy 331/331.",
+    "Retry across changed frontend artifacts refused asset conflict; no identity or credential overwrite.",
+    "Docker classic config-ID versus containerd manifest-ID guard refused activation; verified portable OCI export corrects cross-store acquisition.",
+    "First remote restore refused non-loopback binding; test harness corrected to canonical loopback isolation.",
+    "Narrow provisioner policy first omitted MariaDB upsert key columns; exact INSERT/UPDATE union correction passed real SQL.",
+    "One final interactive attempt failed generic DOCKER_LIFECYCLE_COMMAND_FAILED after Redis rotation during restart. No child detail retained; credential-free diagnostic rerun passed complete unchanged-source acceptance. Historical Docker events unavailable; cause unconfirmed.",
+    "An optional SQL metadata observer missed the short-lived deployment and captured nothing; separate owned canonical probe captured metadata successfully."
+  ],
+  "limitations": [
+    "No npm/image publication or release tag.",
+    "No permanent testbox, host trust/resolver/firewall modification, or Oxymotion.",
+    "Minimal profile is explicit container distribution; existing Team/native channel remains unchanged.",
+    "SMTP excluded from qualified recovery profile.",
+    "Unqualified engine/schema/kernel transitions fail closed; same-revision upgrade/rollback verified.",
+    "Additional SQL-account credential rotation unsupported.",
+    "Docker filesystem byte-for-byte reproduction not asserted; pinned inputs, no-cache builds and immutable export verified.",
+    "Backup retention is explicit policy metadata; no automatic deletion scheduler.",
+    "Crashed exclusive locks and partial canonical DDL require owner investigation; no automatic takeover or identity repair.",
+    "One unreproduced local Docker restart failure is disclosed; final unchanged-source PTY run and independent remote run passed."
+  ],
+  "logs": {
+    "automatic": {
+      "path": "/tmp/drumee-il4-final-automatic.log",
+      "sha256": "9b956fd76d1b84b268e9782a15d4e2aebed9b061eefa1f3249cc6214949bc262"
+    },
+    "interactive": {
+      "path": "/tmp/drumee-il4-final-interactive-retry.log",
+      "sha256": "3ebc32d6bbeb7bb15b4c5705674122c7235e815d4c15966bd7956a29ea599580"
+    },
+    "remote": {
+      "path": "/tmp/drumee-il4-testbox-acceptance-final.log",
+      "sha256": "f008c1d03961a2b938932df8ae6938cf3a48154648cc53d558adfa47ee499526"
+    },
+    "remote_browser": {
+      "path": "/tmp/drumee-il4-testbox-browser-final.log",
+      "sha256": "d8bf2fada07a1badccd76341b4b45e9dc41a8f93c35465b796502bf3db67f08d"
+    },
+    "profile_tap": {
+      "path": "/tmp/drumee-il4-final-profile.log",
+      "sha256": "d12a7b28589655ecc7da32cc34830e2d1621cc45cdfbd87a9c2d1573117244f6"
+    },
+    "archive_security": {
+      "path": "/tmp/drumee-il4-final-archive-test.log",
+      "sha256": "464e0ee629edf74de09ef21e4232fbcedc26588ff7cc23c470f47fe2da88c255"
+    },
+    "legacy": {
+      "path": "/tmp/drumee-il4-final-legacy.log",
+      "sha256": "1960b8a18c8ec624658ed94eafe8773205900aafb3db6dedd9efc2295efea699"
+    },
+    "infra_unit": {
+      "path": "/tmp/drumee-il4-infra-unit.log",
+      "sha256": "013a6b559028840bf062659d5c45a0b187bf3a0c01f2c6a1e3a5721172d6deaa"
+    },
+    "infra_integration": {
+      "path": "/tmp/drumee-il4-infra-integration.log",
+      "sha256": "68c52e03e99a78efc13f22a04de673b5cf71ed18387459633d9e24d1906b312f"
+    },
+    "infra_package": {
+      "path": "/tmp/drumee-il4-infra-clean-package.log",
+      "sha256": "72d786dda404f0aa13b93c2e2f5191ec45bcd9a094354d57a40a8300eec16860"
+    },
+    "kb01b_unit": {
+      "path": "/tmp/drumee-il4-kb-unit.log",
+      "sha256": "84597cf54db6417cf86184ddbdae340869d30a5adb1b13167e0bcd5e8fc97416"
+    },
+    "kb01b_sql": {
+      "path": "/tmp/drumee-il4-kb-integration.log",
+      "sha256": "3bd8eaf7514896d7ec6b5864da841785bce9bdcc753efd5712b6797305d29761"
+    },
+    "runtime_unit": {
+      "path": "/tmp/drumee-il4-runtime-unit.log",
+      "sha256": "74bcf0e5c33766260576c379f68975fbfb8eeae11ed901a773644dd3b3a1426b"
+    },
+    "kb01a_sql": {
+      "path": "/tmp/drumee-il4-runtime-integration.log",
+      "sha256": "dbfbf6643e887cb0c623ced94f85f02fe72823d3c923fbda0274ff6a96439214"
+    },
+    "retained_kernel": {
+      "path": "/tmp/drumee-il4-kernel-regression.log",
+      "sha256": "fae7e183caaf4382b3722e15d26e74915192e70877809b629cb0736f2f28ecfb"
+    },
+    "system_mfs": {
+      "path": "/tmp/drumee-il4-system-mfs-unit.log",
+      "sha256": "93400326011c6177727be4759d4268f5bda6746ad7c0356e5fd495b491dbe7fe"
+    },
+    "finder_source": {
+      "path": "/tmp/drumee-il4-finder-source-unit.log",
+      "sha256": "d5a392e3300695eb0459e257a375e4ffc35b6c3b82ec86df62d441fa7c60cfbd"
+    }
+  }
+}

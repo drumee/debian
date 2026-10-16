@@ -46,7 +46,12 @@ Hub name), unrelated-schema SELECT/ALTER, SQL-account creation, global grant,
 runtime DDL, platform-remit writes, enrollment metadata access/modification and
 Hub ACL deletion. Separate HTTP tests verify readers/outsiders cannot provision
 Hubs and platform remit/Hub administration do not bypass unrelated MFS grants.
-See the IL-4R ledger for executed counts and remaining qualifications.
+See the IL-4R ledger for final counts and limitations. Its evidence JSON includes
+credential-free observations from mysql.user, mysql.db, mysql.tables_priv and
+information_schema.ROUTINES. All five application accounts have N in every
+observed global privilege column. Only the provisioner has a database-level
+Hub-namespace grant option; runtime has none. Observed intrinsic DEFINERs belong
+to kernel_schema, MFS DEFINERs to kernel_provisioner, and get_remit is INVOKER.
 
 The final source audit removes the older probe's unnecessary direct cookie and
 socket DML. Alpha.4's sole direct transport write is `OTAK_EXPIRE_QUERY`'s DELETE
