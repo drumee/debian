@@ -53,6 +53,9 @@ socket DML. Alpha.4's sole direct transport write is `OTAK_EXPIRE_QUERY`'s DELET
 from authn; all other writes execute the canonical DEFINER routines. The private
 provisioner needs only SELECT-based session resolution and the canonical
 session_ensure compatibility routine. Its Yellow Page UPDATE column sets are
-derived from SqlHubStore and SqlMfsStore statements. This policy is recorded as
+derived from SqlHubStore and SqlMfsStore statements. MariaDB's upsert privilege
+checks require the INSERT/UPDATE column union, including inserted key/time
+columns in hub_acl and hub_capability; real-MariaDB qualification covers this.
+This policy is recorded as
 `il4-sql-roles-1` in job artifacts and schema compatibility; older unqualified
 projection backups cannot be silently adopted under this policy.

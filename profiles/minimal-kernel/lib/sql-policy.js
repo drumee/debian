@@ -43,7 +43,9 @@ function grants(stage, tables) {
   }
   if (tables.includes("hub_lifecycle")) {
     for (const name of hub_tables) table(name, "SELECT,INSERT", "provisioner");
-    for (const [name, columns] of Object.entries({ entity: "status,mtime", hub_lifecycle: "state,error_code,mtime", hub_acl: "privilege,granted_by,mtime", hub_plan: "status,plan_cursor,error_code,mtime", hub_capability: "plan_id,target_version,artifact_ref,status,attempt,error_code,mtime,applied_version", system_mfs_provisioning: "root_id,status,error_code,mtime" })) if (tables.includes(name)) grant("UPDATE (" + columns + ")", "yp.`" + name + "`", "provisioner");
+    // MariaDB checks INSERT targets too for ON DUPLICATE KEY UPDATE, including
+    // key/time columns. Include the canonical INSERT/UPDATE union for upserts.
+    for (const [name, columns] of Object.entries({ entity: "status,mtime", hub_lifecycle: "state,error_code,mtime", hub_acl: "hub_id,uid,privilege,granted_by,ctime,mtime", hub_plan: "status,plan_cursor,error_code,mtime", hub_capability: "hub_id,module_id,plan_id,target_version,artifact_ref,status,attempt,error_code,mtime,applied_version", system_mfs_provisioning: "root_id,status,error_code,mtime" })) if (tables.includes(name)) grant("UPDATE (" + columns + ")", "yp.`" + name + "`", "provisioner");
     table("hub_acl", "DELETE", "provisioner");
     table("entity", "INSERT", "provisioner");
     grant("CREATE,ALTER,DROP,INDEX,CREATE ROUTINE,ALTER ROUTINE,EXECUTE,SELECT,INSERT,UPDATE,DELETE", "`hub\\_%`.*", "provisioner");
