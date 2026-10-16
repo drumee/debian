@@ -30,10 +30,10 @@ function build(input) {
     let tools;
     if (input.tools) {
       const source = path.join(profile, "node_modules/@drumee/infra-layer"), tools_tag = "drumee-minimal-application-tools:" + revision.slice(0, 16);
-      run("docker", ["build", "--label", "org.opencontainers.image.source=https://github.com/drumee/infra-layer", "--label", "org.opencontainers.image.revision=cf4ac5735f7ec0d48e48a9a752951f77f7284c74", "-f", path.join(source, "capabilities/docker/Dockerfile.services"), "-t", tools_tag, source], { stdio: "inherit" });
+      run("docker", ["build", "--label", "org.opencontainers.image.source=https://github.com/drumee/infra-layer", "--label", "org.opencontainers.image.revision=c6ef6e9b8d33921ffa39c289490067adfc63a8b0", "-f", path.join(source, "capabilities/docker/Dockerfile.services"), "-t", tools_tag, source], { stdio: "inherit" });
       tools = { tag: tools_tag, image: run("docker", ["image", "inspect", tools_tag, "--format", "{{.Id}}"] ).trim() };
     }
-    const receipt = { revision, runtime: { version: "0.1.0-alpha.4", integrity: runtimeSRI }, infrastructure: { revision: "cf4ac5735f7ec0d48e48a9a752951f77f7284c74", integrity: lock.packages["node_modules/@drumee/infra-layer"].integrity }, image, tag, plugins, artifacts, ...(tools ? { tools } : {}) };
+    const receipt = { revision, runtime: { version: "0.1.0-alpha.4", integrity: runtimeSRI }, infrastructure: { revision: "c6ef6e9b8d33921ffa39c289490067adfc63a8b0", integrity: lock.packages["node_modules/@drumee/infra-layer"].integrity }, image, tag, plugins, artifacts, ...(tools ? { tools } : {}) };
     fs.mkdirSync(path.join(profile, ".cache"), { recursive: true }); fs.writeFileSync(path.join(profile, ".cache/images.json"), JSON.stringify(receipt, null, 2), { mode: 0o600 }); return receipt;
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 }

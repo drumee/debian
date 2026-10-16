@@ -39,7 +39,7 @@ node profiles/minimal-application/scripts/build.js /owned/artifacts/build-input.
 
 Production npm dependency is only published Runtime alpha.4; its SRI is verified
 against the lock. Infra Layer is a development/operator dependency pinned to
-immutable source `cf4ac5735f7ec0d48e48a9a752951f77f7284c74`, with archive SRI in
+immutable source `c6ef6e9b8d33921ffa39c289490067adfc63a8b0`, with archive SRI in
 the lock. Published alpha.2 does not implement this new application contract.
 No sibling source tree or local file dependency is required by npm ci.
 
