@@ -1,0 +1,109 @@
+{
+  "distribution": {
+    "profile": "minimal-application"
+  },
+  "deployment": {
+    "id": "application-example",
+    "project": "application-example",
+    "owner_uid": 1000,
+    "owner_gid": 1000,
+    "acceptance": false
+  },
+  "storage": {
+    "root": "/owned/drumee/application",
+    "backup_location": "/owned/drumee/application-backups",
+    "retention_days": 14
+  },
+  "infrastructure": {
+    "spec": {
+      "contract_version": "2",
+      "instance": {
+        "id": "application-example"
+      },
+      "dns": {
+        "mode": "none"
+      },
+      "http": {
+        "enabled": false,
+        "https": false
+      },
+      "secrets": {
+        "store_resource": "application-secrets",
+        "resources": []
+      }
+    },
+    "requirements": {
+      "contract_version": "2",
+      "capabilities": []
+    },
+    "adapter_input": {
+      "kind": "docker-services",
+      "project": "application-example",
+      "network": "application-example-application",
+      "services": {},
+      "resource_sources": []
+    }
+  },
+  "manifest": {
+    "contract_version": "1",
+    "id": "minimal-application",
+    "profile": "application",
+    "helper_image": "node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+    "init_jobs": [],
+    "schema_versions": {},
+    "external_writers": "none",
+    "persistent_resources": [
+      {
+        "id": "operator-state",
+        "source": "/owned/drumee/application/durable/operator-state",
+        "uid": 1000,
+        "gid": 1000,
+        "backup_required": true
+      }
+    ],
+    "provenance": {
+      "repository": "https://github.com/drumee/debian",
+      "revision": "0000000000000000000000000000000000000000",
+      "path": "profiles/minimal-application",
+      "acceptance": "real-application"
+    },
+    "application": {
+      "id": "application",
+      "image": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "uid": 1000,
+      "gid": 1000,
+      "command": [
+        "node",
+        "/app/host.js"
+      ],
+      "plugins": [],
+      "listener_ports": [
+        3101
+      ],
+      "requires": [],
+      "mounts": [],
+      "secret_mounts": [],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "/app/health.js"
+        ],
+        "interval": "2s",
+        "timeout": "2s",
+        "retries": 10
+      }
+    },
+    "external_gateway": {
+      "kind": "host-loopback",
+      "protocol": "http",
+      "host_address": "127.0.0.1",
+      "host_port": 28971,
+      "container_port": 3101,
+      "route_prefix": "/-/",
+      "rpc_prefix": "/-/svc/",
+      "tls_termination": "external",
+      "readiness_path": "/-/svc/health.ready"
+    }
+  }
+}

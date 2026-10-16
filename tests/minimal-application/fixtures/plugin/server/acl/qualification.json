@@ -1,0 +1,9 @@
+{
+  "modules": { "public": "worker", "private": "worker" },
+  "services": {
+    "ping": { "scope": "domain", "permission": { "src": 0, "fast_check": "public-api" } },
+    "write": { "scope": "domain", "permission": { "src": 0, "fast_check": "public-api" } },
+    "smtp_probe": { "scope": "domain", "permission": { "src": 0, "fast_check": "public-api" } },
+    "denied": { "scope": "domain", "permission": { "src": 1 } }
+  }
+}

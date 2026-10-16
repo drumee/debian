@@ -1,0 +1,9 @@
+{
+  "name": "@drumee/minimal-application-qualification-fixture",
+  "version": "0.0.0-il5",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "files": ["server/"],
+  "dependencies": { "nodemailer": "10.1.1" },
+  "bundledDependencies": ["nodemailer"]
+}
