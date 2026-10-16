@@ -44,6 +44,7 @@ async function interruptedInitialization(file, cfg) {
 function clean(prepared) {
   assert.match(prepared.project, /^drumee-il4-[a-f0-9]{8}(?:-restored)?$/);
   driver.inspectProject(prepared.project, Object.keys(prepared.compose.services));
+  driver.checkNetworks(prepared.composition);
   const owner = JSON.parse(fs.readFileSync(path.join(prepared.root, "deployment-owner.json")));
   assert.equal(owner.project, prepared.project); assert.equal(owner.uid, process.getuid());
   driver.compose(prepared, ["down"]);

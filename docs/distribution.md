@@ -4,6 +4,16 @@ Status: design agreed, implementation pending.
 Scope: container channel, Debian 13 Trixie only. The native channel is frozen
 — neither removed nor maintained — for the duration of this transition.
 
+IL-4R adds an explicitly selected minimal-kernel container qualification profile
+under `profiles/minimal-kernel`, documented in
+[its operator guide](minimal-kernel-operator.md). It consumes immutable npm/source
+artifacts and builds the pinned kernel/Infra Layer tools images inherited from
+the approved IL-3 baseline (Node 22/Bookworm and MariaDB 11.4). This is an explicit
+experimental packaging extension, separate from the historical Team role/.deb
+train described below. It uses the existing drumee-ctl dispatcher and canonical
+Infra Layer lifecycle; it does not create a competing installer or change Team's
+APT package dependencies, role composition, release train or native channel.
+
 This document is normative. Where it contradicts `ROADMAP.md` or any other
 document, this one wins.
 

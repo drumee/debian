@@ -29,6 +29,22 @@ and alignment digest in `profiles/minimal-kernel/.cache/images.json`. This is
 dependency/provenance reproducibility; byte-for-byte Docker filesystem/timestamp
 reproducibility is not asserted. No image is published by this command.
 
+For transfer between Docker image-store implementations, use the portable export
+(Python 3 is required on the export host):
+
+```sh
+node profiles/minimal-kernel/scripts/export.js /owned-artifacts/minimal-kernel.tar.gz
+```
+
+This saves explicit build tags, hashes every OCI blob, verifies manifest/config/
+uncompressed-layer identity and source/alignment labels, and writes a protected
+`.tar.gz.json` receipt containing portable repository@manifest-digest references.
+Classic Docker's local config ID and containerd's manifest ID can differ for the
+same verified image. On the destination, verify the whole archive SHA-256, load
+it, and use the portable receipt's immutable kernel/tools references. Pull the
+already pinned official base/helper digests there as needed. Never replace a
+failed image-ID check with an unverified tag or disable the Infra Layer guard.
+
 ## Configure and install
 
 Copy `config/drumee.minimal-kernel.example.yaml` to the deployment's

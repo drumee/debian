@@ -114,5 +114,5 @@ async function run(opts) {
   if (!state.ready) fail("MINIMAL_APPLICATION_NOT_READY");
   return { ...state, credential_resource: path.join(cfg.storage.root, "durable/operator-state/credential.json"), retrieval: "Use drumee-ctl --profile minimal-kernel credential --execute with this config at a private controlling TTY." };
 }
-if (require.main === module) run(options(process.argv.slice(2))).then(value => { console.log(JSON.stringify(value, null, 2)); if (value.ready === false || value.valid === false) process.exitCode = 1; }).catch(error => { console.error(JSON.stringify({ code: /^[A-Z0-9_]+$/.test(error.code || "") ? error.code : "MINIMAL_OPERATION_FAILED", diagnostics: Array.isArray(error.diagnostics) ? error.diagnostics : undefined })); process.exitCode = 1; });
+if (require.main === module) Promise.resolve().then(() => run(options(process.argv.slice(2)))).then(value => { console.log(JSON.stringify(value, null, 2)); if (value.ready === false || value.valid === false) process.exitCode = 1; }).catch(error => { console.error(JSON.stringify({ code: /^[A-Z0-9_]+$/.test(error.code || "") ? error.code : "MINIMAL_OPERATION_FAILED", diagnostics: Array.isArray(error.diagnostics) ? error.diagnostics : undefined })); process.exitCode = 1; });
 module.exports = { options, load, run, owner, assets };

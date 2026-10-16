@@ -28,6 +28,8 @@ test("operator parser admits protected descriptors and requires explicit mutatio
   const { options, run } = require("../operator");
   assert.equal(options(["install", "--password-fd", "3", "--execute"]).password_fd, 3);
   assert.throws(() => options(["install", "--password", "never-a-cli-secret"]), { code: "MINIMAL_CLI_USAGE" });
+  const rejected = require("node:child_process").spawnSync(process.execPath, [require.resolve("../operator"), "install", "--password", "never-a-cli-secret"], { encoding: "utf8" });
+  assert.equal(rejected.status, 1); assert.deepEqual(JSON.parse(rejected.stderr), { code: "MINIMAL_CLI_USAGE" }); assert.equal(rejected.stdout, "");
   const directory = fs.mkdtempSync("/tmp/drumee-il4-cli-test-");
   try {
     const cfg = configuration(), file = directory + "/config.yaml";
