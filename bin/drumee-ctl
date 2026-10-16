@@ -16,6 +16,13 @@
 # the pm2 process wrapper (start/stop/restart/log).
 set -euo pipefail
 
+# Explicit profile dispatch precedes legacy detection; Team remains the default.
+if [ "${1:-}" = --profile ]; then
+  [ "${2:-}" = minimal-kernel ] || { echo 'error: unsupported profile' >&2; exit 1; }
+  shift 2
+  exec node "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/profiles/minimal-kernel/operator.js" "$@"
+fi
+
 DRUMEE_DIR="${DRUMEE_DIR:-.}"
 log()  { printf '\033[1;36m==>\033[0m %s\n' "$*"; }
 ok()   { printf '  \033[1;32mOK\033[0m   %s\n' "$*"; }
