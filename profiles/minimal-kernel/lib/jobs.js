@@ -50,7 +50,7 @@ async function run(job, mode) {
       const material = operator.retrieveInitialCredential({ file: "/operator-state/credential.json", authorization: { authorized: true, scope: "retrieve-initial-credential", operation_id: options.operation_id } });
       try {
         const { sessions, yellow_page } = components(db), session = await sessions.fromRequest({ headers: {} });
-        await session.signin({ uid: material.username, password: material.password.toString("utf8") });
+        await session.signin({ uid: material.email, password: material.password.toString("utf8") });
         if (!(await new runtime.PlatformAuthorizer({ store: yellow_page }).authorize({ session, permission: { scope: "platform", src: "PLATFORM_ADMINISTRATOR" } })).granted) fail("INITIAL_OPERATOR_AUTHENTICATION_FAILED");
       } finally { material.password.fill(0); }
     } else fail("INITIALIZATION_JOB_UNKNOWN");

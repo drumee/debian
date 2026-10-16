@@ -11,7 +11,7 @@ async function build() {
   }));
   const metadata = JSON.parse(fs.readFileSync(path.join(plugin, "index.json")));
   // Runtime plugin resolution consumes the actual ui-build entry metadata.
-  fs.writeFileSync(path.join(output, "index.html"), '<!doctype html><meta charset="utf-8"><title>Drumee</title><form id="login"><label>Username <input name="username" autocomplete="username" required></label><label>Password <input name="password" type="password" autocomplete="current-password" required></label><button>Sign in</button></form><p id="message"></p><div id="workspace"></div><script src="/bootstrap.js"></script>');
+  fs.writeFileSync(path.join(output, "index.html"), '<!doctype html><meta charset="utf-8"><title>Drumee</title><form id="login"><label>Email <input name="username" type="email" autocomplete="username" required></label><label>Password <input name="password" type="password" autocomplete="current-password" required></label><button>Sign in</button></form><p id="message"></p><div id="workspace"></div><script src="/bootstrap.js"></script>');
   fs.writeFileSync(path.join(output, "bootstrap.js"), `(async()=>{const r=await fetch('/-/svc/bootstrap.plugin?name=finder');const p=await r.json();if(!r.ok)throw Error('PLUGIN_RESOLUTION_FAILED');const s=document.createElement('script');s.src=p.data.path;document.head.append(s)})().catch(()=>{document.body.dataset.error='BOOTSTRAP_FAILED'});\n`);
   console.log("BROWSER_BUILD_VALID " + metadata.hash);
 }

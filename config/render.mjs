@@ -123,9 +123,10 @@ function parseScalar(s, line) {
 }
 
 // --------------------------------------------------------- defaults + validate
-const SCHEMA = JSON.parse(
+const SCHEMA_DOCUMENT = JSON.parse(
   readFileSync(new URL('./drumee.schema.json', import.meta.url), 'utf8'),
 );
+const SCHEMA = SCHEMA_DOCUMENT.$defs?.team || SCHEMA_DOCUMENT;
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 function applyDefaults(cfg) {
