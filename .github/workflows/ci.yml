@@ -18,8 +18,9 @@ jobs:
           done < <(git ls-files '*.sh' 'bin/*' | grep -v '/src/')
           exit $fail
       - name: ShellCheck
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca
         with:
+          version: v0.11.0
           severity: warning
           ignore_paths: builder/src target
 
@@ -45,7 +46,18 @@ jobs:
           apt-get install -y --no-install-recommends git ca-certificates
       - uses: actions/checkout@v4
       - name: Packaging invariants (scripts/check-packaging.sh)
-        run: scripts/check-packaging.sh
+        working-directory: ${{ github.workspace }}
+        run: |
+          # Checkout trusts this mount in its temporary HOME only. The root
+          # job container must also trust the exact runner-owned workspace.
+          git --version
+          pwd
+          id
+          stat -c '%u:%g %n' "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/.git"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git rev-parse --show-toplevel
+          git ls-files --error-unmatch scripts/check-packaging.sh
+          scripts/check-packaging.sh
 
   # One comprehensive suite: render + compose validity + config smoke + the
   # installer wizard (render-only) + native packaging metadata + version drift.
