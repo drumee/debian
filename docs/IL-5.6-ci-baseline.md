@@ -35,6 +35,7 @@ hashes and initial job IDs/versions; normalized diagnostics contain no credentia
 | Packaging CA package | 20250419 |
 | Lint Git on hosted runner | 2.55.0 (not involved in ShellCheck analysis) |
 | Host Git used to make isolated clones | 2.39.5 |
+| Host Bash/find used for both ShellCheck replays | 5.2.15 / GNU findutils 4.9.0 |
 
 Both read-only clones use the same Trixie tool image
 `sha256:e40111e22399124db7cb569e5769be32eaccf3f8f1415bf31f11ce1f37139fab`.
@@ -77,7 +78,7 @@ with level/message retained. Both SHA256:
 The scan inventory, grouped codes and zero-delta evidence are in the comparison JSON.
 
 Examples explicitly verified on both trees: tests/config-parity.sh SC1087,
-admin/build.sh SC2034/SC2089/SC2090, meta/build.sh SC2034, schemas/build.sh
+admin/build.sh SC2034/SC2089/SC2090, meta/build.sh SC2045, schemas/build.sh
 SC2034/SC2045, schemas-patch/build.sh SC2034/SC2166/SC2045 and
 schemas-patch/bin/patch-from-manifest.sh SC2037/SC2046/SC2154/SC2155/SC2164.
 Other repeated debt includes missing shell declarations (SC2148), `ls` iteration
@@ -107,7 +108,9 @@ Adding only `safe.directory=$GITHUB_WORKSPACE` to the job's actual global config
 makes Git/listing succeed and reaches all 12 invariants. A separately mounted
 neighbor repository remains untrusted (Git exit 128), proving no wildcard trust
 or disabled ownership protection. Both corrected outputs are byte-identical.
-Actual hosted UID/stat observations will be retained from the corrective job.
+The corrective hosted job confirms worktree owner 1001:1001, .git owner 0:0
+and uid 0 execution; it reaches the same baseline findings. See the stabilization
+report for exact logs and job conclusions.
 
 ## Reproduction and ownership boundaries
 

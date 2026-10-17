@@ -10,6 +10,12 @@
       "lint": "failure (91 diagnostics)",
       "suite": "success",
       "minimal-application-contract": "success"
+    },
+    "job_ids": {
+      "packaging": 117198883591,
+      "lint": 117198884048,
+      "suite": 117198883970,
+      "minimal-application-contract": 117198884112
     }
   },
   "versions": {
@@ -25,7 +31,9 @@
     "trixie": "debian:trixie-slim@sha256:020c0d20b9880058cbe785a9db107156c3c75c2ac944a6aa7ab59f2add76a7bd",
     "local_tools_image": "sha256:e40111e22399124db7cb569e5769be32eaccf3f8f1415bf31f11ce1f37139fab",
     "local_tools_git": "2.47.3 (1:2.47.3-0+deb13u1)",
-    "local_tools_ca": "20250419"
+    "local_tools_ca": "20250419",
+    "local_shellcheck_driver_bash": "5.2.15",
+    "local_shellcheck_driver_find": "4.9.0"
   },
   "shellcheck": {
     "baseline": {

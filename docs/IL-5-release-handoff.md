@@ -1,6 +1,10 @@
 # IL-5 release and integration handoff
 
-Status: **READY_FOR_TECHNICAL_REVIEW**. No merge or publication authorization is
+Current status after IL-5.6: **READY_FOR_MERGE_WITH_BASELINE_DEBT**.
+See [CI stabilization](IL-5.6-ci-stabilization.md) and
+[baseline comparison](IL-5.6-ci-baseline.md).
+
+Historical IL-5.0–5 status: **READY_FOR_TECHNICAL_REVIEW**. No merge or publication authorization is
 implied. The selected evidence is in [qualification](IL-5-qualification.md).
 
 ## Review branches and integration order
@@ -140,3 +144,28 @@ Testbox still has only the three previously observed stopped historical
 initialization containers; no IL-5 service/resource was installed there. Build
 images and the local npm archive are retained as explicitly identified review
 artifacts. The cleanroom worktree remains clean.
+
+## IL-5.6 CI follow-up (2026-10-17)
+
+The earlier local qualification and failed-attempt evidence above remain intact.
+The initial hosted run exposed a packaging Git ownership/context failure and
+91 ShellCheck findings. Identical-tool baseline comparison now proves zero IL-5
+ShellCheck regressions (20 errors/71 warnings, 39 files, 121 paths). The minimal
+workflow correction trusts only its exact mounted workspace in the actual job
+HOME and pins the already-qualified ShellCheck action/version without changing
+severity, scope or exits. Packaging itself is unchanged.
+
+Corrective CI [39013263757](https://github.com/drumee/debian/actions/runs/39013263757)
+on `1b1480dd8ec15c92442ed2208d36c3904ec36b4f` completes: application-contract and
+suite SUCCESS; packaging FAILURE with exactly baseline 10 passes/2 failures and
+no fatal Git context; lint FAILURE with exactly the baseline diagnostics. These
+are actual failing GitHub conclusions, not waived successes. Local revalidation
+passes 5 application TAP, 8 Python archive cases, 15 minimal-kernel TAP and 331
+shared checks. Infra Layer HEAD remains de4b34e and its previous qualification is
+reused; no contract/distribution/secret/network/SMTP behavior changed.
+
+The two remaining historical debt packages belong to drumee/debian maintainers:
+DEB-CI-DEBT-01 (legacy image packaging compliance) and DEB-CI-DEBT-02 (legacy
+shell/build hardening), defined in the stabilization report. Maintainers must
+explicitly assess that debt and any required branch checks before integration.
+Infra Layer precedes Debian; no automatic merge, publication or D0 is performed.
