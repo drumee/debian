@@ -1,0 +1,134 @@
+{
+  "status": "READY_FOR_TECHNICAL_REVIEW",
+  "raw_logs": "local-only; not shipped; hashes preserve selected evidence",
+  "logs": {
+    "infra_unit": {
+      "file": "/tmp/drumee-il5-infra-unit-real.log",
+      "sha256": "36b151b6c777d6d8b2b26289e38602a773fcd7c064c4512f69cca6a608b2e9db"
+    },
+    "infra_integration_initial_mixed": {
+      "file": "/tmp/drumee-il5-infra-regressions.log",
+      "sha256": "5879aa9389cd9d90f589684572a206e18eabb798b3fccd2c09dd039997969e15"
+    },
+    "infra_lifecycle_selected_serial": {
+      "file": "/tmp/drumee-il5-infra-lifecycle-serial.log",
+      "sha256": "cd7300f61a60505b0588bc9e676983678720fed45897f9cf9c1f4246950a6f8f"
+    },
+    "infra_https_jobs": {
+      "file": "/tmp/drumee-il5-infra-https-regression.log",
+      "sha256": "31e3fc59300da63a7024693c9acb31d9804dc90f199dc0ab6f9e78e5ce392454"
+    },
+    "infra_application": {
+      "file": "/tmp/drumee-il5-infra-application-final.log",
+      "sha256": "29cc47e63b9fd824700de8ae61c12195e432a58519a49f01579edcf7f01d22d1"
+    },
+    "infra_installed_consumer": {
+      "file": "/tmp/drumee-il5-installed-consumer-final.log",
+      "sha256": "1ad541e19590580c9878e515311d9b1396804df6ff01c7854e3d857dd4ad1fb0"
+    },
+    "infra_package_allowlist": {
+      "file": "/tmp/drumee-il5-package-allowlist-final.log",
+      "sha256": "034d637a55d7017e2738178ac136edad19d70d0c0c8b5e486562ca7dd228ece0"
+    },
+    "debian_application_units": {
+      "file": "/tmp/drumee-il5-debian-profile-final.log",
+      "sha256": "3aab368fe5157c50edfc3ff3c24ff9f2f5d1ff5d38ea6e55ab8f2493e6a731ad"
+    },
+    "debian_plugin_security": {
+      "file": "/tmp/drumee-il5-plugin-security-final.log",
+      "sha256": "27fbc3ba583102c1482e7f4d6a4da0ed795c32a432e6acc2d4e89257347ab270"
+    },
+    "debian_legacy": {
+      "file": "/tmp/drumee-il5-debian-regressions-real.log",
+      "sha256": "1960b8a18c8ec624658ed94eafe8773205900aafb3db6dedd9efc2295efea699"
+    },
+    "debian_kernel_units": {
+      "file": "/tmp/drumee-il5-kernel-unit-real.log",
+      "sha256": "25efe6b130daf31918ebd650049387447d14d19687b8860805c2aaeb29497e45"
+    },
+    "debian_kernel_real": {
+      "file": "/tmp/drumee-il5-kernel-regression.log",
+      "sha256": "4e9ff0dace54f03faeeb2c62102ddd061c5bd4f39a5652c147eea71bfc4b17ed"
+    },
+    "runtime_units": {
+      "file": "/tmp/drumee-il5-runtime-unit-real.log",
+      "sha256": "47bcb7de01745bdcf4756a09f948427b3cb5f050d51dd7a794bc789a27119f85"
+    },
+    "cleanroom_acquisition": {
+      "file": "/tmp/drumee-il5-cleanroom-final-ci.log",
+      "sha256": "b4e9878d06fe0e72d07576e67f0d436f3d57cfa954b0ebec97ead6826f86f563"
+    },
+    "cleanroom_build": {
+      "file": "/tmp/drumee-il5-final-cleanroom-build.log",
+      "sha256": "f34788c0a27cc4f4d7dc4f235b0e2f34aaab16ef051c917c7aef967f377fa9ad"
+    },
+    "cleanroom_rebuild": {
+      "file": "/tmp/drumee-il5-final-cleanroom-rebuild.log",
+      "sha256": "3e3f7c5d6d985f2e9a3ad7521e51f74d0fc05604a80236449884c79d385491ee"
+    },
+    "cleanroom_acceptance": {
+      "file": "/tmp/drumee-il5-final-cleanroom-acceptance.log",
+      "sha256": "1e63888fdbc2ad2c50197d85a3a73af50cd1c70dc2857efacbea474e81614cbd"
+    },
+    "packaging_final": {
+      "file": "/tmp/drumee-il5-packaging-gate.log",
+      "sha256": "e617b3d0b6f5e8ffb3c1a6ca5b8e330b0a9198c87611b20fe8e02d85bdcc6f55"
+    },
+    "packaging_baseline": {
+      "file": "/tmp/drumee-il5-packaging-baseline.log",
+      "sha256": "9f9dafaa91b12fe6a7f5eb3a5e7d8593f11ffb743dfac4d3a710d43ce6093e0a"
+    }
+  },
+  "excluded_initial_attempts": [
+    "sandbox tests",
+    "initial application harness attempts",
+    "first 15/16 lifecycle run"
+  ],
+  "tap": {
+    "infra_units": 141,
+    "infra_gateway": 17,
+    "infra_services": 17,
+    "infra_lifecycle": 16,
+    "debian_application": 5,
+    "debian_kernel": 15,
+    "runtime": 56
+  },
+  "other": {
+    "debian_legacy_checks": 331,
+    "plugin_archive_python_cases": 8,
+    "schema_structural_assertions": 3,
+    "infra_application_groups": 11,
+    "infra_application_assertions": 86,
+    "infra_https_job_scenarios": 4,
+    "installed_consumer_assertions": 8,
+    "debian_application_groups": 9,
+    "debian_application_assertions": 90,
+    "kernel_stage_groups": 31,
+    "kernel_functional_assertions": 260,
+    "kernel_browser_assertions": 24,
+    "kernel_browser_scenarios": 3,
+    "kernel_sql_negative_cases": 16,
+    "gateway_browser_scenarios": 1
+  },
+  "network": {
+    "separate_client": "testbox",
+    "control_route": true,
+    "runtime_lan_connection": "ECONNREFUSED",
+    "assertions_per_selected_application_run": 2,
+    "counted_inside_functional_reports": true
+  },
+  "publication": false,
+  "production": false,
+  "D0": false,
+  "preexisting_packaging_gate": {
+    "passed": 10,
+    "failed": 2,
+    "baseline": "3fb32d86ce336c886235c23b9632a140a2dc3045",
+    "identical_findings": true,
+    "findings": [
+      "legacy Team FROM without digest",
+      "legacy global pm2 install"
+    ],
+    "ci_gate_unchanged": true
+  }
+}
