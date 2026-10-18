@@ -8,6 +8,6 @@
   "scripts": { "test": "node --test test/*.test.js" },
   "dependencies": { "@drumee/server-runtime": "0.1.0-alpha.4" },
   "devDependencies": {
-    "@drumee/infra-layer": "https://codeload.github.com/drumee/infra-layer/tar.gz/c6ef6e9b8d33921ffa39c289490067adfc63a8b0"
+    "@drumee/infra-layer": "https://codeload.github.com/drumee/infra-layer/tar.gz/aa9057f224f4ae5cf80d777e3cb2fad092193fb1"
   }
 }

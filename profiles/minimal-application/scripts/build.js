@@ -10,6 +10,7 @@ function build(input) {
   if (run("git", ["status", "--porcelain", "--", "profiles/minimal-application"], { cwd: repository }).trim()) fail("APPLICATION_SOURCE_MUST_BE_COMMITTED");
   const lock = require("../package-lock.json");
   if (lock.packages["node_modules/@drumee/server-runtime"].version !== "0.1.0-alpha.4" || lock.packages["node_modules/@drumee/server-runtime"].integrity !== runtimeSRI) fail("APPLICATION_RUNTIME_PROVENANCE_INVALID");
+  const infrastructure = require("./infrastructure-source").verify();
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "drumee-il5-build-"));
   try {
     for (const name of ["package.json", "package-lock.json", "Dockerfile"]) fs.copyFileSync(path.join(profile, name), path.join(directory, name));
@@ -25,15 +26,15 @@ function build(input) {
     }
     fs.writeFileSync(path.join(directory, "plugins-manifest.json"), JSON.stringify(plugins), { mode: 0o644 });
     const plugin_digest = crypto.createHash("sha256").update(JSON.stringify(artifacts)).digest("hex"), tag = "drumee-minimal-application:" + revision.slice(0, 16) + "-" + plugin_digest.slice(0, 16);
-    run("docker", ["build", "--label", "org.opencontainers.image.source=https://github.com/drumee/debian", "--label", "org.opencontainers.image.revision=" + revision, "--label", "org.drumee.application.plugins=" + plugin_digest, "-t", tag, directory], { stdio: "inherit" });
+    run("docker", ["build", "--label", "org.opencontainers.image.source=https://github.com/drumee/debian", "--label", "org.opencontainers.image.revision=" + revision, "--label", "org.drumee.application.plugins=" + plugin_digest, "--label", "org.drumee.infra.revision=" + infrastructure.revision, "--label", "org.drumee.infra.source-integrity=" + infrastructure.integrity, "-t", tag, directory], { stdio: "inherit" });
     const image = run("docker", ["image", "inspect", tag, "--format", "{{.Id}}"] ).trim();
     let tools;
     if (input.tools) {
       const source = path.join(profile, "node_modules/@drumee/infra-layer"), tools_tag = "drumee-minimal-application-tools:" + revision.slice(0, 16);
-      run("docker", ["build", "--label", "org.opencontainers.image.source=https://github.com/drumee/infra-layer", "--label", "org.opencontainers.image.revision=c6ef6e9b8d33921ffa39c289490067adfc63a8b0", "-f", path.join(source, "capabilities/docker/Dockerfile.services"), "-t", tools_tag, source], { stdio: "inherit" });
+      run("docker", ["build", "--label", "org.opencontainers.image.source=https://github.com/drumee/infra-layer", "--label", "org.opencontainers.image.revision=" + infrastructure.revision, "-f", path.join(source, "capabilities/docker/Dockerfile.services"), "-t", tools_tag, source], { stdio: "inherit" });
       tools = { tag: tools_tag, image: run("docker", ["image", "inspect", tools_tag, "--format", "{{.Id}}"] ).trim() };
     }
-    const receipt = { revision, runtime: { version: "0.1.0-alpha.4", integrity: runtimeSRI }, infrastructure: { revision: "c6ef6e9b8d33921ffa39c289490067adfc63a8b0", integrity: lock.packages["node_modules/@drumee/infra-layer"].integrity }, image, tag, plugins, artifacts, ...(tools ? { tools } : {}) };
+    const receipt = { revision, runtime: { version: "0.1.0-alpha.4", integrity: runtimeSRI }, infrastructure, image, tag, plugins, artifacts, ...(tools ? { tools } : {}) };
     fs.mkdirSync(path.join(profile, ".cache"), { recursive: true }); fs.writeFileSync(path.join(profile, ".cache/images.json"), JSON.stringify(receipt, null, 2), { mode: 0o600 }); return receipt;
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 }
