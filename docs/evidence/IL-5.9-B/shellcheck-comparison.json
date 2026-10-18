@@ -1,0 +1,13 @@
+{
+  "version": "0.11.0",
+  "files_scanned": 121,
+  "diagnostics": 91,
+  "levels": {
+    "warning": 71,
+    "error": 20
+  },
+  "baseline_diagnostics_equal": true,
+  "baseline_inventory_equal": true,
+  "new_diagnostics": 0,
+  "scanner_exit": 1
+}

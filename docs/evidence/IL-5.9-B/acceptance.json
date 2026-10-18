@@ -1,0 +1,57 @@
+{
+  "project": "drumee-il5-debian-41791db3",
+  "source_revision": "ccaa839bf13ab163025e868b21f16516c87d1ff9",
+  "infrastructure": {
+    "revision": "aa9057f224f4ae5cf80d777e3cb2fad092193fb1",
+    "integrity": "sha512-faoNlMWBO05FM+ozsuGu9tqFgq/IYc9WJwb4KCyZcZiTlEIrgJ9QLqLxslTADdipaItg02r2f6qFG07HDxhVqA==",
+    "sha256": "b33e5ba7946b73701b05365c637f5153e9ddb860efe0074821d86161dd1466d2",
+    "package_integrity": "sha512-ZZIxqtHsFA0tCwAR6vcGa3iOttFYTkHCS4rKN4UtPApLPDkq41FJ0xJWKfWLEWVUlvM3JZldb1aGrhyKMiM9Pw=="
+  },
+  "image": "sha256:d44327e37d37c612257822684a870d05d7f90fdae649b2dcbfb8e9f0566e7955",
+  "runtime": {
+    "version": "0.1.0-alpha.4",
+    "integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ=="
+  },
+  "groups": [
+    "selector-public-plan-and-operator-authorization",
+    "install-real-runtime-native-rpc-and-authorization",
+    "docker-host-and-separate-lan-network-observations",
+    "operator-proxy-fragment-with-real-host-nginx-and-verified-tls",
+    "restart-stop-start-and-idempotent-install-preserve-data",
+    "real-operator-interruption-and-explicit-recovery",
+    "configuration-rollback-and-failed-plugin-startup-preserve-state",
+    "operator-backup-and-isolated-restore",
+    "unknown-existing-installation-and-owner-mismatch-refused",
+    "optional-canonical-smtp-dkim-isolation-and-failure-preservation"
+  ],
+  "internet_delivery": "not-tested",
+  "network": {
+    "control_route": true,
+    "application_non_loopback": "ECONNREFUSED"
+  },
+  "socket_observation": "LISTEN 0      4096   127.0.0.1:45591 0.0.0.0:*",
+  "host_proxy": {
+    "containerized": false,
+    "ca_san_verified": true,
+    "operator_fragment": true
+  },
+  "interruption": {
+    "real_sigkill": true,
+    "explicit_recovery_required": true,
+    "data_preserved": true
+  },
+  "smtp": {
+    "starttls_auth": true,
+    "invalid_tls_name_refused": true,
+    "private_dkim_observed": true,
+    "no_open_relay": true,
+    "optional_failure_isolated": true,
+    "backend_failure_preserves_queued_message": true,
+    "secrets_preserved": true,
+    "required_failure_diagnosed": true,
+    "smtp_recovery": "explicitly-unsupported",
+    "internet_delivery": false
+  },
+  "status": "passed",
+  "assertions": 126
+}

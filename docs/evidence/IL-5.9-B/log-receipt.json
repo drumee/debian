@@ -1,0 +1,90 @@
+{
+  "local_directory": "/tmp/drumee-il59b-evidence",
+  "logs": [
+    {
+      "file": "clean-npm-ci.log",
+      "bytes": 154,
+      "sha256": "c2d847f792d610897189e47ce632df51bfb871276674ff218fec08c53ddf9efd"
+    },
+    {
+      "file": "plugin-npm-ci.log",
+      "bytes": 26,
+      "sha256": "c363a8920577905981352305567d93d9143d28145ad277f7db337f2a8dd7a874"
+    },
+    {
+      "file": "profile-tests.log",
+      "bytes": 2153,
+      "sha256": "5ce0ef5adeea62bfd02e69b43b7551a3fa734dea9b6ebbe16c93fddc0df99883"
+    },
+    {
+      "file": "plugin-tests.log",
+      "bytes": 106,
+      "sha256": "95c29329dc1330be4680b47af91142552bc94a69ffb04f2f5362fdef44cad3c5"
+    },
+    {
+      "file": "kernel-tests-initial-missing-dependencies.log",
+      "bytes": 3932,
+      "sha256": "b670b4a30a35f0db1ab4b422cbb351f929ff520387138d11c5f5f3490b9c4630"
+    },
+    {
+      "file": "kernel-tests.log",
+      "bytes": 3292,
+      "sha256": "9e456df35905791ceec7bab67c85b2b7254fa5bac4fab9c9f27f9dba0e0616fe"
+    },
+    {
+      "file": "run-all.log",
+      "bytes": 18946,
+      "sha256": "1960b8a18c8ec624658ed94eafe8773205900aafb3db6dedd9efc2295efea699"
+    },
+    {
+      "file": "packaging.log",
+      "bytes": 1382,
+      "sha256": "287689179f73c7b6fe342824b351c71641d1ad8c4d69be6ecf96d47e7bdb3044"
+    },
+    {
+      "file": "packaging-container.log",
+      "bytes": 1389,
+      "sha256": "9d259d412de9c25bd87c01a68943b06d100c232f01baf0dd80068fe61af2b4ed"
+    },
+    {
+      "file": "shellcheck-raw.json",
+      "bytes": 19971,
+      "sha256": "97204758f66489e965ab1fefcc3898b65017872f81e6d3330ebabde644fdc328"
+    },
+    {
+      "file": "shellcheck.json",
+      "bytes": 18257,
+      "sha256": "07570bf6645697be3d55940643d76063a84baf512eec1b911f88e6652a4b0c13"
+    },
+    {
+      "file": "build-first.log",
+      "bytes": 4451,
+      "sha256": "f829f64fe3085445fc8c96ec33ace8492721df06f0702a3fbf6e483a67dabecb"
+    },
+    {
+      "file": "build-second.log",
+      "bytes": 4000,
+      "sha256": "32787af5f9f77bfe3bf6fb618266dd75003626d23db38026b55ec4ccd1c0d8e4"
+    },
+    {
+      "file": "acceptance.log",
+      "bytes": 805,
+      "sha256": "eae1c59d9e1f56d3d648de1a25405aaad0bffac036a2e02dc285e5d36d6e76d3"
+    },
+    {
+      "file": "github-ci-code.log",
+      "bytes": 211621,
+      "sha256": "aec7c7f8c70da720edf35b3cb1d110a5ea573159b13f49829f53b0a2bd96fafe"
+    },
+    {
+      "file": "packed-consumer.log",
+      "bytes": 457,
+      "sha256": "4e980eae2736b7d8e27f36121be11bce3cdd14c67d6dc4d0aa969ea9529d04a7"
+    },
+    {
+      "file": "verify-images.py",
+      "bytes": 3744,
+      "sha256": "6f7e3e6914082fe7f80eae60a4f1182a13e7fda12a0e3a54c0c7db4d447b3151"
+    }
+  ]
+}
