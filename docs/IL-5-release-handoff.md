@@ -204,3 +204,42 @@ lot. Alpha.3 remains unpublished; source→npm migration requires explicit new
 lock/provenance validation. Oxy-form has not selected a compatible replacement
 and is not declared unblocked. SMTP Internet/provider/DNS/recipient and spool
 recovery conditions remain pending; OF-02, production and D0 are not executed.
+
+## IL-5.9-B — new Debian consumer qualification (2026-10-18)
+
+This additive update supersedes the **active consumer pin** above; historical
+source/package identities and qualification attempts remain unchanged evidence.
+Infra PR #2 is now `aa9057f224f4ae5cf80d777e3cb2fad092193fb1`. Debian consumes
+that exact GitHub archive, whose newly measured source SRI is
+`sha512-faoNlMWBO05FM+ozsuGu9tqFgq/IYc9WJwb4KCyZcZiTlEIrgJ9QLqLxslTADdipaItg02r2f6qFG07HDxhVqA==`.
+The rebuilt, unpublished npm alpha.3 SRI is separately
+`sha512-ZZIxqtHsFA0tCwAR6vcGa3iOttFYTkHCS4rKN4UtPApLPDkq41FJ0xJWKfWLEWVUlvM3JZldb1aGrhyKMiM9Pw==`.
+The source lock never substitutes that npm SRI for the GitHub archive.
+
+[Source selection](IL-5.9-B-source-selection.md),
+[consumer change inventory](IL-5.9-B-consumer-realignment.md) and
+[qualification](IL-5.9-B-qualification.md) record source/lock commit a7a756f,
+clean-build/acceptance source `ccaa839bf13ab163025e868b21f16516c87d1ff9`, two
+identical same-host build receipts, actual image inspection, 126 real acceptance
+assertions, 8 application TAP, 8 plugin archive cases, 15 historical-kernel TAP,
+331 shared checks and 8 isolated npm-consumer assertions with strict types.
+The 260/3-Chromium/16-SQL historical kernel evidence is retained, not rerun.
+Packaging/lint still fail on the identical two/91 historical findings.
+
+Application image:
+`sha256:d44327e37d37c612257822684a870d05d7f90fdae649b2dcbfb8e9f0566e7955`.
+Native tools image:
+`sha256:075a3c53d14f9a71c827f285564518dde41e29faa0cc9e58f4cc126cd3dda4cd`.
+These local images contain a disposable acceptance plugin; they are not a
+published application-specific distribution or Oxy-form deployment.
+Runtime alpha.4, native HTTP/RPC prefixes, loopback publication and public Infra
+lifecycle APIs remain fixed. SMTP queue/secret persistence is observed;
+SMTP_RECOVERY_UNQUALIFIED still refuses spool recovery. No Internet delivery is
+qualified. Infra's GitHub security chain is observed; external Sonar cleanup
+remains an independent owner task, with no annotation disposition in this mission.
+
+Status: READY_FOR_OWNER_MERGE_DECISION, subject to current checks, explicit owner
+acceptance of historical debt/security reservations and the separate merge
+operation. Order remains Infra #2 → Debian #7 into feat/container-distribution;
+convergence to Debian main and future registry migration require separate review.
+No publication, merge, Oxy-form resumption, production operation or D0 occurred.

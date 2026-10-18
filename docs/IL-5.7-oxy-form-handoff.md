@@ -109,3 +109,45 @@ native RPC allow/deny, owned lifecycle, immutable acquisition and qualified
 SMTP composition/trust/isolation. It does not qualify Oxymotion D0, Hub/MFS/Finder,
 crawling, agents, application business rules or Internet mail delivery. D0 is
 neither started nor declared validated.
+
+## IL-5.9-B — updated candidate inputs (2026-10-18)
+
+The original references above describe the IL-5.7 observation. The newly qualified
+Debian **minimal-application** consumer now pins Infra Layer
+`aa9057f224f4ae5cf80d777e3cb2fad092193fb1` at
+`https://codeload.github.com/drumee/infra-layer/tar.gz/aa9057f224f4ae5cf80d777e3cb2fad092193fb1`,
+source SRI
+`sha512-faoNlMWBO05FM+ozsuGu9tqFgq/IYc9WJwb4KCyZcZiTlEIrgJ9QLqLxslTADdipaItg02r2f6qFG07HDxhVqA==`.
+Debian executable/image source is
+`ccaa839bf13ab163025e868b21f16516c87d1ff9` on the existing PR #7 feature branch;
+subsequent evidence/docs commits preserve its executable tree. The distribution
+profile remains version `0.0.0-il5`; Runtime is exactly `0.1.0-alpha.4`.
+[Qualification](IL-5.9-B-qualification.md) and its image receipts identify the
+actual local application/tools images and verified disposable plugin. Those
+images are not Oxy-form images and have not been published. The npm alpha.3
+candidate remains a future release choice, not the selected registry dependency.
+
+Future OF-01R must explicitly choose this compatible distribution/revision,
+package and verify its own plugin, select a free loopback host port and connect
+its existing host Nginx/certificates to it. Preserve `/-/` and `/-/svc/` without
+rewrites. Use the existing commands documented in
+[the operator guide](IL-5-distribution.md): `bin/drumee-ctl --profile
+minimal-application validate|plan|proxy-config|install|status|doctor|stop|start|
+restart|backup|restore|rollback --config OWNED_CONFIG`, with `--execute` for
+mutations and `--recover` only after investigated interrupted activation.
+Install/build instructions and immutable source receipts must travel together.
+No Hub/MFS/Finder/SQL/Redis/DNS or containerized HTTP gateway is implicit.
+
+The real qualification demonstrates independent LAN denial plus a positive LAN
+witness, host Nginx/verified HTTPS, native public/denied RPC, restart, SIGKILL and
+explicit recovery, rollback and isolated no-SMTP restoration. Optional SMTP/DKIM
+is composed canonically with STARTTLS/SASL, private DKIM networking and no host
+mail publication. Application failure preserves an isolated queued message and
+secret fingerprints. This is not upstream Internet mail qualification.
+
+Still required separately: verified upstream TLS and authorized sender, distinct
+submission/upstream secrets, controlled inboxes, SPF/DKIM/DMARC observations,
+actual reception and bounces. SMTP spool recovery remains explicitly unsupported
+(SMTP_RECOVERY_UNQUALIFIED). No production secret value belongs in this handoff.
+Infra #2 then Debian #7 integration decisions remain separate. Oxy-form is not
+modified or declared unblocked/accepted; OF-02 and Oxymotion D0 are not started.
