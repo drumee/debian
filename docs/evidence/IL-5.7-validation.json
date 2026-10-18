@@ -1,0 +1,276 @@
+{
+  "decision": "READY_FOR_OWNER_MERGE_DECISION",
+  "examined_on": "2026-10-18",
+  "heads": {
+    "infra": "de4b34e99370bf3b9f0d17399db4b2ea3d107677",
+    "infra_base": "bef9a379754bcf9a46fed8bcb6f88fe1f775c739",
+    "debian": "86f68a735096a070aa9aa77bc0d79cf0cd1f47af",
+    "debian_base": "3fb32d86ce336c886235c23b9632a140a2dc3045",
+    "debian_main": "b8b0ebe7082e1ad2366f3a7997712f5da5bba127",
+    "debian_convergence_common": "245c5161ded2452395da7a879bb50853386c933b"
+  },
+  "dependency": {
+    "infra": {
+      "version": "0.1.0-alpha.3",
+      "resolved": "https://codeload.github.com/drumee/infra-layer/tar.gz/c6ef6e9b8d33921ffa39c289490067adfc63a8b0",
+      "integrity": "sha512-/XFgDPrCJkuk9sEbLf5GGJ1Z55mueK85t77swiB4i/0s6OvdlrGqd9MUE9e8AnyMOi0nBUOl+W2h8FlqDZdX2Q==",
+      "dev": true,
+      "license": "AGPL-3.0-only",
+      "engines": {
+        "node": ">=22"
+      }
+    },
+    "runtime": {
+      "version": "0.1.0-alpha.4",
+      "dist.integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ==",
+      "gitHead": "f961f6214432c2e6dbbcde2b926544c076935950"
+    }
+  },
+  "registry": {
+    "versions": [
+      "0.0.0-stage",
+      "0.1.0-alpha.1",
+      "0.1.0-alpha.2"
+    ],
+    "dist-tags": {
+      "next": "0.1.0-alpha.2",
+      "latest": "0.1.0-alpha.1"
+    }
+  },
+  "artifacts": {
+    "source_archive": {
+      "local_file": "/tmp/drumee-il57-infra-source.tar.gz",
+      "bytes": 221414,
+      "sha256": "183894b43ffadeec281e4d93a11361bed604d7aac12dec06a5f41d4faa29876a",
+      "integrity": "sha512-/XFgDPrCJkuk9sEbLf5GGJ1Z55mueK85t77swiB4i/0s6OvdlrGqd9MUE9e8AnyMOi0nBUOl+W2h8FlqDZdX2Q=="
+    },
+    "npm_candidate": {
+      "local_file": "/tmp/drumee-infra-layer-0.1.0-alpha.3.tgz",
+      "bytes": 98007,
+      "sha256": "2118aa64684b7ef8bcdc3985390f71d77c16232ecb637e331e4142467dbac526",
+      "integrity": "sha512-+voNVLiQa+Cb9k0M/frJIkejFRqAJPa/d7Z42iqG+waU1oupgDL/r4FrvK09ADhW4pjKfYNlm7FNdc0ixvf5Eg=="
+    },
+    "qualification_plugin": {
+      "local_file": "/tmp/drumee-minimal-application-qualification-fixture-0.0.0-il5.tgz",
+      "bytes": 371680,
+      "sha256": "8fc48c582581b6214f2ddab9df437d815a2f61dd441ccc44ff858e8c84956a6a",
+      "integrity": "sha512-cCo/f6Aw+RSGCc9M07ZVVLjKNbwfopOMIqrqJUlqmMu2pYgz5WICbCSBAptOGo4EWMY0x6FZwqw/z/lFDRPg4w=="
+    }
+  },
+  "candidate": {
+    "version": "0.1.0-alpha.3",
+    "filename": "drumee-infra-layer-0.1.0-alpha.3.tgz",
+    "size": 98007,
+    "unpackedSize": 351221,
+    "integrity": "sha512-+voNVLiQa+Cb9k0M/frJIkejFRqAJPa/d7Z42iqG+waU1oupgDL/r4FrvK09ADhW4pjKfYNlm7FNdc0ixvf5Eg==",
+    "shasum": "a039a39ae9bb77bf2a9b7a5b89e7e771388ba491"
+  },
+  "candidate_files": [
+    "CHANGELOG.md",
+    "LICENSE",
+    "PROVENANCE.md",
+    "README.md",
+    "adapters/docker/nginx.js",
+    "adapters/docker/resources.js",
+    "adapters/docker/services.js",
+    "capabilities/database/index.js",
+    "capabilities/dns/index.js",
+    "capabilities/docker/Dockerfile.services",
+    "capabilities/http/nginx/index.js",
+    "capabilities/http/nginx/routes.js",
+    "capabilities/mail/index.js",
+    "capabilities/redis/index.js",
+    "capabilities/secrets/index.js",
+    "capabilities/tls/acme.js",
+    "capabilities/tls/index.js",
+    "index.d.ts",
+    "lib/contracts-v2.js",
+    "lib/diagnostics.js",
+    "lib/filesystem-safety.js",
+    "lib/index.js",
+    "lib/plan-v2.js",
+    "lib/plan.js",
+    "lib/rendering.js",
+    "lib/spec.js",
+    "lib/state-v2.js",
+    "lib/state.js",
+    "lib/validation.js",
+    "lifecycle/activation.js",
+    "lifecycle/composition.js",
+    "lifecycle/docker.js",
+    "lifecycle/external-gateway.js",
+    "lifecycle/index.d.ts",
+    "lifecycle/index.js",
+    "lifecycle/journal.js",
+    "lifecycle/preparation.js",
+    "lifecycle/recovery.js",
+    "lifecycle/transitions.js",
+    "package.json"
+  ],
+  "candidate_dependencies": [],
+  "images": {
+    "revision": "cfb993dd3979122e4ff7915b8627ff669ef90a96",
+    "runtime": {
+      "version": "0.1.0-alpha.4",
+      "integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ=="
+    },
+    "infrastructure": {
+      "revision": "c6ef6e9b8d33921ffa39c289490067adfc63a8b0",
+      "integrity": "sha512-/XFgDPrCJkuk9sEbLf5GGJ1Z55mueK85t77swiB4i/0s6OvdlrGqd9MUE9e8AnyMOi0nBUOl+W2h8FlqDZdX2Q=="
+    },
+    "image": "sha256:b98ae69b0a39ce4edb26fefa2a60ba28620ab12fe6ccd28d2f6daade4be6901d",
+    "tag": "drumee-minimal-application:cfb993dd3979122e-326a59a24455ccdd",
+    "plugins": [
+      {
+        "id": "qualification",
+        "root": "/app/plugins/qualification/server",
+        "revision": "cfb993dd3979122e4ff7915b8627ff669ef90a96"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "qualification",
+        "files": 164,
+        "bytes": 1666457,
+        "integrity": "sha512-cCo/f6Aw+RSGCc9M07ZVVLjKNbwfopOMIqrqJUlqmMu2pYgz5WICbCSBAptOGo4EWMY0x6FZwqw/z/lFDRPg4w=="
+      }
+    ],
+    "tools": {
+      "tag": "drumee-minimal-application-tools:cfb993dd3979122e",
+      "image": "sha256:d8dab923b53d0eede951c0ad6b1741807ebbfa45944206b577b943045147cee0"
+    }
+  },
+  "evidence_trace": {
+    "infra_real_application": "f0f48aace5331919448a65e91800a3120637261d",
+    "debian_cleanroom": "cfb993dd3979122e4ff7915b8627ff669ef90a96",
+    "code_equal_to_examined_heads": true,
+    "original_log_hashes_verified": {
+      "IL-5": 19,
+      "IL-5.6-comparison": 10,
+      "IL-5.6-stabilization": 9
+    },
+    "local_tests": {
+      "infra_unit_tap": 141,
+      "debian_app_tap": 5,
+      "plugin_python_cases": 8,
+      "kernel_tap": 15,
+      "installed_consumer_assertions": 8,
+      "strict_types": true,
+      "real_preparation": true,
+      "activated": false
+    }
+  },
+  "ci": {
+    "infra": {
+      "checks": [
+        {
+          "id": 117199059647,
+          "name": "SonarCloud Code Analysis",
+          "status": "completed",
+          "conclusion": "failure",
+          "details_url": "https://sonarcloud.io/dashboard?id=drumee_infra-layer&pullRequest=2"
+        }
+      ]
+    },
+    "debian": {
+      "checks": [
+        {
+          "id": 117347849318,
+          "name": "packaging",
+          "status": "completed",
+          "conclusion": "failure",
+          "details_url": "https://github.com/drumee/debian/actions/runs/39015907321/job/117347849318"
+        },
+        {
+          "id": 117347849315,
+          "name": "minimal-application-contract",
+          "status": "completed",
+          "conclusion": "success",
+          "details_url": "https://github.com/drumee/debian/actions/runs/39015907321/job/117347849315"
+        },
+        {
+          "id": 117347849299,
+          "name": "suite",
+          "status": "completed",
+          "conclusion": "success",
+          "details_url": "https://github.com/drumee/debian/actions/runs/39015907321/job/117347849299"
+        },
+        {
+          "id": 117347849175,
+          "name": "lint",
+          "status": "completed",
+          "conclusion": "failure",
+          "details_url": "https://github.com/drumee/debian/actions/runs/39015907321/job/117347849175"
+        },
+        {
+          "id": 117347841171,
+          "name": "lint",
+          "status": "completed",
+          "conclusion": "failure",
+          "details_url": "https://github.com/drumee/debian/actions/runs/39015904623/job/117347841171"
+        },
+        {
+          "id": 117347841147,
+          "name": "suite",
+          "status": "completed",
+          "conclusion": "success",
+          "details_url": "https://github.com/drumee/debian/actions/runs/39015904623/job/117347841147"
+        },
+        {
+          "id": 117347841145,
+          "name": "minimal-application-contract",
+          "status": "completed",
+          "conclusion": "success",
+          "details_url": "https://github.com/drumee/debian/actions/runs/39015904623/job/117347841145"
+        },
+        {
+          "id": 117347840982,
+          "name": "packaging",
+          "status": "completed",
+          "conclusion": "failure",
+          "details_url": "https://github.com/drumee/debian/actions/runs/39015904623/job/117347840982"
+        }
+      ]
+    }
+  },
+  "changes_since_il56": "none before this documentation-only audit",
+  "owner_acceptance": "pending; recommendation only",
+  "oxy_form": "BLOCKED_DISTRIBUTION at last unchanged consumer report; no compatible reference selected there",
+  "no_merge_publish_protection_change": true,
+  "logs": {
+    "infra_unit": {
+      "file": "/tmp/drumee-il57-infra-unit.log",
+      "sha256": "9d94f1bb3a8a205f800c7dedf93d6ceec1a65f64f771e4822774f5992d7487a6"
+    },
+    "infra_package": {
+      "file": "/tmp/drumee-il57-infra-package.log",
+      "sha256": "034d637a55d7017e2738178ac136edad19d70d0c0c8b5e486562ca7dd228ece0"
+    },
+    "isolated_consumer": {
+      "file": "/tmp/drumee-il57-installed-consumer.log",
+      "sha256": "620740736864e6af24ed6e1baac61ed7b22341d33ee564ffc2ac1a344907417c"
+    },
+    "debian_units": {
+      "file": "/tmp/drumee-il57-debian-unit.log",
+      "sha256": "ec151d4f7418a0c4a9f5c9928b049b42225440890e48121a210476cc7f180623"
+    },
+    "plugin_security": {
+      "file": "/tmp/drumee-il57-plugin-security.log",
+      "sha256": "05288d3104d08ae5b03062536de62a71d4995ba0dbbe0f59f2347868aebffc3b"
+    },
+    "kernel_units": {
+      "file": "/tmp/drumee-il57-kernel-unit.log",
+      "sha256": "2c8f630f392179ab4b595c5608ac42fd184e702c27170c5bbc57a17655e12f6e"
+    },
+    "image_inspection": {
+      "file": "/tmp/drumee-il57-image-inspection.log",
+      "sha256": "f0990aab9bbe861eec9d61465900dd29c9817c2701a50e6f9db18a1bd566b13f"
+    }
+  },
+  "environment": {
+    "node": "22.22.0",
+    "typescript": "5.9.3",
+    "test_host": "unchanged local qualification environment",
+    "heavy_tests": "reused unchanged evidence; not newly counted"
+  }
+}

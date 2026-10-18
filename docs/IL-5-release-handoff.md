@@ -1,6 +1,11 @@
 # IL-5 release and integration handoff
 
-Current status after IL-5.6: **READY_FOR_MERGE_WITH_BASELINE_DEBT**.
+Current status after IL-5.7: **READY_FOR_OWNER_MERGE_DECISION**.
+See [final integration validation](IL-5.7-final-validation.md),
+[proposed debt acceptance](IL-5.7-baseline-debt-acceptance.md) and
+[Oxy-form handoff](IL-5.7-oxy-form-handoff.md).
+
+Historical IL-5.6 status: **READY_FOR_MERGE_WITH_BASELINE_DEBT**.
 See [CI stabilization](IL-5.6-ci-stabilization.md) and
 [baseline comparison](IL-5.6-ci-baseline.md).
 
@@ -169,3 +174,33 @@ DEB-CI-DEBT-01 (legacy image packaging compliance) and DEB-CI-DEBT-02 (legacy
 shell/build hardening), defined in the stabilization report. Maintainers must
 explicitly assess that debt and any required branch checks before integration.
 Infra Layer precedes Debian; no automatic merge, publication or D0 is performed.
+
+## IL-5.7 final owner-decision audit (2026-10-18)
+
+The expected Infra de4b34e / Debian 86f68a7 HEADs and actual bases were verified,
+with no executable drift. Immutable source/package/plugin/image integrity and
+38 prior log hashes match their evidence. Targeted confirmations pass: 141 Infra
+TAP, 5 application TAP, 8 archive cases, 15 minimal-kernel TAP, package allowlist
+and a fresh installed consumer with strict types/8 real-preparation assertions.
+Heavy unchanged integration evidence is reused without inflating totals.
+
+The branch-policy audit goes beyond mergeable=true: protected=false, successful
+GraphQL branchProtectionRule=null, no active/inherited rulesets or effective
+branch rules, and no required review count/check observed. Detailed classic REST
+reads returned 403 and were not interpreted as absence; independent authorized
+reads establish the snapshot. No protection is changed. Reinspect before merge.
+
+The Debian CI failures stay characterized baseline debt, proposed for temporary
+acceptance only for the explicit new profile; owner acceptance remains pending.
+The broader audit additionally records Infra SonarCloud FAILURE (26 OPEN issues,
+Security D/Reliability D), separately from Debian debt. Its test-only/shipped
+contexts and residual risks require explicit Infra/security owner disposition;
+no finding or gate was suppressed or silently accepted. The actual check remains
+red. No production canonical defect requiring a workaround was demonstrated.
+
+Integration remains owner-authorized Infra #2 → Debian #7 on its current
+feat/container-distribution base, followed by a distinct reviewed main-convergence
+lot. Alpha.3 remains unpublished; source→npm migration requires explicit new
+lock/provenance validation. Oxy-form has not selected a compatible replacement
+and is not declared unblocked. SMTP Internet/provider/DNS/recipient and spool
+recovery conditions remain pending; OF-02, production and D0 are not executed.

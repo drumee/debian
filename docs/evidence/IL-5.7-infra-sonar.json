@@ -1,0 +1,564 @@
+{
+  "check_id": 117199059647,
+  "head": "de4b34e99370bf3b9f0d17399db4b2ea3d107677",
+  "conclusion": "failure",
+  "url": "https://sonarcloud.io/dashboard?id=drumee_infra-layer&pullRequest=2",
+  "gate": {
+    "projectStatus": {
+      "status": "ERROR",
+      "conditions": [
+        {
+          "status": "ERROR",
+          "metricKey": "new_reliability_rating",
+          "comparator": "GT",
+          "periodIndex": 1,
+          "errorThreshold": "1",
+          "actualValue": "4"
+        },
+        {
+          "status": "ERROR",
+          "metricKey": "new_security_rating",
+          "comparator": "GT",
+          "periodIndex": 1,
+          "errorThreshold": "1",
+          "actualValue": "4"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_maintainability_rating",
+          "comparator": "GT",
+          "periodIndex": 1,
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_duplicated_lines_density",
+          "comparator": "GT",
+          "periodIndex": 1,
+          "errorThreshold": "3",
+          "actualValue": "0.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_security_hotspots_reviewed",
+          "comparator": "LT",
+          "periodIndex": 1,
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        }
+      ],
+      "periods": [],
+      "ignoredConditions": false
+    }
+  },
+  "counts": {
+    "total": 26,
+    "shipped": 5,
+    "test_only": 21,
+    "type": {
+      "CODE_SMELL": 17,
+      "VULNERABILITY": 7,
+      "BUG": 2
+    },
+    "severity": {
+      "MINOR": 16,
+      "CRITICAL": 3,
+      "MAJOR": 7
+    }
+  },
+  "issues": [
+    {
+      "key": "AaFGkAAM7h-_7ZHL5nV7",
+      "rule": "javascript:S7723",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 9,
+      "message": "Use `new Error()` instead of `Error()`.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/package-consumer.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAHd7h-_7ZHL5nWA",
+      "rule": "javascript:S3776",
+      "type": "CODE_SMELL",
+      "severity": "CRITICAL",
+      "line": 57,
+      "message": "Refactor this function to reduce its Cognitive Complexity from 39 to the 15 allowed.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
+        }
+      ],
+      "file": "lifecycle/composition.js",
+      "shipped": true,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj__s7h-_7ZHL5nVp",
+      "rule": "docker:S8431",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "line": 1,
+      "message": "Use either the version tag or the digest for the image instead of both.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "file": "test/application/Dockerfile",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj___7h-_7ZHL5nVu",
+      "rule": "javascript:S7723",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 5,
+      "message": "Use `new Error()` instead of `Error()`.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/build.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj___7h-_7ZHL5nVv",
+      "rule": "javascript:S4036",
+      "type": "VULNERABILITY",
+      "severity": "MINOR",
+      "line": 10,
+      "message": "Make sure the \"PATH\" variable only contains fixed, unwriteable directories.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/build.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj___7h-_7ZHL5nVw",
+      "rule": "javascript:S4036",
+      "type": "VULNERABILITY",
+      "severity": "MINOR",
+      "line": 11,
+      "message": "Make sure the \"PATH\" variable only contains fixed, unwriteable directories.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/build.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj___7h-_7ZHL5nVx",
+      "rule": "javascript:S4036",
+      "type": "VULNERABILITY",
+      "severity": "MINOR",
+      "line": 12,
+      "message": "Make sure the \"PATH\" variable only contains fixed, unwriteable directories.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/build.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAR7h-_7ZHL5nV8",
+      "rule": "javascript:S7723",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 4,
+      "message": "Use `new Error()` instead of `Error()`.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/host.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj__y7h-_7ZHL5nVr",
+      "rule": "jssecurity:S8707",
+      "type": "VULNERABILITY",
+      "severity": "MAJOR",
+      "line": 5,
+      "message": "Path Traversal via faulty LLM-supplied CLI arguments",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "file": "test/application/interrupt.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj__y7h-_7ZHL5nVq",
+      "rule": "javascript:S2681",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "line": 6,
+      "message": "This statement will not be executed conditionally; only the first statement will be. The rest will execute unconditionally.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "file": "test/application/interrupt.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj__57h-_7ZHL5nVs",
+      "rule": "javascript:S5332",
+      "type": "VULNERABILITY",
+      "severity": "MINOR",
+      "line": 11,
+      "message": "Using http protocol is insecure. Use https instead.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/plugins/qualification/worker.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj__57h-_7ZHL5nVt",
+      "rule": "javascript:S7723",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 15,
+      "message": "Use `new Error()` instead of `Error()`.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/plugins/qualification/worker.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nVy",
+      "rule": "javascript:S1788",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "line": 10,
+      "message": "Move this default parameter last, so callers can omit it instead of passing \"undefined\".",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nV0",
+      "rule": "javascript:S7780",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 40,
+      "message": "`String.raw` should be used to avoid escaping `\\`.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nV1",
+      "rule": "javascript:S7723",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 40,
+      "message": "Use `new Error()` instead of `Error()`.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nVz",
+      "rule": "javascript:S4036",
+      "type": "VULNERABILITY",
+      "severity": "MINOR",
+      "line": 40,
+      "message": "Make sure the \"PATH\" variable only contains fixed, unwriteable directories.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nV2",
+      "rule": "javascript:S7723",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 45,
+      "message": "Use `new Error()` instead of `Error()`.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nV3",
+      "rule": "javascript:S2486",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 67,
+      "message": "Handle this exception, don't catch it at all, or explain in a comment why it is ignored.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nV4",
+      "rule": "javascript:S9382",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 67,
+      "message": "Unexpected `await` inside a loop.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nV5",
+      "rule": "javascript:S2259",
+      "type": "BUG",
+      "severity": "MAJOR",
+      "line": 71,
+      "message": "TypeError can be thrown as \"initial\" might be null or undefined here.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAG7h-_7ZHL5nV6",
+      "rule": "javascript:S6582",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 113,
+      "message": "Prefer using an optional chain expression instead, as it's more concise and easier to read.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "test/application/run.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGj_9q7h-_7ZHL5nVo",
+      "rule": "javascript:S7778",
+      "type": "CODE_SMELL",
+      "severity": "MINOR",
+      "line": 73,
+      "message": "Merge these Array#push() calls into a single call with multiple arguments.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "file": "lib/plan-v2.js",
+      "shipped": true,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAHd7h-_7ZHL5nWB",
+      "rule": "javascript:S3358",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "line": 86,
+      "message": "Extract this nested ternary operation into an independent statement.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "file": "lifecycle/composition.js",
+      "shipped": true,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkACL7h-_7ZHL5nV-",
+      "rule": "javascript:S2871",
+      "type": "BUG",
+      "severity": "CRITICAL",
+      "line": 15,
+      "message": "Provide a compare function that depends on \"String.localeCompare\", to reliably sort elements alphabetically.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "HIGH"
+        }
+      ],
+      "file": "lifecycle/external-gateway.js",
+      "shipped": true,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkACL7h-_7ZHL5nV_",
+      "rule": "javascript:S2681",
+      "type": "CODE_SMELL",
+      "severity": "MAJOR",
+      "line": 28,
+      "message": "This statement will not be executed conditionally; only the first statement will be. The rest will execute unconditionally.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "file": "lifecycle/external-gateway.js",
+      "shipped": true,
+      "owner_disposition": "pending; no Sonar state changed"
+    },
+    {
+      "key": "AaFGkAAX7h-_7ZHL5nV9",
+      "rule": "javascript:S5443",
+      "type": "VULNERABILITY",
+      "severity": "CRITICAL",
+      "line": 4,
+      "message": "Make sure publicly writable directories are used safely here.",
+      "status": "OPEN",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "file": "test/support/application-inputs.js",
+      "shipped": false,
+      "owner_disposition": "pending; no Sonar state changed"
+    }
+  ]
+}

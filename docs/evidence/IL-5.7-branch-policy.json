@@ -1,0 +1,302 @@
+{
+  "observed_on": "2026-10-18",
+  "rest_reads": {
+    "debian_destination_protection": {
+      "endpoint": "repos/drumee/debian/branches/feat%2Fcontainer-distribution/protection",
+      "status": "HTTP/2.0 403 Forbidden",
+      "exit": 1,
+      "body": {
+        "message": "Resource not accessible by personal access token",
+        "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+        "status": "403"
+      },
+      "stderr": "gh: Resource not accessible by personal access token (HTTP 403)"
+    },
+    "debian_destination_rules": {
+      "endpoint": "repos/drumee/debian/rules/branches/feat%2Fcontainer-distribution",
+      "status": "HTTP/2.0 200 OK",
+      "exit": 0,
+      "body": [],
+      "stderr": ""
+    },
+    "debian_rulesets": {
+      "endpoint": "repos/drumee/debian/rulesets?includes_parents=true",
+      "status": "HTTP/2.0 200 OK",
+      "exit": 0,
+      "body": [],
+      "stderr": ""
+    },
+    "debian_main_protection": {
+      "endpoint": "repos/drumee/debian/branches/main/protection",
+      "status": "HTTP/2.0 403 Forbidden",
+      "exit": 1,
+      "body": {
+        "message": "Resource not accessible by personal access token",
+        "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+        "status": "403"
+      },
+      "stderr": "gh: Resource not accessible by personal access token (HTTP 403)"
+    },
+    "debian_main_rules": {
+      "endpoint": "repos/drumee/debian/rules/branches/main",
+      "status": "HTTP/2.0 200 OK",
+      "exit": 0,
+      "body": [],
+      "stderr": ""
+    },
+    "debian_reviews": {
+      "endpoint": "repos/drumee/debian/pulls/7/reviews",
+      "status": "HTTP/2.0 200 OK",
+      "exit": 0,
+      "body": [],
+      "stderr": ""
+    },
+    "infra_destination_protection": {
+      "endpoint": "repos/drumee/infra-layer/branches/main/protection",
+      "status": "HTTP/2.0 403 Forbidden",
+      "exit": 1,
+      "body": {
+        "message": "Resource not accessible by personal access token",
+        "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+        "status": "403"
+      },
+      "stderr": "gh: Resource not accessible by personal access token (HTTP 403)"
+    },
+    "infra_destination_rules": {
+      "endpoint": "repos/drumee/infra-layer/rules/branches/main",
+      "status": "HTTP/2.0 200 OK",
+      "exit": 0,
+      "body": [],
+      "stderr": ""
+    },
+    "infra_rulesets": {
+      "endpoint": "repos/drumee/infra-layer/rulesets?includes_parents=true",
+      "status": "HTTP/2.0 200 OK",
+      "exit": 0,
+      "body": [],
+      "stderr": ""
+    },
+    "infra_reviews": {
+      "endpoint": "repos/drumee/infra-layer/pulls/2/reviews",
+      "status": "HTTP/2.0 200 OK",
+      "exit": 0,
+      "body": [],
+      "stderr": ""
+    }
+  },
+  "graphql": {
+    "data": {
+      "debian": {
+        "defaultBranchRef": {
+          "name": "main",
+          "target": {
+            "oid": "b8b0ebe7082e1ad2366f3a7997712f5da5bba127"
+          },
+          "branchProtectionRule": null
+        },
+        "destination": {
+          "name": "feat/container-distribution",
+          "target": {
+            "oid": "3fb32d86ce336c886235c23b9632a140a2dc3045"
+          },
+          "branchProtectionRule": null
+        },
+        "pullRequest": {
+          "mergeable": "MERGEABLE",
+          "mergeStateStatus": "UNSTABLE",
+          "reviewDecision": null,
+          "baseRefName": "feat/container-distribution",
+          "headRefOid": "86f68a735096a070aa9aa77bc0d79cf0cd1f47af"
+        }
+      },
+      "infra": {
+        "defaultBranchRef": {
+          "name": "main",
+          "target": {
+            "oid": "bef9a379754bcf9a46fed8bcb6f88fe1f775c739"
+          },
+          "branchProtectionRule": null
+        },
+        "pullRequest": {
+          "mergeable": "MERGEABLE",
+          "mergeStateStatus": "UNSTABLE",
+          "reviewDecision": null,
+          "baseRefName": "main",
+          "headRefOid": "de4b34e99370bf3b9f0d17399db4b2ea3d107677"
+        }
+      }
+    }
+  },
+  "branch_metadata": {
+    "debian": {
+      "name": "feat/container-distribution",
+      "commit": {
+        "sha": "3fb32d86ce336c886235c23b9632a140a2dc3045",
+        "node_id": "C_kwDOQMKb29oAKDNmYjMyZDg2Y2UzMzZjODg2MjM1YzIzYjk2MzJhMTQwYTJkYzMwNDU",
+        "commit": {
+          "author": {
+            "name": "Somanos Sar",
+            "email": "somanos@drumee.com",
+            "date": "2026-10-16T14:53:14Z"
+          },
+          "committer": {
+            "name": "Somanos Sar",
+            "email": "somanos@drumee.com",
+            "date": "2026-10-16T14:53:14Z"
+          },
+          "message": "docs(distribution): close review handoff and record isolated cleanup",
+          "tree": {
+            "sha": "d01ff78b5c4054274c38f804a0210dd4c143d3d8",
+            "url": "https://api.github.com/repos/drumee/debian/git/trees/d01ff78b5c4054274c38f804a0210dd4c143d3d8"
+          },
+          "url": "https://api.github.com/repos/drumee/debian/git/commits/3fb32d86ce336c886235c23b9632a140a2dc3045",
+          "comment_count": 0,
+          "verification": {
+            "verified": false,
+            "reason": "unsigned",
+            "signature": null,
+            "payload": null,
+            "verified_at": null
+          }
+        },
+        "url": "https://api.github.com/repos/drumee/debian/commits/3fb32d86ce336c886235c23b9632a140a2dc3045",
+        "html_url": "https://github.com/drumee/debian/commit/3fb32d86ce336c886235c23b9632a140a2dc3045",
+        "comments_url": "https://api.github.com/repos/drumee/debian/commits/3fb32d86ce336c886235c23b9632a140a2dc3045/comments",
+        "author": null,
+        "committer": null,
+        "parents": [
+          {
+            "sha": "20a0bfa1a83af2a3a83e849c83b619676212a224",
+            "url": "https://api.github.com/repos/drumee/debian/commits/20a0bfa1a83af2a3a83e849c83b619676212a224",
+            "html_url": "https://github.com/drumee/debian/commit/20a0bfa1a83af2a3a83e849c83b619676212a224"
+          }
+        ]
+      },
+      "_links": {
+        "self": "https://api.github.com/repos/drumee/debian/branches/feat/container-distribution",
+        "html": "https://github.com/drumee/debian/tree/feat/container-distribution"
+      },
+      "protected": false,
+      "protection": {
+        "enabled": false,
+        "required_status_checks": {
+          "enforcement_level": "off",
+          "contexts": [],
+          "checks": []
+        }
+      },
+      "protection_url": "https://api.github.com/repos/drumee/debian/branches/feat/container-distribution/protection"
+    },
+    "infra": {
+      "name": "main",
+      "commit": {
+        "sha": "bef9a379754bcf9a46fed8bcb6f88fe1f775c739",
+        "node_id": "C_kwDOVHcpvdoAKGJlZjlhMzc5NzU0YmNmOWE0NmZlZDhiY2I2Zjg4ZmUxZjc3NWM3Mzk",
+        "commit": {
+          "author": {
+            "name": "Somanos Sar",
+            "email": "somanossar@gmail.com",
+            "date": "2026-10-16T15:01:43Z"
+          },
+          "committer": {
+            "name": "GitHub",
+            "email": "noreply@github.com",
+            "date": "2026-10-16T15:01:43Z"
+          },
+          "message": "Merge pull request #1 from drumee/feat/il4-release-candidate\n\nFeat/il4 release candidate",
+          "tree": {
+            "sha": "d138d6a960038fd041b8c3eec61c1902fb372f4f",
+            "url": "https://api.github.com/repos/drumee/infra-layer/git/trees/d138d6a960038fd041b8c3eec61c1902fb372f4f"
+          },
+          "url": "https://api.github.com/repos/drumee/infra-layer/git/commits/bef9a379754bcf9a46fed8bcb6f88fe1f775c739",
+          "comment_count": 0,
+          "verification": {
+            "verified": true,
+            "reason": "valid",
+            "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq0jxXCRC1aQ7uu5UhlAAARKoQAGvJKgmiQsbpxKc3y3c7mibp\ntJBW8NHr2T9ORHfYWTLsUZHzotoDVCsMk9IWMnmWXn2NaxdXU8bTVx+hDhq/iS5K\nHnBxGqzfY9zJB4Wx7o3yZ7e5sDt4g8Ij3SDeKqLm6qa+pzUU3YZii0HUWm3X5jjf\nFVf1rkPdss0aC3TCczWCelViywNQ93dqNK4OvRSy22BotKIY3cj8Q3g9+l/Bnadx\nWd1iPRktT5jNpIQvT4jbzuX54jiX/WkLiCWNEknitDxyHnQg56PtUzWQWEhCerOB\nh4BG+NhP/kqYMICnVbPkBtj0svOJRt25Ejv6v2os6QeAQlBO8LdrBKj9EDjkyvF9\nWyhNrn1IyoMj1Nzu6VZhnaeSuGx2TByL2Dx24rdxvBmTs5HKN8EurEVGkjTHS6If\nhmK9eJ+8Hv9fQ2T+WZsQqliDhHZ9rDs+8bKaOA3vlqhEqFlwNUKWEiJWvsiHZqyf\n05Fh5tFUhgREMpxBsDmmN31B3RiuZp70KSAUjEHER33LWoXIuqNRB1hEebV7byJ3\nUwx8bQmnPbcqFf4nCVC0LT4I9NbEYmB0zvpECSZhNLDDQb/wVOpenPNE+gpN+CdI\nZ24WWcPFT9P+xdaToGR2qC1KH7STAyrlHdFC41NcCPccN+69UcVKrpqTpB+qPTtd\nFQqiYkY1cIRAGUqJFDfL\n=06c2\n-----END PGP SIGNATURE-----\n",
+            "payload": "tree d138d6a960038fd041b8c3eec61c1902fb372f4f\nparent 35fe3d0e6b6311d43940338b65a7e5ae74c0d222\nparent 94216fb59c83114ab97fff51dbfa36f63e2316f2\nauthor Somanos Sar <somanossar@gmail.com> 1792162903 +0200\ncommitter GitHub <noreply@github.com> 1792162903 +0200\n\nMerge pull request #1 from drumee/feat/il4-release-candidate\n\nFeat/il4 release candidate",
+            "verified_at": "2026-10-16T15:01:44Z"
+          }
+        },
+        "url": "https://api.github.com/repos/drumee/infra-layer/commits/bef9a379754bcf9a46fed8bcb6f88fe1f775c739",
+        "html_url": "https://github.com/drumee/infra-layer/commit/bef9a379754bcf9a46fed8bcb6f88fe1f775c739",
+        "comments_url": "https://api.github.com/repos/drumee/infra-layer/commits/bef9a379754bcf9a46fed8bcb6f88fe1f775c739/comments",
+        "author": {
+          "login": "somanos",
+          "id": 177176074,
+          "node_id": "U_kgDOCo9-Cg",
+          "avatar_url": "https://avatars.githubusercontent.com/u/177176074?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/somanos",
+          "html_url": "https://github.com/somanos",
+          "followers_url": "https://api.github.com/users/somanos/followers",
+          "following_url": "https://api.github.com/users/somanos/following{/other_user}",
+          "gists_url": "https://api.github.com/users/somanos/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/somanos/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/somanos/subscriptions",
+          "organizations_url": "https://api.github.com/users/somanos/orgs",
+          "repos_url": "https://api.github.com/users/somanos/repos",
+          "events_url": "https://api.github.com/users/somanos/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/somanos/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "committer": {
+          "login": "web-flow",
+          "id": 19864447,
+          "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+          "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/web-flow",
+          "html_url": "https://github.com/web-flow",
+          "followers_url": "https://api.github.com/users/web-flow/followers",
+          "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+          "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+          "organizations_url": "https://api.github.com/users/web-flow/orgs",
+          "repos_url": "https://api.github.com/users/web-flow/repos",
+          "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/web-flow/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "parents": [
+          {
+            "sha": "35fe3d0e6b6311d43940338b65a7e5ae74c0d222",
+            "url": "https://api.github.com/repos/drumee/infra-layer/commits/35fe3d0e6b6311d43940338b65a7e5ae74c0d222",
+            "html_url": "https://github.com/drumee/infra-layer/commit/35fe3d0e6b6311d43940338b65a7e5ae74c0d222"
+          },
+          {
+            "sha": "94216fb59c83114ab97fff51dbfa36f63e2316f2",
+            "url": "https://api.github.com/repos/drumee/infra-layer/commits/94216fb59c83114ab97fff51dbfa36f63e2316f2",
+            "html_url": "https://github.com/drumee/infra-layer/commit/94216fb59c83114ab97fff51dbfa36f63e2316f2"
+          }
+        ]
+      },
+      "_links": {
+        "self": "https://api.github.com/repos/drumee/infra-layer/branches/main",
+        "html": "https://github.com/drumee/infra-layer/tree/main"
+      },
+      "protected": false,
+      "protection": {
+        "enabled": false,
+        "required_status_checks": {
+          "enforcement_level": "off",
+          "contexts": [],
+          "checks": []
+        }
+      },
+      "protection_url": "https://api.github.com/repos/drumee/infra-layer/branches/main/protection"
+    }
+  },
+  "decision": {
+    "required_checks_observed": [],
+    "required_human_review_observed": false,
+    "classic_rest_limitation": "403 for PAT and integration; not interpreted as absence. GraphQL branchProtectionRule=null and protected=false independently verified.",
+    "effective_rulesets": [],
+    "protection_modified": false
+  }
+}
