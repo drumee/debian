@@ -243,3 +243,27 @@ acceptance of historical debt/security reservations and the separate merge
 operation. Order remains Infra #2 → Debian #7 into feat/container-distribution;
 convergence to Debian main and future registry migration require separate review.
 No publication, merge, Oxy-form resumption, production operation or D0 occurred.
+
+## IL-5.10 — canonical integration and alpha.3 decision dossier
+
+[Final IL-5.10 report](IL-5.10-final-report.md) records A PASS after the actual
+Debian merge, confirmed Infra #2 merge at
+`9e4166618ca519e5d9b9e58f5191d37c5fd56462`, the unexecuted
+[Debian-main convergence plan](IL-5.10-C-debian-convergence-plan.md) and the
+clean-main qualified, still-unpublished alpha.3 candidate. Debian continues to
+pin aa9057f/source SRI unchanged; Runtime alpha.4 and minimal-kernel are untouched.
+Source and npm SRI remain separate. Canonical package bytes retain
+ZZIxqtHs…9Pw== after two identical clean-main packs and isolated-consumer/types
+qualification. No migration to a presumed npm alpha.3 dependency is made.
+
+Technical status is READY_FOR_ALPHA3_PUBLICATION_DECISION, not publication
+permission. The broader 227-record legacy Sonar main inventory, partial global
+Security/Dependabot visibility, 65 visible ESLint warnings and Debian's two/91
+historical debt remain explicit owner-review inputs. New Quality/CodeQL passes
+are not a blanket acceptance of those records. No Debian-main merge, release tag,
+image/npm publication, production action or D0 occurs.
+
+[Oxy-form handoff](IL-5.10-oxy-form-handoff.md) supplies exact integrated sources,
+existing profile/CLI, artifact mapping and remaining target/SMTP qualification.
+It leaves the static site/forms and Oxy-form repository untouched; the consumer
+is not declared accepted or resumed.
