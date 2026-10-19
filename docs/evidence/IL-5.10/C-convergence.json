@@ -1,0 +1,1648 @@
+{
+  "status": "PLAN_PREPARED_NOT_INTEGRATED",
+  "main": "558e4b8561c70897a3383e1ac188e70a2d607892",
+  "distribution": "1ff957fac41f158346974d0b290b9396fefb44b6",
+  "merge_base": "245c5161ded2452395da7a879bb50853386c933b",
+  "main_only_commits": [
+    {
+      "sha": "558e4b8561c70897a3383e1ac188e70a2d607892",
+      "subject": "Merge pull request #6 from drumee/docs/readme-refresh"
+    },
+    {
+      "sha": "d52fc825cbc7a82ec8908beb92d24b9e4c689fc3",
+      "subject": "docs: add AGPL-3.0 LICENSE"
+    },
+    {
+      "sha": "b8b0ebe7082e1ad2366f3a7997712f5da5bba127",
+      "subject": "feat: force English default language in pod configs"
+    },
+    {
+      "sha": "9c5b180e61fd35daf532c4d77f76fd685fbba370",
+      "subject": "Merge pull request #5 from drumee/feat/seed-builder"
+    },
+    {
+      "sha": "7b7d8d18362167c0a74d13cb60e4bb17c34ee2a6",
+      "subject": "Merge pull request #4 from drumee/feat/seed-builder"
+    }
+  ],
+  "distribution_only_commits": [
+    {
+      "sha": "1ff957fac41f158346974d0b290b9396fefb44b6",
+      "subject": "Merge pull request #7 from drumee/feat/il5-minimal-application"
+    },
+    {
+      "sha": "490c4b0a28ffb35da6ff248402139b5f600c793f",
+      "subject": "docs(distribution): finalize active source guides and IL-5.9-B CI readback"
+    },
+    {
+      "sha": "667be439e6dbe543f6e01a223dccbd0bbf5f9d4f",
+      "subject": "docs(distribution): qualify IL-5.9-B realignment and controlled integration handoff"
+    },
+    {
+      "sha": "8d9ffd04b2150f418bdb609ce07ad103ef225901",
+      "subject": "test(distribution): record clean-clone IL-5.9-B image and acceptance evidence"
+    },
+    {
+      "sha": "ccaa839bf13ab163025e868b21f16516c87d1ff9",
+      "subject": "test(distribution): exercise interrupted recovery and SMTP queue isolation after realignment"
+    },
+    {
+      "sha": "a7a756f9814ff341d78430dbac1f5d6774f45e46",
+      "subject": "fix(distribution): pin qualified IL-5.9 Infra Layer source and verify installed bytes"
+    },
+    {
+      "sha": "0d936b870bd634bac44939066f4a0e526e1b02ea",
+      "subject": "docs(il5.7): validate branch policy debt and owner integration decision"
+    },
+    {
+      "sha": "86f68a735096a070aa9aa77bc0d79cf0cd1f47af",
+      "subject": "docs(il5.6): qualify CI stabilization with measured baseline debt"
+    },
+    {
+      "sha": "1b1480dd8ec15c92442ed2208d36c3904ec36b4f",
+      "subject": "fix(ci): trust only the packaging workspace and pin qualified ShellCheck"
+    },
+    {
+      "sha": "8a64533be404f4375e578695c6e952ced8a64c99",
+      "subject": "docs(il5.6): reproduce CI packaging and ShellCheck against baseline"
+    },
+    {
+      "sha": "6687d7c19f686e15971cd6deec3ba1bfbf8eb0ab",
+      "subject": "docs(il5): link canonical and distribution review PRs"
+    },
+    {
+      "sha": "da3890abd6c2e1b279f5dfe625ed0babab8e602a",
+      "subject": "docs(il5): record cleanroom qualification and review reservations"
+    },
+    {
+      "sha": "cfb993dd3979122e4ff7915b8627ff669ef90a96",
+      "subject": "build(il5): pin qualified Infra Layer candidate source and integrity"
+    },
+    {
+      "sha": "d3d85a51a50964950e6a685675b7a36a260e5065",
+      "subject": "test(il5): qualify operator runtime proxy recovery and optional SMTP"
+    },
+    {
+      "sha": "9ffb273ba428cea88134740bb99d241e8da5b4a5",
+      "subject": "feat(il5): add explicit minimal application operator and immutable plugin assembly"
+    },
+    {
+      "sha": "5f727f784971ae9511a8749dbb861bd460932ec2",
+      "subject": "docs(il5): audit external gateway distribution boundaries"
+    },
+    {
+      "sha": "3fb32d86ce336c886235c23b9632a140a2dc3045",
+      "subject": "docs(distribution): close review handoff and record isolated cleanup"
+    },
+    {
+      "sha": "20a0bfa1a83af2a3a83e849c83b619676212a224",
+      "subject": "docs(distribution): record final IL-4 release qualification evidence"
+    },
+    {
+      "sha": "4a0efba6193912ce5b0487db51fb541ca79638d0",
+      "subject": "fix(sql): include canonical upsert columns in provisioner grants"
+    },
+    {
+      "sha": "6c8e5b86e9767c9f20416e611539ea2743faf3f4",
+      "subject": "fix(security): derive SQL writes from canonical runtime statements"
+    },
+    {
+      "sha": "bf3020e136dda8fc7e2b90d3e2ce53f0596a20a6",
+      "subject": "fix(test): retain canonical loopback isolation during remote restore"
+    },
+    {
+      "sha": "e3916266954d12054ea6b26c46807dee6ae48550",
+      "subject": "fix(distribution): verify portable OCI artifacts across Docker stores"
+    },
+    {
+      "sha": "6555f1868b95b6f7f160d5b6a2ec0777c3f94f94",
+      "subject": "feat(distribution): qualify durable enrollment and candidate recovery boundaries"
+    },
+    {
+      "sha": "3e7a6547e9d7626fcbf54881894a6388541d7e69",
+      "subject": "test(distribution): exercise real minimal installation and recovery"
+    },
+    {
+      "sha": "664f75208713576dc269dd36a22011b489a4162a",
+      "subject": "fix(distribution): preserve Team schema defaults and canonical email sign-in"
+    },
+    {
+      "sha": "2c7a00640f895ff7776b726ce533e8f8adfb1684",
+      "subject": "fix(distribution): read intrinsic manifest through exported package root"
+    },
+    {
+      "sha": "2c9f6033521546d15feced513c5bdeb9cf04de5a",
+      "subject": "feat(operator): delegate minimal profile commands to canonical lifecycle"
+    },
+    {
+      "sha": "237016b20ca8e10e439043bed89c9f7f9dfaf4bc",
+      "subject": "feat(distribution): separate runtime and Hub provisioning SQL roles"
+    },
+    {
+      "sha": "15f75fee7e8bfcb2e46154fc224aee78c11d1e6b",
+      "subject": "feat(distribution): invoke canonical initial administrator jobs"
+    },
+    {
+      "sha": "7823e0ac761e4dd05e74f0b4ee512aa905b32940",
+      "subject": "feat(distribution): add explicitly selected minimal-kernel profile"
+    },
+    {
+      "sha": "8df7cf2e8a2bf0cd32d978f5ce801c04e60c21d0",
+      "subject": "feat(distribution): align minimal kernel with canonical KB-01B artifacts"
+    },
+    {
+      "sha": "d035f9ed5af437c323d364dfbd732673f24f6c3e",
+      "subject": "docs(distribution): pin final infrastructure qualification evidence"
+    },
+    {
+      "sha": "1fa0939d5c73cdc40b0fb4ac936b76aaa63e4e7e",
+      "subject": "docs(distribution): specify minimal profile handoff and first-operator gate"
+    },
+    {
+      "sha": "4382c96d3362ed9eadce67cb59b18aaeb5e00ed9",
+      "subject": "docs(distribution): inventory pinned minimal kernel qualification inputs"
+    },
+    {
+      "sha": "8a236e5d147a55cfd5580dcda0712cd6436ca93c",
+      "subject": "acme_email defaults to the admin email, and a guard so it stays that way"
+    },
+    {
+      "sha": "c4f1ffd2b71a2c35f9a836e239dd1b5da6420ac8",
+      "subject": "release 1.0.57: the fixes a fresh container install found"
+    },
+    {
+      "sha": "e88ba219fc202cfa668d3363428bc6f0b9cd0ced",
+      "subject": "container channel: three fixes a real fresh install found, and DEB_UNSIGNED"
+    },
+    {
+      "sha": "5ed937a308d0a252c9885b40f08ff3ff74aa56e4",
+      "subject": "publish the seven role images at 1.0.55"
+    },
+    {
+      "sha": "267cb498769cfe8deeea02dcbbec267d84fb3b9a",
+      "subject": "release-status.sh: the roles row was permanently wrong"
+    },
+    {
+      "sha": "3d655b466b1250f7f119b610a7cfea11958edf6c",
+      "subject": "release 1.0.55: drumee-role-media becomes drumee-role-converter"
+    },
+    {
+      "sha": "021da8832d2a2df3d90884b30116c03c719c4026",
+      "subject": "release 1.0.52: the schemas role, and seven single-box assumptions the split exposed"
+    },
+    {
+      "sha": "b6a1ae250d37064de41848ace2425d5fa9194bb2",
+      "subject": "release 1.0.43: one writer per credential (channel-parity change 3, second half)"
+    },
+    {
+      "sha": "21fcc56109a2f6e83727b55816e4f13cfba7049d",
+      "subject": "release 1.0.42: strip .env to what compose and the host CLI need (channel-parity change 3)"
+    },
+    {
+      "sha": "e895b1202451aa844ad4e2a52d41118891cac9c9",
+      "subject": "release 1.0.41: one configuration path for both channels (channel-parity change 1)"
+    },
+    {
+      "sha": "86b120fa959d1cffcd2ae792e6a2f2b3917a93b0",
+      "subject": "release 1.0.37: build the app role"
+    },
+    {
+      "sha": "f5722b1c1dca2428417db5545a3490bc0386d309",
+      "subject": "release 1.0.36: compose emits the role services"
+    },
+    {
+      "sha": "2142c5d42daa20789817e8a874e60f6f2c7a6945",
+      "subject": "release 1.0.31: implement infra-init"
+    },
+    {
+      "sha": "ea6247ada2269c5d903202890d7492a76e46109c",
+      "subject": "release 1.0.30: reduce inter-component Depends to one, and build the first role image"
+    },
+    {
+      "sha": "884250602280c1f614cc8528d110411ca2f128d1",
+      "subject": "roles: publish bootstrap and the role packages, and build the first role image"
+    },
+    {
+      "sha": "ad395d4d22ce0bbd3a256bfc1779fb278db43a27",
+      "subject": "tests: run the lifecycle assertions against a real box over ssh"
+    },
+    {
+      "sha": "dbde1b4114ee27baf918c28e59b78845781ed2f4",
+      "subject": "tests: a lifecycle harness for an already-installed box"
+    },
+    {
+      "sha": "b85b5e55057c53e565ade4684ea2a8ab15cacb4c",
+      "subject": "infra 1.2.31 / release 1.0.29: make dpkg-reconfigure actually re-render"
+    },
+    {
+      "sha": "9a965830507a2265e5aeab1803a3f17a511306d3",
+      "subject": "infra 1.2.30 / release 1.0.28: never publish a link-local IPv6 address in a zone"
+    },
+    {
+      "sha": "45ad40b9bc7bb874b3bfa58d140fb9d8eb80a2b3",
+      "subject": "infra 1.2.29 / release 1.0.27: make the resolver fix survive a reboot"
+    },
+    {
+      "sha": "47a1fd40a8c70b1046c046a34ed8d98a82fed265",
+      "subject": "infra 1.2.28 / release 1.0.26: recommend bind9-dnsutils, and start pointing the host at its own named"
+    },
+    {
+      "sha": "57480f61b0905abb1ad5d3c200b8c145dc67b606",
+      "subject": "release-status.sh: report on the pool, not the frozen flat repo"
+    },
+    {
+      "sha": "97fd9a0c1b884716995c3ede5d0d9b8fc6fdff9c",
+      "subject": "server-pod 2.9.98 / release 1.0.25: make the package tell the truth about its architecture, and deprecate the source-based images"
+    },
+    {
+      "sha": "6efa747fbf2c6fc3b7fad3cf756413f4415adbce",
+      "subject": "keyring 1.1.0 / release 1.0.24: offline-master signing key, distributable by apt"
+    },
+    {
+      "sha": "04d4d08df0bb3945592ef9608e7f48aaba74e77e",
+      "subject": "static 1.0.5 / release 1.0.23: first pool-only release, flat frozen"
+    },
+    {
+      "sha": "29b4632b885c35b749ee41d5fbb941486db5ea4b",
+      "subject": "Rename baremetal.sh to debian.sh, keeping the old URLs served"
+    },
+    {
+      "sha": "1370babc54728e5291422fe0457369d9ee7cee1e",
+      "subject": "docs: document the build flow end to end, and the steps that ship nothing"
+    },
+    {
+      "sha": "93d6a61bf265ab378c17bb212ff6b446d7254306",
+      "subject": "Added scripts/release-status.sh"
+    },
+    {
+      "sha": "c1e919433abf3ef4613ec1e9e31739b7a4220c5c",
+      "subject": "server-pod 2.9.97 / release 1.0.22: stop losing pm2 to a login session scope"
+    },
+    {
+      "sha": "cf6fc51fbf4076d74f69b5d13c53d2ffbf44e218",
+      "subject": "infra 1.2.27 / release 1.0.21: make dpkg-reconfigure actually re-render"
+    },
+    {
+      "sha": "ce79548fea1e865392601650e3ff38d2fcefec9b",
+      "subject": "release.yml: fix the workflow file that never ran"
+    },
+    {
+      "sha": "3173a63dac6021ec8a0d86a6f7507356c1f6cc39",
+      "subject": "server-pod 2.9.96 / infra 1.2.26 / release 1.0.20: stop hanging shutdown, stop defaulting to LAN"
+    },
+    {
+      "sha": "b215c393485437d670627409ce2ff584a7af1e13",
+      "subject": "1.0.18"
+    },
+    {
+      "sha": "683ab1426528f4fd0a6c58f565ce48b433f80ff4",
+      "subject": "schemas 2.7.1 / release 1.0.17: the seed carries no entities"
+    },
+    {
+      "sha": "231715b0e3976732706f6a8884319786227dd191",
+      "subject": "infra 1.2.25 / release 1.0.16: make a fresh install actually serve"
+    },
+    {
+      "sha": "3e1a6fac0d242ee4ec6ad8339b32db92f78d7cb7",
+      "subject": "server-pod 2.9.95 / release 1.0.14: start the stack after installing it"
+    },
+    {
+      "sha": "dda04fd9e7c5caf11407c9da93c4c9be39c4f68c",
+      "subject": "infra 1.2.23 / release 1.0.13: self-signed can actually serve"
+    },
+    {
+      "sha": "3095be2d8da1d1ea068d888cefb3dd2831420ff3",
+      "subject": "infra 1.2.22 / release 1.0.12: fix what deploying 1.2.21 exposed"
+    },
+    {
+      "sha": "00f9fe901549293f791c1edbd2be79e6763ba476",
+      "subject": "release 1.0.11: pin the metapackage to infra 1.2.21"
+    },
+    {
+      "sha": "b07d124c748b2d00374ed777c5b2f0ed1f165518",
+      "subject": "infra: deploy DNS on the self-signed/private path (1.2.21)"
+    },
+    {
+      "sha": "b3a33c5e412f6087411a84c001a9769334b1bab2",
+      "subject": "infra: remove the rendered configuration on purge (1.2.20 / release 1.0.10)"
+    },
+    {
+      "sha": "74c1a021c9f3379c35030d9d594ebaa3685dcdc7",
+      "subject": "release 1.0.9: infra 1.2.19 \u2014 serve the static assets"
+    },
+    {
+      "sha": "b393bb0302c0d9016d5b6c2e33ac67b885ae1f87",
+      "subject": "scripts: require --key when publishing the flat repository"
+    },
+    {
+      "sha": "c4611eda7f1cc16dc96df9a5e6aeaeb7180e379d",
+      "subject": "release 1.0.8: infra 1.2.18 \u2014 1.2.17 could not be installed at all"
+    },
+    {
+      "sha": "4225025b39c084ee517c29df87bec3a923b77b4f",
+      "subject": "infra: ask before re-rendering an existing instance, and refuse to install on defaults"
+    },
+    {
+      "sha": "425ec0a0d4c2154614bc0694948378fab6f38789",
+      "subject": "release 1.0.6: infra 1.2.16 \u2014 no TURN upstream without a host"
+    },
+    {
+      "sha": "91a31dcb29d14dac48900bf5e2d42c4f84e41c2a",
+      "subject": "release 1.0.5: infra 1.2.15 \u2014 sweep the stale private vhost"
+    },
+    {
+      "sha": "1812d6bd67ab2a45217c294af4de3d7143515a92",
+      "subject": "release 1.0.4: infra 1.2.14 \u2014 the certificate directory setting now has effect"
+    },
+    {
+      "sha": "b3a95cbd08debddadec61134ac81f979b5c4e29b",
+      "subject": "infra: export the certificate-directory variable that is actually read"
+    },
+    {
+      "sha": "d57c12a8d01383358b033c40de1ed9215865af6d",
+      "subject": "release 1.0.3: infra 1.2.13, schemas 2.7.0, server-pod 2.9.94, node-runtime 0.1.0"
+    },
+    {
+      "sha": "9e33d0bc5dd991961957dc63fc05389f3daed9b6",
+      "subject": "server-pod 2.9.94: make the service actually start, and ship pm2"
+    },
+    {
+      "sha": "a703cbee936a642f176a44976d7d1de928df235c",
+      "subject": "schemas: fix a guard that could never pass"
+    },
+    {
+      "sha": "69aca8ea6bc6deb75beeb9fab1278282504abb84",
+      "subject": "scripts: install curl before using it, not after"
+    },
+    {
+      "sha": "73ecef719a1bb98f63c8eac2858e31750c73ead9",
+      "subject": "release 1.0.1: ship the DNS/TLS wizard to clients"
+    },
+    {
+      "sha": "c7a6a53d921c6f6e134a614ea286c5402d0739e6",
+      "subject": "apt: export the dearmored keyring from publish-apt.sh too"
+    },
+    {
+      "sha": "f3d49c280a50bb4bf541d61910527b39da346385",
+      "subject": "utils: match the maintainer trailer in get_email"
+    },
+    {
+      "sha": "73bbfc885f45ba4360eb792bc78f8dd646a78305",
+      "subject": "apt: publish the pool/dists layout alongside the flat repository"
+    },
+    {
+      "sha": "b0163c912d27759782347f993fc22fc384dacf84",
+      "subject": "infra: ask who runs DNS, not just how TLS is issued; bump to 1.2.12"
+    },
+    {
+      "sha": "d3d0de5fcc6e033c546c523f789cd67137c5d313",
+      "subject": "scripts: fix the maintainer derivation in check-versions.sh --sync"
+    },
+    {
+      "sha": "1068f05b74c998ff4dadbf42725e7e75bffa8f32",
+      "subject": "docker: base image for the role containers (increment 4)"
+    },
+    {
+      "sha": "fd58ac01821fa16e8809f9b5885ad91099ac2d1a",
+      "subject": "packages: drumee-node-runtime and drumee-bootstrap (increment 3)"
+    },
+    {
+      "sha": "eb7810ad7b8a1a1993d56d2d4e18b50329f92de9",
+      "subject": "roles: build the drumee-roles source package (increment 2)"
+    },
+    {
+      "sha": "d6a61c05061bf2c3980dcfd8ec2d92cdad1fb786",
+      "subject": "apt: local reprepro repository to develop against (increment 1)"
+    },
+    {
+      "sha": "070794c70aa2d32aec9177c93ecd65c8ddd5b594",
+      "subject": "roles: add the drumee-roles source package skeleton"
+    },
+    {
+      "sha": "9e5083b0f2aead5952871877e82850505eba09da",
+      "subject": "check-packaging: exclude vendored trees, add the Architecture/payload check"
+    },
+    {
+      "sha": "258c71168178be2597e8b6dc26f975ce1310f6a5",
+      "subject": "schemas: drop the dead schemas/Dockerfile"
+    },
+    {
+      "sha": "a4b80e706e34e75ca6f3aeaf37f7acb7616b09de",
+      "subject": "distribution: adopt the design of record and gate it in CI (increment 0)"
+    },
+    {
+      "sha": "c23d2ddf52877162bedc4e10007bcd57b3f89f2a",
+      "subject": "images: refuse to publish an image with no dependencies, and add on-demand builds"
+    },
+    {
+      "sha": "7f570db140d877ef8e7088fc45bfe55779afec41",
+      "subject": "scripts: rename the two installers to baremetal.sh and containers.sh"
+    }
+  ],
+  "changed_paths_count": 284,
+  "tree_delta": [
+    [
+      "M",
+      ".github/workflows/ci.yml"
+    ],
+    [
+      "M",
+      ".github/workflows/release.yml"
+    ],
+    [
+      "M",
+      ".gitignore"
+    ],
+    [
+      "A",
+      "AGENT-BRIEF.md"
+    ],
+    [
+      "M",
+      "CLAUDE.md"
+    ],
+    [
+      "A",
+      "INTERACTIVE-FLOW.md"
+    ],
+    [
+      "D",
+      "LICENSE"
+    ],
+    [
+      "M",
+      "README.md"
+    ],
+    [
+      "M",
+      "ROADMAP.md"
+    ],
+    [
+      "M",
+      "bin/drumee-ctl"
+    ],
+    [
+      "A",
+      "bootstrap/build.sh"
+    ],
+    [
+      "A",
+      "bootstrap/debian/changelog"
+    ],
+    [
+      "A",
+      "bootstrap/debian/control"
+    ],
+    [
+      "A",
+      "bootstrap/debian/copyright"
+    ],
+    [
+      "A",
+      "bootstrap/debian/install"
+    ],
+    [
+      "A",
+      "bootstrap/debian/rules"
+    ],
+    [
+      "A",
+      "bootstrap/debian/source/format"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/entrypoint/app"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/entrypoint/converter"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/entrypoint/dns"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/entrypoint/infra"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/entrypoint/lib.sh"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/entrypoint/mail"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/entrypoint/schemas"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/entrypoint/web"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/healthcheck/app"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/healthcheck/converter"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/healthcheck/dns"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/healthcheck/mail"
+    ],
+    [
+      "A",
+      "bootstrap/usr/lib/drumee/healthcheck/web"
+    ],
+    [
+      "R093",
+      "deploy/docker/schemas-init.sh",
+      "bootstrap/usr/lib/drumee/schemas/init"
+    ],
+    [
+      "R100",
+      "deploy/docker/container-populate.js",
+      "bootstrap/usr/lib/drumee/schemas/populate.js"
+    ],
+    [
+      "M",
+      "builder/debian/changelog"
+    ],
+    [
+      "M",
+      "builder/debian/control"
+    ],
+    [
+      "A",
+      "config/drumee.minimal-application.example.json"
+    ],
+    [
+      "A",
+      "config/drumee.minimal-application.schema.json"
+    ],
+    [
+      "A",
+      "config/drumee.minimal-kernel.example.yaml"
+    ],
+    [
+      "A",
+      "config/drumee.minimal-kernel.schema.json"
+    ],
+    [
+      "M",
+      "config/drumee.schema.json"
+    ],
+    [
+      "M",
+      "config/render.mjs"
+    ],
+    [
+      "A",
+      "deploy/docker/DEPRECATED.md"
+    ],
+    [
+      "M",
+      "deploy/docker/Dockerfile.infra-init"
+    ],
+    [
+      "M",
+      "deploy/docker/Dockerfile.populate"
+    ],
+    [
+      "M",
+      "deploy/docker/Dockerfile.schemas"
+    ],
+    [
+      "M",
+      "deploy/docker/Dockerfile.server"
+    ],
+    [
+      "M",
+      "deploy/docker/Dockerfile.static"
+    ],
+    [
+      "M",
+      "deploy/docker/Dockerfile.ui"
+    ],
+    [
+      "M",
+      "deploy/docker/Dockerfile.wireguard"
+    ],
+    [
+      "M",
+      "deploy/docker/README.md"
+    ],
+    [
+      "M",
+      "deploy/docker/entrypoint.sh"
+    ],
+    [
+      "A",
+      "docker/Dockerfile.base"
+    ],
+    [
+      "A",
+      "docker/Dockerfile.role-app"
+    ],
+    [
+      "A",
+      "docker/Dockerfile.role-converter"
+    ],
+    [
+      "A",
+      "docker/Dockerfile.role-dns"
+    ],
+    [
+      "A",
+      "docker/Dockerfile.role-infra"
+    ],
+    [
+      "A",
+      "docker/Dockerfile.role-mail"
+    ],
+    [
+      "A",
+      "docker/Dockerfile.role-schemas"
+    ],
+    [
+      "A",
+      "docker/Dockerfile.role-web"
+    ],
+    [
+      "A",
+      "docker/build-role.sh"
+    ],
+    [
+      "A",
+      "docker/drumee-apt-source.sh"
+    ],
+    [
+      "A",
+      "docker/keyrings/README.md"
+    ],
+    [
+      "A",
+      "docker/keyrings/drumee-archive-keyring.gpg"
+    ],
+    [
+      "A",
+      "docker/keyrings/nodesource.gpg"
+    ],
+    [
+      "A",
+      "docker/publish-roles.sh"
+    ],
+    [
+      "A",
+      "docs/IL-5-architecture.md"
+    ],
+    [
+      "A",
+      "docs/IL-5-contract.md"
+    ],
+    [
+      "A",
+      "docs/IL-5-distribution.md"
+    ],
+    [
+      "A",
+      "docs/IL-5-qualification.md"
+    ],
+    [
+      "A",
+      "docs/IL-5-release-handoff.md"
+    ],
+    [
+      "A",
+      "docs/IL-5.6-ci-baseline.md"
+    ],
+    [
+      "A",
+      "docs/IL-5.6-ci-stabilization.md"
+    ],
+    [
+      "A",
+      "docs/IL-5.7-baseline-debt-acceptance.md"
+    ],
+    [
+      "A",
+      "docs/IL-5.7-final-validation.md"
+    ],
+    [
+      "A",
+      "docs/IL-5.7-oxy-form-handoff.md"
+    ],
+    [
+      "A",
+      "docs/IL-5.9-B-consumer-realignment.md"
+    ],
+    [
+      "A",
+      "docs/IL-5.9-B-qualification.md"
+    ],
+    [
+      "A",
+      "docs/IL-5.9-B-source-selection.md"
+    ],
+    [
+      "M",
+      "docs/build-pipeline.md"
+    ],
+    [
+      "A",
+      "docs/channel-parity.md"
+    ],
+    [
+      "A",
+      "docs/debian.md"
+    ],
+    [
+      "A",
+      "docs/distribution.md"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5-application.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5-distribution-cleanroom.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5-distribution-images.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5-installed-consumer.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5-kernel-regression.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5-validation.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.6-ci-comparison.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.6-ci-stabilization.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.6-shellcheck-baseline.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.6-shellcheck-head.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.7-branch-policy.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.7-infra-sonar.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.7-validation.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B-artifact.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/acceptance.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/ci-code-summary.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/ci-documentary-summary.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/image-verification.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/images-first.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/images-second.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/log-receipt.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/packed-consumer.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/shellcheck-comparison.json"
+    ],
+    [
+      "A",
+      "docs/evidence/IL-5.9-B/verify-images.py"
+    ],
+    [
+      "A",
+      "docs/minimal-kernel-il4.md"
+    ],
+    [
+      "A",
+      "docs/minimal-kernel-il4r-evidence.json"
+    ],
+    [
+      "A",
+      "docs/minimal-kernel-il4r-ledger.md"
+    ],
+    [
+      "A",
+      "docs/minimal-kernel-infra-candidate.md"
+    ],
+    [
+      "A",
+      "docs/minimal-kernel-operator.md"
+    ],
+    [
+      "A",
+      "docs/minimal-kernel-recovery.md"
+    ],
+    [
+      "A",
+      "docs/minimal-kernel-sql.md"
+    ],
+    [
+      "M",
+      "docs/native-audit.md"
+    ],
+    [
+      "M",
+      "docs/native-channel.md"
+    ],
+    [
+      "M",
+      "docs/overview.md"
+    ],
+    [
+      "M",
+      "docs/package-builder.md"
+    ],
+    [
+      "M",
+      "docs/package-infra.md"
+    ],
+    [
+      "M",
+      "docs/package-schemas.md"
+    ],
+    [
+      "M",
+      "docs/quickstart.md"
+    ],
+    [
+      "M",
+      "docs/release.md"
+    ],
+    [
+      "M",
+      "docs/version-management.md"
+    ],
+    [
+      "M",
+      "docs/wireguard.md"
+    ],
+    [
+      "M",
+      "infra/debian/changelog"
+    ],
+    [
+      "M",
+      "infra/debian/config"
+    ],
+    [
+      "M",
+      "infra/debian/control"
+    ],
+    [
+      "M",
+      "infra/debian/postinst"
+    ],
+    [
+      "M",
+      "infra/debian/postrm"
+    ],
+    [
+      "M",
+      "infra/debian/templates"
+    ],
+    [
+      "M",
+      "infra/etc/drumee/conf.d/drumee.json"
+    ],
+    [
+      "A",
+      "keyring/build.sh"
+    ],
+    [
+      "A",
+      "keyring/debian/changelog"
+    ],
+    [
+      "A",
+      "keyring/debian/control"
+    ],
+    [
+      "A",
+      "keyring/debian/copyright"
+    ],
+    [
+      "A",
+      "keyring/debian/install"
+    ],
+    [
+      "A",
+      "keyring/debian/postinst"
+    ],
+    [
+      "A",
+      "keyring/debian/rules"
+    ],
+    [
+      "A",
+      "keyring/keys/drumee-archive-2024.asc"
+    ],
+    [
+      "A",
+      "keyring/keys/drumee-archive-2026.asc"
+    ],
+    [
+      "M",
+      "meta/debian/changelog"
+    ],
+    [
+      "M",
+      "meta/debian/control"
+    ],
+    [
+      "M",
+      "meta/make-control.sh"
+    ],
+    [
+      "A",
+      "node-runtime/build.sh"
+    ],
+    [
+      "A",
+      "node-runtime/debian/arch-independent-payload"
+    ],
+    [
+      "A",
+      "node-runtime/debian/changelog"
+    ],
+    [
+      "A",
+      "node-runtime/debian/control"
+    ],
+    [
+      "A",
+      "node-runtime/debian/copyright"
+    ],
+    [
+      "A",
+      "node-runtime/debian/install"
+    ],
+    [
+      "A",
+      "node-runtime/debian/rules"
+    ],
+    [
+      "A",
+      "node-runtime/debian/source/format"
+    ],
+    [
+      "A",
+      "node-runtime/package-lock.json"
+    ],
+    [
+      "A",
+      "node-runtime/package.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/.gitignore"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/Dockerfile"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/README.md"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/infra-source-lock.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/lib/config.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/lib/distribution.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/operator.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/package-lock.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/package.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/runtime/health.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/runtime/host.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/scripts/build.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/scripts/infrastructure-source.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/scripts/plugin-artifact.py"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/test/configuration.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/test/profile.test.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-application/test/source.test.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/.dockerignore"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/.gitignore"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/Dockerfile"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/README.md"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/browser/entry.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/dependency-alignment.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/dependency-manifest.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/inventory.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/inventory.test.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/components.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/config.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/database.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/distribution.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/driver.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/host.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/jobs.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/provisioner.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/lib/sql-policy.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/operator.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/package-lock.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/package.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/scripts/acquire.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/scripts/alignment.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/scripts/browser.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/scripts/build.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/scripts/export.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/scripts/image-archive.py"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/scripts/sources.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/scripts/verify.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/sources.lock.json"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/test/alignment.test.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/test/configuration.js"
+    ],
+    [
+      "A",
+      "profiles/minimal-kernel/test/profile.test.js"
+    ],
+    [
+      "M",
+      "release-manifest.yaml"
+    ],
+    [
+      "A",
+      "roles/build.sh"
+    ],
+    [
+      "A",
+      "roles/debian/changelog"
+    ],
+    [
+      "A",
+      "roles/debian/control"
+    ],
+    [
+      "A",
+      "roles/debian/copyright"
+    ],
+    [
+      "A",
+      "roles/debian/drumee-release.install"
+    ],
+    [
+      "A",
+      "roles/debian/drumee-role-app.lintian-overrides"
+    ],
+    [
+      "A",
+      "roles/debian/drumee-role-converter.lintian-overrides"
+    ],
+    [
+      "A",
+      "roles/debian/drumee-role-dns.lintian-overrides"
+    ],
+    [
+      "A",
+      "roles/debian/drumee-role-infra.lintian-overrides"
+    ],
+    [
+      "A",
+      "roles/debian/drumee-role-mail.lintian-overrides"
+    ],
+    [
+      "A",
+      "roles/debian/drumee-role-schemas.lintian-overrides"
+    ],
+    [
+      "A",
+      "roles/debian/drumee-role-web.lintian-overrides"
+    ],
+    [
+      "A",
+      "roles/debian/gen-substvars.py"
+    ],
+    [
+      "A",
+      "roles/debian/rules"
+    ],
+    [
+      "M",
+      "schemas-patch/build.sh"
+    ],
+    [
+      "D",
+      "schemas/Dockerfile"
+    ],
+    [
+      "M",
+      "schemas/build.sh"
+    ],
+    [
+      "M",
+      "schemas/debian/changelog"
+    ],
+    [
+      "M",
+      "schemas/debian/postinst"
+    ],
+    [
+      "M",
+      "scripts/Dockerfile.seed"
+    ],
+    [
+      "A",
+      "scripts/apt-repo-local.sh"
+    ],
+    [
+      "M",
+      "scripts/build-images-local.sh"
+    ],
+    [
+      "A",
+      "scripts/build-minimal-kernel.sh"
+    ],
+    [
+      "M",
+      "scripts/build-seed.sh"
+    ],
+    [
+      "A",
+      "scripts/check-packaging.sh"
+    ],
+    [
+      "M",
+      "scripts/check-versions.sh"
+    ],
+    [
+      "R099",
+      "scripts/get-drumee.sh",
+      "scripts/containers.sh"
+    ],
+    [
+      "A",
+      "scripts/debian.sh"
+    ],
+    [
+      "M",
+      "scripts/deploy-apt-repo.sh"
+    ],
+    [
+      "D",
+      "scripts/install-native.sh"
+    ],
+    [
+      "A",
+      "scripts/lib/apt-repo.sh"
+    ],
+    [
+      "M",
+      "scripts/publish-apt.sh"
+    ],
+    [
+      "M",
+      "scripts/publish-images.sh"
+    ],
+    [
+      "A",
+      "scripts/publish-pool.sh"
+    ],
+    [
+      "M",
+      "scripts/publish-site.sh"
+    ],
+    [
+      "A",
+      "scripts/release-status.sh"
+    ],
+    [
+      "M",
+      "scripts/seed-entrypoint.sh"
+    ],
+    [
+      "M",
+      "server/build.sh"
+    ],
+    [
+      "M",
+      "server/debian/changelog"
+    ],
+    [
+      "M",
+      "server/debian/control"
+    ],
+    [
+      "M",
+      "server/debian/drumee-server-pod.init"
+    ],
+    [
+      "A",
+      "server/debian/drumee-server-pod.maintscript"
+    ],
+    [
+      "M",
+      "server/debian/drumee-server-pod.service"
+    ],
+    [
+      "A",
+      "server/debian/drumee-server-pod.triggers"
+    ],
+    [
+      "M",
+      "server/debian/postinst"
+    ],
+    [
+      "M",
+      "server/debian/rules"
+    ],
+    [
+      "D",
+      "server/etc/init.d/drumee"
+    ],
+    [
+      "D",
+      "server/etc/rc3.d/S02drumee"
+    ],
+    [
+      "D",
+      "server/etc/rc6.d/K01drumee"
+    ],
+    [
+      "M",
+      "server/system/usr/sbin/drumee"
+    ],
+    [
+      "M",
+      "server/usr/sbin/drumee"
+    ],
+    [
+      "M",
+      "static/debian/changelog"
+    ],
+    [
+      "M",
+      "static/debian/control"
+    ],
+    [
+      "M",
+      "target/etc/drumee/conf.d/drumee.json"
+    ],
+    [
+      "A",
+      "tests/config-parity.sh"
+    ],
+    [
+      "A",
+      "tests/minimal-application/fixtures/plugin/.gitignore"
+    ],
+    [
+      "A",
+      "tests/minimal-application/fixtures/plugin/package-lock.json"
+    ],
+    [
+      "A",
+      "tests/minimal-application/fixtures/plugin/package.json"
+    ],
+    [
+      "A",
+      "tests/minimal-application/fixtures/plugin/server/acl/qualification.json"
+    ],
+    [
+      "A",
+      "tests/minimal-application/fixtures/plugin/server/worker.js"
+    ],
+    [
+      "A",
+      "tests/minimal-application/network.js"
+    ],
+    [
+      "A",
+      "tests/minimal-application/plugin-artifact.test.py"
+    ],
+    [
+      "A",
+      "tests/minimal-application/run.js"
+    ],
+    [
+      "A",
+      "tests/minimal-application/smtp.js"
+    ],
+    [
+      "A",
+      "tests/minimal-kernel/acceptance.js"
+    ],
+    [
+      "A",
+      "tests/minimal-kernel/assertions.js"
+    ],
+    [
+      "A",
+      "tests/minimal-kernel/image-archive.test.py"
+    ],
+    [
+      "A",
+      "tests/minimal-kernel/install-pty.py"
+    ],
+    [
+      "A",
+      "tests/minimal-kernel/interrupt.js"
+    ],
+    [
+      "A",
+      "tests/minimal-kernel/remote-browser.js"
+    ],
+    [
+      "A",
+      "tests/minimal-kernel/rotation.js"
+    ],
+    [
+      "A",
+      "tests/minimal-kernel/run.js"
+    ],
+    [
+      "M",
+      "tests/native/control-deps.sh"
+    ],
+    [
+      "A",
+      "tests/native/dns-zone-config.sh"
+    ],
+    [
+      "M",
+      "tests/native/install-verify.sh"
+    ],
+    [
+      "A",
+      "tests/native/lifecycle-remote.sh"
+    ],
+    [
+      "A",
+      "tests/native/upgrade-reconfigure.sh"
+    ],
+    [
+      "M",
+      "tests/run-all.sh"
+    ],
+    [
+      "M",
+      "tests/wizard-install.sh"
+    ],
+    [
+      "M",
+      "ui/debian/changelog"
+    ],
+    [
+      "M",
+      "ui/debian/control"
+    ],
+    [
+      "M",
+      "utils/functions.sh"
+    ]
+  ],
+  "main_changed_since_base": [
+    "LICENSE",
+    "README.md",
+    "deploy/docker/entrypoint.sh",
+    "infra/etc/drumee/conf.d/drumee.json",
+    "target/etc/drumee/conf.d/drumee.json"
+  ],
+  "concurrent_paths": [
+    "README.md"
+  ],
+  "simulation": {
+    "method": "git merge-tree --write-tree --messages",
+    "exit": 1,
+    "unresolved_tree": "8eba687e8f52aee02634616906448cb60c0a4e8e",
+    "conflicts": [
+      "README.md"
+    ],
+    "refs_modified": false,
+    "commit_created": false,
+    "candidate_qualified": false,
+    "minimal_profile_subtrees_equal_distribution": true
+  },
+  "shellcheck_historical_diagnostic_files_unchanged": [
+    "admin/build.sh",
+    "admin/opt/drumee/schemas/patch.sh",
+    "bin/drumee-plugin",
+    "bootstrap/usr/lib/drumee/entrypoint/lib.sh",
+    "bootstrap/usr/lib/drumee/entrypoint/schemas",
+    "builder/build.sh",
+    "infra/build.sh",
+    "infra/sample.sh",
+    "infra/var/lib/drumee/utils/cron/tmp-files-cleaner",
+    "infra/var/lib/drumee/utils/functions.sh",
+    "meta/build.sh",
+    "schemas-patch/bin/patch-from-file",
+    "schemas-patch/bin/patch-from-manifest.sh",
+    "schemas-patch/build.sh",
+    "schemas-patch/patch.sh",
+    "schemas/build.sh",
+    "scripts/build-seed.sh",
+    "scripts/containers.sh",
+    "scripts/publish-images.sh",
+    "scripts/release-status.sh",
+    "server/build.sh",
+    "server/system/usr/sbin/drumee",
+    "server/usr/sbin/drumee-plugin",
+    "server/usr/share/drumee/admin/admin.sh",
+    "server/usr/share/drumee/admin/create-server",
+    "server/usr/share/drumee/admin/templates/.bashrc",
+    "server/usr/share/drumee/admin/templates/.profile",
+    "server/usr/share/drumee/bin/db-patch-scan.sh",
+    "server/usr/share/drumee/bin/make-zip.sh",
+    "server/usr/share/drumee/sbin/log-history.sh",
+    "server/usr/share/drumee/sbin/log-rotate.sh",
+    "static/build.sh",
+    "tests/config-parity.sh",
+    "tests/native/control-deps.sh",
+    "tests/run-all.sh",
+    "tests/wizard-install.sh",
+    "ui/build.sh",
+    "utils/env.sh",
+    "utils/functions.sh"
+  ],
+  "shellcheck_diagnostic_file_count": 39
+}
