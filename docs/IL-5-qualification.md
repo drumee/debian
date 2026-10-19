@@ -1,6 +1,13 @@
 # IL-5 qualification ledger
 
-Current IL-5.9-B status: **READY_FOR_OWNER_MERGE_DECISION**, with unchanged
+Current IL-5.10 status: **READY_FOR_ALPHA3_PUBLICATION_DECISION**.
+See [the final dossier](IL-5.10-final-report.md): Debian's integrated tree is
+verified, Infra PR #2 is now canonically merged, the alpha.3 package is qualified
+but unpublished, and Debian-main convergence remains a separate plan.
+No source-to-npm lock migration or production action is performed.
+
+
+Historical IL-5.9-B status: **READY_FOR_OWNER_MERGE_DECISION**, with unchanged
 historical Debian CI debt. See [consumer realignment](IL-5.9-B-consumer-realignment.md)
 and [new integrated qualification](IL-5.9-B-qualification.md): immutable aa9057f
 source, 126 actual acceptance assertions, verified images/rebuild receipts,

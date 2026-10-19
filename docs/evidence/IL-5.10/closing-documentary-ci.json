@@ -1,0 +1,40 @@
+{
+  "head": "f154c4791f3aaebd9f6c1dfe8ae9368da3d049cc",
+  "documentary_pr": 8,
+  "checks": [
+    {
+      "id": 118235285824,
+      "name": "suite",
+      "conclusion": "success",
+      "details_url": "https://github.com/drumee/debian/actions/runs/39303733144/job/118235285824"
+    },
+    {
+      "id": 118235285029,
+      "name": "lint",
+      "conclusion": "failure",
+      "details_url": "https://github.com/drumee/debian/actions/runs/39303733144/job/118235285029"
+    },
+    {
+      "id": 118235284862,
+      "name": "packaging",
+      "conclusion": "failure",
+      "details_url": "https://github.com/drumee/debian/actions/runs/39303733144/job/118235284862"
+    },
+    {
+      "id": 118235284469,
+      "name": "minimal-application-contract",
+      "conclusion": "success",
+      "details_url": "https://github.com/drumee/debian/actions/runs/39303733144/job/118235284469"
+    }
+  ],
+  "packaging": {
+    "pass": 10,
+    "historical_fail": 2
+  },
+  "shellcheck": {
+    "diagnostics": 91,
+    "baseline_equal": true,
+    "new": 0
+  },
+  "new_code_or_lock_changes": false
+}

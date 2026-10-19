@@ -149,3 +149,17 @@ private Runtime ingress and real SMTP upstream/secrets/mailbox/DNS/reception/
 bounce qualification. Forms stay disabled until its own acceptance passes.
 Its repository/status is not changed; OF-02 and Oxymotion D0 are not executed.
 No production host, resolver, firewall, system trust or secret is modified.
+
+
+## Documentary closing checks
+
+The [Infra evidence PR #10](https://github.com/drumee/infra-layer/pull/10) and
+[Debian reports PR #8](https://github.com/drumee/debian/pull/8) remain open for
+review, not automatically merged. On documented heads da42c0f/f154c47, Infra's
+five Quality jobs and CodeQL succeed; its documentation-only Sonar gate also
+passes without clearing the canonical-main historical inventory. Debian's
+application-contract and shared-suite jobs succeed; packaging/lint still fail
+with exactly 10/2 checks and the identical 91 baseline diagnostics. Direct job
+log comparison confirms no addition. [Debian check snapshot](evidence/IL-5.10/closing-documentary-ci.json).
+Closing ledger/evidence additions change no profile, lock or shipped module;
+actual latest PR-head checks remain available from the linked PRs.
