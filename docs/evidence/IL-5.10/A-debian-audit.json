@@ -1,0 +1,32 @@
+{
+  "merged_commit": "1ff957fac41f158346974d0b290b9396fefb44b6",
+  "qualified_head": "490c4b0a28ffb35da6ff248402139b5f600c793f",
+  "merge_tree": "8e922e649f7612ddf352fefa69d570b5b4452536",
+  "merge_tree_matches_qualified": true,
+  "minimal_kernel_matches_baseline": true,
+  "source": {
+    "revision": "aa9057f224f4ae5cf80d777e3cb2fad092193fb1",
+    "url": "https://codeload.github.com/drumee/infra-layer/tar.gz/aa9057f224f4ae5cf80d777e3cb2fad092193fb1",
+    "sha256": "b33e5ba7946b73701b05365c637f5153e9ddb860efe0074821d86161dd1466d2",
+    "integrity": "sha512-faoNlMWBO05FM+ozsuGu9tqFgq/IYc9WJwb4KCyZcZiTlEIrgJ9QLqLxslTADdipaItg02r2f6qFG07HDxhVqA=="
+  },
+  "archive_members": 260,
+  "package_member_hashes_matched": 40,
+  "status": "PASS",
+  "tests": {
+    "application_tap": 8,
+    "minimal_kernel_tap": 15,
+    "plugin_python": 8,
+    "shared_checks": 331,
+    "failures": 0,
+    "skips": 0
+  },
+  "logs": {
+    "A-npm-ci.log": "94534e76de28c6d30f0f201c3fe597da031cb754c7e011f545e7694d728af8db",
+    "A-application-tests.log": "5b54480b18d7284df089626d4c18c2fcfd47f6b3f28fbd504ea1dbbdd59c185e",
+    "A-plugin-tests.log": "0a5cc512b7f5e3231f79e087aca946780954ed07f7d1527e2755eeacf988bb35",
+    "A-kernel-ci.log": "91096ad9570ff76bf3b9533c060a627004e93e012d7960b4db2f20d96b45caff",
+    "A-kernel-tests.log": "24c6d80690fd29f29f2f4ffe52149717eaa71cf258398caa150368ebf257630c",
+    "A-shared-tests.log": "1960b8a18c8ec624658ed94eafe8773205900aafb3db6dedd9efc2295efea699"
+  }
+}
