@@ -1,0 +1,98 @@
+{
+  "status": "READY_FOR_MERGE_WITH_BASELINE_DEBT",
+  "diagnostic_commit": "8a64533be404f4375e578695c6e952ced8a64c99",
+  "workflow_fix_commit": "1b1480dd8ec15c92442ed2208d36c3904ec36b4f",
+  "ci": {
+    "run_id": 39013263757,
+    "url": "https://github.com/drumee/debian/actions/runs/39013263757",
+    "head_sha": "1b1480dd8ec15c92442ed2208d36c3904ec36b4f",
+    "conclusion": "failure",
+    "jobs": {
+      "lint": {
+        "id": 117340068896,
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      "suite": {
+        "id": 117340068986,
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "minimal-application-contract": {
+        "id": 117340069018,
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "packaging": {
+        "id": 117340069029,
+        "status": "completed",
+        "conclusion": "failure"
+      }
+    },
+    "workspace": "/__w/debian/debian",
+    "uid": 0,
+    "workspace_owner": "1001:1001",
+    "git_directory_owner": "0:0",
+    "git_version": "2.47.3",
+    "shellcheck_version": "0.11.0",
+    "shellcheck_gcc_matches_initial_ci_and_baseline": true,
+    "shellcheck_diagnostics": 91,
+    "packaging_matches_baseline": true,
+    "packaging_exit": 1,
+    "packaging_pass": 10,
+    "packaging_fail": 2,
+    "fatal_git_context": false
+  },
+  "local_tests": {
+    "application_tap": 5,
+    "plugin_archive_python": 8,
+    "kernel_tap": 15,
+    "shared_checks": 331,
+    "failures": 0,
+    "skips": 0
+  },
+  "implementation_delta": {
+    "only_workflow_and_docs": true,
+    "contract_changed": false,
+    "infra_head_unchanged": "de4b34e99370bf3b9f0d17399db4b2ea3d107677",
+    "source_pin": "c6ef6e9b8d33921ffa39c289490067adfc63a8b0"
+  },
+  "logs": {
+    "corrective_full": {
+      "local_file": "/tmp/drumee-il56-corrective-run.log",
+      "sha256": "47fd8f3880d272e5c2c6f3deab15e1fa78508adf48d3ade8b8a71a288ccbcebe"
+    },
+    "corrective_packaging_normalized": {
+      "local_file": "/tmp/drumee-il56-corrective-packaging-normalized.log",
+      "sha256": "5f12bc7720f596aab57ae1d3c4ac470d8ed5d22080e7569aa5b0e35f3cf9c4d5"
+    },
+    "application_units": {
+      "local_file": "/tmp/drumee-il56-application-units.log",
+      "sha256": "c07276485a21676dc2812219085073976481dfaf54d1980ac2995507daf74323"
+    },
+    "plugin_security": {
+      "local_file": "/tmp/drumee-il56-plugin-security.log",
+      "sha256": "6159af58823ecff325df622ea2641f420d0185c59a1c915aa765c186f837097b"
+    },
+    "kernel_units": {
+      "local_file": "/tmp/drumee-il56-kernel-units.log",
+      "sha256": "4886f6386bd193ab40e1e9ec9d7a70225dd2011b69789da6f2c218d6caec815e"
+    },
+    "shared": {
+      "local_file": "/tmp/drumee-il56-run-all.log",
+      "sha256": "1960b8a18c8ec624658ed94eafe8773205900aafb3db6dedd9efc2295efea699"
+    },
+    "baseline_corrected_workflow": {
+      "local_file": "/tmp/drumee-il56-baseline-corrected-workflow.log",
+      "sha256": "2d2f61f7ca2c8a858d9d3926cc0c406eceef8a5314dbeec919b804d230ba1751"
+    },
+    "head_corrected_workflow": {
+      "local_file": "/tmp/drumee-il56-head-corrected-workflow.log",
+      "sha256": "2d2f61f7ca2c8a858d9d3926cc0c406eceef8a5314dbeec919b804d230ba1751"
+    },
+    "actual_workflow_step": {
+      "local_file": "/tmp/drumee-il56-tools/actual-workflow-step.sh",
+      "sha256": "8b04e1334ec3151c70cf5fb880a95f33363505d9191241eef377d22418af1cb2"
+    }
+  }
+}

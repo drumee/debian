@@ -1,0 +1,32 @@
+{
+  "revision": "cfb993dd3979122e4ff7915b8627ff669ef90a96",
+  "runtime": {
+    "version": "0.1.0-alpha.4",
+    "integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ=="
+  },
+  "infrastructure": {
+    "revision": "c6ef6e9b8d33921ffa39c289490067adfc63a8b0",
+    "integrity": "sha512-/XFgDPrCJkuk9sEbLf5GGJ1Z55mueK85t77swiB4i/0s6OvdlrGqd9MUE9e8AnyMOi0nBUOl+W2h8FlqDZdX2Q=="
+  },
+  "image": "sha256:b98ae69b0a39ce4edb26fefa2a60ba28620ab12fe6ccd28d2f6daade4be6901d",
+  "tag": "drumee-minimal-application:cfb993dd3979122e-326a59a24455ccdd",
+  "plugins": [
+    {
+      "id": "qualification",
+      "root": "/app/plugins/qualification/server",
+      "revision": "cfb993dd3979122e4ff7915b8627ff669ef90a96"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "qualification",
+      "files": 164,
+      "bytes": 1666457,
+      "integrity": "sha512-cCo/f6Aw+RSGCc9M07ZVVLjKNbwfopOMIqrqJUlqmMu2pYgz5WICbCSBAptOGo4EWMY0x6FZwqw/z/lFDRPg4w=="
+    }
+  ],
+  "tools": {
+    "tag": "drumee-minimal-application-tools:cfb993dd3979122e",
+    "image": "sha256:d8dab923b53d0eede951c0ad6b1741807ebbfa45944206b577b943045147cee0"
+  }
+}

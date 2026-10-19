@@ -1,0 +1,223 @@
+{
+  "source": {
+    "revision": "aa9057f224f4ae5cf80d777e3cb2fad092193fb1",
+    "url": "https://codeload.github.com/drumee/infra-layer/tar.gz/aa9057f224f4ae5cf80d777e3cb2fad092193fb1",
+    "sha256": "b33e5ba7946b73701b05365c637f5153e9ddb860efe0074821d86161dd1466d2",
+    "integrity": "sha512-faoNlMWBO05FM+ozsuGu9tqFgq/IYc9WJwb4KCyZcZiTlEIrgJ9QLqLxslTADdipaItg02r2f6qFG07HDxhVqA==",
+    "members": 260
+  },
+  "npm": {
+    "version": "0.1.0-alpha.3",
+    "size": 98808,
+    "unpackedSize": 353683,
+    "shasum": "26aaf59f95825710a16e854246e1c35e5450c0ba",
+    "integrity": "sha512-ZZIxqtHsFA0tCwAR6vcGa3iOttFYTkHCS4rKN4UtPApLPDkq41FJ0xJWKfWLEWVUlvM3JZldb1aGrhyKMiM9Pw==",
+    "files": [
+      {
+        "path": "CHANGELOG.md",
+        "size": 2834,
+        "mode": 420
+      },
+      {
+        "path": "LICENSE",
+        "size": 34523,
+        "mode": 420
+      },
+      {
+        "path": "PROVENANCE.md",
+        "size": 17607,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 30114,
+        "mode": 420
+      },
+      {
+        "path": "adapters/docker/nginx.js",
+        "size": 6848,
+        "mode": 420
+      },
+      {
+        "path": "adapters/docker/resources.js",
+        "size": 1972,
+        "mode": 420
+      },
+      {
+        "path": "adapters/docker/services.js",
+        "size": 8149,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/database/index.js",
+        "size": 3793,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/dns/index.js",
+        "size": 6214,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/docker/Dockerfile.services",
+        "size": 946,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/http/nginx/index.js",
+        "size": 3390,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/http/nginx/routes.js",
+        "size": 3438,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/mail/index.js",
+        "size": 9316,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/redis/index.js",
+        "size": 4026,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/secrets/index.js",
+        "size": 7510,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/tls/acme.js",
+        "size": 7441,
+        "mode": 420
+      },
+      {
+        "path": "capabilities/tls/index.js",
+        "size": 11253,
+        "mode": 420
+      },
+      {
+        "path": "index.d.ts",
+        "size": 10673,
+        "mode": 420
+      },
+      {
+        "path": "lib/contracts-v2.js",
+        "size": 16245,
+        "mode": 420
+      },
+      {
+        "path": "lib/diagnostics.js",
+        "size": 571,
+        "mode": 420
+      },
+      {
+        "path": "lib/filesystem-safety.js",
+        "size": 4062,
+        "mode": 420
+      },
+      {
+        "path": "lib/index.js",
+        "size": 334,
+        "mode": 420
+      },
+      {
+        "path": "lib/plan-v2.js",
+        "size": 13706,
+        "mode": 420
+      },
+      {
+        "path": "lib/plan.js",
+        "size": 4713,
+        "mode": 420
+      },
+      {
+        "path": "lib/rendering.js",
+        "size": 6467,
+        "mode": 420
+      },
+      {
+        "path": "lib/spec.js",
+        "size": 3105,
+        "mode": 420
+      },
+      {
+        "path": "lib/state-v2.js",
+        "size": 6284,
+        "mode": 420
+      },
+      {
+        "path": "lib/state.js",
+        "size": 4224,
+        "mode": 420
+      },
+      {
+        "path": "lib/validation.js",
+        "size": 14618,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/activation.js",
+        "size": 24837,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/composition.js",
+        "size": 15165,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/docker.js",
+        "size": 8191,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/external-gateway.js",
+        "size": 4081,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/index.d.ts",
+        "size": 6454,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/index.js",
+        "size": 1046,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/journal.js",
+        "size": 2467,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/preparation.js",
+        "size": 17014,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/recovery.js",
+        "size": 15713,
+        "mode": 420
+      },
+      {
+        "path": "lifecycle/transitions.js",
+        "size": 11564,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 2775,
+        "mode": 420
+      }
+    ]
+  },
+  "archive_files_verified_against_git": 225,
+  "changed_package_members_since_IL58": [
+    "package.json"
+  ],
+  "public_contract_equal": true
+}

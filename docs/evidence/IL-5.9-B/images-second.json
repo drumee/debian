@@ -1,0 +1,34 @@
+{
+  "revision": "ccaa839bf13ab163025e868b21f16516c87d1ff9",
+  "runtime": {
+    "version": "0.1.0-alpha.4",
+    "integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ=="
+  },
+  "infrastructure": {
+    "revision": "aa9057f224f4ae5cf80d777e3cb2fad092193fb1",
+    "integrity": "sha512-faoNlMWBO05FM+ozsuGu9tqFgq/IYc9WJwb4KCyZcZiTlEIrgJ9QLqLxslTADdipaItg02r2f6qFG07HDxhVqA==",
+    "sha256": "b33e5ba7946b73701b05365c637f5153e9ddb860efe0074821d86161dd1466d2",
+    "package_integrity": "sha512-ZZIxqtHsFA0tCwAR6vcGa3iOttFYTkHCS4rKN4UtPApLPDkq41FJ0xJWKfWLEWVUlvM3JZldb1aGrhyKMiM9Pw=="
+  },
+  "image": "sha256:d44327e37d37c612257822684a870d05d7f90fdae649b2dcbfb8e9f0566e7955",
+  "tag": "drumee-minimal-application:ccaa839bf13ab163-ca1ff2bec768d27e",
+  "plugins": [
+    {
+      "id": "qualification",
+      "root": "/app/plugins/qualification/server",
+      "revision": "ccaa839bf13ab163025e868b21f16516c87d1ff9"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "qualification",
+      "files": 164,
+      "bytes": 1666782,
+      "integrity": "sha512-GPdfP2L6NKtz4qzOgqHsekCjRd7BXTuiPqA+XPxXBGntrMBUQIC0Vv18DEJe/4nryK8mBHGQOC7ajqxFq4kkEA=="
+    }
+  ],
+  "tools": {
+    "tag": "drumee-minimal-application-tools:ccaa839bf13ab163",
+    "image": "sha256:075a3c53d14f9a71c827f285564518dde41e29faa0cc9e58f4cc126cd3dda4cd"
+  }
+}

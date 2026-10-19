@@ -1,0 +1,13 @@
+{
+  "name": "@drumee/debian-minimal-application",
+  "version": "0.0.0-il5",
+  "private": true,
+  "type": "commonjs",
+  "license": "AGPL-3.0-only",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test test/*.test.js" },
+  "dependencies": { "@drumee/server-runtime": "0.1.0-alpha.4" },
+  "devDependencies": {
+    "@drumee/infra-layer": "https://codeload.github.com/drumee/infra-layer/tar.gz/aa9057f224f4ae5cf80d777e3cb2fad092193fb1"
+  }
+}

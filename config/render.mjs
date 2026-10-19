@@ -44,6 +44,10 @@ function die(msg) {
 // Supports: 2-space indentation (any depth), `key:` sections, `key: scalar`,
 // inline lists `[a, b]`, comments, and scalar types string/int/bool/null.
 function parseYaml(text) {
+  // JSON is the lossless YAML subset used for nested public Infra Layer records.
+  if (text.trimStart().startsWith('{')) {
+    try { return JSON.parse(text); } catch { die('invalid JSON configuration'); }
+  }
   const root = {};
   const stack = [{ indent: -1, container: root }];
   const lines = text.split('\n');
@@ -1057,6 +1061,7 @@ ${conf('/etc/opendkim', 'etc/opendkim')}
 // they did in an earlier draft, and a stack that differs depending on which command
 // produced it is worse than either stack.
 function composeFor(cfg) {
+  if (cfg.distribution?.profile === 'minimal-application') return JSON.stringify(require('../profiles/minimal-application/lib/distribution').compose(cfg), null, 2) + '\n';
   if (cfg.distribution?.profile === 'minimal-kernel') return JSON.stringify(require('../profiles/minimal-kernel/lib/distribution').compose(cfg), null, 2) + '\n';
   return (cfg.images?.stack === 'roles') ? renderComposeRoles(cfg) : renderCompose(cfg);
 }
@@ -1067,6 +1072,7 @@ function load(opts) {
   try { text = readFileSync(opts.config, 'utf8'); }
   catch { die(`cannot read config: ${opts.config}`); }
   const raw = parseYaml(text);
+  if (raw.distribution?.profile === 'minimal-application') return require('../profiles/minimal-application/lib/config').validate(raw);
   if (raw.distribution?.profile === 'minimal-kernel') return require('../profiles/minimal-kernel/lib/config').validate(raw);
   const cfg = applyDefaults(raw);
   validate(cfg);
@@ -1086,6 +1092,7 @@ function emit(content, out) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 const { command, opts } = parseArgs(process.argv.slice(2));
 if (['env', 'debconf', 'caddyfile'].includes(command) && load(opts).distribution?.profile === 'minimal-kernel') die('minimal-kernel uses Infra Layer lifecycle composition; this Team-only output is unsupported');
+if (['env', 'debconf', 'caddyfile'].includes(command) && load(opts).distribution?.profile === 'minimal-application') die('minimal-application uses an external gateway; this Team-only output is unsupported');
 
 switch (command) {
   case 'validate': {
@@ -1100,6 +1107,7 @@ switch (command) {
   case 'debconf': { emit(renderDebconf(load(opts)), opts.out); break; }
   case 'all': {
     const cfg = withSecrets(load(opts));
+    if (cfg.distribution?.profile === 'minimal-application') { emit(composeFor(cfg), join(opts.outDir, 'composition.json')); break; }
     if (cfg.distribution?.profile === 'minimal-kernel') { emit(composeFor(cfg), join(opts.outDir, 'composition.json')); break; }
     emit(renderEnv(cfg), join(opts.outDir, '.env'));
     chmodSync(join(opts.outDir, '.env'), 0o600);  // holds DB root credentials
@@ -1119,6 +1127,7 @@ switch (command) {
 }
 
 function withSecrets(cfg) {
+  if (cfg.distribution?.profile === 'minimal-application') return cfg;
   if (cfg.distribution?.profile === 'minimal-kernel') return cfg;
   const generated = fillSecrets(cfg);
   if (generated.length) {

@@ -9,6 +9,9 @@
     },
     {
       "$ref": "#/$defs/minimalKernel"
+    },
+    {
+      "$ref": "#/$defs/minimalApplication"
     }
   ],
   "$defs": {
@@ -643,6 +646,169 @@
           }
         }
       ]
+    },
+    "minimalApplication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "distribution",
+        "deployment",
+        "storage",
+        "infrastructure",
+        "manifest"
+      ],
+      "properties": {
+        "distribution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile"
+          ],
+          "properties": {
+            "profile": {
+              "const": "minimal-application"
+            }
+          }
+        },
+        "deployment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "project",
+            "owner_uid",
+            "owner_gid",
+            "acceptance"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "project": {
+              "type": "string",
+              "minLength": 1
+            },
+            "owner_uid": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "owner_gid": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "acceptance": {
+              "type": "boolean"
+            }
+          }
+        },
+        "storage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "root",
+            "backup_location",
+            "retention_days"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "minLength": 1
+            },
+            "backup_location": {
+              "type": "string",
+              "minLength": 1
+            },
+            "retention_days": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "infrastructure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "spec",
+            "requirements",
+            "adapter_input"
+          ],
+          "properties": {
+            "spec": {
+              "type": "object"
+            },
+            "requirements": {
+              "type": "object"
+            },
+            "adapter_input": {
+              "type": "object"
+            }
+          }
+        },
+        "manifest": {
+          "type": "object",
+          "required": [
+            "contract_version",
+            "profile",
+            "application",
+            "external_gateway",
+            "persistent_resources"
+          ],
+          "properties": {
+            "contract_version": {
+              "const": "1"
+            },
+            "profile": {
+              "const": "application"
+            },
+            "application": {
+              "type": "object"
+            },
+            "external_gateway": {
+              "type": "object"
+            },
+            "persistent_resources": {
+              "type": "array"
+            }
+          }
+        },
+        "imports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ref",
+              "file"
+            ],
+            "properties": {
+              "ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "resource",
+                  "key"
+                ],
+                "properties": {
+                  "resource": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "file": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "description": "Structural profile selection; the public pinned Infra Layer APIs validate complete nested capability/distribution contracts."
     }
   }
 }

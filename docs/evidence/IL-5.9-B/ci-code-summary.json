@@ -1,0 +1,52 @@
+{
+  "head": "ccaa839bf13ab163025e868b21f16516c87d1ff9",
+  "run": "https://github.com/drumee/debian/actions/runs/39137350279",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "name": "packaging",
+      "conclusion": "failure",
+      "databaseId": 117704470524,
+      "url": "https://github.com/drumee/debian/actions/runs/39137350279/job/117704470524"
+    },
+    {
+      "name": "minimal-application-contract",
+      "conclusion": "success",
+      "databaseId": 117704470688,
+      "url": "https://github.com/drumee/debian/actions/runs/39137350279/job/117704470688"
+    },
+    {
+      "name": "suite",
+      "conclusion": "success",
+      "databaseId": 117704470714,
+      "url": "https://github.com/drumee/debian/actions/runs/39137350279/job/117704470714"
+    },
+    {
+      "name": "lint",
+      "conclusion": "failure",
+      "databaseId": 117704470756,
+      "url": "https://github.com/drumee/debian/actions/runs/39137350279/job/117704470756"
+    }
+  ],
+  "packaging": {
+    "pass": 10,
+    "fail": 2,
+    "baseline_output_identical": true
+  },
+  "shellcheck": {
+    "diagnostics": 91,
+    "baseline_gcc_exact_match": true
+  },
+  "suite": {
+    "pass": 331,
+    "fail": 0
+  },
+  "application_tap": {
+    "pass": 8,
+    "fail": 0
+  },
+  "plugin_tests": {
+    "pass": 8,
+    "fail": 0
+  }
+}

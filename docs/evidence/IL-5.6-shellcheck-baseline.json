@@ -1,0 +1,730 @@
+[
+  {
+    "file": "admin/build.sh",
+    "line": 27,
+    "column": 8,
+    "code": 1090,
+    "level": "warning",
+    "message": "ShellCheck can't follow non-constant source. Use a directive to specify location."
+  },
+  {
+    "file": "admin/build.sh",
+    "line": 28,
+    "column": 8,
+    "code": 1090,
+    "level": "warning",
+    "message": "ShellCheck can't follow non-constant source. Use a directive to specify location."
+  },
+  {
+    "file": "admin/build.sh",
+    "line": 39,
+    "column": 5,
+    "code": 2034,
+    "level": "warning",
+    "message": "force appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "admin/build.sh",
+    "line": 59,
+    "column": 23,
+    "code": 2154,
+    "level": "warning",
+    "message": "build_dir is referenced but not assigned."
+  },
+  {
+    "file": "admin/build.sh",
+    "line": 63,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "admin/opt/drumee/schemas/patch.sh",
+    "line": 28,
+    "column": 1,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "bin/drumee-plugin",
+    "line": 52,
+    "column": 11,
+    "code": 2221,
+    "level": "warning",
+    "message": "This pattern always overrides a later one on line 52."
+  },
+  {
+    "file": "bin/drumee-plugin",
+    "line": 52,
+    "column": 17,
+    "code": 2222,
+    "level": "warning",
+    "message": "This pattern never matches because of a previous pattern on line 52."
+  },
+  {
+    "file": "bootstrap/usr/lib/drumee/entrypoint/lib.sh",
+    "line": 56,
+    "column": 3,
+    "code": 3043,
+    "level": "warning",
+    "message": "In POSIX sh, 'local' is undefined."
+  },
+  {
+    "file": "bootstrap/usr/lib/drumee/entrypoint/schemas",
+    "line": 91,
+    "column": 26,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "builder/build.sh",
+    "line": 23,
+    "column": 1,
+    "code": 2034,
+    "level": "warning",
+    "message": "REPO_BASE appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "builder/build.sh",
+    "line": 34,
+    "column": 9,
+    "code": 2089,
+    "level": "warning",
+    "message": "Quotes/backslashes will be treated literally. Use an array."
+  },
+  {
+    "file": "builder/build.sh",
+    "line": 35,
+    "column": 7,
+    "code": 2090,
+    "level": "warning",
+    "message": "Quotes/backslashes in this variable will not be respected."
+  },
+  {
+    "file": "builder/build.sh",
+    "line": 36,
+    "column": 7,
+    "code": 2090,
+    "level": "warning",
+    "message": "Quotes/backslashes in this variable will not be respected."
+  },
+  {
+    "file": "builder/build.sh",
+    "line": 37,
+    "column": 7,
+    "code": 2090,
+    "level": "warning",
+    "message": "Quotes/backslashes in this variable will not be respected."
+  },
+  {
+    "file": "builder/build.sh",
+    "line": 38,
+    "column": 7,
+    "code": 2090,
+    "level": "warning",
+    "message": "Quotes/backslashes in this variable will not be respected."
+  },
+  {
+    "file": "builder/build.sh",
+    "line": 39,
+    "column": 7,
+    "code": 2090,
+    "level": "warning",
+    "message": "Quotes/backslashes in this variable will not be respected."
+  },
+  {
+    "file": "infra/build.sh",
+    "line": 14,
+    "column": 1,
+    "code": 2034,
+    "level": "warning",
+    "message": "type appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "infra/build.sh",
+    "line": 21,
+    "column": 1,
+    "code": 2034,
+    "level": "warning",
+    "message": "REPO_BASE appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "infra/build.sh",
+    "line": 42,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "infra/sample.sh",
+    "line": 1,
+    "column": 1,
+    "code": 2148,
+    "level": "error",
+    "message": "Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive."
+  },
+  {
+    "file": "infra/var/lib/drumee/utils/cron/tmp-files-cleaner",
+    "line": 32,
+    "column": 28,
+    "code": 2166,
+    "level": "warning",
+    "message": "Prefer [ p ] && [ q ] as [ p -a q ] is not well defined."
+  },
+  {
+    "file": "infra/var/lib/drumee/utils/functions.sh",
+    "line": 1,
+    "column": 1,
+    "code": 2148,
+    "level": "error",
+    "message": "Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive."
+  },
+  {
+    "file": "meta/build.sh",
+    "line": 23,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "schemas-patch/bin/patch-from-file",
+    "line": 2,
+    "column": 22,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "schemas-patch/bin/patch-from-manifest.sh",
+    "line": 2,
+    "column": 22,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "schemas-patch/bin/patch-from-manifest.sh",
+    "line": 14,
+    "column": 8,
+    "code": 2155,
+    "level": "warning",
+    "message": "Declare and assign separately to avoid masking return values."
+  },
+  {
+    "file": "schemas-patch/bin/patch-from-manifest.sh",
+    "line": 21,
+    "column": 1,
+    "code": 2037,
+    "level": "error",
+    "message": "To assign the output of a command, use var=$(cmd) ."
+  },
+  {
+    "file": "schemas-patch/bin/patch-from-manifest.sh",
+    "line": 23,
+    "column": 1,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "schemas-patch/bin/patch-from-manifest.sh",
+    "line": 42,
+    "column": 59,
+    "code": 2154,
+    "level": "warning",
+    "message": "opt is referenced but not assigned."
+  },
+  {
+    "file": "schemas-patch/build.sh",
+    "line": 29,
+    "column": 1,
+    "code": 2034,
+    "level": "warning",
+    "message": "REPO_BASE appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "schemas-patch/build.sh",
+    "line": 60,
+    "column": 23,
+    "code": 2166,
+    "level": "warning",
+    "message": "Prefer [ p ] && [ q ] as [ p -a q ] is not well defined."
+  },
+  {
+    "file": "schemas-patch/build.sh",
+    "line": 115,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "schemas-patch/patch.sh",
+    "line": 1,
+    "column": 1,
+    "code": 2148,
+    "level": "error",
+    "message": "Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive."
+  },
+  {
+    "file": "schemas-patch/patch.sh",
+    "line": 1,
+    "column": 1,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "schemas/build.sh",
+    "line": 19,
+    "column": 1,
+    "code": 2034,
+    "level": "warning",
+    "message": "REPO_BASE appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "schemas/build.sh",
+    "line": 83,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "scripts/build-seed.sh",
+    "line": 50,
+    "column": 3,
+    "code": 2215,
+    "level": "warning",
+    "message": "This flag is used as a command name. Bad line break or missing [ .. ]?"
+  },
+  {
+    "file": "scripts/containers.sh",
+    "line": 37,
+    "column": 1,
+    "code": 2034,
+    "level": "warning",
+    "message": "c_blue appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "scripts/containers.sh",
+    "line": 140,
+    "column": 25,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "scripts/publish-images.sh",
+    "line": 79,
+    "column": 3,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "scripts/publish-images.sh",
+    "line": 83,
+    "column": 44,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "scripts/publish-images.sh",
+    "line": 89,
+    "column": 3,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "scripts/publish-images.sh",
+    "line": 98,
+    "column": 3,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "scripts/publish-images.sh",
+    "line": 103,
+    "column": 3,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "scripts/publish-images.sh",
+    "line": 110,
+    "column": 5,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "scripts/publish-images.sh",
+    "line": 118,
+    "column": 5,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "scripts/release-status.sh",
+    "line": 313,
+    "column": 5,
+    "code": 2178,
+    "level": "warning",
+    "message": "Variable was used as an array but is now assigned a string."
+  },
+  {
+    "file": "scripts/release-status.sh",
+    "line": 315,
+    "column": 8,
+    "code": 2128,
+    "level": "warning",
+    "message": "Expanding an array without an index only gives the first element."
+  },
+  {
+    "file": "scripts/release-status.sh",
+    "line": 315,
+    "column": 34,
+    "code": 2128,
+    "level": "warning",
+    "message": "Expanding an array without an index only gives the first element."
+  },
+  {
+    "file": "server/build.sh",
+    "line": 77,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "server/system/usr/sbin/drumee",
+    "line": 46,
+    "column": 1,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "server/system/usr/sbin/drumee",
+    "line": 84,
+    "column": 11,
+    "code": 2048,
+    "level": "warning",
+    "message": "Use \"$@\" (with quotes) to prevent whitespace problems."
+  },
+  {
+    "file": "server/usr/sbin/drumee-plugin",
+    "line": 52,
+    "column": 11,
+    "code": 2221,
+    "level": "warning",
+    "message": "This pattern always overrides a later one on line 52."
+  },
+  {
+    "file": "server/usr/sbin/drumee-plugin",
+    "line": 52,
+    "column": 17,
+    "code": 2222,
+    "level": "warning",
+    "message": "This pattern never matches because of a previous pattern on line 52."
+  },
+  {
+    "file": "server/usr/share/drumee/admin/admin.sh",
+    "line": 21,
+    "column": 25,
+    "code": 2034,
+    "level": "warning",
+    "message": "swap appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "server/usr/share/drumee/admin/admin.sh",
+    "line": 30,
+    "column": 6,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "server/usr/share/drumee/admin/create-server",
+    "line": 11,
+    "column": 25,
+    "code": 2034,
+    "level": "warning",
+    "message": "start appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "server/usr/share/drumee/admin/create-server",
+    "line": 28,
+    "column": 6,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "server/usr/share/drumee/admin/create-server",
+    "line": 57,
+    "column": 5,
+    "code": 2034,
+    "level": "warning",
+    "message": "script_dir appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "server/usr/share/drumee/admin/templates/.bashrc",
+    "line": 1,
+    "column": 1,
+    "code": 2148,
+    "level": "error",
+    "message": "Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive."
+  },
+  {
+    "file": "server/usr/share/drumee/admin/templates/.bashrc",
+    "line": 104,
+    "column": 7,
+    "code": 1090,
+    "level": "warning",
+    "message": "ShellCheck can't follow non-constant source. Use a directive to specify location."
+  },
+  {
+    "file": "server/usr/share/drumee/admin/templates/.profile",
+    "line": 1,
+    "column": 1,
+    "code": 2148,
+    "level": "error",
+    "message": "Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive."
+  },
+  {
+    "file": "server/usr/share/drumee/bin/db-patch-scan.sh",
+    "line": 6,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "server/usr/share/drumee/bin/make-zip.sh",
+    "line": 13,
+    "column": 1,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "server/usr/share/drumee/sbin/log-history.sh",
+    "line": 4,
+    "column": 1,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "server/usr/share/drumee/sbin/log-history.sh",
+    "line": 8,
+    "column": 13,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "server/usr/share/drumee/sbin/log-rotate.sh",
+    "line": 4,
+    "column": 1,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "server/usr/share/drumee/sbin/log-rotate.sh",
+    "line": 11,
+    "column": 19,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "server/usr/share/drumee/sbin/log-rotate.sh",
+    "line": 13,
+    "column": 16,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "server/usr/share/drumee/sbin/log-rotate.sh",
+    "line": 13,
+    "column": 37,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "server/usr/share/drumee/sbin/log-rotate.sh",
+    "line": 15,
+    "column": 23,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "server/usr/share/drumee/sbin/log-rotate.sh",
+    "line": 19,
+    "column": 13,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "static/build.sh",
+    "line": 20,
+    "column": 5,
+    "code": 2034,
+    "level": "warning",
+    "message": "force appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "static/build.sh",
+    "line": 24,
+    "column": 5,
+    "code": 2034,
+    "level": "warning",
+    "message": "compile appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "static/build.sh",
+    "line": 28,
+    "column": 5,
+    "code": 2034,
+    "level": "warning",
+    "message": "enableApi appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "static/build.sh",
+    "line": 40,
+    "column": 1,
+    "code": 2034,
+    "level": "warning",
+    "message": "control appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "static/build.sh",
+    "line": 55,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "tests/config-parity.sh",
+    "line": 103,
+    "column": 52,
+    "code": 1087,
+    "level": "error",
+    "message": "Use braces when expanding arrays, e.g. ${array[idx]} (or ${var}[.. to quiet)."
+  },
+  {
+    "file": "tests/native/control-deps.sh",
+    "line": 15,
+    "column": 61,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "tests/run-all.sh",
+    "line": 7,
+    "column": 1,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "tests/wizard-install.sh",
+    "line": 7,
+    "column": 58,
+    "code": 2164,
+    "level": "warning",
+    "message": "Use 'cd ... || exit' or 'cd ... || return' in case cd fails."
+  },
+  {
+    "file": "ui/build.sh",
+    "line": 22,
+    "column": 5,
+    "code": 2034,
+    "level": "warning",
+    "message": "compile appears unused. Verify use (or export if used externally)."
+  },
+  {
+    "file": "ui/build.sh",
+    "line": 71,
+    "column": 10,
+    "code": 2045,
+    "level": "error",
+    "message": "Iterating over ls output is fragile. Use globs."
+  },
+  {
+    "file": "utils/env.sh",
+    "line": 1,
+    "column": 1,
+    "code": 2148,
+    "level": "error",
+    "message": "Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive."
+  },
+  {
+    "file": "utils/functions.sh",
+    "line": 1,
+    "column": 1,
+    "code": 2148,
+    "level": "error",
+    "message": "Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive."
+  },
+  {
+    "file": "utils/functions.sh",
+    "line": 133,
+    "column": 24,
+    "code": 2166,
+    "level": "warning",
+    "message": "Prefer [ p ] || [ q ] as [ p -o q ] is not well defined."
+  },
+  {
+    "file": "utils/functions.sh",
+    "line": 202,
+    "column": 20,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "utils/functions.sh",
+    "line": 203,
+    "column": 20,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "utils/functions.sh",
+    "line": 228,
+    "column": 18,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  },
+  {
+    "file": "utils/functions.sh",
+    "line": 229,
+    "column": 18,
+    "code": 2046,
+    "level": "warning",
+    "message": "Quote this to prevent word splitting."
+  }
+]
