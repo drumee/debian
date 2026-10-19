@@ -1,0 +1,42 @@
+{
+  "head": "667be439e6dbe543f6e01a223dccbd0bbf5f9d4f",
+  "run": "https://github.com/drumee/debian/actions/runs/39165762692",
+  "created_at": "2026-10-18T20:58:59Z",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "name": "packaging",
+      "conclusion": "failure",
+      "databaseId": 117788261526,
+      "url": "https://github.com/drumee/debian/actions/runs/39165762692/job/117788261526"
+    },
+    {
+      "name": "lint",
+      "conclusion": "failure",
+      "databaseId": 117788261682,
+      "url": "https://github.com/drumee/debian/actions/runs/39165762692/job/117788261682"
+    },
+    {
+      "name": "suite",
+      "conclusion": "success",
+      "databaseId": 117788261704,
+      "url": "https://github.com/drumee/debian/actions/runs/39165762692/job/117788261704"
+    },
+    {
+      "name": "minimal-application-contract",
+      "conclusion": "success",
+      "databaseId": 117788261731,
+      "url": "https://github.com/drumee/debian/actions/runs/39165762692/job/117788261731"
+    }
+  ],
+  "shellcheck_baseline_equal": true,
+  "shellcheck_count": 91,
+  "packaging_pass": 10,
+  "packaging_fail": 2,
+  "new_defects": 0,
+  "job_logs": {
+    "lint-job.log": "085f57be2aeb71c3cb7b19885db80d1f9c59b856ff0434ef2c23930478389bbf",
+    "packaging-job.log": "370a1266624a6f9997b92d27466b3fd551e75515c51ee3ab9d0b0ddf2f9230e2"
+  },
+  "log_retrieval": "REST individual job logs; gh run view --log returned empty output"
+}

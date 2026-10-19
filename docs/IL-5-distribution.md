@@ -44,7 +44,7 @@ node profiles/minimal-application/scripts/build.js /owned/artifacts/build-input.
 
 Production npm dependency is only published Runtime alpha.4; its SRI is verified
 against the lock. Infra Layer is a development/operator dependency pinned to
-immutable source `c6ef6e9b8d33921ffa39c289490067adfc63a8b0`, with archive SRI in
+immutable source `aa9057f224f4ae5cf80d777e3cb2fad092193fb1`, with archive SRI in
 the lock. Published alpha.2 does not implement this new application contract.
 No sibling source tree or local file dependency is required by npm ci.
 
@@ -171,3 +171,11 @@ not spool recovery. Infra Layer retains its declared upstream TLS policy and
 adds no direct-MX transport. Real Internet delivery, recipient control, SPF/DKIM/
 DMARC alignment, bounces and consumer integration remain future acceptance work.
 Oxy-form remains read-only and Oxymotion D0 is not started or qualified by IL-5.
+
+## IL-5.9-B provenance update
+
+The original IL-5 consumer used `c6ef6e9b8d33921ffa39c289490067adfc63a8b0`.
+The current source selection and separate source/npm integrity receipts are in
+[IL-5.9-B source selection](IL-5.9-B-source-selection.md);
+[the integrated qualification](IL-5.9-B-qualification.md) records the new images
+and actual acceptance. Earlier reports retain their original references.

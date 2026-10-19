@@ -1,6 +1,13 @@
 # IL-5 qualification ledger
 
-Current status after IL-5.7: **READY_FOR_OWNER_MERGE_DECISION**.
+Current IL-5.9-B status: **READY_FOR_OWNER_MERGE_DECISION**, with unchanged
+historical Debian CI debt. See [consumer realignment](IL-5.9-B-consumer-realignment.md)
+and [new integrated qualification](IL-5.9-B-qualification.md): immutable aa9057f
+source, 126 actual acceptance assertions, verified images/rebuild receipts,
+strict isolated consumer, zero new ShellCheck/packaging findings. The new run
+does not replace or relabel historical qualification evidence below.
+
+Historical status after IL-5.7: **READY_FOR_OWNER_MERGE_DECISION**.
 See [final integration validation](IL-5.7-final-validation.md),
 [proposed debt acceptance](IL-5.7-baseline-debt-acceptance.md) and
 [Oxy-form handoff](IL-5.7-oxy-form-handoff.md).

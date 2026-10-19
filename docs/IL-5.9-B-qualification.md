@@ -201,8 +201,11 @@ shell-hardening lots described in [debt acceptance](IL-5.7-baseline-debt-accepta
 completed on ccaa839: minimal-application-contract SUCCESS (8 TAP and 8 archive
 tests), suite SUCCESS (331 checks), packaging FAILURE (same two debt findings),
 lint FAILURE (same 91 diagnostics). [Summary](evidence/IL-5.9-B/ci-code-summary.json)
-retains job IDs. The workflow file is unchanged. Delivery-head CI is recorded
-below after the documentary push.
+retains job IDs. The workflow file is unchanged. The final documentary delivery
+is checked again through
+[PR #7 checks](https://github.com/drumee/debian/pull/7/checks); its observed outcome
+is included in the delivery report. Documents do not claim a new integrated run
+for commits that only add evidence and handoff text.
 
 ## Integration conditions and limits
 
@@ -225,3 +228,31 @@ Oxy-form still needs separate selection and OF-01R acceptance with its real plug
 existing proxy/certificates and controlled upstream SMTP/DNS/mailbox inputs.
 It is not declared unblocked. Production, OF-02, Oxymotion D0, merges, npm/image
 publication and release tags are outside this execution and are not performed.
+
+
+## Closing documentary verification (2026-10-19)
+
+The interrupted task resumes without executable changes. Both live PR heads are
+unchanged from the qualification: Infra aa9057f and Debian documentary head
+667be439e6dbe543f6e01a223dccbd0bbf5f9d4f. The latter's
+[PR CI run](https://github.com/drumee/debian/actions/runs/39165762692) has
+minimal-application-contract and suite SUCCESS, packaging and lint FAILURE.
+Direct REST job logs confirm exactly 10/2 packaging checks and the same 91
+ShellCheck diagnostics; no new diagnostic appears. The aggregate gh log command
+returned empty output, so that empty response was not used as evidence.
+[The documentary CI receipt](evidence/IL-5.9-B/ci-documentary-summary.json)
+retains job identities and hashes of the successfully read individual logs.
+
+The closing commit updates documentation/evidence only. Relative to ccaa839,
+all profile/acceptance executable files are unchanged, including the source lock.
+Final delivery-head checks remain directly available in PR #7; their actual
+observed outcome accompanies delivery. The original temporary build/log directory
+has expired after interruption. Committed inventories, checksums, run receipts
+and GitHub job records remain; availability of the old local images or temporary
+full logs is not asserted at closing. Reconstruct from the locked source rather
+than treating those disposable paths as a distribution dependency.
+
+The protection read is repeated: Debian destination protected=false, effective
+rules [], detailed classic endpoint HTTP 403. Both PRs are open, unmerged and
+mergeable; Debian reports unstable because historical jobs fail. No protection,
+base, upstream repository or security tool disposition is changed.

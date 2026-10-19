@@ -48,9 +48,13 @@ Paths relative to the repository:
   TLS-name negative input and a queued `.invalid` message in capture mode.
   There is no production mail delivery or authentication implementation change.
 - `docs/IL-5.9-B-source-selection.md`, this report,
-  `docs/IL-5.9-B-qualification.md`, `docs/IL-5-release-handoff.md` and
-  `docs/IL-5.7-oxy-form-handoff.md`: provenance, results and future consumer inputs.
-- `docs/evidence/IL-5.9-B-artifact.json` and `docs/evidence/IL-5.9-B/`: artifact,
+  `docs/IL-5.9-B-qualification.md`, `docs/IL-5-release-handoff.md`,
+  `docs/IL-5.7-oxy-form-handoff.md`, `docs/IL-5-qualification.md`,
+  `docs/IL-5.7-final-validation.md`, `docs/IL-5-distribution.md` and
+  `docs/IL-5-contract.md`: provenance, results, current operator references and
+  future consumer inputs; old ledger entries are retained as history.
+- `docs/evidence/IL-5.9-B-artifact.json` and `docs/evidence/IL-5.9-B/` (including
+  `ci-documentary-summary.json` from closing readback): artifact,
   image, acceptance, isolated-consumer and CI evidence; no secret values.
 
 Earlier reports retain their original c6ef6e9 source and checksums as historical

@@ -251,3 +251,11 @@ Only documentary commits are pushed on the existing Debian feature branch.
 Previous reports are preserved and the IL-5 release handoff links this dossier.
 Infra/Runtime/Oxy-form branches remain unchanged. Tests use only owned isolated
 resources; no protection change, merge, release or permanent deployment occurs.
+
+## Subsequent IL-5.9-B verification
+
+The observations above remain the IL-5.7 snapshot.
+[IL-5.9-B qualification](IL-5.9-B-qualification.md) records the subsequent
+immutable Infra source realignment, new clean-build image identities, real
+integrated acceptance and unchanged baseline debt. No historical checksum,
+Sonar observation or test result above is erased or relabelled as a new run.

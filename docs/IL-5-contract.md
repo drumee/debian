@@ -4,7 +4,7 @@ Infra Layer owns the public contract, validation, composition, projections and
 lifecycle. The complete contract is maintained in
 [Infra Layer IL-5 contract](https://github.com/drumee/infra-layer/blob/feat/il5-external-gateway/docs/IL-5-contract.md)
 and its public declarations. Debian consumes immutable source
-`c6ef6e9b8d33921ffa39c289490067adfc63a8b0`; published alpha.2 lacks this extension.
+`aa9057f224f4ae5cf80d777e3cb2fad092193fb1`; published alpha.2 lacks this extension.
 
 `Distribution.profile: application` requires an immutable non-root supplied
 application, explicit plugin inventory, resources/secrets/dependencies/health,
@@ -32,3 +32,11 @@ No-SMTP cold backup and isolated restore are separately tested.
 
 See [operator distribution](IL-5-distribution.md),
 [qualification](IL-5-qualification.md) and [handoff](IL-5-release-handoff.md).
+
+## IL-5.9-B provenance update
+
+The original IL-5 consumer used `c6ef6e9b8d33921ffa39c289490067adfc63a8b0`.
+The current source selection and separate source/npm integrity receipts are in
+[IL-5.9-B source selection](IL-5.9-B-source-selection.md);
+[the integrated qualification](IL-5.9-B-qualification.md) records the new images
+and actual acceptance. Earlier reports retain their original references.
