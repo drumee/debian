@@ -45,8 +45,9 @@ stale: replace it with links/statuses from the current IL-4 and IL-5 evidence.
 Do not choose ours/theirs for the whole file. Preserve the main-added root LICENSE.
 The entrypoint and two pod configuration files auto-merge, but inspect/test
 forceDefaultLanguage=true in all three. These are semantic main behaviors, not
-optional whitespace resolutions. Other concurrent paths are README plus those
-three files; the package/license addition has no two-sided content conflict.
+optional whitespace resolutions. Only README changed on both sides since the merge-base. The three English
+files are main-only changes retained automatically; LICENSE is a main-only
+addition. They still require semantic review, even without a two-sided conflict.
 
 Freeze and compare the resolved profile subtrees, source locks, plugin acquisition,
 SQL roles/bootstrap jobs and operator dispatch against the reviewed distribution
