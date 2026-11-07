@@ -2,7 +2,7 @@
 // Real operator acceptance. Docker is used only for observation, fault injection
 // and cleanup of resources whose canonical ownership was checked first.
 const fs = require("node:fs"), path = require("node:path"), os = require("node:os"), crypto = require("node:crypto");
-const strict = require("node:assert/strict"), { execFileSync, spawn } = require("node:child_process");
+const strict = require("node:assert/strict"), { execFileSync, spawn, spawnSync } = require("node:child_process");
 const { freePort, request, externalNetwork } = require("./network");
 const repository = path.resolve(__dirname, "../.."), profile = path.join(repository, "profiles/minimal-application");
 const L = require(path.join(profile, "node_modules/@drumee/infra-layer/lifecycle"));
@@ -18,7 +18,7 @@ async function main() {
   cfg.deployment.acceptance = true; cfg.manifest.provenance.revision = receipt.revision; cfg.manifest.application.plugins = receipt.plugins;
   cfg.manifest.persistent_resources.push({ id: "application-state", source: root + "/durable/application-state", uid: process.getuid(), gid: process.getgid(), backup_required: true });
   cfg.manifest.application.mounts.push({ resource: "application-state", target: "/app/state", read_only: false });
-  const configs = [], report = { project, source_revision: receipt.revision, infrastructure: receipt.infrastructure, image: receipt.image, runtime: receipt.runtime, groups: [], internet_delivery: "not-tested" };
+  const configs = [], sensitive = [], report = { project, source_revision: receipt.revision, infrastructure: receipt.infrastructure, image: receipt.image, runtime: receipt.runtime, groups: [], internet_delivery: "not-tested" };
   let proxy;
   const step = async (name, fn) => { await fn(); report.groups.push(name); console.log("IL5_DISTRIBUTION_OK " + name); };
   function write(value, name = "config") { const file = path.join(base, name + ".json"); fs.writeFileSync(file, JSON.stringify(value), { mode: 0o600 }); return file; }
@@ -93,7 +93,7 @@ async function main() {
     await step("optional-canonical-smtp-dkim-isolation-and-failure-preservation", async () => {
       if (!receipt.tools) throw Error("EXPLICIT_SMTP_TOOLS_IMAGE_REQUIRED");
       const mail = structuredClone(cfg), mail_root = path.join(base, "smtp"); mail.deployment.id += "-smtp"; mail.deployment.project += "-smtp"; mail.infrastructure.spec.instance.id = mail.deployment.id; mail.infrastructure.adapter_input.project = mail.deployment.project; mail.infrastructure.adapter_input.network = mail.deployment.project + "-application"; mail.storage.root = mail_root; mail.storage.backup_location = mail_root + "-backups"; mail.manifest.external_gateway.host_port = await freePort(); for (const resource of mail.manifest.persistent_resources) resource.source = resource.source.replace(root, mail_root);
-      const imported = path.join(base, "submission-import"); fs.writeFileSync(imported, crypto.randomBytes(32).toString("base64url"), { mode: 0o600 }); require("./smtp")(mail, receipt.tools.image, imported); configs.push(mail);
+      const imported = path.join(base, "submission-import"); fs.writeFileSync(imported, crypto.randomBytes(32).toString("base64url"), { mode: 0o600 }); sensitive.push(fs.readFileSync(imported, "utf8")); require("./smtp")(mail, receipt.tools.image, imported); configs.push(mail);
       const mail_file = write(mail, "smtp"), mail_port = mail.manifest.external_gateway.host_port; assert.equal(cli("install", mail_file, ["--execute"]).ready, true);
       const objects = own(mail), relay = objects.find(x => x.Config.Labels["com.docker.compose.service"] === "mail"), backend = objects.find(x => x.Config.Labels["com.docker.compose.service"] === "application");
       for (const object of objects.filter(x => x !== backend)) assert.deepEqual(object.HostConfig.PortBindings || {}, {});
@@ -118,6 +118,21 @@ async function main() {
       assert.equal(cli("start", requiredFile, ["--execute"]).ready, true);
       fs.mkdirSync(mail.storage.backup_location, { mode: 0o700 }); assert.equal(cli("backup", requiredFile, ["--execute", "--backup", mail.storage.backup_location + "/refused"], false).code, "SMTP_RECOVERY_UNQUALIFIED"); assert.equal(cli("status", requiredFile).ready, true);
       report.smtp = { starttls_auth: true, invalid_tls_name_refused: true, private_dkim_observed: true, no_open_relay: true, optional_failure_isolated: true, backend_failure_preserves_queued_message: true, secrets_preserved: true, required_failure_diagnosed: true, smtp_recovery: "explicitly-unsupported", internet_delivery: false };
+    });
+    await step("logs-and-receipts-contain-no-qualification-secrets", async () => {
+      let checked = 0;
+      for (const value of configs) for (const object of own(value)) {
+        const result = spawnSync("docker", ["logs", object.Id], { encoding: "utf8", timeout: 30000 });
+        assert.equal(result.status, 0);
+        const logs = result.stdout + result.stderr;
+        for (const secret of sensitive) assert.equal(logs.includes(secret), false);
+        assert.equal(/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(logs), false);
+        checked++;
+      }
+      const artifacts = JSON.stringify({ receipt, report });
+      for (const secret of sensitive) assert.equal(artifacts.includes(secret), false);
+      assert.equal(/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(artifacts), false);
+      report.secret_checks = { containers_checked: checked, generated_credentials_absent: true, private_keys_absent: true, receipts_checked: true };
     });
     report.status = "passed";
   } catch (error) { report.status = "failed"; report.failure = { code: error.code || error.message, diagnostic: error.diagnostic }; console.error(JSON.stringify(report.failure)); throw error; }
