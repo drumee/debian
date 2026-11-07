@@ -1,0 +1,96 @@
+{
+  "starting_distribution": "1ff957fac41f158346974d0b290b9396fefb44b6",
+  "producer": {
+    "source": "a8037dd62a50ae4bcb8ab0b36f6a8e1b5f23a0a6",
+    "version": "0.1.0-alpha.4",
+    "bytes": 107774,
+    "members": 43,
+    "sha256": "e9ceff871f45331c9f3308c5efa20ab4308b8c59a5b511485be1426645431023",
+    "integrity": "sha512-8R0syrXk74veTYi9AogxGNEOUX6djiLkVIj4DIJ26owR45o8BT9vqI5Bu9Ffuqf1upu80o9/d4ZfnTqvVS2Mqg==",
+    "all_member_bytes_equal_source": true,
+    "registry_gitHead": null
+  },
+  "image_source": "fa9a1f5b1b37aef3b0b34960411d6590f2ea3c84",
+  "acceptance_runner": "aa5e79b9aaaaebb72a7b5e4d01e22ff9524045c4",
+  "application_image": "sha256:34b68bfc3a7d9c8f5c3dc94a8b575f5559828ab89ecc1205aff71d67401b7bee",
+  "tools_image": "sha256:592eea5363d23d3dac46dffab71a776cfbb4f2e4673f9f7c7b39d694e76dbf3e",
+  "runtime": {
+    "version": "0.1.0-alpha.4",
+    "integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ=="
+  },
+  "fixture": [
+    {
+      "id": "qualification",
+      "files": 164,
+      "bytes": 1666782,
+      "integrity": "sha512-GPdfP2L6NKtz4qzOgqHsekCjRd7BXTuiPqA+XPxXBGntrMBUQIC0Vv18DEJe/4nryK8mBHGQOC7ajqxFq4kkEA=="
+    }
+  ],
+  "results": {
+    "application_contracts": 8,
+    "plugin_archive": 8,
+    "minimal_kernel": 15,
+    "shared_suite": 331,
+    "acceptance_groups": 11,
+    "acceptance_assertions": 154,
+    "acceptance_status": "passed",
+    "audit_prod": 0,
+    "audit_dev": 0,
+    "shellcheck": {
+      "files": 97,
+      "count": 91,
+      "levels": {
+        "warning": 71,
+        "error": 20
+      },
+      "equals_historical": true,
+      "invocation": "one file per invocation",
+      "exit_code": 1
+    },
+    "packaging": {
+      "passes": 10,
+      "historical_failures": 2,
+      "unchanged": true
+    }
+  },
+  "acceptance_groups": [
+    "selector-public-plan-and-operator-authorization",
+    "install-real-runtime-native-rpc-and-authorization",
+    "docker-host-and-separate-lan-network-observations",
+    "operator-proxy-fragment-with-real-host-nginx-and-verified-tls",
+    "restart-stop-start-and-idempotent-install-preserve-data",
+    "real-operator-interruption-and-explicit-recovery",
+    "configuration-rollback-and-failed-plugin-startup-preserve-state",
+    "operator-backup-and-isolated-restore",
+    "unknown-existing-installation-and-owner-mismatch-refused",
+    "optional-canonical-smtp-dkim-isolation-and-failure-preservation",
+    "logs-and-receipts-contain-no-qualification-secrets"
+  ],
+  "smtp": {
+    "starttls_auth": true,
+    "invalid_tls_name_refused": true,
+    "private_dkim_observed": true,
+    "no_open_relay": true,
+    "optional_failure_isolated": true,
+    "backend_failure_preserves_queued_message": true,
+    "secrets_preserved": true,
+    "required_failure_diagnosed": true,
+    "smtp_recovery": "explicitly-unsupported",
+    "internet_delivery": false
+  },
+  "secrets": {
+    "containers_checked": 5,
+    "generated_credentials_absent": true,
+    "private_keys_absent": true,
+    "receipts_checked": true
+  },
+  "network": {
+    "client": "owned disposable SSH container",
+    "separate_network_namespace": true,
+    "physical_lan_test": false,
+    "positive_control": true,
+    "non_loopback_result": "ECONNREFUSED",
+    "loopback_only": true
+  },
+  "no_production_or_of01r_execution": true
+}

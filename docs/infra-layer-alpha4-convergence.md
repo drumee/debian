@@ -46,9 +46,58 @@ services Dockerfile still owns optional native tools construction.
 
 ## Qualification and debt boundary
 
-Final acceptance and CI results are recorded below after execution. Counts must
-not be inferred from historical IL-5.9-B acceptance. Security negative controls,
-public lifecycle calls and the existing real acceptance runner remain intact.
+Fresh qualification (Node 22.22.0 / npm 11.18.0 / Docker 29.2.0) passed:
+
+| Check | Result |
+| --- | --- |
+| Locked registry installation and installed-member verification | PASS, 43 members |
+| Application contracts | 8 passed, zero skips |
+| Plugin archive boundaries | 8 Python tests passed |
+| Minimal-kernel regression | 15 passed, zero skips; lock unchanged |
+| Shared Debian suite | 331 checks passed, no emitted skip |
+| Production and development npm audits (application profile) | Zero vulnerabilities |
+| Real minimal-application acceptance | 11 groups, 154 assertions, zero failures/skips |
+| Packaging | 10 passes / 2 historical failures, identical normalized baseline output |
+| ShellCheck 0.11.0 | Same 91 historical findings (20 errors / 71 warnings), no new findings |
+
+Application and native-tools images were built from committed profile code at
+`fa9a1f5b1b37aef3b0b34960411d6590f2ea3c84`. The acceptance runner at
+`aa5e79b9aaaaebb72a7b5e4d01e22ff9524045c4` adds only the missing secret-leak check;
+its profile/build inputs equal the image source byte-for-byte. Counts are separate,
+not an aggregate. The qualification fixture artifact is unchanged from IL-5.9-B,
+but all lifecycle/SMTP acceptance above was freshly executed with alpha.4.
+
+Real acceptance covered install/readiness, native RPC and denied access, host
+Nginx with CA/SAN verification, explicit loopback publication, independent-network
+connection refusal with a positive control route, restart/stop/start, durable data,
+SIGKILL and explicit recovery, failed plugin startup, configuration rollback,
+isolated backup/restore, owner/unowned-directory refusals, optional and required
+SMTP failures, required STARTTLS authentication, wrong credentials/certificate
+hostname and unauthenticated-envelope refusals, internal DKIM and queue/secret
+preservation. Generated credential/private-key checks passed against both stdout
+and stderr of five owned containers and against image/build/acceptance receipts.
+The existing negative controls and public lifecycle paths remain intact.
+
+The network client was an owned SSH container in a separate network namespace,
+not a physical LAN machine. Its nonce control route reached a dedicated host
+bridge address while the application's non-loopback connection was refused.
+Host socket and Docker inspections separately confirmed 127.0.0.1 publication.
+Nginx ran as an unprivileged host process from an extracted Debian package; no
+host service installation, resolver/firewall/system trust change was made.
+This is local isolated network qualification, not production-network acceptance.
+
+Internet SMTP delivery remains untested. Capture-mode SMTP spool backup/restore
+still refuses with SMTP_RECOVERY_UNQUALIFIED; it is not implicitly supported.
+No new Team/native full installation or browser campaign was run. Their historical
+proofs are not relabelled as current acceptance.
+
+The separate minimal-kernel profile retains its IL-4 Infra source pin
+`ad8f2baecb65e5e8782bb60fa92f1653bcc9f724`; this lot aligns only the OF-01R
+minimal-application consumer. A kernel migration needs its own qualification.
+
+The compact evidence receipt is [here](evidence/infra-layer-alpha4-convergence.json).
+Hosted results and the exact final distribution merge identity must be verified
+separately before this dossier is used as an OF-01R handoff.
 
 The distribution branch has historical global packaging failures (unqualified
 legacy FROM references and global PM2 installation), plus 91 ShellCheck findings.
