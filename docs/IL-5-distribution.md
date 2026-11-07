@@ -1,5 +1,7 @@
 # IL-5.3 — minimal-application operator distribution
 
+> Current registry convergence: see [Infra Layer alpha.4 qualification](infra-layer-alpha4-convergence.md). Earlier source pins and artifact identities below are historical evidence.
+
 Implemented profile: `profiles/minimal-application`, selected explicitly with
 `bin/drumee-ctl --profile minimal-application`. Team remains the default and
 minimal-kernel source/dependency pins remain unchanged. Clean-checkout acceptance and limits are recorded in

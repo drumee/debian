@@ -26,7 +26,7 @@ function build(input) {
     }
     fs.writeFileSync(path.join(directory, "plugins-manifest.json"), JSON.stringify(plugins), { mode: 0o644 });
     const plugin_digest = crypto.createHash("sha256").update(JSON.stringify(artifacts)).digest("hex"), tag = "drumee-minimal-application:" + revision.slice(0, 16) + "-" + plugin_digest.slice(0, 16);
-    run("docker", ["build", "--label", "org.opencontainers.image.source=https://github.com/drumee/debian", "--label", "org.opencontainers.image.revision=" + revision, "--label", "org.drumee.application.plugins=" + plugin_digest, "--label", "org.drumee.infra.revision=" + infrastructure.revision, "--label", "org.drumee.infra.source-integrity=" + infrastructure.integrity, "-t", tag, directory], { stdio: "inherit" });
+    run("docker", ["build", "--label", "org.opencontainers.image.source=https://github.com/drumee/debian", "--label", "org.opencontainers.image.revision=" + revision, "--label", "org.drumee.application.plugins=" + plugin_digest, "--label", "org.drumee.infra.revision=" + infrastructure.revision, "--label", "org.drumee.infra.package-integrity=" + infrastructure.package_integrity, "--label", "org.drumee.infra.version=" + infrastructure.version, "-t", tag, directory], { stdio: "inherit" });
     const image = run("docker", ["image", "inspect", tag, "--format", "{{.Id}}"] ).trim();
     let tools;
     if (input.tools) {

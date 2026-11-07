@@ -1,5 +1,7 @@
 # IL-5 release and integration handoff
 
+> Current registry convergence: see [Infra Layer alpha.4 qualification](infra-layer-alpha4-convergence.md). Earlier source pins and artifact identities below are historical evidence.
+
 Current status after IL-5.7: **READY_FOR_OWNER_MERGE_DECISION**.
 See [final integration validation](IL-5.7-final-validation.md),
 [proposed debt acceptance](IL-5.7-baseline-debt-acceptance.md) and
