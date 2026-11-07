@@ -1,5 +1,7 @@
 # IL-5.7 — conditions for Oxy-form OF-01R resumption
 
+> Current registry convergence: see [Infra Layer alpha.4 qualification](infra-layer-alpha4-convergence.md). Earlier source pins and artifact identities below are historical evidence.
+
 This is a handoff proposal, not an Oxy-form code change, OF-02 execution or
 production authorization. The unchanged consumer report at Oxy-form
 `7f368473d4f350a88e844b841f97a175b53921b8` still says BLOCKED_DISTRIBUTION.

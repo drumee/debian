@@ -1,5 +1,7 @@
 # Explicit minimal application profile
 
+> Current registry convergence: see [Infra Layer alpha.4 qualification](../../docs/infra-layer-alpha4-convergence.md). Earlier source pins and artifact identities below are historical evidence.
+
 Owner-bound native Server Runtime composition behind an externally managed HTTPS
 proxy. No gateway/DB/Redis/DNS/Hub/MFS/Finder is implicit. Runtime alpha.4 is
 unchanged; Infra Layer's immutable IL-5 source owns all lifecycle operations.
