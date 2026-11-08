@@ -36,5 +36,5 @@ test("profile uses public lifecycle exports and adds no session, identity SQL or
   assert.doesNotMatch(text, /infra-layer\/(?:lib|lifecycle\/(?!['"]))/);
   assert.doesNotMatch(text, /docker compose|INSERT INTO|createPrivateHub|SessionManager|createHash|nodemailer/);
   const lock = require("../package-lock.json"); assert.equal(lock.packages["node_modules/@drumee/server-runtime"].integrity, "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ==");
-  assert.equal(lock.packages["node_modules/@drumee/infra-layer"].resolved, "https://registry.npmjs.org/@drumee/infra-layer/-/infra-layer-0.1.0-alpha.5.tgz");
+  assert.equal(lock.packages["node_modules/@drumee/infra-layer"].resolved, "https://registry.npmjs.org/@drumee/infra-layer/-/infra-layer-0.1.0-alpha.6.tgz");
 });
