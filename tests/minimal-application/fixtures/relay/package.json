@@ -1,0 +1,6 @@
+{
+  "name": "debian-synthetic-smtp-qualification",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": { "smtp-server": "3.19.24" }
+}

@@ -1,0 +1,264 @@
+{
+  "baseline": "2d2fd20d7a8116ae5023088cc4129246afe09c24",
+  "target": "feat/container-distribution",
+  "pr": "https://github.com/drumee/debian/pull/11",
+  "qualified_source": "70522f033262d469bc1f6252ca8823def819c842",
+  "input_identities": {
+    "profiles/minimal-application": "687d1256381c8acf5acb381117349b4d870ec009",
+    "tests/minimal-application/run.js": "8c9ae77ffc4d910baf31956596c691ac38b32794",
+    "tests/minimal-application/smtp.js": "c65c8a52d6ec4900017f07cfbfe06d38140ffac1",
+    "tests/minimal-application/recovery.js": "6f561122c548eb8564004aaf3ce26334d1cd2d1f",
+    "tests/minimal-application/relay-auth.js": "0fa71162a645f74dbc616d9df0fc5515075cf10d",
+    "tests/minimal-application/fixtures/relay": "794cc32d51c533ac07895eabcff5f35b8b330514",
+    "tests/minimal-application/fixtures/plugin": "f4d36d2a25e2737680090ce5c7e47a0dec2bb4e7",
+    "bin/drumee-ctl": "3f2ba6dc88b9d9bbdc7a7b2408fe349a548c43e3",
+    "config/render.mjs": "646e35a7f1e2fefbdcb6579bf1e1da62c50860bb",
+    "config/drumee.schema.json": "48554788e94d0dd13990eea59e175495e3e2b5d7"
+  },
+  "infra": {
+    "version": "0.1.0-alpha.6",
+    "producer": "09b7f28bce99ba3744e31a0ee5b2dde868a9a86a",
+    "sha256": "562a01bf5d8dba6151bf3a1768e56655df9e9302ed2ea6f072a4ed72eb177874",
+    "integrity": "sha512-ZuGENEDYE1Ug6FJYzvSR+MG8zzOaBMBkYhgx+5nNR5OKMDBHpOvCfdzDe1XNfNz7fKqRfCHFQZGlxvYQzEm+YQ==",
+    "bytes": 110826,
+    "members": 44,
+    "all_members_equal_qualified_git": true
+  },
+  "infra_url": "https://registry.npmjs.org/@drumee/infra-layer/-/infra-layer-0.1.0-alpha.6.tgz",
+  "additional_required_member": "lib/smtp-auth.js",
+  "full_inventory": "profiles/minimal-application/infra-source-lock.json",
+  "images": {
+    "revision": "70522f033262d469bc1f6252ca8823def819c842",
+    "runtime": {
+      "version": "0.1.0-alpha.4",
+      "integrity": "sha512-bOZ/v6/4mQ/FPa8iE21polPx2PjJWFYTKqTz+2duqxI2ljpviemNgOtpwkxF4j/1Xn/1aVIxdvVCc8Tch2ctEQ=="
+    },
+    "infrastructure": {
+      "acquisition": "npm-registry",
+      "version": "0.1.0-alpha.6",
+      "revision": "09b7f28bce99ba3744e31a0ee5b2dde868a9a86a",
+      "integrity": "sha512-ZuGENEDYE1Ug6FJYzvSR+MG8zzOaBMBkYhgx+5nNR5OKMDBHpOvCfdzDe1XNfNz7fKqRfCHFQZGlxvYQzEm+YQ==",
+      "sha256": "562a01bf5d8dba6151bf3a1768e56655df9e9302ed2ea6f072a4ed72eb177874",
+      "package_integrity": "sha512-ZuGENEDYE1Ug6FJYzvSR+MG8zzOaBMBkYhgx+5nNR5OKMDBHpOvCfdzDe1XNfNz7fKqRfCHFQZGlxvYQzEm+YQ=="
+    },
+    "image": "sha256:1a5c9149109bfc5f5a0ba721b788508d9fc99bbeac37c38b6a0186348c081e1b",
+    "tag": "drumee-minimal-application:70522f033262d469-03e8f4d7b80b44f8",
+    "plugins": [
+      {
+        "id": "qualification",
+        "root": "/app/plugins/qualification/server",
+        "revision": "70522f033262d469bc1f6252ca8823def819c842"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "qualification",
+        "files": 164,
+        "bytes": 1725981,
+        "integrity": "sha512-yjQrN7LCOP6+QCGltSVcW6Il2nHWUfP6uFxc7kliAeEEf4tNAG3gVu2p6fFPKItmoD+fDnjPGeZmN58Ev6l7pw=="
+      }
+    ],
+    "tools": {
+      "tag": "drumee-minimal-application-tools:70522f033262d469",
+      "image": "sha256:a02cc47d0ebca12a55759edb00757b3a8cdd00112ad4afe9a4ff7b5337ffe843"
+    }
+  },
+  "qualification_plugin": {
+    "files": 164,
+    "compressed_bytes": 388595,
+    "unpacked_bytes": 1725981,
+    "integrity": "sha512-yjQrN7LCOP6+QCGltSVcW6Il2nHWUfP6uFxc7kliAeEEf4tNAG3gVu2p6fFPKItmoD+fDnjPGeZmN58Ev6l7pw==",
+    "sha256": "adecbceb5045ec284379d54bf7c59c826b16ad368fa8da82fe4352321a00231e",
+    "source": "70522f033262d469bc1f6252ca8823def819c842"
+  },
+  "smtp": {
+    "cases": [
+      {
+        "name": "simple",
+        "passed": true,
+        "exact_map": true,
+        "entries": 1,
+        "private_modes": true,
+        "accepted_by_private_relay": true,
+        "authenticated": true,
+        "received_by_synthetic_sink": true,
+        "no_plaintext_authentication": true
+      },
+      {
+        "name": "full-address-and-shell-literals",
+        "passed": true,
+        "exact_map": true,
+        "entries": 1,
+        "private_modes": true,
+        "accepted_by_private_relay": true,
+        "authenticated": true,
+        "received_by_synthetic_sink": true,
+        "no_plaintext_authentication": true
+      },
+      {
+        "name": "opaque-and-utf8",
+        "passed": true,
+        "exact_map": true,
+        "entries": 1,
+        "private_modes": true,
+        "accepted_by_private_relay": true,
+        "authenticated": true,
+        "received_by_synthetic_sink": true,
+        "no_plaintext_authentication": true
+      },
+      {
+        "name": "wrong-authentication",
+        "passed": true,
+        "exact_map": true,
+        "entries": 1,
+        "private_modes": true,
+        "accepted_by_private_relay": true,
+        "authenticated": false,
+        "received_by_synthetic_sink": false,
+        "no_plaintext_authentication": true
+      },
+      {
+        "name": "untrusted-ca",
+        "passed": true,
+        "exact_map": true,
+        "entries": 1,
+        "private_modes": true,
+        "accepted_by_private_relay": true,
+        "authenticated": false,
+        "received_by_synthetic_sink": false,
+        "no_plaintext_authentication": true
+      },
+      {
+        "name": "wrong-hostname",
+        "passed": true,
+        "exact_map": true,
+        "entries": 1,
+        "private_modes": true,
+        "accepted_by_private_relay": true,
+        "authenticated": false,
+        "received_by_synthetic_sink": false,
+        "no_plaintext_authentication": true
+      },
+      {
+        "name": "no-starttls",
+        "passed": true,
+        "exact_map": true,
+        "entries": 1,
+        "private_modes": true,
+        "accepted_by_private_relay": true,
+        "authenticated": false,
+        "received_by_synthetic_sink": false,
+        "no_plaintext_authentication": true
+      }
+    ],
+    "assertions": 487,
+    "refusals": {
+      "canonical_file_imports": 11,
+      "before_connection": true,
+      "final_lf_and_crlf_refused_without_trimming": true
+    },
+    "mixed_recovery": {
+      "actual_adapter": true,
+      "ordinary_rollback": true,
+      "failed_start": true,
+      "recovery_required": true,
+      "authorized_rollback": true,
+      "ready_rpc_smtp_after_recovery": true,
+      "data_queue_secrets_preserved": true,
+      "absent_roles_observed": true,
+      "real_mount_order_variation": true,
+      "complete_mount_records_equal": true,
+      "copied_observation_guard_probes": true,
+      "real_extra_network_refused_without_recreation": true,
+      "external_smtp": false
+    },
+    "provider_image": "sha256:cfe06df3543654ca95bc1496258f05f575621dd76a69076f3cab96f7120267be",
+    "external_provider": false,
+    "real_mailbox": false
+  },
+  "full_profile": {
+    "groups": [
+      "selector-public-plan-and-operator-authorization",
+      "install-real-runtime-native-rpc-and-authorization",
+      "docker-host-and-separate-lan-network-observations",
+      "operator-proxy-fragment-with-real-host-nginx-and-verified-tls",
+      "restart-stop-start-and-idempotent-install-preserve-data",
+      "real-operator-interruption-and-explicit-recovery",
+      "configuration-rollback-and-failed-plugin-startup-preserve-state",
+      "operator-backup-and-isolated-restore",
+      "unknown-existing-installation-and-owner-mismatch-refused",
+      "optional-canonical-smtp-dkim-isolation-and-failure-preservation",
+      "logs-and-receipts-contain-no-qualification-secrets"
+    ],
+    "assertions": 226,
+    "mixed_recovery": {
+      "actual_adapter": true,
+      "ordinary_rollback": true,
+      "failed_start": true,
+      "recovery_required": true,
+      "authorized_rollback": true,
+      "ready_rpc_smtp_after_recovery": true,
+      "data_queue_secrets_preserved": true,
+      "absent_roles_observed": true,
+      "real_mount_order_variation": true,
+      "complete_mount_records_equal": true,
+      "copied_observation_guard_probes": true,
+      "real_extra_network_refused_without_recreation": true,
+      "external_smtp": false
+    },
+    "host_proxy": {
+      "containerized": false,
+      "ca_san_verified": true,
+      "operator_fragment": true
+    },
+    "secret_checks": {
+      "containers_checked": 5,
+      "generated_credentials_absent": true,
+      "private_keys_absent": true,
+      "receipts_checked": true
+    },
+    "internet_delivery": "not-tested"
+  },
+  "local_checks": {
+    "profile_contracts": 10,
+    "plugin_boundaries": 8,
+    "shared_assertions": 331,
+    "minimal_kernel_tests": 7,
+    "profile_production_audit": 0,
+    "profile_development_audit": 0,
+    "synthetic_provider_audit": 0,
+    "patched_plugin_fixture_audit": 0
+  },
+  "ci_debt": {
+    "shellcheck": 91,
+    "errors": 20,
+    "warnings": 71,
+    "packaging_failing_rules": 2,
+    "same_as_baseline": true,
+    "checks_disabled": false
+  },
+  "initial_hosted_debt_comparison": [
+    {
+      "file": "initial-128848639756-lint.log",
+      "identical": true,
+      "records": 91
+    },
+    {
+      "file": "initial-128848639570-packaging.log",
+      "identical": true,
+      "records": 14
+    },
+    {
+      "file": "initial-128848458669-lint.log",
+      "identical": true,
+      "records": 91
+    },
+    {
+      "file": "initial-128848458873-packaging.log",
+      "identical": true,
+      "records": 14
+    }
+  ],
+  "publication": false,
+  "oxy_form_modified": false
+}
