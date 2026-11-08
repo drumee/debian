@@ -55,6 +55,16 @@ packaging failures must be compared with the baseline and retained as failures.
 The owner's targeted-merge authorization permits unchanged historical debt;
 it does not disable checks, repair IL-5.10-C or converge Debian main.
 
+An additional audit of the existing bundled qualification plugin found three
+moderate address-parser advisories affecting its Nodemailer 10.1.1
+(GHSA-8c8m-p3m8-cjg8, GHSA-m943-m63m-w62w, GHSA-85x2-q946-cp5h). The same findings
+exist on the starting revision. Only that directly related synthetic SMTP client
+fixture is updated to exact 10.1.7, already qualified by the producer; its audit
+is then clean. Its sender/recipient remain fixed. This changes the test artifact,
+so a fresh archive/image receipt and both complete consumer campaigns are required.
+The old plugin SRI and prior campaign remain historical evidence, not the final
+qualification for the rebuilt fixture. Profile/Runtime dependencies are unchanged.
+
 No actual provider/account, owner secret, external message, production deployment
 or public form activation is used. Oxy-form #3 remains draft and unchanged.
 `SMTP_RECOVERY_UNQUALIFIED` remains: neither SMTP spool backup/restore nor
