@@ -7,7 +7,7 @@ const repository = path.resolve(__dirname, "../.."), profile = path.join(reposit
 const source = require(path.join(profile, "scripts/infrastructure-source")).verify(), L = require(installed + "/lifecycle"), { compose } = require(path.join(profile, "lib/config")), configuration = require(path.join(profile, "test/configuration"));
 const command = (program, args, options = {}) => execFileSync(program, args, { encoding: "utf8", stdio: "pipe", timeout: 300000, ...options });
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-function status(port) { return new Promise((resolve, reject) => { const req = http.get({ hostname: "127.0.0.1", port, agent: false }, res => { let body = ""; res.on("data", b => body += b); res.on("end", () => { try { resolve(JSON.parse(body)); } catch { reject(Error("SYNTHETIC_STATUS_INVALID")); } }); }); req.on("error", reject); req.setTimeout(3000, () => req.destroy()); }); }
+function status(port, release = false) { return new Promise((resolve, reject) => { const req = http.request({ hostname: "127.0.0.1", port, path: release ? "/allow" : "/", method: release ? "POST" : "GET", agent: false }, res => { let body = ""; res.on("data", b => body += b); res.on("end", () => { try { resolve(JSON.parse(body)); } catch { reject(Error("SYNTHETIC_STATUS_INVALID")); } }); }); req.on("error", reject); req.setTimeout(3000, () => req.destroy()); req.end(); }); }
 async function main() {
   const input = JSON.parse(fs.readFileSync(process.argv[2])), images = JSON.parse(fs.readFileSync(input.images));
   strict.ok(path.isAbsolute(input.output)); strict.deepEqual(images.infrastructure, source); strict.equal(source.version, "0.1.0-alpha.6");
@@ -17,7 +17,7 @@ async function main() {
   fs.writeFileSync(build + "/Dockerfile", 'FROM node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392\nWORKDIR /fixture\nCOPY package.json package-lock.json ./\nRUN npm ci --ignore-scripts --no-audit --no-fund\nCOPY server.js ./\nUSER 1000:1000\nENTRYPOINT ["node", "/fixture/server.js"]\n');
   const tag = "debian-synthetic-relay:" + suffix; command("docker", ["build", "--label", "org.drumee.qualification=" + suffix, "-t", tag, build]);
   const providerImage = command("docker", ["image", "inspect", tag, "--format", "{{.Id}}"] ).trim();
-  const report = { source_revision: images.revision, infrastructure: source, application_image: images.image, tools_image: images.tools.image, provider_image: providerImage, cases: [], assertions: 0, external_provider: false, real_owner_credentials: false, real_mailbox: false };
+  const report = { source_revision: images.revision, qualification_revision: command("git", ["rev-parse", "HEAD"]).trim(), infrastructure: source, application_image: images.image, tools_image: images.tools.image, provider_image: providerImage, cases: [], assertions: 0, external_provider: false, real_owner_credentials: false, real_mailbox: false };
   const check = (value, expected) => { strict.deepEqual(value, expected); report.assertions++; };
   const cases = [
     { name: "simple", user: "synthetic-simple", password: "synthetic:formerly!restricted/+=@" },
@@ -45,7 +45,7 @@ async function main() {
           openssl(["x509", "-req", "-in", keys + "/" + name + ".csr", "-CA", keys + "/" + name + "-ca.pem", "-CAkey", keys + "/" + name + "-ca.key", "-set_serial", "1", "-days", "1", "-extfile", keys + "/" + name + ".ext", "-out", keys + "/" + name + ".pem"]);
         }
         fs.writeFileSync(keys + "/trust.pem", Buffer.concat([fs.readFileSync(keys + "/relay-ca.pem"), ...(c.mode === "untrusted-ca" ? [] : [fs.readFileSync(keys + "/provider-ca.pem")])]));
-        fs.writeFileSync(keys + "/input.json", JSON.stringify({ user: c.user, password: c.mode === "wrong-password" ? "different-synthetic-password" : c.password, mode: c.mode }), { mode: 0o600 });
+        fs.writeFileSync(keys + "/input.json", JSON.stringify({ user: c.user, password: c.mode === "wrong-password" ? "different-synthetic-password" : c.password, mode: c.mode, defer: index === 0 }), { mode: 0o600 });
         provider = command("docker", ["run", "-d", "--name", project + "-provider", "--label", "org.drumee.qualification=" + project, "--network", network, "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true", "--pids-limit", "128", "--memory", "128m", "--user", process.getuid() + ":" + process.getgid(), "-p", gateway + ":" + smtpPort + ":2525", "-p", "127.0.0.1:" + control + ":8025", ...["provider.key", "provider.pem", "input.json"].flatMap(f => ["--mount", "type=bind,source=" + keys + "/" + f + ",target=/fixture/" + f + ",readonly"]), providerImage]).trim();
         for (let i = 0; ; i++) { try { await status(control); break; } catch (error) { if (i > 50) throw error; await delay(100); } }
         const submission = crypto.randomBytes(32).toString("base64url"), upstream = { resource: "mail-test", key: "upstream" };
@@ -59,6 +59,8 @@ async function main() {
           for (const [ref, file] of [[tls.private_key_ref, "relay.key"], [tls.certificate_ref, "relay.pem"], [tls.ca_bundle_ref, "trust.pem"]]) adapter.resource_sources.find(x => JSON.stringify(x.ref) === JSON.stringify(ref)).source = keys + "/" + file;
           adapter.resource_sources.push({ ref: upstream, source: root + "/durable/projections/upstream" });
           Object.assign(spec.mail, { mode: "relay", relay_tls: "required", relay_endpoint: { host: gateway, port: smtpPort, transport: "tcp" }, relay_user: c.user, relay_secret_ref: upstream });
+          value.manifest.persistent_resources.push({ id: "application-state", source: root + "/durable/application-state", uid: process.getuid(), gid: process.getgid(), backup_required: true });
+          value.manifest.application.mounts.push({ resource: "application-state", target: "/app/state", read_only: false });
           value.imports.push({ ref: tls.private_key_ref, file: keys + "/relay.key" }, { ref: upstream, file: keys + "/upstream" }); return value;
         }
         if (index === 0) {
@@ -74,7 +76,8 @@ async function main() {
         cfg = configurationFor(project, owned + "/deployment", await freePort()); const file = owned + "/config.json"; fs.writeFileSync(file, JSON.stringify(cfg), { mode: 0o600 });
         report.phase = "canonical-profile-install";
         const result = JSON.parse(command(repository + "/bin/drumee-ctl", ["--profile", "minimal-application", "install", "--config", file, "--execute"])); check(result.ready, true);
-        const ids = command("docker", ["ps", "-aq", "--filter", "label=com.docker.compose.project=" + project]).trim().split("\n").filter(Boolean), objects = JSON.parse(command("docker", ["inspect", ...ids])), mail = objects.find(x => x.Config.Labels["com.docker.compose.service"] === "mail");
+        const ids = command("docker", ["ps", "-aq", "--filter", "label=com.docker.compose.project=" + project]).trim().split("\n").filter(Boolean), initialObjects = JSON.parse(command("docker", ["inspect", ...ids]));
+        let objects = initialObjects, mail = objects.find(x => x.Config.Labels["com.docker.compose.service"] === "mail");
         for (const object of objects) { check(object.Config.Labels["org.drumee.infra.owner"], project); if (object !== objects.find(x => x.Config.Labels["com.docker.compose.service"] === "application")) check(object.HostConfig.PortBindings || {}, {}); }
         report.phase = "exact-map-and-private-permissions";
         check(command("docker", ["exec", mail.Id, "postmap", "-q", "[" + gateway + "]:" + smtpPort, "hash:/run/infra-mail/auth/sasl_passwd"], { encoding: null }).equals(Buffer.from(c.user + ":" + c.password + "\n")), true);
@@ -82,6 +85,28 @@ async function main() {
         check(command("docker", ["exec", mail.Id, "stat", "-c", "%a", "/run/infra-mail/auth"]).trim(), "700"); check(command("docker", ["exec", mail.Id, "stat", "-c", "%a", "/run/infra-mail/auth/sasl_passwd.db"]).trim(), "600");
         check(command("docker", ["exec", mail.Id, "cat", "/run/secrets/mail-relay"], { encoding: null }).equals(Buffer.from(c.password)), true); check(command("docker", ["exec", mail.Id, "stat", "-c", "%a", "/run/secrets/mail-relay"]).trim(), "600");
         const queued = await request(cfg.manifest.external_gateway.host_port, "qualification.smtp_probe", { queue_message: true }); check(queued.status, 200); check(queued.body.data.queued, true);
+        if (index === 0) {
+          report.phase = "authenticated-mixed-failed-start-recovery";
+          let before; for (let i = 0; i < 100; i++) { before = await status(control); if (before.deferrals > 0) break; await delay(100); }
+          check(before.deferrals > 0, true); check(before.messages, 0); check(before.account_exact, true); check(before.password_exact, true); check(before.tls_only, true);
+          const countedAssert = new Proxy(strict, { get(target, key) { const fn = target[key]; return typeof fn === "function" ? (...args) => { report.assertions++; return fn(...args); } : fn; } });
+          function own(value) {
+            const owner = JSON.parse(fs.readFileSync(value.storage.root + "/deployment-owner.json")); check(owner.project, value.deployment.project); check(owner.uid, process.getuid());
+            const ids = command("docker", ["ps", "-aq", "--filter", "label=com.docker.compose.project=" + value.deployment.project]).trim().split("\n").filter(Boolean), values = JSON.parse(command("docker", ["inspect", ...ids]));
+            for (const object of values) check(object.Config.Labels["org.drumee.infra.owner"], value.deployment.project); return values;
+          }
+          function write(value, name) { const destination = owned + "/" + name + ".json"; fs.writeFileSync(destination, JSON.stringify(value), { mode: 0o600 }); return destination; }
+          function cli(operation, config = file, extra = [], ok = true) {
+            try { const result = JSON.parse(command(repository + "/bin/drumee-ctl", ["--profile", "minimal-application", operation, "--config", config, ...extra])); if (!ok) throw Error("EXPECTED_REFUSAL_MISSING"); return result; }
+            catch (error) { if (ok) throw Object.assign(Error("CANONICAL_OPERATION_FAILED"), { code: "CANONICAL_OPERATION_FAILED", operation }); return JSON.parse(String(error.stderr)); }
+          }
+          const queueIds = object => command("docker", ["exec", object.Id, "postqueue", "-j"]).trim().split("\n").filter(Boolean).map(line => JSON.parse(line).queue_id).sort();
+          const fingerprints = (await L.prepareDeployment(compose(cfg), { root: cfg.storage.root, authorized: true, imports: cfg.imports })).fingerprints;
+          report.mixed_recovery = await require("./recovery")({ mail: cfg, file, cli, write, request, assert: countedAssert, command, own, queueIds, fingerprints, lifecycle: L });
+          objects = own(cfg); mail = objects.find(x => x.Config.Labels["com.docker.compose.service"] === "mail");
+          check(command("docker", ["exec", mail.Id, "postmap", "-q", "[" + gateway + "]:" + smtpPort, "hash:/run/infra-mail/auth/sasl_passwd"], { encoding: null }).equals(Buffer.from(c.user + ":" + c.password + "\n")), true);
+          await status(control, true); command("docker", ["exec", mail.Id, "postqueue", "-f"]);
+        }
         report.phase = "upstream-sasl-and-sink";
         let proof; for (let i = 0; i < 150; i++) { proof = await status(control); if (c.mode ? (c.mode === "wrong-password" ? proof.authentications > 0 : proof.connections > 0) : proof.messages > 0) break; await delay(100); }
         if (!c.mode) { check(proof.messages, 1); check(proof.authentications > 0, true); check(proof.account_exact, true); check(proof.password_exact, true); check(proof.envelope_exact, true); check(proof.body_exact, true); }
