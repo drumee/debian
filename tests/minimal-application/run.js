@@ -116,6 +116,7 @@ async function main() {
       command("docker", ["stop", own(mail).find(x => x.Config.Labels["com.docker.compose.service"] === "mail").Id]);
       assert.equal(cli("status", requiredFile).ready, false); assert.equal((await request(mail_port, "qualification.ping")).status, 200);
       assert.equal(cli("start", requiredFile, ["--execute"]).ready, true);
+      report.mixed_recovery = await require("./recovery")({ mail, file: requiredFile, cli, write, request, assert, command, own, queueIds, fingerprints, lifecycle: L });
       fs.mkdirSync(mail.storage.backup_location, { mode: 0o700 }); assert.equal(cli("backup", requiredFile, ["--execute", "--backup", mail.storage.backup_location + "/refused"], false).code, "SMTP_RECOVERY_UNQUALIFIED"); assert.equal(cli("status", requiredFile).ready, true);
       report.smtp = { starttls_auth: true, invalid_tls_name_refused: true, private_dkim_observed: true, no_open_relay: true, optional_failure_isolated: true, backend_failure_preserves_queued_message: true, secrets_preserved: true, required_failure_diagnosed: true, smtp_recovery: "explicitly-unsupported", internet_delivery: false };
     });
