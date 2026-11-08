@@ -112,9 +112,10 @@ async function main() {
         if (!c.mode) { check(proof.messages, 1); check(proof.authentications > 0, true); check(proof.account_exact, true); check(proof.password_exact, true); check(proof.envelope_exact, true); check(proof.body_exact, true); }
         else { await delay(1000); proof = await status(control); check(proof.messages, 0); check(proof.connections > 0, true); if (c.mode === "wrong-password") check(proof.authentications > 0, true); else check(proof.authentications, 0); }
         check(proof.tls_only, true); check(command("docker", ["exec", mail.Id, "test", "!", "-e", "/tmp/DEBIAN_SMTP_EXPANDED"]), "");
-        for (const object of objects) { const logs = spawnSync("docker", ["logs", object.Id], { encoding: "utf8" }); check(logs.status, 0); for (const secret of [c.user, c.password, submission]) check((logs.stdout + logs.stderr).includes(secret), false); check(/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(logs.stdout + logs.stderr), false); }
+        for (const object of [...objects, { Id: provider }]) { const logs = spawnSync("docker", ["logs", object.Id], { encoding: "utf8" }); check(logs.status, 0); for (const secret of [c.user, c.password, submission]) check((logs.stdout + logs.stderr).includes(secret), false); check(/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(logs.stdout + logs.stderr), false); }
         check(JSON.stringify({ env: mail.Config.Env, cmd: mail.Config.Cmd, entrypoint: mail.Config.Entrypoint }).includes(c.password), false);
         report.cases.push({ name: c.name, passed: true, exact_map: true, entries: 1, private_modes: true, accepted_by_private_relay: true, authenticated: !c.mode, received_by_synthetic_sink: proof.messages === 1, no_plaintext_authentication: proof.tls_only });
+        for (const credential of [c.user, c.password, submission]) check(JSON.stringify(report).includes(credential), false);
         console.log("DEBIAN_RELAY_AUTH_OK " + c.name);
       } finally {
         if (cfg && fs.existsSync(cfg.storage.root + "/deployment-owner.json")) {
