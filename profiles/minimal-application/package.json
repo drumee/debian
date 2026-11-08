@@ -8,6 +8,6 @@
   "scripts": { "test": "node --test test/*.test.js" },
   "dependencies": { "@drumee/server-runtime": "0.1.0-alpha.4" },
   "devDependencies": {
-    "@drumee/infra-layer": "0.1.0-alpha.4"
+    "@drumee/infra-layer": "0.1.0-alpha.5"
   }
 }
