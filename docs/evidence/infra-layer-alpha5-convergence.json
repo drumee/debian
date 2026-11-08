@@ -1,0 +1,94 @@
+{
+  "starting_distribution": "175e6fd1c1500a05192ad367dca95ebd1fcecdbb",
+  "target_branch": "feat/container-distribution",
+  "producer": "6b04a883484beb5d8ec274bbef75cd1a254ddb54",
+  "version": "0.1.0-alpha.5",
+  "archive": {
+    "url": "https://registry.npmjs.org/@drumee/infra-layer/-/infra-layer-0.1.0-alpha.5.tgz",
+    "members": 43,
+    "size": 108632,
+    "unpacked_size": 386015,
+    "sha256": "d714ea7fcce17041a4c6c9509add14c52c735169a4d6660d55ff570fc64fc75f",
+    "integrity": "sha512-NmHYfb/n83s2iY7MEpqNBU7W6xMGAiUHaUfzcm8C57ooPMR2oQeB6Q9O37ip0/Mb3O+/Oa4vx3n7ONLEcE2IVQ==",
+    "all_members_equal_qualified_git": true
+  },
+  "build_source": "15723584d96539dd5620026bcb1780e0ea473fee",
+  "acceptance_source": "7e033c763ce153d0b1de51aec92dac0227c10d56",
+  "profile_tree": "f3257c57426de0b461718b9bd45e61e3d180214d",
+  "images": {
+    "application": "sha256:232e921c3330de43ab36853456e2dc9de7d8730f2c95b61ebc1daebf7302491e",
+    "tools": "sha256:9bd904ed25890e994cd8b12782dcdc02c3c9f58aa99d5fe67871c7d54f95362d"
+  },
+  "plugin": {
+    "id": "qualification",
+    "files": 164,
+    "bytes": 1666782,
+    "integrity": "sha512-GPdfP2L6NKtz4qzOgqHsekCjRd7BXTuiPqA+XPxXBGntrMBUQIC0Vv18DEJe/4nryK8mBHGQOC7ajqxFq4kkEA=="
+  },
+  "fresh_checks": {
+    "application_contracts": 8,
+    "plugin_archive_tests": 8,
+    "shared_suite": 331,
+    "kernel_regression": 7,
+    "production_vulnerabilities": 0,
+    "development_vulnerabilities": 0,
+    "real_groups": 11,
+    "real_assertions": 226,
+    "skipped_real_scenarios": 0
+  },
+  "mixed_recovery": {
+    "actual_adapter": true,
+    "ordinary_rollback": true,
+    "failed_start": true,
+    "recovery_required": true,
+    "authorized_rollback": true,
+    "ready_rpc_smtp_after_recovery": true,
+    "data_queue_secrets_preserved": true,
+    "absent_roles_observed": true,
+    "real_mount_order_variation": true,
+    "complete_mount_records_equal": true,
+    "copied_observation_guard_probes": true,
+    "real_extra_network_refused_without_recreation": true,
+    "external_smtp": false
+  },
+  "smtp": {
+    "starttls_auth": true,
+    "invalid_tls_name_refused": true,
+    "private_dkim_observed": true,
+    "no_open_relay": true,
+    "optional_failure_isolated": true,
+    "backend_failure_preserves_queued_message": true,
+    "secrets_preserved": true,
+    "required_failure_diagnosed": true,
+    "smtp_recovery": "explicitly-unsupported",
+    "internet_delivery": false
+  },
+  "secret_checks": {
+    "containers_checked": 5,
+    "generated_credentials_absent": true,
+    "private_keys_absent": true,
+    "receipts_checked": true
+  },
+  "historical_ci_debt": {
+    "shellcheck": {
+      "action": "ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca",
+      "files": 121,
+      "findings": 91,
+      "levels": {
+        "warning": 71,
+        "error": 20
+      },
+      "unchanged": true,
+      "per_file_invocation": true,
+      "regular_files_only": true
+    },
+    "packaging": {
+      "same_normalized_output": true,
+      "passes": 10,
+      "historical_failures": 2
+    }
+  },
+  "post_merge_verification": "required separately; result recorded in final local report",
+  "production_access": false,
+  "oxy_form_executed": false
+}
