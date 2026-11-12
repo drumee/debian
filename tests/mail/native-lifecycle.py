@@ -15,7 +15,11 @@ spec['deployment'].update({'id':project,'project':project,'root':str(root/'servi
 registry=json.loads((source/'service/durable/registry/public/current.json').read_text());verifiers=json.loads((source/'rotate-input.json').read_text())['verifiers']
 for name,value in [('registry.json',registry),('verifiers.json',verifiers)]:
  (root/name).write_text(json.dumps(value));(root/name).chmod(0o600)
-cfg={'distribution':{'profile':'mail'},'service':spec,'registry_file':str(root/'registry.json'),'verifiers_file':str(root/'verifiers.json'),'secret_sources':previous['plan']['secret_sources'],'acceptance':True,'acceptance_private_listener':os.environ.get('MAIL02_PRIVATE_BIND')=='1','monitoring':{'queue_age_seconds':1,'auth_failures':1}};(root/'config.json').write_text(json.dumps(cfg));(root/'config.json').chmod(0o600)
+(root/'inputs').mkdir(mode=0o700)
+sources=[]
+for item in previous['plan']['secret_sources']:
+ file=root/'inputs'/item['ref'].replace(':','-').replace('/','-');file.write_bytes(pathlib.Path(item['file']).read_bytes());file.chmod(0o600);sources.append({'ref':item['ref'],'file':str(file)})
+cfg={'distribution':{'profile':'mail'},'service':spec,'registry_file':str(root/'registry.json'),'verifiers_file':str(root/'verifiers.json'),'secret_sources':sources,'acceptance':True,'acceptance_private_listener':os.environ.get('MAIL02_PRIVATE_BIND')=='1','monitoring':{'queue_age_seconds':1,'auth_failures':1}};(root/'config.json').write_text(json.dumps(cfg));(root/'config.json').chmod(0o600)
 network=project+'-foreign-test';created=False;checks=[]
 try:
  operator('validate');checks.append('profile-validation')
