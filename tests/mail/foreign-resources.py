@@ -1,18 +1,24 @@
 """Pre-existing network/volume negatives. Synthetic target resources remain intact."""
-import copy,hashlib,json,pathlib,subprocess,sys,tempfile,uuid
+import copy,hashlib,json,pathlib,subprocess,sys,tempfile,uuid,ipaddress
 repo=pathlib.Path(__file__).resolve().parents[2];source=pathlib.Path(sys.argv[1]);original=json.loads((source/'config.json').read_text());checks=[];commands=[];retained=[]
 def run(args,ok=True):
  r=subprocess.run(args,capture_output=True,timeout=120);commands.append({'argv':args,'exit':r.returncode,'stdout_sha256':hashlib.sha256(r.stdout).hexdigest(),'stderr_sha256':hashlib.sha256(r.stderr).hexdigest()})
  if ok and r.returncode:raise RuntimeError('foreign resource fixture failed '+str(args[:3]))
  return r
 def inspect(kind,name):return json.loads(run(['docker',kind,'inspect',name]).stdout)[0]
+ids=run(['docker','network','ls','-q']).stdout.decode().split();networks=json.loads(run(['docker','network','inspect',*ids]).stdout);used=[ipaddress.ip_network(c['Subnet']) for n in networks for c in (n['IPAM'].get('Config') or []) if c.get('Subnet')]
+def allocate():
+ for i in range(256):
+  network=ipaddress.ip_network('10.252.'+str(i)+'.0/24')
+  if not any(network.version==n.version and network.overlaps(n) for n in used):used.append(network);return str(network)
+ raise RuntimeError('no unused owned qualification subnet')
 for index,kind in enumerate(['edge-owner','edge-internal','edge-ipam','control-owner','control-internal','volume-owner','volume-options']):
- root=pathlib.Path(tempfile.mkdtemp(prefix='mail02-foreign-'));cfg=copy.deepcopy(original);project='mail02-foreign-'+uuid.uuid4().hex[:8];cfg['service']['deployment'].update(id=project,project=project,root=str(root/'service'),backup_root=str(root/'backups'));cfg['service']['networks'].update(edge_subnet=f'10.243.{60+index}.0/24',edge_gateway=f'10.243.{60+index}.1');cfg['service']['networks']['private_submission']['address']=f'10.243.{60+index}.1';cfg['acceptance_private_listener']=False;file=root/'config.json';file.write_text(json.dumps(cfg));file.chmod(0o600);run(['node',str(repo/'tests/mail/api.cjs'),'prepare',str(file)]);p=json.loads((root/'service/durable/operator-state/prepared.json').read_text());owner=project if not kind.endswith('owner') else 'synthetic-foreign-owner';name=project+('-sockets' if kind.startswith('volume') else '-control' if kind.startswith('control') else '-edge');resource='volume' if kind.startswith('volume') else 'network'
+ subnet=allocate();gateway=str(ipaddress.ip_network(subnet).network_address+1);root=pathlib.Path(tempfile.mkdtemp(prefix='mail02-foreign-'));cfg=copy.deepcopy(original);project='mail02-foreign-'+uuid.uuid4().hex[:8];cfg['service']['deployment'].update(id=project,project=project,root=str(root/'service'),backup_root=str(root/'backups'));cfg['service']['networks'].update(edge_subnet=subnet,edge_gateway=gateway);cfg['service']['networks']['private_submission']['address']=gateway;cfg['acceptance_private_listener']=False;file=root/'config.json';file.write_text(json.dumps(cfg));file.chmod(0o600);run(['node',str(repo/'tests/mail/api.cjs'),'prepare',str(file)]);p=json.loads((root/'service/durable/operator-state/prepared.json').read_text());owner=project if not kind.endswith('owner') else 'synthetic-foreign-owner';name=project+('-sockets' if kind.startswith('volume') else '-control' if kind.startswith('control') else '-edge');resource='volume' if kind.startswith('volume') else 'network'
  if resource=='network':
   args=['docker','network','create','--label','org.drumee.mail.owner='+owner,'--label','drumee.qualification.owner='+project]
   if not kind.endswith('internal'):args.append('--internal')
-  if kind.startswith('edge'):
-   args+=['--subnet',f'10.243.{160+index if kind.endswith("ipam") else 60+index}.0/24','--gateway',f'10.243.{160+index if kind.endswith("ipam") else 60+index}.1']
+  actual_subnet=allocate() if kind.endswith('ipam') or kind.startswith('control') else subnet
+  args+=['--subnet',actual_subnet,'--gateway',str(ipaddress.ip_network(actual_subnet).network_address+1)]
   run([*args,name])
  else:
   run(['docker','volume','create','--label','org.drumee.mail.owner='+owner,'--label','drumee.qualification.owner='+project,name])

@@ -25,7 +25,7 @@ def file_change(file,mutate,codes):
  try:mutate(file);return rejected(codes)
  finally:file.write_bytes(original);file.chmod(mode)
 def rootfile(file,operation,*args):
- code="const f=require('node:fs'),p='/data/'+process.argv[1];if(process.argv[2]==='write')f.writeFileSync(p,process.argv[3]);else if(process.argv[2]==='chown')f.chownSync(p,Number(process.argv[3]),Number(process.argv[4]));"
+ code="const f=require('node:fs'),p='/data/'+process.argv[1];if(process.argv[2]==='write')f.writeFileSync(p,process.argv[3]);else if(process.argv[2]==='chmod')f.chmodSync(p,Number(process.argv[3]));else if(process.argv[2]==='chown')f.chownSync(p,Number(process.argv[3]),Number(process.argv[4]));"
  return d('run','--rm','--network','none','--read-only','--user','0:0','--mount',f'type=bind,source={root}/service,target=/data','--entrypoint','node',nodeimage,'-e',code,str(file.relative_to(root/'service')),operation,*map(str,args))
 operator('stop');assert no_running()
 case('prepared-compose-listener-injection',lambda:file_change(pathlib.Path(prepared['compose_file']),lambda p:p.write_text(p.read_text().replace('"name":','"unrecognized":',1)),['MAIL_PREPARED_TAMPERED']))
@@ -86,6 +86,27 @@ def extra_network():
   d('network','connect',network,project+'-postfix-1');return rejected(['MAIL_RUNTIME_NETWORK_MISMATCH'])
  finally:d('network','disconnect',network,project+'-postfix-1');d('network','rm',network)
 case('extra-runtime-network',extra_network)
+for storage_name in ['spool','mailboxes']:
+ marker_file=root/'service/durable'/storage_name/'.infra-owner'
+ def marker_permissions(file=marker_file):
+  mode=file.stat().st_mode&0o777
+  try:rootfile(file,'chmod',0o666);return rejected(['MAIL_STORAGE_GUARD_FAILED'])
+  finally:rootfile(file,'chmod',mode)
+ case('unsafe-marker-permissions-'+storage_name,marker_permissions)
+ def marker_owner(file=marker_file):
+  uid,gid=file.stat().st_uid,file.stat().st_gid
+  try:rootfile(file,'chown',5001,gid);return rejected(['MAIL_STORAGE_GUARD_FAILED'])
+  finally:rootfile(file,'chown',uid,gid)
+ case('foreign-marker-owner-'+storage_name,marker_owner)
+# Bind the operator's declared profile to its prepared state, independently of runtime labels.
+state=root/'service/durable/operator-state/prepared.json'
+def wrong_state():
+ foreign=root/'foreign-prepared';foreign.mkdir(mode=0o700);cfg=json.loads((root/'config.json').read_text());cfg['service']['deployment'].update(id=project+'-foreign',project=project+'-foreign',root=str(foreign/'service'),backup_root=str(foreign/'backups'));config=foreign/'config.json';config.write_text(json.dumps(cfg));config.chmod(0o600)
+ run(['node',str(repo/'tests/mail/api.cjs'),'prepare',str(config)]);value=json.loads((foreign/'service/durable/operator-state/prepared.json').read_text());sentinel=foreign/'service/durable/policy-state/retained-target.txt';sentinel.write_text('pre-existing retained target data');before=sentinel.read_bytes()
+ result=file_change(state,lambda f:f.write_text(json.dumps(value)),['MAIL_PROFILE_STATE_MISMATCH']);assert sentinel.read_bytes()==before;assert not d('ps','-q','--filter','label=com.docker.compose.project='+project+'-foreign').stdout.strip();return result
+case('prepared-state-bound-to-declared-root',wrong_state)
+case('missing-frontal-hostname-alias',lambda:container_change('postfix',lambda service:service['networks']['edge'].update(aliases=['foreign.invalid']),['MAIL_RUNTIME_NETWORK_MISMATCH']))
+case('wrong-static-frontal-interface',lambda:container_change('postfix',lambda service:service['networks']['edge'].update(ipv4_address='10.243.47.253'),['MAIL_RUNTIME_NETWORK_MISMATCH']))
 # Every durable identity is exercised without starting a mail writer.
 for storage_name in prepared['storage']:
  directory=root/'service/durable'/storage_name
@@ -101,9 +122,13 @@ for storage_name in prepared['storage']:
  case('replacement-durable-'+storage_name,replacement)
  original_mode=directory.stat().st_mode&0o777
  def permissions(directory=directory,mode=original_mode):
-  try:directory.chmod(0o777);return rejected(['RESOURCE_PERMISSIONS_UNSAFE','MAIL_STORAGE_GUARD_FAILED','MAIL_OPERATION_FAILED'])
-  finally:directory.chmod(mode)
+  try:rootfile(directory,'chmod',0o777);return rejected(['RESOURCE_PERMISSIONS_UNSAFE','MAIL_STORAGE_GUARD_FAILED','MAIL_OPERATION_FAILED'])
+  finally:rootfile(directory,'chmod',mode)
  case('unsafe-permissions-durable-'+storage_name,permissions)
+ def special_mode(directory=directory,mode=original_mode):
+  try:rootfile(directory,'chmod',mode|0o2000);return rejected(['MAIL_STORAGE_GUARD_FAILED'])
+  finally:rootfile(directory,'chmod',mode)
+ case('unexpected-setgid-durable-'+storage_name,special_mode)
  original_gid=directory.stat().st_gid;original_uid=directory.stat().st_uid
  def group(directory=directory,gid=original_gid,uid=original_uid):
   try:rootfile(directory,'chown',uid,5001);return rejected(['MAIL_STORAGE_GUARD_FAILED'])

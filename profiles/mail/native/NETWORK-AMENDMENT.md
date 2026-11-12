@@ -47,7 +47,7 @@ It is not adopted as a qualified route. No host firewall exception is proposed.
 
 The replacement proposal, before implementation, is a mail-owned frontal bridge
 with an explicit stable Postfix address, derived as the last usable edge-subnet
-address (or first usable if that is the gateway). `plan.private_endpoint` declares
+address (or the next highest usable if that is the gateway). `plan.private_endpoint` declares
 that address, hostname, port and mail-owned network name. The existing gateway
 bind remains explicit for host/external routes, but Docker application clients use
 the frontal endpoint directly, without DNAT/proxy/masquerade. A network alias for

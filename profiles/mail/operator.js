@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 "use strict";
-const fs = require("node:fs"), path = require("node:path");
+const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
+const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 function readPrivate(file) {
   if (typeof file !== "string" || !path.isAbsolute(file) || fs.realpathSync(file) !== file) throw Error("MAIL_PRIVATE_FILE_UNSAFE");
   const s = fs.lstatSync(file);
@@ -27,9 +28,18 @@ function run(argv) {
   if (operation === "plan") return M.planMailService(cfg.service, { registry: JSON.parse(readPrivate(cfg.registry_file)), secret_sources: cfg.secret_sources });
   if (process.getuid() !== cfg.service.deployment.owner_uid || process.getgid() !== cfg.service.deployment.owner_gid) throw Error("MAIL_OPERATOR_IDENTITY_MISMATCH");
   const state = path.join(cfg.service.deployment.root, "durable/operator-state/prepared.json");
-  if (operation === "doctor") return M.observeMailService(JSON.parse(fs.readFileSync(state)), { authorized: true, ...cfg.monitoring });
-  if (operation === "status") return M.operateMailService(JSON.parse(fs.readFileSync(state)), "status", { authorized: true });
-  if (operation === "preflight") return M.operateMailService(JSON.parse(fs.readFileSync(state)), "preflight", { authorized: true });
+  const loadState = () => {
+    if (!fs.existsSync(state)) throw Error("MAIL_STORAGE_GUARD_FAILED");
+    const prepared = JSON.parse(readPrivate(state));
+    const digest = crypto.createHash("sha256").update(JSON.stringify(canonical(checked.normalized))).digest("hex");
+    if (prepared.root !== cfg.service.deployment.root || prepared.project !== cfg.service.deployment.project || prepared.hostname !== cfg.service.hostname || prepared.transport_digest !== digest) throw Error("MAIL_PROFILE_STATE_MISMATCH");
+    const binding = (prepared.compose.services.postfix.ports || []).some(port => port.target === checked.normalized.networks.private_submission.port && port.host_ip === checked.normalized.networks.private_submission.address);
+    if (cfg.acceptance === true && (prepared.compose.networks.edge.internal !== !cfg.acceptance_private_listener || binding !== !!cfg.acceptance_private_listener)) throw Error("MAIL_PROFILE_STATE_MISMATCH");
+    return prepared;
+  };
+  if (operation === "doctor") return M.observeMailService(loadState(), { authorized: true, ...cfg.monitoring });
+  if (operation === "status") return M.operateMailService(loadState(), "status", { authorized: true });
+  if (operation === "preflight") return M.operateMailService(loadState(), "preflight", { authorized: true });
   if (!opts.execute) throw Error("MAIL_EXECUTION_AUTHORIZATION_REQUIRED");
   if (operation === "install") {
     const verifiers = JSON.parse(readPrivate(cfg.verifiers_file));
@@ -40,7 +50,7 @@ function run(argv) {
     } else fs.writeFileSync(state, JSON.stringify(prepared), { mode: 0o600, flag: "wx" });
     return M.operateMailService(prepared, "start", { authorized: true, acceptance: cfg.acceptance === true });
   }
-  return M.operateMailService(JSON.parse(fs.readFileSync(state)), operation, { authorized: true, acceptance: cfg.acceptance === true });
+  return M.operateMailService(loadState(), operation, { authorized: true, acceptance: cfg.acceptance === true });
 }
 try { console.log(JSON.stringify(run(process.argv.slice(2)))); }
 catch (error) { console.log(JSON.stringify({ ok: false, code: /^[A-Z0-9_]+$/.test(error.code || error.message) ? error.code || error.message : "MAIL_OPERATION_FAILED" })); process.exitCode = 1; }

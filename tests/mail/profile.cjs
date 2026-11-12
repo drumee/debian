@@ -38,3 +38,11 @@ test("Private Docker descriptor uses the mail-owned frontend without adopting a 
   assert.equal(descriptor.network.external,true);assert.equal(descriptor.network.name,service.deployment.project+"-edge");assert.equal(descriptor.submission.verify_peer,true);assert.equal(descriptor.submission.starttls,"required");
   assert.throws(()=>require("../../profiles/mail/private-client.cjs").render(service,service.networks.edge_gateway),/MAIL_PRIVATE_CLIENT_ADDRESS_INVALID/);
 });
+
+test("A missing mail state refuses before fallback creation", () => {
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),"mail-state-guard-")),cfg=structuredClone(require("../../config/drumee.mail.example.json"));
+  cfg.service.deployment.root=path.join(root,"service");cfg.service.deployment.backup_root=path.join(root,"backups");cfg.service.deployment.owner_uid=process.getuid();cfg.service.deployment.owner_gid=process.getgid();
+  const config=path.join(root,"config.json");fs.writeFileSync(config,JSON.stringify(cfg),{mode:0o600});
+  const result=spawnSync("bash",[path.resolve(__dirname,"../../bin/drumee-ctl"),"--profile","mail","preflight","--config",config],{encoding:"utf8"});
+  assert.equal(result.status,1);assert.equal(JSON.parse(result.stdout).code,"MAIL_STORAGE_GUARD_FAILED");assert.equal(fs.existsSync(cfg.service.deployment.root),false);
+});

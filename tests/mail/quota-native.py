@@ -10,7 +10,7 @@ control=root/'quota-control';control.mkdir(mode=0o700,exist_ok=True)
 def helper(*args):return run(['docker','run','--rm','--network',project+'-edge','--ip','10.243.47.90','--mount','type=volume,source='+project+'-sockets,target=/run/mail-sockets','--mount',f'type=bind,source={source}/keys,target=/keys,readonly','--mount',f'type=bind,source={scripts},target=/lab,readonly','--mount',f'type=bind,source={control},target=/control','--entrypoint','python3',image,*args])
 def client(*args):return json.loads(run(['docker','run','--rm','--network',project+'-edge','--user','1000:1000','--mount',f'type=bind,source={source}/keys,target=/keys,readonly','--mount',f'type=bind,source={scripts},target=/lab,readonly','--entrypoint','python3',image,'/lab/client.py',*args]).stdout)
 def queue():return [json.loads(x) for x in comp('exec','-T','postfix','postqueue','-c','/config','-j').stdout.splitlines()]
-for action in ['high','fits','copy-move']:
+for action in ['high','fits','copy-race','move-race','copy-move']:
  value=json.loads(helper('/lab/atomic-check.py',action).stdout);checks.append({'name':action,'status':'PASS','observation':value});print(json.dumps(checks[-1]),flush=True)
 with concurrent.futures.ThreadPoolExecutor(1) as pool:
  pending=pool.submit(helper,'/lab/atomic-check.py','hold')
