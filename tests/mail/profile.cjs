@@ -32,3 +32,9 @@ test("corrupt archive fails before acquisition and preserves the installed consu
     assert.equal(typeof api().composeMailService, "function");
   } finally { fs.rmSync(root, { recursive: true }); }
 });
+
+test("Private Docker descriptor uses the mail-owned frontend without adopting a backend", () => {
+  const service=require("../../config/drumee.mail.example.json").service, descriptor=require("../../profiles/mail/private-client.cjs").render(service,service.networks.edge_gateway.replace(/\d+$/, "10"));
+  assert.equal(descriptor.network.external,true);assert.equal(descriptor.network.name,service.deployment.project+"-edge");assert.equal(descriptor.submission.verify_peer,true);assert.equal(descriptor.submission.starttls,"required");
+  assert.throws(()=>require("../../profiles/mail/private-client.cjs").render(service,service.networks.edge_gateway),/MAIL_PRIVATE_CLIENT_ADDRESS_INVALID/);
+});

@@ -3,7 +3,7 @@
 const fs = require("node:fs"), path = require("node:path");
 try {
   const cfg = JSON.parse(fs.readFileSync(process.argv[3])), M = require("../../profiles/mail/consumer.cjs").api();
-  const prepared = JSON.parse(fs.readFileSync(path.join(cfg.service.deployment.root, "durable/operator-state/prepared.json")));
+  const prepared = process.argv[2] === "prepare" ? null : JSON.parse(fs.readFileSync(path.join(cfg.service.deployment.root, "durable/operator-state/prepared.json")));
   const input = process.argv[4] ? JSON.parse(fs.readFileSync(process.argv[4])) : {};
   let result;
   if (process.argv[2] === "rotate") result = M.rotateMailTLS(prepared, input, { authorized: true });
@@ -12,6 +12,7 @@ try {
   else if (process.argv[2] === "prepare") {
     const plan = M.planMailService(cfg.service, { registry: JSON.parse(fs.readFileSync(cfg.registry_file)), secret_sources: cfg.secret_sources });
     result = M.prepareMailService(plan, { authorized: true, acceptance: true, private_bind: cfg.acceptance_private_listener === true, verifiers: JSON.parse(fs.readFileSync(cfg.verifiers_file)) });
+    fs.writeFileSync(path.join(cfg.service.deployment.root, "durable/operator-state/prepared.json"), JSON.stringify(result), {mode:0o600,flag:"wx"});
     result = { prepared: true, revision: result.revision };
   } else if (process.argv[2] === "registry") {
     const previous = JSON.parse(fs.readFileSync(path.join(cfg.service.deployment.root, "durable/registry/public/current.json")));

@@ -86,4 +86,27 @@ def extra_network():
   d('network','connect',network,project+'-postfix-1');return rejected(['MAIL_RUNTIME_NETWORK_MISMATCH'])
  finally:d('network','disconnect',network,project+'-postfix-1');d('network','rm',network)
 case('extra-runtime-network',extra_network)
+# Every durable identity is exercised without starting a mail writer.
+for storage_name in prepared['storage']:
+ directory=root/'service/durable'/storage_name
+ def missing(directory=directory):
+  retained=directory.with_name(directory.name+'-guard-retained');directory.rename(retained)
+  try:return rejected(['UNSAFE_RESOURCE_PATH','RESOURCE_MISSING','MAIL_OPERATION_FAILED','MAIL_STORAGE_GUARD_FAILED'])
+  finally:retained.rename(directory)
+ case('missing-durable-'+storage_name,missing)
+ def replacement(directory=directory):
+  retained=directory.with_name(directory.name+'-guard-retained');directory.rename(retained);directory.mkdir(mode=0o700);(directory/'target-retained.txt').write_text('pre-existing synthetic target')
+  try:return rejected(['UNSAFE_RESOURCE_PATH','RESOURCE_MISSING','MAIL_OPERATION_FAILED','MAIL_STORAGE_GUARD_FAILED'])
+  finally:directory.rename(root/('replacement-target-retained-'+uuid.uuid4().hex));retained.rename(directory)
+ case('replacement-durable-'+storage_name,replacement)
+ original_mode=directory.stat().st_mode&0o777
+ def permissions(directory=directory,mode=original_mode):
+  try:directory.chmod(0o777);return rejected(['RESOURCE_PERMISSIONS_UNSAFE','MAIL_STORAGE_GUARD_FAILED','MAIL_OPERATION_FAILED'])
+  finally:directory.chmod(mode)
+ case('unsafe-permissions-durable-'+storage_name,permissions)
+ original_gid=directory.stat().st_gid;original_uid=directory.stat().st_uid
+ def group(directory=directory,gid=original_gid,uid=original_uid):
+  try:rootfile(directory,'chown',uid,5001);return rejected(['MAIL_STORAGE_GUARD_FAILED'])
+  finally:rootfile(directory,'chown',uid,gid)
+ case('foreign-numeric-group-'+storage_name,group)
 operator('preflight');operator('start');result={'status':'PASS_NATIVE_IDENTITY_CONTROLS' if all(x['status']=='PASS' for x in checks) else 'FAIL_NATIVE_IDENTITY_CONTROLS','checks':checks,'commands':commands,'source_sha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()};(root/'identity-result.json').write_text(json.dumps(result,indent=2));print('REPORT '+str(root/'identity-result.json'))
