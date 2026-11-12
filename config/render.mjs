@@ -1061,6 +1061,7 @@ ${conf('/etc/opendkim', 'etc/opendkim')}
 // they did in an earlier draft, and a stack that differs depending on which command
 // produced it is worse than either stack.
 function composeFor(cfg) {
+  if (cfg.distribution?.profile === 'mail') return JSON.stringify(require('../profiles/mail/config.cjs').compose(cfg), null, 2) + '\n';
   if (cfg.distribution?.profile === 'minimal-application') return JSON.stringify(require('../profiles/minimal-application/lib/distribution').compose(cfg), null, 2) + '\n';
   if (cfg.distribution?.profile === 'minimal-kernel') return JSON.stringify(require('../profiles/minimal-kernel/lib/distribution').compose(cfg), null, 2) + '\n';
   return (cfg.images?.stack === 'roles') ? renderComposeRoles(cfg) : renderCompose(cfg);
@@ -1072,6 +1073,7 @@ function load(opts) {
   try { text = readFileSync(opts.config, 'utf8'); }
   catch { die(`cannot read config: ${opts.config}`); }
   const raw = parseYaml(text);
+  if (raw.distribution?.profile === 'mail') return require('../profiles/mail/config.cjs').validate(raw);
   if (raw.distribution?.profile === 'minimal-application') return require('../profiles/minimal-application/lib/config').validate(raw);
   if (raw.distribution?.profile === 'minimal-kernel') return require('../profiles/minimal-kernel/lib/config').validate(raw);
   const cfg = applyDefaults(raw);
@@ -1091,6 +1093,7 @@ function emit(content, out) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 const { command, opts } = parseArgs(process.argv.slice(2));
+if (['env', 'debconf', 'caddyfile', 'all'].includes(command) && load(opts).distribution?.profile === 'mail') die('mail supports validate and compose; use its explicit lifecycle operator for activation');
 if (['env', 'debconf', 'caddyfile'].includes(command) && load(opts).distribution?.profile === 'minimal-kernel') die('minimal-kernel uses Infra Layer lifecycle composition; this Team-only output is unsupported');
 if (['env', 'debconf', 'caddyfile'].includes(command) && load(opts).distribution?.profile === 'minimal-application') die('minimal-application uses an external gateway; this Team-only output is unsupported');
 
@@ -1127,6 +1130,7 @@ switch (command) {
 }
 
 function withSecrets(cfg) {
+  if (cfg.distribution?.profile === 'mail') return cfg;
   if (cfg.distribution?.profile === 'minimal-application') return cfg;
   if (cfg.distribution?.profile === 'minimal-kernel') return cfg;
   const generated = fillSecrets(cfg);

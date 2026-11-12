@@ -1,0 +1,12 @@
+"use strict";
+const fs = require("node:fs"), path = require("node:path"), { execFileSync } = require("node:child_process");
+const base = "drumee-minimal-application-tools:ff6e6b399128e633";
+const expected = "sha256:a02cc47d0ebca12a55759edb00757b3a8cdd00112ad4afe9a4ff7b5337ffe843";
+const command = args => execFileSync("/usr/bin/docker", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+if (command(["image", "inspect", base, "--format", "{{.Id}}"] ).trim() !== expected) throw Error("MAIL_NATIVE_BASE_IDENTITY_MISMATCH");
+const tag = "drumee-mail:mail02-local";
+command(["build", "--pull=false", "-t", tag, "-f", path.join(__dirname, "Dockerfile.native"), __dirname]);
+const id = command(["image", "inspect", tag, "--format", "{{.Id}}"] ).trim();
+fs.mkdirSync(path.join(__dirname, ".cache"), { recursive: true, mode: 0o700 });
+fs.writeFileSync(path.join(__dirname, ".cache/native-image.json"), JSON.stringify({ image: id, base: expected, published: false }, null, 2), { mode: 0o600 });
+console.log(JSON.stringify({ image: id, base: expected, published: false }));

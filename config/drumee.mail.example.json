@@ -1,0 +1,88 @@
+{
+  "distribution": {
+    "profile": "mail"
+  },
+  "service": {
+    "contract": "drumee.mail-service/1",
+    "deployment": {
+      "id": "oxymot-mail",
+      "project": "oxymot-mail",
+      "root": "/srv/oxymot-mail",
+      "backup_root": "/srv/backup/oxymot-mail",
+      "owner_uid": 12000,
+      "owner_gid": 12000,
+      "images": {
+        "postfix": "registry.example.invalid/mail-postfix@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "dovecot": "registry.example.invalid/mail-dovecot@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "opendkim": "registry.example.invalid/mail-opendkim@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "helper": "registry.example.invalid/mail-helper@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    "hostname": "mail.oxymot.fr",
+    "domains": [
+      "oxymot.fr"
+    ],
+    "ip_family": "ipv4",
+    "networks": {
+      "edge_subnet": "172.30.250.0/24",
+      "edge_gateway": "172.30.250.1",
+      "private_submission": {
+        "address": "172.30.250.1",
+        "port": 1587,
+        "allowed_sources": [
+          "172.21.0.0/16",
+          "172.19.0.0/16"
+        ]
+      }
+    },
+    "listeners": {
+      "smtp25": {
+        "enabled": false,
+        "address": "0.0.0.0"
+      },
+      "submission587": {
+        "enabled": false,
+        "address": "0.0.0.0"
+      },
+      "submissions465": {
+        "enabled": false,
+        "address": "0.0.0.0"
+      },
+      "imaps993": {
+        "enabled": false,
+        "address": "0.0.0.0"
+      }
+    },
+    "tls": {
+      "provider": "provided",
+      "certificate_ref": "secret:mail-tls/certificate",
+      "key_ref": "secret:mail-tls/key",
+      "client_ca_ref": "secret:mail-tls/ca",
+      "minimum": "TLSv1.2",
+      "renew_before_days": 30
+    },
+    "outbound": {
+      "mode": "direct-mx"
+    },
+    "delivery": {
+      "transport": "lmtp-unix",
+      "layout": "maildir-by-id",
+      "quota_failure": "temporary"
+    },
+    "dkim": [
+      {
+        "domain": "oxymot.fr",
+        "selector": "mail2026a",
+        "key_ref": "secret:mail-dkim/oxymot"
+      }
+    ],
+    "registry": {
+      "schema": "drumee.mail-registry/1",
+      "bootstrap": "empty"
+    }
+  },
+  "registry_file": "/etc/drumee/mail/private/registry.json",
+  "verifiers_file": "/etc/drumee/mail/private/verifiers.json",
+  "secret_sources": [],
+  "acceptance": false
+}

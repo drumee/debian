@@ -19,7 +19,7 @@ set -euo pipefail
 # Explicit profile dispatch precedes legacy detection; Team remains the default.
 if [ "${1:-}" = --profile ]; then
   case "${2:-}" in
-    minimal-kernel|minimal-application) DRUMEE_SELECTED_PROFILE="$2" ;;
+    minimal-kernel|minimal-application|mail) DRUMEE_SELECTED_PROFILE="$2" ;;
     *) echo 'error: unsupported profile' >&2; exit 1 ;;
   esac
   shift 2
