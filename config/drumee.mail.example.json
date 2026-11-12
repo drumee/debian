@@ -84,5 +84,10 @@
   "registry_file": "/etc/drumee/mail/private/registry.json",
   "verifiers_file": "/etc/drumee/mail/private/verifiers.json",
   "secret_sources": [],
-  "acceptance": false
+  "acceptance": false,
+  "acceptance_private_listener": false,
+  "monitoring": {
+    "queue_age_seconds": 3600,
+    "auth_failures": 5
+  }
 }

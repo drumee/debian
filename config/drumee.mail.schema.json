@@ -437,6 +437,28 @@
     },
     "acceptance": {
       "type": "boolean"
+    },
+    "acceptance_private_listener": {
+      "type": "boolean",
+      "default": false
+    },
+    "monitoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "queue_age_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800,
+          "default": 3600
+        },
+        "auth_failures": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 5
+        }
+      }
     }
   },
   "required": [

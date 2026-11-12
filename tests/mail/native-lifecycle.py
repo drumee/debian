@@ -10,11 +10,12 @@ def operator(verb,execute=False,ok=True):
  return run(['bash',str(repo/'bin/drumee-ctl'),'--profile','mail',verb,'--config',str(root/'config.json')]+(['--execute'] if execute else []),ok)
 def identities():
  p=run(['docker','ps','-q','--filter','label=com.docker.compose.project='+project]);return sorted(p.stdout.decode().split())
-previous=json.loads((source/'prepared.json').read_text());spec=previous['plan']['spec'];spec['deployment'].update({'id':project,'project':project,'root':str(root/'service'),'backup_root':str(root/'backups')})
+previous=json.loads((source/'prepared.json').read_text());spec=previous['plan']['spec'];spec['networks']['private_submission']['allowed_sources']=['10.243.47.0/25','10.243.48.0/24']
+spec['deployment'].update({'id':project,'project':project,'root':str(root/'service'),'backup_root':str(root/'backups')})
 registry=json.loads((source/'service/durable/registry/public/current.json').read_text());verifiers=json.loads((source/'rotate-input.json').read_text())['verifiers']
 for name,value in [('registry.json',registry),('verifiers.json',verifiers)]:
  (root/name).write_text(json.dumps(value));(root/name).chmod(0o600)
-cfg={'distribution':{'profile':'mail'},'service':spec,'registry_file':str(root/'registry.json'),'verifiers_file':str(root/'verifiers.json'),'secret_sources':previous['plan']['secret_sources'],'acceptance':True};(root/'config.json').write_text(json.dumps(cfg));(root/'config.json').chmod(0o600)
+cfg={'distribution':{'profile':'mail'},'service':spec,'registry_file':str(root/'registry.json'),'verifiers_file':str(root/'verifiers.json'),'secret_sources':previous['plan']['secret_sources'],'acceptance':True,'acceptance_private_listener':os.environ.get('MAIL02_PRIVATE_BIND')=='1','monitoring':{'queue_age_seconds':1,'auth_failures':1}};(root/'config.json').write_text(json.dumps(cfg));(root/'config.json').chmod(0o600)
 network=project+'-foreign-test';created=False;checks=[]
 try:
  operator('validate');checks.append('profile-validation')
@@ -24,10 +25,11 @@ try:
  denied=operator('status',ok=False);assert denied.returncode==1 and json.loads(denied.stdout)['code']=='MAIL_RUNTIME_NETWORK_MISMATCH';checks.append('extra-runtime-network-refused')
  run(['docker','network','disconnect',network,ids[0]]);operator('status');operator('stop',True);checks.append('stop-retains-durable-owned-storage')
  assert (root/'service/durable/spool/.infra-owner').exists() and (root/'service/durable/mailboxes/.infra-owner').exists()
- result={'status':'PASS_ISOLATED_PROFILE_LIFECYCLE','project':project,'private_root':str(root),'checks':checks,'commands':commands,'infra_receipt':json.loads((repo/'profiles/mail/infra-source-lock.json').read_text())}
+ result={'status':'PASS_ISOLATED_PROFILE_LIFECYCLE','runtime_retained':os.environ.get('MAIL02_RETAIN_RUNTIME')=='1','project':project,'private_root':str(root),'checks':checks,'commands':commands,'infra_receipt':json.loads((repo/'profiles/mail/infra-source-lock.json').read_text())}
+ if os.environ.get('MAIL02_RETAIN_RUNTIME')=='1':operator('start',True)
  (root/'result.json').write_text(json.dumps(result,indent=2));print(json.dumps({'status':result['status'],'report':str(root/'result.json'),'checks':checks}))
 finally:
  if created:run(['docker','network','rm',network],False)
  prepared=root/'service/durable/operator-state/prepared.json'
- if prepared.exists():
+ if prepared.exists() and os.environ.get('MAIL02_RETAIN_RUNTIME')!='1':
   p=json.loads(prepared.read_text());run(['docker','compose','-p',project,'-f',p['compose_file'],'down'],False)
