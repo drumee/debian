@@ -5,7 +5,7 @@ This document specifies distribution integration; it implements no CLI/profile,
 changes no package/version pins and triggers no production action.
 
 The complete normative design is in the companion
-[Infra Layer MAIL-01 dossier](https://github.com/drumee/infra-layer/tree/3244340/docs/mail-01).
+[Infra Layer MAIL-01 dossier](https://github.com/drumee/infra-layer/tree/2328b28b126355e40f18815e74c20e203ca6388f/docs/mail-01).
 It contains the versioned JSON Schema/examples, architecture, state model,
 CLI specification, migration/rollback, read-only deployment audit and acceptance
 matrix. Freeze the exact companion commit in MAIL-02's implementation baseline;
@@ -52,7 +52,7 @@ drumee-ctl --profile mail mail account create oxyform ...
 
 The normative operation grammar, flags, JSON envelopes/error exits, password input,
 quota/rename/deletion/session semantics and transaction recovery are in
-[operations.md](https://github.com/drumee/infra-layer/blob/3244340/docs/mail-01/operations.md).
+[operations.md](https://github.com/drumee/infra-layer/blob/2328b28b126355e40f18815e74c20e203ca6388f/docs/mail-01/operations.md).
 In particular deletion retains Maildir by default; purge is separate. Rename keeps
 UUID/Maildir/IMAP metadata; receiving, IMAP and submission flags are independent.
 Oxy and Ghost accounts are SMTP-only, distinct and limited to approved senders.
