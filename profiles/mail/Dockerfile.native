@@ -7,7 +7,10 @@ RUN printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d && chmod 755 /usr/sbi
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     dovecot-core=1:2.4.1+dfsg1-6+deb13u7 \
     dovecot-imapd=1:2.4.1+dfsg1-6+deb13u7 \
-    dovecot-lmtpd=1:2.4.1+dfsg1-6+deb13u7 \
+    dovecot-lmtpd=1:2.4.1+dfsg1-6+deb13u7 nftables util-linux \
  && rm -rf /var/lib/apt/lists/*
 LABEL org.drumee.mail.engine-contract="postfix-3.10-dovecot-2.4" \
       org.drumee.mail.base-config="sha256:a02cc47d0ebca12a55759edb00757b3a8cdd00112ad4afe9a4ff7b5337ffe843"
+
+ARG ATOMIC_QUOTA_MODULE
+COPY ${ATOMIC_QUOTA_MODULE} /usr/lib/dovecot/modules/lib10_quota_plugin.so
