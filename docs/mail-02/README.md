@@ -1,5 +1,11 @@
 # MAIL-02 independent mail profile candidate
 
+Draft delivery: [Debian PR #13](https://github.com/drumee/debian/pull/13) and
+[Infra PR #38](https://github.com/drumee/infra-layer/pull/38). The complete
+[qualification matrix](https://github.com/drumee/infra-layer/blob/feat/mail-02-service/docs/mail-02/qualification.md)
+and [reproduction steps](https://github.com/drumee/infra-layer/blob/feat/mail-02-service/docs/mail-02/reproduction.md)
+include the blocking failures and MAIL-03 handoff.
+
 This profile is an unpublished isolated candidate, not a qualified production
 mail service. Its exact producer is locked in
 [`profiles/mail/infra-source-lock.json`](../../profiles/mail/infra-source-lock.json):
