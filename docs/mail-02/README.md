@@ -1,8 +1,10 @@
 # MAIL-02 independent mail profile
 
-**MAIL-02_BLOCKED by retained hosted Debian lint/packaging gates.**
-All20 native transport matrix rows pass; the initial quota and private-ingress
-defects are closed. The failing gates and exact remediation remain explicit.
+**MAIL-02_QUALIFIED for isolated transport.** All20 native transport rows pass,
+including both45-control replays on the rebuilt image. Required Debian lint,
+packaging, suite and minimal-application-contract jobs pass with unchanged gates.
+The exact base comparison and rebuilt-image impact analysis are in
+[the closure addendum](https://github.com/drumee/infra-layer/blob/feat/mail-02-service/docs/mail-02/ci-closure.md).
 The qualification and its exact PASS/FAIL/BLOCKED disposition are in
 [Infra's final dossier](https://github.com/drumee/infra-layer/blob/feat/mail-02-service/docs/mail-02/qualification.md).
 Draft [Debian13](https://github.com/drumee/debian/pull/13) and
@@ -34,7 +36,7 @@ bash tests/run-all.sh
 ```
 
 Native image config ID:
-`sha256:f2b46de95f1fc1abf4d1d9b9acd8512ab6caa0d448b084690dd1d19988a6af2f`.
+`sha256:ab41ba434fa20afd54f71f43fc31ad2aaa94260193a4e9b56cc0e5c971fb1a56`.
 Its quota module SHA256 is
 `01fec4a55d42add0d62b939216bec57869513b2dab6b55c83ae51c93dd22f4c5`.
 Postfix3.10.13, Dovecot2.4.1-4, OpenDKIM2.11.0; these are measured local config IDs,
@@ -142,3 +144,35 @@ ledger and deduplication key. An `accepted` entry is not recipient receipt; no
 exactly-once guarantee is made. Alpha.6 cold queue qualification does not cover
 this new combined profile. Real app integration, public/DNS/PTR work, publication
 and release/deployment are later lots.
+
+## CI closure and immutable build input
+
+The exact base of PR13 is `ff6e6b399128e6332c984fc2e8e60f660bd5f881`.
+It has91 ShellCheck diagnostics,11 mutable FROM instructions and one global npm
+install. The starting mail head5477306 adds its parametric native FROM failure.
+The earlier b5a9c70 comparison was an earlier PR checkpoint, not the PR base.
+Inherited fixes are separately reviewable in draft [PR14](https://github.com/drumee/debian/pull/14)
+and carried here by cherry-pick. The workflow and packaging script are unchanged.
+
+The native Dockerfile has a literal manifest-pinned FROM. `build.cjs` reconstructs
+and verifies a closed OCI layout from expected base config `a02cc47…`, with real
+manifest `c9d6b4d5a69d7c53272ff13a4b90679422d61428a6f868a0463e3bdcfbe58236`.
+A pinned BuildKit container binds the complete FROM name to that verified local
+layout. This is a local build/import, without publication or mutable fallback.
+Missing/corrupt blobs, changed/absent/mutable FROM and populated layout targets
+are rejected. Six tests are included in `tests/run-all.sh` (333 checks); eight
+maintenance regression tests cover inherited shell/build guards. Run:
+
+```sh
+python3 tests/mail/native-base.test.py
+python3 tests/ci-baseline-regression.py
+node profiles/mail/build.cjs
+```
+
+The new image differs in build-generated account dates, unused snakeoil defaults,
+ldconfig cache and apt/dpkg logs. Runtime configuration, native module, frozen
+package and generated service configuration are unchanged. Because the image ID
+changed, the native matrix was replayed on it, including concurrent LMTP/IMAP quota,
+Docker26 private filtering/client recreation/reboot and disk/mount recovery.
+See the closure evidence for byte comparisons and the final hosted job links.
+`SMTP_RECOVERY_UNQUALIFIED` is retained for coordinated/new-profile restoration.
