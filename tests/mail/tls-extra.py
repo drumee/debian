@@ -10,8 +10,12 @@ def api(op,input=None,ok=True):
  if input is not None:
   file=fixtures/('request-'+uuid.uuid4().hex+'.json');file.write_text(json.dumps(input));file.chmod(0o600);args.append(str(file))
  return run(args,ok)
+sys.path.insert(0,str(scripts))
+from certificate_fixture import issue_expired
 def material(days):
- stem=fixtures/('days'+str(days));run(['openssl','req','-new','-newkey','rsa:2048','-nodes','-subj','/CN=mail.oxymot.fr','-keyout',str(stem)+'.key','-out',str(stem)+'.csr']);ext=fixtures/'leaf.ext';ext.write_text('subjectAltName=DNS:mail.oxymot.fr\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\n');run(['openssl','x509','-req','-in',str(stem)+'.csr','-CA',str(source/'keys/ca.pem'),'-CAkey',str(source/'keys/ca.key'),'-set_serial',str(100+days),'-days',str(days),'-extfile',str(ext),'-out',str(stem)+'.pem'])
+ stem=fixtures/('days'+str(days));run(['openssl','req','-new','-newkey','rsa:2048','-nodes','-subj','/CN=mail.oxymot.fr','-keyout',str(stem)+'.key','-out',str(stem)+'.csr']);ext=fixtures/'leaf.ext';ext.write_text('subjectAltName=DNS:mail.oxymot.fr\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\n')
+ if days<0:issue_expired(run,fixtures,str(stem)+'.csr',str(stem)+'.key',source/'keys/ca.pem',source/'keys/ca.key',ext,str(stem)+'.pem')
+ else:run(['openssl','x509','-req','-in',str(stem)+'.csr','-CA',str(source/'keys/ca.pem'),'-CAkey',str(source/'keys/ca.key'),'-set_serial',str(100+days),'-days',str(days),'-extfile',str(ext),'-out',str(stem)+'.pem'])
  for suffix in ['.key','.pem']:(pathlib.Path(str(stem)+suffix)).chmod(0o600)
  return {'certificate_file':str(stem)+'.pem','key_file':str(stem)+'.key','ca_file':str(source/'keys/ca.pem')}
 expired=material(-1);old=(root/'service/durable/tls/current').readlink();refused=api('rotate',expired,False);assert refused.returncode and json.loads(refused.stdout)['code']=='MAIL_CERTIFICATE_INVALID';assert (root/'service/durable/tls/current').readlink()==old;checks.append({'name':'expired-leaf-refused-before-native-activation','status':'PASS','code':'MAIL_CERTIFICATE_INVALID'})

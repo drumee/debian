@@ -5,9 +5,11 @@ def run(args,ok=True):
  r=subprocess.run(args,capture_output=True,timeout=120);commands.append({'argv':args,'exit':r.returncode,'stdout_sha256':hashlib.sha256(r.stdout).hexdigest(),'stderr_sha256':hashlib.sha256(r.stderr).hexdigest()})
  if ok and r.returncode:raise RuntimeError('chain fixture command failed '+str(args[:3]))
  return r
+sys.path.insert(0,sys.argv[3])
+from certificate_fixture import issue_expired
 for name,cn in [('issuer','Expired lab issuer'),('leaf','mail.oxymot.fr')]:run(['openssl','req','-new','-newkey','rsa:2048','-nodes','-subj','/CN='+cn,'-keyout',str(directory/(name+'.key')),'-out',str(directory/(name+'.csr'))])
 (directory/'issuer.ext').write_text('basicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\nsubjectKeyIdentifier=hash\n');(directory/'leaf.ext').write_text('subjectAltName=DNS:mail.oxymot.fr\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\n')
-run(['openssl','x509','-req','-in',str(directory/'issuer.csr'),'-signkey',str(directory/'issuer.key'),'-set_serial','900','-days','-1','-extfile',str(directory/'issuer.ext'),'-out',str(directory/'issuer.pem')]);run(['openssl','x509','-req','-in',str(directory/'leaf.csr'),'-CA',str(directory/'issuer.pem'),'-CAkey',str(directory/'issuer.key'),'-set_serial','901','-days','2','-extfile',str(directory/'leaf.ext'),'-out',str(directory/'leaf.pem')])
+issue_expired(run,directory,directory/'issuer.csr',directory/'issuer.key',None,None,directory/'issuer.ext',directory/'issuer.pem',self_signed=True);run(['openssl','x509','-req','-in',str(directory/'leaf.csr'),'-CA',str(directory/'issuer.pem'),'-CAkey',str(directory/'issuer.key'),'-set_serial','901','-days','2','-extfile',str(directory/'leaf.ext'),'-out',str(directory/'leaf.pem')])
 for file in directory.iterdir():file.chmod(0o600)
 request=directory/'request.json';request.write_text(json.dumps({'certificate_file':str(directory/'leaf.pem'),'key_file':str(directory/'leaf.key'),'ca_file':str(directory/'issuer.pem')}));request.chmod(0o600);pointer=root/'service/durable/tls/current';before=pointer.readlink();r=run(['node',str(repo/'tests/mail/api.cjs'),'rotate',str(root/'config.json'),str(request)],False);assert r.returncode and json.loads(r.stdout)['code']=='MAIL_CERTIFICATE_INVALID';assert pointer.readlink()==before
 code="""import ssl,socket,threading,json
