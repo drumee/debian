@@ -1,0 +1,471 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drumee.org/config/drumee.mail.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile"
+      ],
+      "properties": {
+        "profile": {
+          "const": "mail"
+        }
+      }
+    },
+    "service": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://drumee.org/contracts/mail-service/1/schema.json",
+      "title": "MAIL-01 proposed standalone mail service v1 (not implemented)",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "drumee.mail-service/1"
+        },
+        "deployment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,62}$"
+            },
+            "project": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,62}$"
+            },
+            "root": {
+              "type": "string",
+              "pattern": "^/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+$"
+            },
+            "backup_root": {
+              "type": "string",
+              "pattern": "^/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+$"
+            },
+            "owner_uid": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "owner_gid": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "images": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "postfix": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9._:/-]+@sha256:[a-f0-9]{64}$"
+                },
+                "dovecot": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9._:/-]+@sha256:[a-f0-9]{64}$"
+                },
+                "opendkim": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9._:/-]+@sha256:[a-f0-9]{64}$"
+                },
+                "helper": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9._:/-]+@sha256:[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "postfix",
+                "dovecot",
+                "opendkim",
+                "helper"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "project",
+            "root",
+            "backup_root",
+            "owner_uid",
+            "owner_gid",
+            "images"
+          ]
+        },
+        "hostname": {
+          "type": "string",
+          "pattern": "^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$"
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "ip_family": {
+          "enum": [
+            "ipv4"
+          ],
+          "default": "ipv4"
+        },
+        "networks": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "edge_subnet": {
+              "type": "string"
+            },
+            "edge_gateway": {
+              "type": "string",
+              "format": "ipv4"
+            },
+            "private_submission": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "address": {
+                  "type": "string",
+                  "format": "ipv4"
+                },
+                "port": {
+                  "type": "integer",
+                  "minimum": 1024,
+                  "maximum": 65535
+                },
+                "allowed_sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "address",
+                "port",
+                "allowed_sources"
+              ]
+            }
+          },
+          "required": [
+            "edge_subnet",
+            "edge_gateway",
+            "private_submission"
+          ]
+        },
+        "listeners": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "smtp25": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "address": {
+                  "type": "string",
+                  "format": "ipv4"
+                }
+              },
+              "required": [
+                "address"
+              ]
+            },
+            "submission587": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "address": {
+                  "type": "string",
+                  "format": "ipv4"
+                }
+              },
+              "required": [
+                "address"
+              ]
+            },
+            "submissions465": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "address": {
+                  "type": "string",
+                  "format": "ipv4"
+                }
+              },
+              "required": [
+                "address"
+              ]
+            },
+            "imaps993": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "address": {
+                  "type": "string",
+                  "format": "ipv4"
+                }
+              },
+              "required": [
+                "address"
+              ]
+            }
+          },
+          "required": [
+            "smtp25",
+            "submission587",
+            "submissions465",
+            "imaps993"
+          ]
+        },
+        "tls": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "const": "provided"
+            },
+            "certificate_ref": {
+              "type": "string",
+              "pattern": "^secret:[a-z][a-z0-9-]{0,62}/[a-z][a-z0-9-]{0,62}$"
+            },
+            "key_ref": {
+              "type": "string",
+              "pattern": "^secret:[a-z][a-z0-9-]{0,62}/[a-z][a-z0-9-]{0,62}$"
+            },
+            "client_ca_ref": {
+              "type": "string",
+              "pattern": "^secret:[a-z][a-z0-9-]{0,62}/[a-z][a-z0-9-]{0,62}$"
+            },
+            "minimum": {
+              "const": "TLSv1.2"
+            },
+            "renew_before_days": {
+              "type": "integer",
+              "minimum": 7,
+              "maximum": 60,
+              "default": 30
+            }
+          },
+          "required": [
+            "provider",
+            "certificate_ref",
+            "key_ref",
+            "client_ca_ref",
+            "minimum"
+          ]
+        },
+        "outbound": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "direct-mx"
+            },
+            "tls": {
+              "enum": [
+                "opportunistic",
+                "required-verify"
+              ],
+              "default": "opportunistic"
+            },
+            "require_verify_domains": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$"
+              },
+              "uniqueItems": true,
+              "default": []
+            },
+            "maximal_queue_lifetime_seconds": {
+              "type": "integer",
+              "minimum": 3600,
+              "maximum": 604800,
+              "default": 432000
+            },
+            "bounce_queue_lifetime_seconds": {
+              "type": "integer",
+              "minimum": 3600,
+              "maximum": 604800,
+              "default": 432000
+            },
+            "minimal_backoff_seconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 3600,
+              "default": 300
+            },
+            "maximal_backoff_seconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 21600,
+              "default": 4000
+            },
+            "queue_run_delay_seconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 3600,
+              "default": 300
+            }
+          },
+          "required": [
+            "mode"
+          ]
+        },
+        "delivery": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "transport": {
+              "const": "lmtp-unix"
+            },
+            "layout": {
+              "const": "maildir-by-id"
+            },
+            "default_quota_bytes": {
+              "type": "integer",
+              "minimum": 1048576,
+              "maximum": 1099511627776,
+              "default": 1073741824
+            },
+            "message_size_bytes": {
+              "type": "integer",
+              "minimum": 1024,
+              "maximum": 52428800,
+              "default": 10485760
+            },
+            "quota_failure": {
+              "const": "temporary"
+            }
+          },
+          "required": [
+            "transport",
+            "layout",
+            "quota_failure"
+          ]
+        },
+        "dkim": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "domain": {
+                "type": "string",
+                "pattern": "^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$"
+              },
+              "selector": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "key_ref": {
+                "type": "string",
+                "pattern": "^secret:[a-z][a-z0-9-]{0,62}/[a-z][a-z0-9-]{0,62}$"
+              }
+            },
+            "required": [
+              "domain",
+              "selector",
+              "key_ref"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "registry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema": {
+              "const": "drumee.mail-registry/1"
+            },
+            "bootstrap": {
+              "const": "empty"
+            }
+          },
+          "required": [
+            "schema",
+            "bootstrap"
+          ]
+        }
+      },
+      "required": [
+        "contract",
+        "deployment",
+        "hostname",
+        "domains",
+        "networks",
+        "listeners",
+        "tls",
+        "outbound",
+        "delivery",
+        "dkim",
+        "registry"
+      ]
+    },
+    "registry_file": {
+      "type": "string"
+    },
+    "verifiers_file": {
+      "type": "string"
+    },
+    "secret_sources": {
+      "type": "array"
+    },
+    "acceptance": {
+      "type": "boolean"
+    },
+    "acceptance_private_listener": {
+      "type": "boolean",
+      "default": false
+    },
+    "monitoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "queue_age_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800,
+          "default": 3600
+        },
+        "auth_failures": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 5
+        }
+      }
+    }
+  },
+  "required": [
+    "distribution",
+    "service",
+    "registry_file",
+    "secret_sources",
+    "acceptance"
+  ]
+}

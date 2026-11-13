@@ -11,14 +11,13 @@ source ${base}/../utils/env.sh
 source ${base}/../utils/functions.sh
 #echo ${base}../utils/functions.sh
 
-type=pod
 
 version=$(get_version $base)
 email=$(get_email $base)
 build_dir=$(get_build_dir ${base}/build/$version)
 
 #bundle $base "static" "master" "" "srv/drumee/static"
-REPO_BASE=git@github.com:drumee
+export REPO_BASE=git@github.com:drumee
 lib_dir=var/lib/drumee
 
 bundle $base "setup-infra" "main" "" "$lib_dir/setup-infra"
@@ -39,8 +38,9 @@ packagename=drumee-infra
 package=${packagename}_${version}
 echo "BUILDING PACKAGE $package IN $build_dir"
 dh_make --native --yes --indep --packagename $package --email $email
-for f in $(ls ${base}/debian); do
-  cp -r ${base}/debian/$f $build_dir/debian/
+for src_file in "${base}/debian/"*; do
+  [ -e "$src_file" ] || continue
+  cp -r "$src_file" "$build_dir/debian/"
 done
 dpkg-buildpackage -k$email
 

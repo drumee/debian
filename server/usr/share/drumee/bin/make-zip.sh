@@ -10,7 +10,7 @@ if [ -z $dest ]; then
   echo "Requires destination" >&2
   exit 1;
 fi
-cd $base;
+cd "$base" || exit 1;
 # Debian 12+ ships 7-Zip in two shapes: the modern "7zip" package (binary 7zz on
 # Debian 12, 7z on 13+) and the legacy p7zip wrapper (binary 7z). Prefer the
 # modern binary, fall back to p7zip's 7z.

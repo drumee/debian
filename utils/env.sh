@@ -1,3 +1,4 @@
+#!/bin/bash
 if [ "$UID" == "0" ]; then 
   echo "You should not run this builder with root privilege"
   exit 1

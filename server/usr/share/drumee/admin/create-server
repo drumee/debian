@@ -8,7 +8,7 @@ for arg in "$@"
 do
 	case $arg in
 		--start=*)
-			start="yes"
+			: # Accepted legacy option; currently has no effect.
 			shift
 			;;
 		--name=*)
@@ -25,7 +25,7 @@ done
 
 script_path=$0
 script_name=$(basename $0)
-if [ $(whoami) != "root" ]
+if [ "$(whoami)" != "root" ]
 then 
   echo "PERMISSION DENIED: $script_path requires root privilege"
   exit 1
@@ -47,16 +47,6 @@ case $mode in
 esac
 
 
-if [[ $script_path =~ ^\/ ]]; then
-  script_dir=$(dirname $script_path)
-else 
-  if [[ $script_path =~ ^\.\/ ]]; then
-    script_path=$(echo $script_path | sed -e "s/^\.//")
-    script_dir="$(pwd)$(dirname $script_path)"
-  else 
-    script_dir=$(pwd)/$(dirname $script_path)
-  fi
-fi 
 
 if [ -f /etc/drumee/infrastructure/servers/$name.conf ]; then
   if [ -z $force ]; then 

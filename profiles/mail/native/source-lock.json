@@ -1,0 +1,21 @@
+{
+  "commit": "7d8c0e57599636cff365373ca1ce34e92aac0e25",
+  "repository": "https://github.com/dovecot/core.git",
+  "files": {
+    "quota.c": "232b9de1682b4fa666dde797168423837433ef319c1f4c9e4a08dd2a1f8e7abd",
+    "quota-count.c": "35b1148d8a3b4f309421b7be76ec51a2675c3e898a7a4bdae36cce7a1755f6eb",
+    "quota-fs.c": "8d40a552bf31760bc402dd8e8eb85706988a049052d4f984244d393385cf61ec",
+    "quota-imapc.c": "e8b57b8eac85f0fb79a7e9b2f97620d6096a02c32db79da43b7a395a52fbdbc2",
+    "quota-maildir.c": "44ed4291bf969c305e277e0a96f3e0cfd503d37673fbeeefb1146aec658293d7",
+    "quota-plugin.c": "e419e10449c50e8526b855edf0f399f8a6d446ad00362d701f51c4e51d965ff4",
+    "quota-settings.c": "432ed14722ddbf1cdf68e803bb35fba4a71542ef3c228d797229bd1eea13074d",
+    "quota-storage.c": "8e1abb7e5a971ee73a801e814f4a11897955b8afd091c2daacbb8d8fd1ab04d7",
+    "quota-util.c": "cb5fb97a4f92f3e8c260342d740fbf1285d79e23638581ec430b1253cf640e2a",
+    "quota-private.h": "b61bd783ecf9a5f7fb25bdbd4e66218747bd961c1266f2bc991497c201d87811",
+    "quota-plugin.h": "8445582ca4cdf35dac6e4684ccf92450bba3752eb0d9cc7a3f904c0bd60b2bf1",
+    "quota-settings.h": "f51e0fa91db0f6debad0b6230971d72a9f9422e12a5c8bf993022c0799d30a55",
+    "quota.h": "973b2bc3b9397e21edf185608f5a6c5f5eac38548b06ef77ad6d254d4d194eeb",
+    "quota-fs.h": "23c71c8f4c5f0132335a2fdfb485b00ff64494b464dbc655f949cb1cec0c5c3e",
+    "rquota.x": "ae46dd36d71a5bceef02ec7dd66d57411a0441397119c6a6313900f8fdcf1d03"
+  }
+}

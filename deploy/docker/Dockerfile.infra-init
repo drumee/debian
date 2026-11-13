@@ -15,8 +15,9 @@
 #   docker buildx build -f deploy/docker/Dockerfile.infra-init \
 #     --build-context helpers=deploy/docker --build-context infra=/path/to/setup-infra \
 #     --build-arg SERVER_IMAGE=<registry>/server-pod:<tag> -t drumee/infra-init:<tag> .
-ARG SERVER_IMAGE=drumee/server-pod:local
-FROM ${SERVER_IMAGE}
+ARG SERVER_IMAGE
+ARG SERVER_DIGEST
+FROM ${SERVER_IMAGE}@${SERVER_DIGEST}
 
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends opendkim-tools \

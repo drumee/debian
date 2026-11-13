@@ -1,0 +1,7 @@
+{
+  "contract": "drumee.mail-native-base/1",
+  "from": "drumee-minimal-application-tools@sha256:c9d6b4d5a69d7c53272ff13a4b90679422d61428a6f868a0463e3bdcfbe58236",
+  "manifest": "sha256:c9d6b4d5a69d7c53272ff13a4b90679422d61428a6f868a0463e3bdcfbe58236",
+  "config": "sha256:a02cc47d0ebca12a55759edb00757b3a8cdd00112ad4afe9a4ff7b5337ffe843",
+  "buildkit": "moby/buildkit@sha256:c5f8862f52499773af85bc07695b2379ef08e8002352b0df2c4864c91d78dabe"
+}

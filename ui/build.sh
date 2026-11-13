@@ -11,7 +11,6 @@ source ${base}/../utils/env.sh
 source ${base}/../utils/functions.sh
 
 packagename=drumee-ui-pod
-compile=yes
 enableApi=no
 export DRUMEE_INSTANCE_NAME=main
 export UI_BUILD_MODE=production
@@ -19,7 +18,7 @@ export UI_BUILD_MODE=production
 for arg in "$@"; do
   case $arg in
   --compile=*)
-    compile="${arg#*=}"
+    : # Accepted legacy option; currently has no effect.
     shift
     ;;
   --enable-api=*)
@@ -68,8 +67,9 @@ package=${packagename}_${version}
 echo "BUILDING PACKAGE $package IN $build_dir"
 dh_make --native --yes --indep --packagename $package --email $email
 rsync -ar "${base}/debian" $build_dir/
-for f in $(ls ${base}/debian); do
-  cp -r ${base}/debian/$f $build_dir/debian/
+for src_file in "${base}/debian/"*; do
+  [ -e "$src_file" ] || continue
+  cp -r "$src_file" "$build_dir/debian/"
 done
 dpkg-buildpackage -k$email
 
