@@ -29,12 +29,20 @@ SETUP_SCHEMAS_SRC="${SETUP_SCHEMAS_SRC:-$HOME/setup-schemas}"
 SETUP_INFRA_SRC="${SETUP_INFRA_SRC:-$HOME/setup-infra}"
 TAG="${TAG:-local}"
 MEDIA_DEPS="${MEDIA_DEPS:-0}"
+# Source-derived child images require an acquired immutable parent; never fall back to a tag.
+require_parent_digest() {
+  [[ "${SERVER_DIGEST:-}" =~ ^sha256:[0-9a-f]{64}$ ]] || {
+    echo "FATAL: SERVER_DIGEST must name an acquired immutable server-pod manifest" >&2; exit 1;
+  }
+}
 say() { printf '\033[1;36m==>\033[0m %s\n' "$*"; }
 
 [ -d "$SERVER_SRC" ]  || { echo "server source not found: $SERVER_SRC" >&2; exit 1; }
 [ -d "$UI_SRC" ]      || { echo "ui source not found: $UI_SRC" >&2; exit 1; }
 [ -d "$SCHEMAS_SRC" ] || { echo "schemas source not found: $SCHEMAS_SRC" >&2; exit 1; }
 docker buildx version >/dev/null 2>&1 || { echo "docker buildx required" >&2; exit 1; }
+
+require_parent_digest
 
 say "Building drumee/schemas:$TAG from $SCHEMAS_SRC (factory templates + init)"
 docker buildx build \
@@ -48,6 +56,7 @@ docker buildx build \
   -f "$root/deploy/docker/Dockerfile.server" \
   --build-context "helpers=$root/deploy/docker" \
   --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
+  --build-context "node-runtime=$root/node-runtime" \
   --build-arg INSTALL_DEPS=0 \
   --build-arg "MEDIA_DEPS=$MEDIA_DEPS" \
   -t "drumee/server-pod:$TAG" --load "$SERVER_SRC"
@@ -67,6 +76,11 @@ else
   say "  by cloning the 'static' repo there, rebuilding, and COMPOSE_PROFILES=static."
 fi
 
+# The supplied parent must be the server just built, not an unrelated older release.
+[ "$(docker image inspect "drumee/server-pod@$SERVER_DIGEST" --format '{{.Id}}')" = "$(docker image inspect "drumee/server-pod:$TAG" --format '{{.Id}}')" ] || {
+  echo 'FATAL: immutable parent is absent or differs from the local server build' >&2; exit 1;
+}
+
 say "Building drumee/schemas-populate:$TAG (FROM server-pod + setup-schemas + genesis templates)"
 docker buildx build \
   -f "$root/deploy/docker/Dockerfile.populate" \
@@ -74,7 +88,8 @@ docker buildx build \
   --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
   --build-context "setup=$SETUP_SCHEMAS_SRC" \
   --build-context "schemas=$SCHEMAS_SRC" \
-  --build-arg "SERVER_IMAGE=drumee/server-pod:$TAG" \
+  --build-arg "SERVER_IMAGE=drumee/server-pod" \
+  --build-arg "SERVER_DIGEST=$SERVER_DIGEST" \
   -t "drumee/schemas-populate:$TAG" --load "$root/deploy/docker"
 
 say "Building drumee/wireguard:$TAG (coordination agent, from the infra/ package tree)"
@@ -87,7 +102,8 @@ if [ -d "$SETUP_INFRA_SRC" ]; then
   say "Building drumee/infra-init:$TAG (FROM server-pod + setup-infra + opendkim-tools)"
   docker buildx build -f "$root/deploy/docker/Dockerfile.infra-init" \
     --build-context "helpers=$root/deploy/docker" --build-context "infra=$SETUP_INFRA_SRC" \
-    --build-arg "SERVER_IMAGE=drumee/server-pod:$TAG" \
+    --build-arg "SERVER_IMAGE=drumee/server-pod" \
+  --build-arg "SERVER_DIGEST=$SERVER_DIGEST" \
     -t "drumee/infra-init:$TAG" --load "$root/deploy/docker"
 else
   say "Skipping drumee/infra-init (no setup-infra source at $SETUP_INFRA_SRC)"

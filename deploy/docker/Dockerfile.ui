@@ -14,7 +14,7 @@
 # ENDPOINT=main, UI_BUILD_PATH=<out>/main.
 
 # ---------- build stage ----------
-FROM node:22-bookworm AS build
+FROM node:22-bookworm@sha256:e13726ca604184d7a91fcacab1fc09eefd642dc28e79ac34e85540dd93b78cfb AS build
 ARG INSTALL_DEPS=1
 ENV UI_BUILD_MODE=production \
     UI_BUILD_PATH=/opt/ui/main \
@@ -35,7 +35,7 @@ RUN mkdir -p "$UI_BUILD_PATH" \
     && rm -f "$UI_BUILD_PATH/app/stats.json"
 
 # ---------- runtime stage (one-shot asset publisher) ----------
-FROM alpine:3 AS runtime
+FROM alpine:3@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf AS runtime
 COPY --from=build /opt/ui/ /opt/ui/
 # On start, publish assets into the mounted shared volume, then exit 0.
 CMD ["sh", "-c", "mkdir -p /ui-assets && cp -a /opt/ui/. /ui-assets/ && echo '[ui-build] assets published to /ui-assets' "]

@@ -24,11 +24,12 @@ else
   base=$base/
 fi
 packagename=drumee-schemas-patch
-source ${base}../utils/env.sh
-source ${base}../utils/functions.sh
+# shellcheck source=utils/env.sh
+source "${base}../utils/env.sh"
+# shellcheck source=utils/functions.sh
+source "${base}../utils/functions.sh"
 #echo ${base}../utils/functions.sh
 
-force=no
 for arg in "$@"; do
   case $arg in
   --version=*)
@@ -36,7 +37,7 @@ for arg in "$@"; do
     shift
     ;;
   --force=*)
-    force="${arg#*=}"
+    : # Accepted legacy option; currently has no effect.
     shift
     ;;
   --email=*)
@@ -51,6 +52,7 @@ control="${base}/debian/control"
 check_version "$version" "$control"
 check_email "$email" "$control"
 check_build_dir "${base}/build/$version"
+build_dir="${build_dir:?check_build_dir did not initialize the build directory}"
 
 src=${base}../schemas/src/schemas
 manifest=${src}/patches/manifest.txt
@@ -60,8 +62,7 @@ rsync -ar ${base}/opt $build_dir/files/
 cd $build_dir
 echo "BUILDING PACKAGE IN  $build_dir"
 dh_make --native --yes --indep --packagename ${packagename}_${version} --email $email
-for f in $(ls ${base}/debian); do
-  src_file=${base}/debian/$f
+for src_file in "${base}/debian/"*; do
   if [ -f $src_file ]; then
     cp -r $src_file $build_dir/debian/
   fi

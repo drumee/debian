@@ -53,17 +53,18 @@ drumee_release() {
 # missing credential otherwise surfaces as an access-denied from MariaDB with no hint
 # about which file was absent.
 drumee_require_credentials() {
-  local missing=""
+  drumee_missing_credentials=""
   for f in "$@"; do
-    [ -s "$CRED/$f" ] || missing="$missing $f"
+    [ -s "$CRED/$f" ] || drumee_missing_credentials="$drumee_missing_credentials $f"
   done
-  if [ -n "$missing" ]; then
-    echo "[drumee] missing credential(s) in $CRED:$missing" >&2
+  if [ -n "$drumee_missing_credentials" ]; then
+    echo "[drumee] missing credential(s) in $CRED:$drumee_missing_credentials" >&2
     echo "[drumee] they are produced by the infra role — has infra-init run against" >&2
     echo "[drumee] this deployment's configuration volume?" >&2
     exit 1
   fi
   echo "[drumee] credentials present: $*"
+  unset drumee_missing_credentials
 }
 
 # A role must refuse to run against a schema older than its code expects (§6).

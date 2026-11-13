@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -101,7 +102,7 @@ alias mkdd='mkdir `date +"%Y%m%d"`'
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
+    . "$HOME/.bash_aliases"
 fi
 
 # enable programmable completion features (you don't need to enable

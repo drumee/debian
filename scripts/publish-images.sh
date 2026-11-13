@@ -52,6 +52,12 @@ SETUP_SCHEMAS_SRC="${SETUP_SCHEMAS_SRC:-$HOME/setup-schemas}"
 SETUP_INFRA_SRC="${SETUP_INFRA_SRC:-$HOME/setup-infra}"
 STATIC_SRC="${STATIC_SRC:-$HOME/static}"
 
+# Source-derived child images require an acquired immutable parent; never fall back to a tag.
+require_parent_digest() {
+  [[ "${SERVER_DIGEST:-}" =~ ^sha256:[0-9a-f]{64}$ ]] || {
+    echo "FATAL: SERVER_DIGEST must name an acquired immutable server-pod manifest" >&2; exit 1;
+  }
+}
 say() { printf '\033[1;36m==>\033[0m %s\n' "$*"; }
 docker buildx version >/dev/null 2>&1 || { echo "docker buildx required" >&2; exit 1; }
 
@@ -65,57 +71,82 @@ case "$PLATFORMS" in
     docker buildx inspect --bootstrap >/dev/null 2>&1 || true
     ;;
 esac
-tags() { local n="$1"; printf -- '-t %s/%s:%s ' "$REGISTRY" "$n" "$TAG"
-  [ "$ALSO_STABLE" = 1 ] && printf -- '-t %s/%s:stable ' "$REGISTRY" "$n"
-  [ "$ALSO_LATEST" = 1 ] && printf -- '-t %s/%s:latest ' "$REGISTRY" "$n"; }
+tags() {
+  local n="$1"
+  tag_flags=(-t "$REGISTRY/$n:$TAG")
+  [ "$ALSO_STABLE" = 1 ] && tag_flags+=(-t "$REGISTRY/$n:stable")
+  [ "$ALSO_LATEST" = 1 ] && tag_flags+=(-t "$REGISTRY/$n:latest")
+  return 0
+}
+
+[ "$PUSH" = 1 ] || require_parent_digest
 
 say "Registry=$REGISTRY Tag=$TAG Push=$PUSH Platforms=$PLATFORMS"
 
 say "server-pod"
+tags server-pod
 docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.server" \
   --build-context "helpers=$root/deploy/docker" \
   --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
+  --build-context "node-runtime=$root/node-runtime" \
   --build-arg "INSTALL_DEPS=$INSTALL_DEPS" --build-arg "MEDIA_DEPS=$MEDIA_DEPS" \
-  $(tags server-pod) "${out_flag[@]}" "$SERVER_SRC"
+  "${tag_flags[@]}" "${out_flag[@]}" "$SERVER_SRC"
 
 say "ui-build"
+tags ui-build
 docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.ui" \
-  --build-arg "INSTALL_DEPS=$INSTALL_DEPS" $(tags ui-build) "${out_flag[@]}" "$UI_SRC"
+  --build-arg "INSTALL_DEPS=$INSTALL_DEPS" "${tag_flags[@]}" "${out_flag[@]}" "$UI_SRC"
 
 say "schemas"
+tags schemas
 docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.schemas" \
   --build-context "helpers=$root/deploy/docker" \
   --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
-  $(tags schemas) "${out_flag[@]}" "$SCHEMAS_SRC"
+  "${tag_flags[@]}" "${out_flag[@]}" "$SCHEMAS_SRC"
 
-say "schemas-populate (FROM published server-pod)"
+if [ "$PUSH" = 1 ]; then
+  SERVER_DIGEST=$(docker buildx imagetools inspect "$REGISTRY/server-pod:$TAG" --format '{{.Manifest.Digest}}')
+fi
+require_parent_digest
+if [ "$PUSH" != 1 ]; then
+  [ "$(docker image inspect "$REGISTRY/server-pod@$SERVER_DIGEST" --format '{{.Id}}')" = "$(docker image inspect "$REGISTRY/server-pod:$TAG" --format '{{.Id}}')" ] || {
+    echo 'FATAL: immutable parent is absent or differs from the local server build' >&2; exit 1;
+  }
+fi
+say "schemas-populate (FROM immutable server-pod)"
+tags schemas-populate
 docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.populate" \
   --build-context "helpers=$root/deploy/docker" \
   --build-context "pkg=$root/bootstrap/usr/lib/drumee/schemas" \
   --build-context "setup=$SETUP_SCHEMAS_SRC" \
   --build-context "schemas=$SCHEMAS_SRC" \
-  --build-arg "SERVER_IMAGE=$REGISTRY/server-pod:$TAG" \
-  $(tags schemas-populate) "${out_flag[@]}" "$root/deploy/docker"
+  --build-arg "SERVER_IMAGE=$REGISTRY/server-pod" \
+    --build-arg "SERVER_DIGEST=$SERVER_DIGEST" \
+  "${tag_flags[@]}" "${out_flag[@]}" "$root/deploy/docker"
 
 say "wireguard (coordination agent; bootstrap.sh + agent.js from infra/)"
+tags wireguard
 docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.wireguard" \
   --build-context "wg=$root/infra/var/lib/drumee/wireguard" \
-  $(tags wireguard) "${out_flag[@]}" "$root/deploy/docker"
+  "${tag_flags[@]}" "${out_flag[@]}" "$root/deploy/docker"
 
 if [ -d "$SETUP_INFRA_SRC" ]; then
   say "infra-init (FROM published server-pod)"
+  tags infra-init
   docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.infra-init" \
     --build-context "helpers=$root/deploy/docker" --build-context "infra=$SETUP_INFRA_SRC" \
-    --build-arg "SERVER_IMAGE=$REGISTRY/server-pod:$TAG" \
-    $(tags infra-init) "${out_flag[@]}" "$root/deploy/docker"
+    --build-arg "SERVER_IMAGE=$REGISTRY/server-pod" \
+    --build-arg "SERVER_DIGEST=$SERVER_DIGEST" \
+    "${tag_flags[@]}" "${out_flag[@]}" "$root/deploy/docker"
 else
   say "skip infra-init (no source at $SETUP_INFRA_SRC)"
 fi
 
 if [ -d "$STATIC_SRC" ]; then
   say "static"
+  tags static
   docker buildx build "${plat_flag[@]}" -f "$root/deploy/docker/Dockerfile.static" \
-    $(tags static) "${out_flag[@]}" "$STATIC_SRC"
+    "${tag_flags[@]}" "${out_flag[@]}" "$STATIC_SRC"
 else
   say "skip static (no source at $STATIC_SRC)"
 fi

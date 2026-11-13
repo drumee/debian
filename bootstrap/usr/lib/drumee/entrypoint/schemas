@@ -88,7 +88,7 @@ case "$MODE" in
     POP=/var/lib/drumee/setup-schemas/populate.js
     if [ ! -f "$POP" ]; then
       echo "[drumee] no $POP — skipping populate" >&2
-    elif [ -n "$(mariadb $(printf '%s' "--host=$DB_HOST --port=$DB_PORT") \
+    elif [ -n "$(mariadb "--host=$DB_HOST" "--port=$DB_PORT" \
                  -u"$DB_USER" -p"$DB_PASSWORD" -N -B \
                  -e 'SELECT 1 FROM yp.sys_conf LIMIT 1' 2>/dev/null)" ]; then
       # Idempotent: a populated instance is left alone. Re-running it would mint new

@@ -11,7 +11,7 @@
 #   docker buildx build -f deploy/docker/Dockerfile.static -t drumee/static:<tag> /path/to/static
 #
 # At container start it copies the assets into the shared static volume, then exits.
-FROM alpine:3
+FROM alpine:3@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
 # The static repo's tree is published under /srv/drumee/static in the .deb; mirror
 # that here so /-/static/<x> -> <volume>/<x> and /-/images/<x> -> <volume>/images/<x>.
 COPY . /opt/static/
