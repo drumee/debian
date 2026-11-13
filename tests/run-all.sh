@@ -73,5 +73,8 @@ if tests/config-parity.sh >/dev/null 2>&1; then good "config-parity.sh"; else ba
 hdr "11. CI baseline regressions"
 run "immutable parent, shell arguments, seed command and retention guards" "python3 tests/ci-baseline-regression.py"
 
+hdr "12. Mail native immutable base"
+run "OCI manifest, image config, layers and locked FROM guards" "python3 tests/mail/native-base.test.py"
+
 printf '\n\033[1m== %d passed, %d failed ==\033[0m\n' "$pass" "$fail"
 [ "$fail" = 0 ]
