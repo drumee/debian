@@ -1,6 +1,8 @@
 "use strict";
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto"), { execFileSync } = require("node:child_process");
-const base = "drumee-minimal-application-tools:ff6e6b399128e633";
+const baseLock = require("./native/base-image-lock.json");
+const base = baseLock.config;
+require("./native/base-input.cjs").validateFrom(fs.readFileSync(path.join(__dirname,"Dockerfile.native"),"utf8"),baseLock);
 const expected = "sha256:a02cc47d0ebca12a55759edb00757b3a8cdd00112ad4afe9a4ff7b5337ffe843";
 const command = args => execFileSync("/usr/bin/docker", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
@@ -27,7 +29,15 @@ try {
  command(["cp",name+":/tmp/quota/lib10_quota_plugin.so",moduleFile]);
 } finally { command(["rm","-f",name]); }
 const tag="drumee-mail:mail02-atomic-local";
-command(["build","--pull=false","--build-arg","ATOMIC_QUOTA_MODULE="+path.relative(__dirname,moduleFile),"-t",tag,"-f",path.join(__dirname,"Dockerfile.native"),__dirname]);
+const layout=fs.mkdtempSync(path.join(cache,"base-layout-")), archive=path.join(layout,"base.tar");
+command(["save",baseLock.config,"-o",archive]);
+const oci=path.join(layout,"oci");
+execFileSync("python3",[path.join(__dirname,"native/oci-base.py"),"prepare",archive,oci,path.join(__dirname,"native/base-image-lock.json")],{stdio:"pipe"});
+const builder="mail02-native-"+crypto.randomBytes(6).toString("hex");
+try {
+ command(["buildx","create","--name",builder,"--driver","docker-container","--driver-opt","image="+baseLock.buildkit]);
+ command(["buildx","build","--builder",builder,"--build-context",baseLock.from+"=oci-layout://"+oci+"@"+baseLock.manifest,"--load","--build-arg","ATOMIC_QUOTA_MODULE="+path.relative(__dirname,moduleFile),"-t",tag,"-f",path.join(__dirname,"Dockerfile.native"),__dirname]);
+} finally { command(["buildx","rm",builder]); }
 const id=command(["image","inspect",tag,"--format","{{.Id}}"] ).trim();
-const receipt={image:id,base:expected,upstream:lock.commit,source_files:lock.files,module_sha256:hash(fs.readFileSync(moduleFile)),patch_sha256:hash(fs.readFileSync(path.join(__dirname,"native/apply-quota.py"))),atomic_source_sha256:hash(fs.readFileSync(path.join(__dirname,"native/atomic-quota.c"))),published:false};
+const receipt={image:id,base:expected,base_manifest:baseLock.manifest,base_context:baseLock.from,buildkit:baseLock.buildkit,upstream:lock.commit,source_files:lock.files,module_sha256:hash(fs.readFileSync(moduleFile)),patch_sha256:hash(fs.readFileSync(path.join(__dirname,"native/apply-quota.py"))),atomic_source_sha256:hash(fs.readFileSync(path.join(__dirname,"native/atomic-quota.c"))),published:false};
 fs.writeFileSync(path.join(cache,"native-image.json"),JSON.stringify(receipt,null,2),{mode:0o600});console.log(JSON.stringify(receipt));

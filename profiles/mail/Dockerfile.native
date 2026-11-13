@@ -1,6 +1,5 @@
-# The build script verifies this local base's full config digest before build.
-ARG MAIL_TOOLS_IMAGE=drumee-minimal-application-tools:ff6e6b399128e633
-FROM ${MAIL_TOOLS_IMAGE}
+# Local OCI context: real manifest digest, verified config/layers; no registry publication.
+FROM drumee-minimal-application-tools@sha256:c9d6b4d5a69d7c53272ff13a4b90679422d61428a6f868a0463e3bdcfbe58236
 USER root
 RUN printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d && chmod 755 /usr/sbin/policy-rc.d \
  && apt-get update \
