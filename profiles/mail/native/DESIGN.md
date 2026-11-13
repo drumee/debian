@@ -21,14 +21,31 @@ uses this boundary. Lock waits are bounded and fail temporarily. Independent UUI
 have separate lock inodes. No username/address-based lock is used. Process death
 releases the kernel lock; no durable reservation counter can leak.
 
-While holding the lock, count committed Maildir cur/new messages across folders
-from actual content using virtual RFC822 bytes (LF expanded to CRLF), independently
-of stale index totals. tmp files are not committed messages; disk pressure remains
-an independent admission guard. On interruption, the next admission recounts
-cur/new, including a rename whose acknowledgement was lost. Native Maildir/index
-recovery is still needed; this is not backup restoration. Unexpected links/types,
-unreadable/changing files, lock failure or count failure cause temporary refusal.
-Never use upstream's fail-open quota path.
+The first experimental module counted raw `cur/` and `new/` directory entries.
+It is superseded and is **not qualified**: native readers can move a recent message
+or rename its flag suffix while a raw iterator is running, causing an undercount.
+Passing the initial writer race tests does not establish the invariant.
+
+The replacement serializes growth transactions, folder creation/deletion/rename,
+and quota-count/recalculation under the same stable-home lock. Native Dovecot
+`mailbox_sync(FULL_READ)` precedes virtual-size/status reads; mailbox-list indexing
+and process-local quota-count caching are disabled for this fixed profile. Dovecot
+index locking handles native flag/recent renames. All count errors refuse growth.
+A process-local lock registry permits nested read/namespace guards, but rejects a
+second independent capacity transaction in the same process. The growth owner
+retains the lock until native storage commit or rollback has completed.
+
+The unit is Dovecot virtual RFC822 bytes, summed across all selectable folders of
+the one private UUID namespace. Index/filesystem recovery runs before the next
+admission after interruption; uncommitted `tmp/` files are not logical quota usage
+and remain subject to the separate filesystem free-space guard. Failed writes
+must not retain a reservation. Kernel locks disappear on process death; the lock
+inode is never unlinked. External filesystem writers, shared/public namespaces,
+replication, dsync, Sieve and non-Maildir storage are outside this image contract.
+Do not enable them without a separate writer-path audit and requalification.
+
+This replacement remains unqualified until native concurrency, namespace churn,
+crash recovery, write failure, and accounting tests pass on its exact image.
 
 A Maildir MOVE can stage a destination before source expunge. The proposal does
 not credit a speculative source expunge: reserve destination capacity first,

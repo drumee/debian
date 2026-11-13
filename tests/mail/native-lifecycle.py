@@ -10,7 +10,7 @@ def operator(verb,execute=False,ok=True):
  return run(['bash',str(repo/'bin/drumee-ctl'),'--profile','mail',verb,'--config',str(root/'config.json')]+(['--execute'] if execute else []),ok)
 def identities():
  p=run(['docker','ps','-q','--filter','label=com.docker.compose.project='+project]);return sorted(p.stdout.decode().split())
-previous=json.loads((source/'prepared.json').read_text());spec=previous['plan']['spec'];spec['networks']['private_submission']['allowed_sources']=['10.243.47.0/25','10.243.48.0/24']
+previous=json.loads((source/'prepared.json').read_text());spec=previous['plan']['spec'];spec['networks']['private_submission']['allowed_sources']=['10.243.47.0/25']
 spec['deployment'].update({'id':project,'project':project,'root':str(root/'service'),'backup_root':str(root/'backups')})
 registry=json.loads((source/'service/durable/registry/public/current.json').read_text());verifiers=json.loads((source/'rotate-input.json').read_text())['verifiers']
 for name,value in [('registry.json',registry),('verifiers.json',verifiers)]:

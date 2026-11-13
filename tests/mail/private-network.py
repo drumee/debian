@@ -16,6 +16,8 @@ for generation in range(2):
   spec={'name':client_project,'services':{'client':{'image':image,'user':'1000:1000','read_only':True,'cap_drop':['ALL'],'security_opt':['no-new-privileges:true'],'entrypoint':['/bin/sleep','infinity'],'networks':{'backend':{},'mail_front':descriptor['attachment']},'volumes':[{'type':'bind','source':str(app),'target':'/keys','read_only':True},{'type':'bind','source':str(scripts),'target':'/lab','read_only':True}]}},'networks':{'backend':{'name':backend,'internal':True,'ipam':{'config':[{'subnet':f'10.243.{octet}.0/24'}]}},'mail_front':descriptor['network']}};file=fixtures/(kind+'.json');file.write_text(json.dumps(spec));file.chmod(0o600);compose=['docker','compose','-p',client_project,'-f',str(file)];started=False
   try:
    run([*compose,'up','-d']);started=True;client=run([*compose,'ps','-q','client']).stdout.decode().strip();actual=json.loads(run(['docker','inspect',client]).stdout)[0];networks=actual['NetworkSettings']['Networks'];assert set(networks)=={frontend,backend} and networks[frontend]['IPAddress']==address
+   mounts=actual['Mounts'];assert len(mounts)==2 and all(not m['RW'] for m in mounts) and actual['HostConfig']['ReadonlyRootfs']
+   assert next(m for m in mounts if m['Destination']=='/keys')['Source']==str(app)
    if generation:assert client!=seen[kind]
    seen[kind]=client;assert len(list(app.iterdir()))==2 and {f.name for f in app.iterdir()}=={'client.json','ca.pem'}
    dns=json.loads(run(['docker','exec',client,'python3','-c',"import socket,json;print(json.dumps({'address':socket.gethostbyname('"+descriptor['submission']['host']+"')}))"]).stdout);assert dns['address']==descriptor['submission']['address']
