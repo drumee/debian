@@ -43,7 +43,7 @@ manager() {
   fi
 }
 
-cd $DRUMEE_SERVER_HOME
+cd "$DRUMEE_SERVER_HOME" || exit 1
 case "$1" in
 start)
   if [ ! -d $DRUMEE_LOG_DIR ]; then
@@ -81,7 +81,7 @@ log)
   fi
   ;;
 *)
-  manager $*
+  manager "$@"
   ;;
 esac
 exit 0

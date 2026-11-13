@@ -49,7 +49,7 @@ cmd_add() {
   local tmp; tmp="$(mktemp -d)"
 
   case "$src" in
-    git@*|*.git|https://*.git|https://github.com/*|https://gitlab.*)
+    git@*|*.git|https://github.com/*|https://gitlab.*)
       local ref=""; case "$src" in *#*) ref="${src##*#}"; src="${src%%#*}";; esac
       git clone --depth 1 ${ref:+--branch "$ref"} "$src" "$tmp/p" || die "git clone failed"
       rm -rf "$tmp/p/.git" ;;

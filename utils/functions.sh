@@ -1,4 +1,4 @@
-
+#!/bin/bash
 check_status() {
   if [ "$1" != "0" ]; then
     echo " -------------------------------------------" 1>&2
@@ -130,7 +130,7 @@ check_build_dir() {
       echo "- keep existing source and rebuild from it: 2"
       echo -n "[1] : "
       r=$(answer)
-      if [ "$r" == "1" -o "$r" == "" ]; then
+      if [[ "$r" == "1" || "$r" == "" ]]; then
         echo "Removing $build_dir"
         rm -rf $build_dir
       else
@@ -199,8 +199,8 @@ bundle() {
     mkdir -p $target
     echo "---------------------------------------------------------------"
     echo "Bundling component $name "
-    echo "FROM : " $(strip_base $base $src_dir/$src_files)
-    echo "TO   : " $(strip_base $base $target)
+    echo "FROM : " "$(strip_base "$base" "$src_dir/$src_files")"
+    echo "TO   : " "$(strip_base "$base" "$target")"
     echo "---------------------------------------------------------------"
     # echo rsync --delete-before --exclude=.git -ar $src_dir/$src_files $target/
     rsync --delete-before --exclude=.npmrc --exclude=.git -ar $src_dir/$src_files $target/
@@ -225,8 +225,8 @@ bundle_acme(){
   mkdir -p $target
   echo "---------------------------------------------------------------"
   echo "Bundling component $name "
-  echo "FROM : " $(strip_base $base $src_dir/$src_files)
-  echo "TO   : " $(strip_base $base $target)
+  echo "FROM : " "$(strip_base "$base" "$src_dir/$src_files")"
+  echo "TO   : " "$(strip_base "$base" "$target")"
   echo "---------------------------------------------------------------"
   rsync --delete-before --exclude=.git -ar $acme_dir/ $target/
 }

@@ -100,7 +100,7 @@ for pair in "LOCAL_MODE:local_mode" "ADMIN_EMAIL:admin_email" "TLS_MODE:tls_meth
             "BACKUP_LOCATION:backup_location" "EXCHANGE_LOCATION:exchange_location" \
             "DRUMEE_DESCRIPTION:description" "WIREGUARD_ENABLED:wireguard_enabled"; do
   env_name="${pair%%:*}"; key="${pair##*:}"
-  printf '%s\n' "$preseed" | grep -q "drumee-infra/$key[[:space:]]" \
+  printf '%s\n' "$preseed" | grep -q "drumee-infra/${key}[[:space:]]" \
     || no "$env_name was dropped from .env but drumee-infra/$key is not in the preseed"
 done
 ok "each dropped fact has a matching drumee-infra/* key in the preseed"

@@ -20,8 +20,9 @@ mkdir -p $build_dir/files
 cd $build_dir
 package=${packagename}_${version}
 dh_make --native --yes --indep --packagename $package --email $email
-for f in $(ls ${base}/debian); do
-  cp -r ${base}/debian/$f $build_dir/debian/
+for src_file in "${base}/debian/"*; do
+  [ -e "$src_file" ] || continue
+  cp -r "$src_file" "$build_dir/debian/"
 done
 dpkg-buildpackage -k$email
 

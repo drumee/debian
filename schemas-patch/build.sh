@@ -26,7 +26,7 @@ email=$(get_email $base)
 echo EMAIL ${base} $email $version
 build_dir=$(get_build_dir ${base}/build/$version)
 
-REPO_BASE=git@github.com:drumee
+export REPO_BASE=git@github.com:drumee
 
 DEPTH=2
 manifest=""
@@ -57,7 +57,7 @@ if [ "$manifest" = "auto" ]; then
   hash2=$(tail -1 $tmpfile)
   echo "DEPTH" "$hash1" "$hash2"
   rm -f $tmpfile
-  if [ "$hash1" != "" -a "$hash2" != "" ]; then
+  if [[ "$hash1" != "" && "$hash2" != "" ]]; then
     echo Building manifest
     bin/make-manifest $hash1 $hash2
   fi
@@ -112,8 +112,7 @@ fi
 cd $build_dir
 echo "BUILDING PACKAGE IN  $build_dir"
 dh_make --native --yes --indep --packagename ${packagename}_${version} --email $email
-for f in $(ls ${base}/debian); do
-  src_file=${base}/debian/$f
+for src_file in "${base}/debian/"*; do
   if [ -f $src_file ]; then
     cp -r $src_file $build_dir/debian/
   fi

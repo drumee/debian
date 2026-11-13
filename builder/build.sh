@@ -20,7 +20,7 @@ version=$(get_version $builder_dir)
 email=$(get_email $builder_dir)
 build_dir=$(get_build_dir ${builder_dir}/build/$version)
 
-REPO_BASE=git@github.com:drumee
+export REPO_BASE=git@github.com:drumee
 lib_dir=var/lib/drumee
 
 if [ "$1" = "pull" ]; then
@@ -31,12 +31,12 @@ fi
 mkdir -p $build_dir/files/var/
 mkdir -p $build_dir/files/usr/
 mkdir -p $build_dir/files/etc/
-OPTIONS='-ar --delete --exclude ".github:.git:.npmrc"'
-rsync $OPTIONS ${target_dir}/var/ $build_dir/files/var/
-rsync $OPTIONS ${target_dir}/usr/ $build_dir/files/usr/
-rsync $OPTIONS ${target_dir}/etc/ $build_dir/files/etc/
-rsync $OPTIONS ${builder_dir}/src/setup $build_dir/files/${lib_dir}
-rsync $OPTIONS $deb_base/ $build_dir/debian/
+OPTIONS=(-ar --delete --exclude '.github' --exclude '.git' --exclude '.npmrc')
+rsync "${OPTIONS[@]}" ${target_dir}/var/ $build_dir/files/var/
+rsync "${OPTIONS[@]}" ${target_dir}/usr/ $build_dir/files/usr/
+rsync "${OPTIONS[@]}" ${target_dir}/etc/ $build_dir/files/etc/
+rsync "${OPTIONS[@]}" ${builder_dir}/src/setup $build_dir/files/${lib_dir}
+rsync "${OPTIONS[@]}" $deb_base/ $build_dir/debian/
 cp -u ${builder_dir}/src/setup/menu/templates $build_dir/debian/templates
 
 cd $build_dir

@@ -1,3 +1,4 @@
+#!/bin/bash
 export DRUMEE_INSTALL=auto
 export DRUMEE_DOMAIN_NAME=red-chipie.com
 export DRUMEE_SERVER_ROOT=/home/somanos/tmp/server-root
