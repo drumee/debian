@@ -1,0 +1,10 @@
+"""Native equal-size passwd-file changes within one-second timestamp buckets."""
+import hashlib,json,pathlib,subprocess,sys,uuid
+repo=pathlib.Path(__file__).resolve().parents[2];root=pathlib.Path(sys.argv[1]);prepared=json.loads((root/'service/durable/operator-state/prepared.json').read_text());public=root/'service/durable/registry/public/current.json';private=root/'service/durable/registry/private';requests=root/('cache-probe-'+uuid.uuid4().hex);requests.mkdir(mode=0o700);commands=[];checks=[];original=json.loads(public.read_text())['mailboxes'][1]['quota_bytes'];old_stamp=int((private/'current/users').stat().st_mtime)
+def run(args):
+ r=subprocess.run(args,capture_output=True,timeout=120);commands.append({'argv':args,'exit':r.returncode,'stdout_sha256':hashlib.sha256(r.stdout).hexdigest(),'stderr_sha256':hashlib.sha256(r.stderr).hexdigest()});assert r.returncode==0,'cache test command refused';return r
+for limit in [1048576,2097152]*5+[original]:
+ registry=json.loads(public.read_text());registry['generation']=max([registry['generation'],*[int(x.name.split('-')[-1]) for x in private.glob('generation-*')]])+1;registry['mailboxes'][1]['quota_bytes']=limit;request=requests/(str(registry['generation'])+'.json');request.write_text(json.dumps(registry));request.chmod(0o600)
+ result=json.loads(run(['node',str(repo/'tests/mail/api.cjs'),'registry',str(root/'config.json'),str(request)]).stdout);stamp=int((private/'current/users').stat().st_mtime);assert stamp>old_stamp;old_stamp=stamp
+ observed=run(['docker','exec',prepared['project']+'-dovecot-1','doveadm','-c','/registry/active.conf','user','-f','quota/Mailbox/storage_size','second@oxymot.fr']).stdout.decode().strip();assert observed==str(limit)+'B';assert not (public.parent/'admission-closed').exists();checks.append({'generation':result['generation'],'quota_bytes':limit,'users_mtime_seconds':stamp,'native_userdb':observed,'status':'PASS'})
+result={'status':'PASS_NATIVE_RAPID_REGISTRY_GENERATIONS','checks':checks,'commands':commands};(root/'registry-cache-result.json').write_text(json.dumps(result,indent=2));print(json.dumps({'status':result['status'],'changes':len(checks)}))
