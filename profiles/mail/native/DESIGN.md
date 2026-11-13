@@ -44,8 +44,9 @@ inode is never unlinked. External filesystem writers, shared/public namespaces,
 replication, dsync, Sieve and non-Maildir storage are outside this image contract.
 Do not enable them without a separate writer-path audit and requalification.
 
-This replacement remains unqualified until native concurrency, namespace churn,
-crash recovery, write failure, and accounting tests pass on its exact image.
+The exact verdict and native concurrency, namespace-churn, crash/write-failure,
+restart and accounting evidence are recorded in the Infra MAIL-02 dossier.
+Passing a subset never qualifies a different image or an external writer path.
 
 A Maildir MOVE can stage a destination before source expunge. The proposal does
 not credit a speculative source expunge: reserve destination capacity first,
