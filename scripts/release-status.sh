@@ -310,9 +310,9 @@ if [ "$REMOTE" = 1 ] && [ -d "$root/apt-repo" ] && [ -n "${APT_SSH_HOST:-debian@
     printf '  %-24s %-38s %-24s %s\n' "rsync dry-run" "apt-repo/" "$host" "${Y}unreachable${Z}"
   else
     xfer="$(printf '%s\n' "$out" | grep -cE '\.deb$|^(In)?Release|^Packages')"
-    del="$(printf '%s\n' "$out" | grep -c '^deleting')"
+    delete_count="$(printf '%s\n' "$out" | grep -c '^deleting')"
     v="${G}in sync${Z}"; [ "$xfer" != 0 ] && v="${R}$xfer to upload${Z}"
-    [ "$del" != 0 ] && v="$v ${R}$del would be DELETED${Z}"
+    [ "$delete_count" != 0 ] && v="$v ${R}$delete_count would be DELETED${Z}"
     printf '  %-24s %-38s %-24s %s\n' "rsync dry-run" "apt-repo/" "$host" "$v"
   fi
 else

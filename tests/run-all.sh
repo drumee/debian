@@ -4,7 +4,7 @@
 # validate the generated compose if the daemon is reachable).
 set -uo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$root"
+cd "$root" || exit 1
 pass=0; fail=0
 hdr()  { printf '\n\033[1;36m── %s\033[0m\n' "$*"; }
 good() { printf '  \033[1;32mPASS\033[0m %s\n' "$1"; pass=$((pass+1)); }
@@ -69,6 +69,9 @@ if tests/native/control-deps.sh >/dev/null 2>&1; then good "native/control-deps.
 
 hdr "10. Channel parity — one fact, one place"
 if tests/config-parity.sh >/dev/null 2>&1; then good "config-parity.sh"; else bad "config-parity.sh"; fi
+
+hdr "11. CI baseline regressions"
+run "immutable parent, shell arguments, seed command and retention guards" "python3 tests/ci-baseline-regression.py"
 
 printf '\n\033[1m== %d passed, %d failed ==\033[0m\n' "$pass" "$fail"
 [ "$fail" = 0 ]

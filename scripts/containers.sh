@@ -34,7 +34,6 @@ if { [ -t 1 ] || [ "${FORCE_COLOR:-0}" = "1" ]; } && [ -z "${NO_COLOR:-}" ]; the
   c_cyan=$'\033[38;5;44m'; c_grn=$'\033[1;32m'; c_yel=$'\033[1;33m'; c_red=$'\033[1;31m'
   c_dim=$'\033[2m'; c_bold=$'\033[1m'; c_off=$'\033[0m'
 else c_cyan=; c_grn=; c_yel=; c_red=; c_dim=; c_bold=; c_off=; fi
-c_blue="$c_cyan"   # back-compat for prompt helpers below
 # Glyphs (UTF-8) with ASCII fallback for legacy terminals.
 case "${LC_ALL:-}${LC_CTYPE:-}${LANG:-}" in
   *[Uu][Tt][Ff]*) G_OK=$'✓'; G_NO=$'✗'; G_WARN=$'⚠'; BAR=$'▌'; RULE=$'───────────────────────────────────────────────';;
@@ -137,7 +136,7 @@ ensure_docker
 
 # ---------------------------------------------------------- 2. choose where + how
 DRUMEE_DIR="${DRUMEE_DIR:-./drumee}"
-mkdir -p "$DRUMEE_DIR"; cd "$DRUMEE_DIR"; DRUMEE_DIR="$(pwd)"
+mkdir -p "$DRUMEE_DIR"; cd "$DRUMEE_DIR" || exit 1; DRUMEE_DIR="$(pwd)"
 
 # An existing config is KEPT by default (idempotent re-runs). Reconfigure only on
 # an explicit RECONFIGURE=1 or an interactive "yes" (default no).

@@ -74,8 +74,9 @@ echo "BUILDING PACKAGE $package IN $build_dir"
 # immediately below, so what actually decides the built architecture is control — but
 # leaving --indep here misdescribes the package to anyone reading the build.
 dh_make --native --yes --single --packagename ${packagename}_${version} --email $email
-for f in $(ls ${base}/debian); do
-  cp -r ${base}/debian/$f $build_dir/debian/
+for src_file in "${base}/debian/"*; do
+  [ -e "$src_file" ] || continue
+  cp -r "$src_file" "$build_dir/debian/"
 done
 dpkg-buildpackage -k$email
 if [ -d "${DEB_BUILD_TARGET}" ]; then

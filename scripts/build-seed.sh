@@ -43,10 +43,9 @@ docker buildx version >/dev/null 2>&1 || { echo "docker buildx required" >&2; ex
   echo "schemas factory templates not found at: $SCHEMAS_SRC (set SCHEMAS_SRC=)" >&2; exit 1; }
 
 say "Building drumee/seed:$TAG"
+# schemas-init/populate.js share the canonical bootstrap helpers context.
 docker buildx build \
   -f "$root/scripts/Dockerfile.seed" \
-  # schemas-init and populate.js now live in drumee-bootstrap, which is where they
-  # survive the deletion of deploy/docker. One copy, three consumers.
   --build-context "helpers=$root/bootstrap/usr/lib/drumee/schemas" \
   -t "drumee/seed:$TAG" --load "$root/scripts"
 

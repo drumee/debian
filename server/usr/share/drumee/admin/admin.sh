@@ -18,7 +18,7 @@ do
 			shift
 			;;
 		-s=*|--swap=*)
-			swap="${arg#*=}"
+			: # Accepted legacy option; currently has no effect.
 			shift
 			;;
 	esac
@@ -27,7 +27,7 @@ done
 
 script_path=$0
 script_name=$(basename $0)
-if [ $(whoami) != "root" ]
+if [ "$(whoami)" != "root" ]
 then 
   echo "PERMISSION DENIED: $script_path requires root privilege"
   exit 1

@@ -25,7 +25,7 @@ if [ ! -x $patcher ]; then
 fi 
 
 
-cd $SCHEMAS_PATH
+cd "$SCHEMAS_PATH" || exit 1
 for i in $(cat manifest.txt); do
   echo $i
   target=null

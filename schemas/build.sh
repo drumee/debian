@@ -16,7 +16,7 @@ email=$(get_email $base)
 echo EMAIL ${base} $email $version
 build_dir=$(get_build_dir ${base}/build/$version)
 
-REPO_BASE=git@github.com:drumee
+export REPO_BASE=git@github.com:drumee
 bundle $base "setup-schemas" "main" "" "var/lib/drumee/setup-schemas"
 # fix/neutral-templates, not preview: it carries the regenerated host-neutral
 # templates (no dev-box rows, no baked /data/mfs roots, intact trigger DDL) and
@@ -80,8 +80,9 @@ package=${packagename}_${version}
 
 echo "BUILDING PACKAGE IN  $build_dir"
 dh_make --native --yes --indep --packagename $package --email $email
-for f in $(ls ${base}/debian); do
-  cp -r ${base}/debian/$f $build_dir/debian/
+for src_file in "${base}/debian/"*; do
+  [ -e "$src_file" ] || continue
+  cp -r "$src_file" "$build_dir/debian/"
 done
 # DEB_UNSIGNED=1 builds without a maintainer signature.
 #

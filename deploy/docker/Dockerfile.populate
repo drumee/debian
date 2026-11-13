@@ -16,8 +16,9 @@
 #     --build-arg SERVER_IMAGE=<registry>/server-pod:<tag> -t .../schemas-populate:<tag> .
 # SERVER_IMAGE lets publishing point the base at the registry-qualified server-pod
 # image; defaults to the locally-built one.
-ARG SERVER_IMAGE=drumee/server-pod:local
-FROM ${SERVER_IMAGE}
+ARG SERVER_IMAGE
+ARG SERVER_DIGEST
+FROM ${SERVER_IMAGE}@${SERVER_DIGEST}
 
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends mariadb-client \

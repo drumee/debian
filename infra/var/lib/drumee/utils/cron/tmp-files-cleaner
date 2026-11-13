@@ -29,7 +29,7 @@ if [ -d $tmp_data ]; then
 fi 
 
 tmp_dl="$DRUMEE_DATA_DIR/mfs/__download__/"
-if [ ! -z $DRUMEE_DATA_DIR -a -d $tmp_dl ]; then
+if [[ -n "$DRUMEE_DATA_DIR" && -d "$tmp_dl" ]]; then
   echo "cleaning old files in $tmp_dl"
   find $tmp_dl -ctime +15 -delete
 fi 

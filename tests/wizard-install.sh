@@ -4,7 +4,7 @@
 # so it exercises the wizard's config-building + render without starting Docker.
 # Needs Node 20; Docker only used to validate the generated compose if present.
 set -uo pipefail
-root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$root"
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$root" || exit 1
 pass=0; fail=0
 ok(){ printf '  \033[1;32mPASS\033[0m %s\n' "$1"; pass=$((pass+1)); }
 no(){ printf '  \033[1;31mFAIL\033[0m %s\n' "$1"; fail=$((fail+1)); }
