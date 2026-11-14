@@ -17,7 +17,7 @@ try:
   time.sleep(.1)
  else:raise TimeoutError('held session synchronization')
  old=passwords[users[0]];passwords[users[0]]='Rotated-'+uuid.uuid4().hex;cli('mailbox','password',users[0],password=passwords[users[0]],mutate=True)
- (private/'session-release').write_text('go');child.wait(timeout=60);assert child.returncode==0;observed=json.loads(child.stdout.read());assert observed['mail_after_change']!='250' and observed['mail_after_change']!=250;assert observed['data_after_change']!=250;assert observed['target_imap_after_change']=='disconnected';assert observed['unrelated_imap_after_change']=='OK';check('rotation-revokes-held-smtp-and-target-imap-preserves-unrelated',observed)
+ (private/'session-release').write_text('go');child.wait(timeout=60);assert child.returncode==0;observed=json.loads(child.stdout.read());assert observed['mail_after_change']==421 and observed['data_after_change']==421;assert observed['target_imap_after_change']=='disconnected';assert observed['unrelated_imap_after_change']=='OK';check('rotation-revokes-held-smtp-and-target-imap-preserves-unrelated',observed)
  assert wait_read(users[0],tag)['matches']==1;passwords['old']=old;assert not probe(action='imap',user=users[0],credential='old')['ok'];assert probe(action='imap',user=users[0])['ok'];check('rotation-preserves-final-250-message-and-rejects-old-password',{'matches':1})
 finally:
  if child.poll() is None:child.terminate();child.wait(timeout=10)

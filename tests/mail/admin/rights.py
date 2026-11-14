@@ -3,7 +3,7 @@ from common import *
 users=['rights-'+uuid.uuid4().hex[:8]+'@oxymot.fr' for _ in range(2)]
 for user in users:
  passwords[user]='Rights-'+uuid.uuid4().hex;cli('mailbox','create',user,password=passwords[user],mutate=True)
-passwords['ghost']='Ghost-'+uuid.uuid4().hex;cli('account','password','ghost',password=passwords['ghost'],mutate=True);cli('account','update','ghost',opts=['--envelope-from',users[0],'--header-from',users[0],'--dsn-mailbox',users[0]],mutate=True)
+passwords['ghost']='Ghost-'+uuid.uuid4().hex;cli('account','password','ghost',password=passwords['ghost'],mutate=True);cli('account','update','ghost',opts=['--envelope-from',users[0],'--header-from',users[0],'--dsn-mailbox',users[0]],mutate=True);cli('account','enable','ghost',mutate=True)
 for mode in ('account-grants','mailbox-all-disable'):
  if mode=='mailbox-all-disable':cli('mailbox','enable',users[0],opts=['--scope','submission'],mutate=True)
  write_passwords()
@@ -21,7 +21,7 @@ for mode in ('account-grants','mailbox-all-disable'):
   else:raise TimeoutError('held session synchronization')
   if mode=='account-grants':cli('account','update','ghost',opts=['--header-from',users[1]],mutate=True)
   else:cli('mailbox','disable',users[0],opts=['--scope','all'],mutate=True)
-  (private/'session-release').write_text('go');child.wait(timeout=60);assert child.returncode==0;observed=json.loads(child.stdout.read());assert observed['mail_after_change']!=250 and observed['data_after_change']!=250;assert observed['unrelated_imap_after_change']=='OK';assert observed['target_imap_after_change']==('OK' if mode=='account-grants' else 'disconnected');check(mode+'-revokes-smtp-at-next-mail-and-final-data',observed)
+  (private/'session-release').write_text('go');child.wait(timeout=60);assert child.returncode==0;observed=json.loads(child.stdout.read());assert observed['mail_after_change']==421 and observed['data_after_change']==421;assert observed['unrelated_imap_after_change']=='OK';assert observed['target_imap_after_change']==('OK' if mode=='account-grants' else 'disconnected');check(mode+'-revokes-smtp-at-next-mail-and-final-data',observed)
   if mode=='mailbox-all-disable':
    assert probe(action='rcpt',recipient=users[0])['rcpt_code']==550;assert not probe(action='imap',user=users[0])['ok'];assert not probe(action='submit',auth=users[0],sender=users[0],recipient=users[1],tag='denied')['ok'];cli('mailbox','enable',users[0],opts=['--scope','imap'],mutate=True)
   assert wait_read(users[0],tag)['matches']==1;check(mode+'-preserves-accepted-message',{'matches':1})
