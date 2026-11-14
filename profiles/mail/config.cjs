@@ -8,7 +8,7 @@ function validate(cfg) {
   if (cfg.monitoring && (Object.keys(cfg.monitoring).some(k => !["queue_age_seconds", "auth_failures"].includes(k)) || Object.values(cfg.monitoring).some(v => !Number.isSafeInteger(v) || v < 1))) throw Error("MAIL_PROFILE_INVALID");
   for (const k of ["registry_file", "verifiers_file"]) if (typeof cfg[k] !== "string" || !path.isAbsolute(cfg[k]) || path.normalize(cfg[k]) !== cfg[k]) throw Error("MAIL_PRIVATE_FILE_UNSAFE");
   const checked = api().validateMailService(cfg.service);
-  if (!checked.valid) throw Error("MAIL_SERVICE_INVALID: " + JSON.stringify(checked.diagnostics));
+  if (!checked.valid) throw Error("MAIL_SERVICE_INVALID");
   return { ...cfg, service: checked.normalized };
 }
 function compose(raw) {

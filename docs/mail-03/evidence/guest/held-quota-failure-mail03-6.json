@@ -1,0 +1,130 @@
+{
+  "status": "FAIL_HELD_LMTP_QUOTA_CHANGE",
+  "checks": [
+    {
+      "name": "held-old-limit-lmtp-cannot-commit-above-new-applied-quota",
+      "status": "FAIL",
+      "observation": {
+        "change": {
+          "applied_revision": 59,
+          "changed": true,
+          "code": "OK",
+          "contract": "drumee.mail-cli/1",
+          "data": {
+            "address": "held-quota-17bf89c2@oxymot.fr",
+            "advisory": true,
+            "created_at": "2026-11-14T08:03:06.214215+00:00",
+            "credential_generation": 1,
+            "deleted": false,
+            "id": "8391f5ed-69b6-4b0d-8308-aaf71f1554c5",
+            "imap_enabled": true,
+            "messages": 0,
+            "modified_at": "2026-11-14T08:03:16.343233+00:00",
+            "observed_at": "2026-11-14T08:03:24.748Z",
+            "over_quota": false,
+            "quota_bytes": 1048576,
+            "receive_enabled": true,
+            "submission_enabled": false,
+            "used_bytes": 0
+          },
+          "desired_revision": 59,
+          "ok": true,
+          "operation_id": "0175f589-6a7d-4a93-8648-03d9cc1aa872"
+        },
+        "delivery": {
+          "lmtp_final_code": 250
+        },
+        "used_bytes": 1200435,
+        "quota_bytes": 1048576
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "71e8e2c8abd6935d8d148c28c4913e7b7b58549768ca27e188a53f13d91a8aac",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "held-quota-17bf89c2@oxymot.fr",
+        "--quota-bytes",
+        "2097152",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "57",
+        "--request-id",
+        "af6a7e59-db9a-465c-b8fb-65747337ec6e",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ee18906ec7f5e3bac6a0dff8b6e34f69b847b2b359650d9d9564cd03d6db9ac0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "quota",
+        "held-quota-17bf89c2@oxymot.fr",
+        "--bytes",
+        "1048576",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "58",
+        "--request-id",
+        "0175f589-6a7d-4a93-8648-03d9cc1aa872"
+      ],
+      "exit": 0,
+      "stdout_sha256": "a2878302cf923e175a0dfff47e8676656c4b6da763885e6d34c23fd70c7f8013",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "show",
+        "held-quota-17bf89c2@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c4a7d424e36b393a2024e1f1d4c177aab97454ed0ad2322ee5f019866ba893e0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

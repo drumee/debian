@@ -4,7 +4,7 @@ root=pathlib.Path(sys.argv[1]);source=pathlib.Path(sys.argv[2]);scripts=pathlib.
 def d(*args):
  r=subprocess.run(['docker',*args],capture_output=True,timeout=90);commands.append({'argv':['docker',*args],'exit':r.returncode,'stdout_sha256':hashlib.sha256(r.stdout).hexdigest(),'stderr_sha256':hashlib.sha256(r.stderr).hexdigest()});return r
 control={}
-for role,ports in [('policy',[10001,10002,10003]),('opendkim',[8891])]:
+for role,ports in [('policy',[10001,10002,10003,10004]),('opendkim',[8891])]:
  data=json.loads(d('inspect',project+'-'+role+'-1').stdout)[0];address=data['NetworkSettings']['Networks'][project+'-control']['IPAddress']
  for port in ports:control[role+'-'+str(port)]=[address,port]
 names=['edge-anonymous-relay-refused','plaintext-mail-requires-starttls','verified-tls-without-auth-refused']+['smtp-ineligible-or-wrong-password-'+w for w in ['ghost','oxymotion','contact@oxymot.fr','hello@oxymot.fr']]+['sasl-authorization-identity-impersonation-refused']+['imap-ineligible-'+w for w in ['ghost','oxymotion','hello@oxymot.fr']]+['imap-list-and-absolute-shared-namespace-isolation','internal-recipient-and-orcpt-cannot-bypass-rcpt-validation','mx-auth-remains-absent-after-starttls','authenticated-application-null-envelope-refused']+['native-tls11-refused-'+str(port) for port in [587,465,993]]+['plaintext-imap-not-listening']+['control-network-refuses-'+x for x in control]+['unix-auth-lmtp-not-mounted-in-client']

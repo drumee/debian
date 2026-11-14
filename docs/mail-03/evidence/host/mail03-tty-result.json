@@ -1,0 +1,75 @@
+{
+  "status": "PASS_MAIL03_NATIVE_TTY",
+  "checks": [
+    {
+      "name": "masked-tty-mismatch-restores-terminal",
+      "status": "PASS",
+      "observation": {
+        "exit": 2,
+        "output_sha256": "59714d82ad29002a871a89af6e900b0df99c735585a614e359e734dbba259988",
+        "secret_in_output": false
+      }
+    },
+    {
+      "name": "masked-tty-cancel-restores-terminal",
+      "status": "PASS",
+      "observation": {
+        "exit": 130,
+        "output_sha256": "967aeb1c91b0f4363b697d5cf815147a3c833417a13f5e174353e8727cbef36c",
+        "secret_in_output": false
+      }
+    },
+    {
+      "name": "masked-tty-valid-restores-terminal",
+      "status": "PASS",
+      "observation": {
+        "exit": 0,
+        "output_sha256": "3a1b3910beced3beb6142cfa77030cec16657338ab9179fc018c25c854967ef8",
+        "secret_in_output": false
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e96a3af2921346fa85cea9bbfdc193846c8c645b99b7c57b4ddea310df82ccd7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-3087174e-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-qblxe20q/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "af101c4e0ec2a910a1fa8ac53788f7999771f064b466743261183fbbd0672553",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

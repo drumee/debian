@@ -1,0 +1,9 @@
+{
+  "python": "3.11.2",
+  "implementation": "CPython",
+  "sqlite": "3.40.1",
+  "binding_sha256": "9f201dc4d1b5ff168d54820c48e0deb7e912a38a2da0486fb5fc3da5d0a55811",
+  "python_sha256": "a83c0370d91532c96d4060a0e7c107d1f2889dad8a98e03395e86ef0373fd467",
+  "node": "v22.22.0",
+  "docker": "29.2.0"
+}

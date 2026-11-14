@@ -1,0 +1,1759 @@
+{
+  "runtime": {
+    "bindings": {
+      "1587/tcp": [
+        {
+          "HostIp": "10.243.47.1",
+          "HostPort": "1587"
+        }
+      ]
+    },
+    "ports": {
+      "1587/tcp": [
+        {
+          "HostIp": "10.243.47.1",
+          "HostPort": "1587"
+        }
+      ]
+    },
+    "postfix_networks": {
+      "mail02-profile-41dd8c8f-control": {
+        "IPAMConfig": {},
+        "Links": null,
+        "Aliases": [
+          "mail02-profile-41dd8c8f-postfix-1",
+          "postfix"
+        ],
+        "MacAddress": "02:42:ac:14:00:05",
+        "NetworkID": "246a56b9da32724c968824d519351953fa9c2c5b2972eb85f7f24d31cbd2a742",
+        "EndpointID": "b6741dff9f43fc75cd161af31d7935542581f0463418668738f2121870620e54",
+        "Gateway": "",
+        "IPAddress": "172.20.0.5",
+        "IPPrefixLen": 16,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DriverOpts": null,
+        "DNSNames": [
+          "mail02-profile-41dd8c8f-postfix-1",
+          "postfix",
+          "02b17dbd6e77"
+        ]
+      },
+      "mail02-profile-41dd8c8f-edge": {
+        "IPAMConfig": {
+          "IPv4Address": "10.243.47.254"
+        },
+        "Links": null,
+        "Aliases": [
+          "mail02-profile-41dd8c8f-postfix-1",
+          "postfix",
+          "mail.oxymot.fr"
+        ],
+        "MacAddress": "02:42:0a:f3:2f:fe",
+        "NetworkID": "8d512e02abca13a96d4788f58cc3735bdbb30b588a80bc99352dcec72155ff4d",
+        "EndpointID": "1e785df006d6f396f8bf01fbf01ae986924127bd5618df94dfb22758be6cb567",
+        "Gateway": "10.243.47.1",
+        "IPAddress": "10.243.47.254",
+        "IPPrefixLen": 24,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DriverOpts": null,
+        "DNSNames": [
+          "mail02-profile-41dd8c8f-postfix-1",
+          "postfix",
+          "mail.oxymot.fr",
+          "02b17dbd6e77"
+        ]
+      }
+    },
+    "pid1_bounding_caps": "0x4eb",
+    "private_rules": {
+      "nftables": [
+        {
+          "metainfo": {
+            "version": "1.1.3",
+            "release_name": "Commodore Bullmoose #4",
+            "json_schema_version": 1
+          }
+        },
+        {
+          "table": {
+            "family": "inet",
+            "name": "drumee_mail_private",
+            "handle": 2
+          }
+        },
+        {
+          "chain": {
+            "family": "inet",
+            "table": "drumee_mail_private",
+            "name": "input",
+            "handle": 1,
+            "type": "filter",
+            "hook": "input",
+            "prio": -10,
+            "policy": "accept"
+          }
+        },
+        {
+          "rule": {
+            "family": "inet",
+            "table": "drumee_mail_private",
+            "chain": "input",
+            "handle": 2,
+            "expr": [
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "payload": {
+                      "protocol": "tcp",
+                      "field": "dport"
+                    }
+                  },
+                  "right": 1587
+                }
+              },
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "payload": {
+                      "protocol": "ip",
+                      "field": "saddr"
+                    }
+                  },
+                  "right": "10.243.47.1"
+                }
+              },
+              {
+                "counter": {
+                  "packets": 19,
+                  "bytes": 1140
+                }
+              },
+              {
+                "drop": null
+              }
+            ]
+          }
+        },
+        {
+          "rule": {
+            "family": "inet",
+            "table": "drumee_mail_private",
+            "chain": "input",
+            "handle": 3,
+            "expr": [
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "payload": {
+                      "protocol": "tcp",
+                      "field": "dport"
+                    }
+                  },
+                  "right": 1587
+                }
+              },
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "payload": {
+                      "protocol": "ip",
+                      "field": "saddr"
+                    }
+                  },
+                  "right": "10.243.47.254"
+                }
+              },
+              {
+                "counter": {
+                  "packets": 0,
+                  "bytes": 0
+                }
+              },
+              {
+                "accept": null
+              }
+            ]
+          }
+        },
+        {
+          "rule": {
+            "family": "inet",
+            "table": "drumee_mail_private",
+            "chain": "input",
+            "handle": 4,
+            "expr": [
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "payload": {
+                      "protocol": "tcp",
+                      "field": "dport"
+                    }
+                  },
+                  "right": 1587
+                }
+              },
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "payload": {
+                      "protocol": "ip",
+                      "field": "saddr"
+                    }
+                  },
+                  "right": {
+                    "prefix": {
+                      "addr": "10.243.47.0",
+                      "len": 25
+                    }
+                  }
+                }
+              },
+              {
+                "counter": {
+                  "packets": 72,
+                  "bytes": 13298
+                }
+              },
+              {
+                "accept": null
+              }
+            ]
+          }
+        },
+        {
+          "rule": {
+            "family": "inet",
+            "table": "drumee_mail_private",
+            "chain": "input",
+            "handle": 5,
+            "expr": [
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "payload": {
+                      "protocol": "tcp",
+                      "field": "dport"
+                    }
+                  },
+                  "right": 1587
+                }
+              },
+              {
+                "counter": {
+                  "packets": 8,
+                  "bytes": 480
+                }
+              },
+              {
+                "drop": null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "mail_frontend_id_retained": "8d512e02abca13a96d4788f58cc3735bdbb30b588a80bc99352dcec72155ff4d",
+    "mail_container_ids_retained": [
+      "02b17dbd6e77",
+      "6a00d5fe4e15",
+      "d359c2d18d70",
+      "de0c3477830c"
+    ]
+  },
+  "status": "PASS_PRIVATE_NETWORKS",
+  "checks": [
+    {
+      "name": "ghost-project-generation-0",
+      "status": "PASS",
+      "observation": {
+        "expected": "allowed",
+        "accepted": true,
+        "correlation": "private-ghost-d12276b258b94317b07818bfd2cbd185",
+        "status": "PASS",
+        "tls_verified": true,
+        "authentication_required": true,
+        "bad_password_code": 535,
+        "account": "ghost",
+        "observed_frontend_source": "10.243.47.10",
+        "observed_backend_source": "10.243.48.2",
+        "backend_project": "mail02-client-1d0ec6b0",
+        "client_id": "e45a4b4a0b25a5ec9d46c21a9ad14bca5b2f7789ed69aad70d41f59c1a705921",
+        "restricted_secret_projection": true,
+        "observed_local_delivery": 1
+      }
+    },
+    {
+      "name": "oxymotion-project-generation-0",
+      "status": "PASS",
+      "observation": {
+        "expected": "allowed",
+        "accepted": true,
+        "correlation": "private-oxymotion-d0a0b00f656f4573bbdb18b288209838",
+        "status": "PASS",
+        "tls_verified": true,
+        "authentication_required": true,
+        "bad_password_code": 535,
+        "account": "oxymotion",
+        "observed_frontend_source": "10.243.47.11",
+        "observed_backend_source": "10.243.50.2",
+        "backend_project": "mail02-client-29e28499",
+        "client_id": "af836e7c7b1ed5ee7f98a2c4f6dba7fbc02aa67236f3921605aaa7f96d9fa008",
+        "restricted_secret_projection": true,
+        "observed_local_delivery": 1
+      }
+    },
+    {
+      "name": "forbidden-project-generation-0",
+      "status": "PASS",
+      "observation": {
+        "expected": "forbidden",
+        "status": "PASS",
+        "access_blocked": true,
+        "exception": "TimeoutError",
+        "errno": null,
+        "smtp_code": null,
+        "observed_frontend_source": "10.243.47.200",
+        "observed_backend_source": "10.243.49.2",
+        "backend_project": "mail02-client-2160faa9",
+        "client_id": "860061fc9d98cf69ce9a6434a1b8e5bed949a7cc8be20a2f1fbfb468cf8e8172",
+        "restricted_secret_projection": true,
+        "kernel_drop_packets": 4
+      }
+    },
+    {
+      "name": "unattached-project-generation-0",
+      "status": "PASS",
+      "observation": {
+        "expected": "forbidden",
+        "status": "PASS",
+        "access_blocked": true,
+        "exception": "SMTPServerDisconnected",
+        "errno": null,
+        "smtp_code": null,
+        "observed_frontend_source": null,
+        "observed_backend_source": "10.243.51.2",
+        "backend_project": "mail02-client-7909438e",
+        "client_id": "d8777acd24a0e72c7a936357d7964855b3292654fc7f5a24f9def77736014366",
+        "restricted_secret_projection": true,
+        "kernel_drop_packets": 5
+      }
+    },
+    {
+      "name": "ghost-project-generation-1",
+      "status": "PASS",
+      "observation": {
+        "expected": "allowed",
+        "accepted": true,
+        "correlation": "private-ghost-156a743a80b2488b806ffee437e35f36",
+        "status": "PASS",
+        "tls_verified": true,
+        "authentication_required": true,
+        "bad_password_code": 535,
+        "account": "ghost",
+        "observed_frontend_source": "10.243.47.10",
+        "observed_backend_source": "10.243.48.2",
+        "backend_project": "mail02-client-1d0ec6b0",
+        "client_id": "148c6fa3ed931404d927c320d4c8e8e6037b1675d90e02fc071b85f853781196",
+        "restricted_secret_projection": true,
+        "observed_local_delivery": 1
+      }
+    },
+    {
+      "name": "oxymotion-project-generation-1",
+      "status": "PASS",
+      "observation": {
+        "expected": "allowed",
+        "accepted": true,
+        "correlation": "private-oxymotion-2dff3f2eb2d64366a59c395c8d1b6b25",
+        "status": "PASS",
+        "tls_verified": true,
+        "authentication_required": true,
+        "bad_password_code": 535,
+        "account": "oxymotion",
+        "observed_frontend_source": "10.243.47.11",
+        "observed_backend_source": "10.243.50.2",
+        "backend_project": "mail02-client-29e28499",
+        "client_id": "660f1906086bd75c4d0931c5109d8f596be88333dad08032083d3473911f3efc",
+        "restricted_secret_projection": true,
+        "observed_local_delivery": 1
+      }
+    },
+    {
+      "name": "forbidden-project-generation-1",
+      "status": "PASS",
+      "observation": {
+        "expected": "forbidden",
+        "status": "PASS",
+        "access_blocked": true,
+        "exception": "TimeoutError",
+        "errno": null,
+        "smtp_code": null,
+        "observed_frontend_source": "10.243.47.200",
+        "observed_backend_source": "10.243.49.2",
+        "backend_project": "mail02-client-2160faa9",
+        "client_id": "bcdf6308cc33a4cf009714bfdf809947393f47588981bac44a693f9e8453986a",
+        "restricted_secret_projection": true,
+        "kernel_drop_packets": 4
+      }
+    },
+    {
+      "name": "unattached-project-generation-1",
+      "status": "PASS",
+      "observation": {
+        "expected": "forbidden",
+        "status": "PASS",
+        "access_blocked": true,
+        "exception": "SMTPServerDisconnected",
+        "errno": null,
+        "smtp_code": null,
+        "observed_frontend_source": null,
+        "observed_backend_source": "10.243.51.2",
+        "backend_project": "mail02-client-7909438e",
+        "client_id": "1e26b44b963b3b76d61325e712db41f161ab9115beee6c51832a5bf67f805258",
+        "restricted_secret_projection": true,
+        "kernel_drop_packets": 6
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/private-client.cjs",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "10.243.47.10"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d6f84ee4f6955088b7b994e2177c582b7df5501cd51203b3627270a75c98e25c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-1d0ec6b0",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/ghost.json",
+        "up",
+        "-d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "7051a3bc712934ac8461e0e37c89d969085c95bb16d5bd25ad516610934b6bfc"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-1d0ec6b0",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/ghost.json",
+        "ps",
+        "-q",
+        "client"
+      ],
+      "exit": 0,
+      "stdout_sha256": "4426a2f595a1bc0de9af47256266bd862f14849d04b3b94897d5698926a3ca6b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "e45a4b4a0b25a5ec9d46c21a9ad14bca5b2f7789ed69aad70d41f59c1a705921"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7d2ccc1a68dc8f88a8c8d3d212e8c3cc2acff220c17382817bccca459f380370",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "e45a4b4a0b25a5ec9d46c21a9ad14bca5b2f7789ed69aad70d41f59c1a705921",
+        "python3",
+        "-c",
+        "import socket,json;print(json.dumps({'address':socket.gethostbyname('mail.oxymot.fr')}))"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fe2160ac34133dd480df12adbd9e59769a9d9017731eaee741a8aa4f1855a662",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f29ec9dc0dc506af7605fefff2a118570255605023ce53655ffe9c7d221ac287",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "e45a4b4a0b25a5ec9d46c21a9ad14bca5b2f7789ed69aad70d41f59c1a705921",
+        "python3",
+        "/lab/private-probe.py",
+        "10.243.47.254",
+        "allowed",
+        "private-ghost-d12276b258b94317b07818bfd2cbd185"
+      ],
+      "exit": 0,
+      "stdout_sha256": "4542332ca8e8bcef885b5c7c2bfccae7a0a54f275b492020ce6ece7213ff7569",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1f3645f54bd7a72f721f3e389a54a37e5cf548bac426602f9baad94f1d9fbd23",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/client.py",
+        "imap",
+        "contact@oxymot.fr",
+        "private-ghost-d12276b258b94317b07818bfd2cbd185"
+      ],
+      "exit": 0,
+      "stdout_sha256": "49d700bb8496c748fe6d6da0c9ece64cf76defbc69d7872d5632506a03d2713a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-1d0ec6b0",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/ghost.json",
+        "down"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "fda56967433b6632f3db2ecb78e580acdecfd7d3a5c61cd5726a84ea4346017f"
+    },
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/private-client.cjs",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "10.243.47.11"
+      ],
+      "exit": 0,
+      "stdout_sha256": "38f3f823de2a2471ecce63dcdf623303aa968223d606cfd428131d1db356c88e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-29e28499",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/oxymotion.json",
+        "up",
+        "-d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "2c1a91bb6f3c82736e030278292ead346faed54619f3b4785a6cb3fa0bbed202"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-29e28499",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/oxymotion.json",
+        "ps",
+        "-q",
+        "client"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d37fe4941f01e6a9ca2c74c5fa949cb4e72fd85473ba4542df6654d70f0b1597",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "af836e7c7b1ed5ee7f98a2c4f6dba7fbc02aa67236f3921605aaa7f96d9fa008"
+      ],
+      "exit": 0,
+      "stdout_sha256": "32ef529d9262652fc5531ace64f37dce7dd131527426ae3e5abf2d283b9da903",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "af836e7c7b1ed5ee7f98a2c4f6dba7fbc02aa67236f3921605aaa7f96d9fa008",
+        "python3",
+        "-c",
+        "import socket,json;print(json.dumps({'address':socket.gethostbyname('mail.oxymot.fr')}))"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fe2160ac34133dd480df12adbd9e59769a9d9017731eaee741a8aa4f1855a662",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1f3645f54bd7a72f721f3e389a54a37e5cf548bac426602f9baad94f1d9fbd23",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "af836e7c7b1ed5ee7f98a2c4f6dba7fbc02aa67236f3921605aaa7f96d9fa008",
+        "python3",
+        "/lab/private-probe.py",
+        "10.243.47.254",
+        "allowed",
+        "private-oxymotion-d0a0b00f656f4573bbdb18b288209838"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e77501761c55e2287f475dc014e3772eb920aa3e84f28fc9f2bd3ee42cd2c735",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "067776d79ff02f515f32954904336cd14b2d6d97d078d09569381ef3820c55c4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/client.py",
+        "imap",
+        "contact@oxymot.fr",
+        "private-oxymotion-d0a0b00f656f4573bbdb18b288209838"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e8cc48d943dae60fb2dd9429705d364d0788922eb6a86bd2bcfc6ef73df1ae2e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-29e28499",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/oxymotion.json",
+        "down"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "45b301d618d7765b04506c46c8704eb72072fd28a861ace3d3a28d029482683e"
+    },
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/private-client.cjs",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "10.243.47.200"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d994d36908369654b7bd8c90825db9c2b83b244435591ea0f74975f27762edc2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-2160faa9",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/forbidden.json",
+        "up",
+        "-d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5ccaeed0fc80a6d7bfef8a25ee7595004eac3792f7527cf664273a6a2eb3f623"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-2160faa9",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/forbidden.json",
+        "ps",
+        "-q",
+        "client"
+      ],
+      "exit": 0,
+      "stdout_sha256": "559c2f6704804c828d43537f80b310e25e6fc5fa18c7b6d62ce4de061fef802b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "860061fc9d98cf69ce9a6434a1b8e5bed949a7cc8be20a2f1fbfb468cf8e8172"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f440ad92401491298fdd42facc67510de8c498a29bdee05438832e89d6b711f4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "860061fc9d98cf69ce9a6434a1b8e5bed949a7cc8be20a2f1fbfb468cf8e8172",
+        "python3",
+        "-c",
+        "import socket,json;print(json.dumps({'address':socket.gethostbyname('mail.oxymot.fr')}))"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fe2160ac34133dd480df12adbd9e59769a9d9017731eaee741a8aa4f1855a662",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "067776d79ff02f515f32954904336cd14b2d6d97d078d09569381ef3820c55c4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "860061fc9d98cf69ce9a6434a1b8e5bed949a7cc8be20a2f1fbfb468cf8e8172",
+        "python3",
+        "/lab/private-probe.py",
+        "10.243.47.254",
+        "forbidden",
+        "private-forbidden-8d060da1c57942b1959b5c7e8e63dc2b"
+      ],
+      "exit": 0,
+      "stdout_sha256": "136af1a9fe5d29ad7e47293e1018f4133fe8c3837c0aee7dfee09dccbc010824",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "af6b2ced78c98e28cfa2aa517667fba9ca5898a242d6fe597f811c21704d57aa",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-2160faa9",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/forbidden.json",
+        "down"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "02f8603ccac8a76946f6f8bcef61068e9e878200c864ca1c0d6453327888461c"
+    },
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/private-client.cjs",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "10.243.47.201"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f4fb051ace6bfbd7b0ba1dffe98e4c48f024cf0206914bcfcbaeae99d3535922",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-7909438e",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/unattached.json",
+        "up",
+        "-d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "35efb558dc2967c36e70dcdc9721aec74b6c2aaf4fba354ae035fd19f572a51a"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-7909438e",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/unattached.json",
+        "ps",
+        "-q",
+        "client"
+      ],
+      "exit": 0,
+      "stdout_sha256": "01325b644acefb2727695fa49e9c9c0c764df106983f44ee1eda5a4c0be5bec8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "d8777acd24a0e72c7a936357d7964855b3292654fc7f5a24f9def77736014366"
+      ],
+      "exit": 0,
+      "stdout_sha256": "2c3092f273293813aa7b869cbc8301d902c9cbf3982acecd61ae5f40abe15042",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "af6b2ced78c98e28cfa2aa517667fba9ca5898a242d6fe597f811c21704d57aa",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "d8777acd24a0e72c7a936357d7964855b3292654fc7f5a24f9def77736014366",
+        "python3",
+        "/lab/private-probe.py",
+        "10.243.47.1",
+        "forbidden",
+        "private-unattached-9e7cd0be6da94e528104f4952847478f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e197e8e3e77b5867b1f3933cbcbaad211782e6005b57cf2e7a1607bfb6aca7be",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "064d8b9ca20fa5c2eefcabe31eb188fef063d499c254b0a92d8eb76cc99a7981",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-7909438e",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/unattached.json",
+        "down"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "130aab78865c027c3148f09c2f900926207a9d03c367b8710460b2f5872eb9c9"
+    },
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/private-client.cjs",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "10.243.47.10"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d6f84ee4f6955088b7b994e2177c582b7df5501cd51203b3627270a75c98e25c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-1d0ec6b0",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/ghost.json",
+        "up",
+        "-d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "7051a3bc712934ac8461e0e37c89d969085c95bb16d5bd25ad516610934b6bfc"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-1d0ec6b0",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/ghost.json",
+        "ps",
+        "-q",
+        "client"
+      ],
+      "exit": 0,
+      "stdout_sha256": "2e2a963c80020a7e001722d30c02e676747d16e86eb3f1a16e83c6c9c8dfe693",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "148c6fa3ed931404d927c320d4c8e8e6037b1675d90e02fc071b85f853781196"
+      ],
+      "exit": 0,
+      "stdout_sha256": "a0b34805099fc3e4f6baa715fa50a1690b91ac6ca7895d18aa8a3dd3c031e928",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "148c6fa3ed931404d927c320d4c8e8e6037b1675d90e02fc071b85f853781196",
+        "python3",
+        "-c",
+        "import socket,json;print(json.dumps({'address':socket.gethostbyname('mail.oxymot.fr')}))"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fe2160ac34133dd480df12adbd9e59769a9d9017731eaee741a8aa4f1855a662",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c9b4b050bb5bc560adc865737189baadc12724e321b16f045e50c8a902066b47",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "148c6fa3ed931404d927c320d4c8e8e6037b1675d90e02fc071b85f853781196",
+        "python3",
+        "/lab/private-probe.py",
+        "10.243.47.254",
+        "allowed",
+        "private-ghost-156a743a80b2488b806ffee437e35f36"
+      ],
+      "exit": 0,
+      "stdout_sha256": "a5a8251f4713e5c6653ace1d8dc7072bd3bff7e684c3108333bef0837e89078d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6a62a7c4c33fc83f518993bba6f6da59d36d8a40564fd90a1bb8d8626ee5661f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/client.py",
+        "imap",
+        "contact@oxymot.fr",
+        "private-ghost-156a743a80b2488b806ffee437e35f36"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1893967bd2443ca4a790407c159f9b28e6db8a9a39fa5b2da1354338acf9eb47",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-1d0ec6b0",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/ghost.json",
+        "down"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "fda56967433b6632f3db2ecb78e580acdecfd7d3a5c61cd5726a84ea4346017f"
+    },
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/private-client.cjs",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "10.243.47.11"
+      ],
+      "exit": 0,
+      "stdout_sha256": "38f3f823de2a2471ecce63dcdf623303aa968223d606cfd428131d1db356c88e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-29e28499",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/oxymotion.json",
+        "up",
+        "-d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "2c1a91bb6f3c82736e030278292ead346faed54619f3b4785a6cb3fa0bbed202"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-29e28499",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/oxymotion.json",
+        "ps",
+        "-q",
+        "client"
+      ],
+      "exit": 0,
+      "stdout_sha256": "63b99c2b6a0d038fc16a006af498bbaa92b740f69be354fbbb744b008673f5d1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "660f1906086bd75c4d0931c5109d8f596be88333dad08032083d3473911f3efc"
+      ],
+      "exit": 0,
+      "stdout_sha256": "5283b8ec330156ef6000654be4ca48fd121346b9e4b26df6aab7f58a3467b3bf",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "660f1906086bd75c4d0931c5109d8f596be88333dad08032083d3473911f3efc",
+        "python3",
+        "-c",
+        "import socket,json;print(json.dumps({'address':socket.gethostbyname('mail.oxymot.fr')}))"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fe2160ac34133dd480df12adbd9e59769a9d9017731eaee741a8aa4f1855a662",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6a62a7c4c33fc83f518993bba6f6da59d36d8a40564fd90a1bb8d8626ee5661f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "660f1906086bd75c4d0931c5109d8f596be88333dad08032083d3473911f3efc",
+        "python3",
+        "/lab/private-probe.py",
+        "10.243.47.254",
+        "allowed",
+        "private-oxymotion-2dff3f2eb2d64366a59c395c8d1b6b25"
+      ],
+      "exit": 0,
+      "stdout_sha256": "14bb41fd4e2c96dd6094d4455fa76823f811f0b1d2d9967cf360ffcb121b2fd7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d26bf7c14d4951fb966ff73340b004e61021d8453ec43e659459ff41496e6bb9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/client.py",
+        "imap",
+        "contact@oxymot.fr",
+        "private-oxymotion-2dff3f2eb2d64366a59c395c8d1b6b25"
+      ],
+      "exit": 0,
+      "stdout_sha256": "0543c4252f9aac3c0388bd3abc90c255d24028e13e35d552dc6f96393d99061d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-29e28499",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/oxymotion.json",
+        "down"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "45b301d618d7765b04506c46c8704eb72072fd28a861ace3d3a28d029482683e"
+    },
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/private-client.cjs",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "10.243.47.200"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d994d36908369654b7bd8c90825db9c2b83b244435591ea0f74975f27762edc2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-2160faa9",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/forbidden.json",
+        "up",
+        "-d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5ccaeed0fc80a6d7bfef8a25ee7595004eac3792f7527cf664273a6a2eb3f623"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-2160faa9",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/forbidden.json",
+        "ps",
+        "-q",
+        "client"
+      ],
+      "exit": 0,
+      "stdout_sha256": "2e46f6df94b768f84d46ab05aca558fc9068b94c760434f14d4f3358ac74a011",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "bcdf6308cc33a4cf009714bfdf809947393f47588981bac44a693f9e8453986a"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fdfbb98ac913c3a3b0f26700fc98d75e4710053863f00f97d1bdd0f03fbf243c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "bcdf6308cc33a4cf009714bfdf809947393f47588981bac44a693f9e8453986a",
+        "python3",
+        "-c",
+        "import socket,json;print(json.dumps({'address':socket.gethostbyname('mail.oxymot.fr')}))"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fe2160ac34133dd480df12adbd9e59769a9d9017731eaee741a8aa4f1855a662",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d26bf7c14d4951fb966ff73340b004e61021d8453ec43e659459ff41496e6bb9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "bcdf6308cc33a4cf009714bfdf809947393f47588981bac44a693f9e8453986a",
+        "python3",
+        "/lab/private-probe.py",
+        "10.243.47.254",
+        "forbidden",
+        "private-forbidden-69b9e47c5a1e463d9010b4593ab87e31"
+      ],
+      "exit": 0,
+      "stdout_sha256": "136af1a9fe5d29ad7e47293e1018f4133fe8c3837c0aee7dfee09dccbc010824",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7d080c07df116ec60bab80eaccb8f1a0c48e5d276a66f7147c4e695512cad936",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-2160faa9",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/forbidden.json",
+        "down"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "02f8603ccac8a76946f6f8bcef61068e9e878200c864ca1c0d6453327888461c"
+    },
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/private-client.cjs",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "10.243.47.201"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f4fb051ace6bfbd7b0ba1dffe98e4c48f024cf0206914bcfcbaeae99d3535922",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-7909438e",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/unattached.json",
+        "up",
+        "-d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "35efb558dc2967c36e70dcdc9721aec74b6c2aaf4fba354ae035fd19f572a51a"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-7909438e",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/unattached.json",
+        "ps",
+        "-q",
+        "client"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b16d235cfc68c68f8dca3c320a06976971281836a5f63f13579bc64ca662f582",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "1e26b44b963b3b76d61325e712db41f161ab9115beee6c51832a5bf67f805258"
+      ],
+      "exit": 0,
+      "stdout_sha256": "bdac71c6da6a6b406943c882107460980fd1b900784c75285c4aa0098b8e01bf",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7d080c07df116ec60bab80eaccb8f1a0c48e5d276a66f7147c4e695512cad936",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "1e26b44b963b3b76d61325e712db41f161ab9115beee6c51832a5bf67f805258",
+        "python3",
+        "/lab/private-probe.py",
+        "10.243.47.1",
+        "forbidden",
+        "private-unattached-395dac03edcb4060a2ad99120080be31"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e197e8e3e77b5867b1f3933cbcbaad211782e6005b57cf2e7a1607bfb6aca7be",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9922f4765c208b5ab749d9c731fef5544a3e3f19b0edbf499f5a7ac07327a567",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-client-7909438e",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/private-clients-8c443340e7a749e1af79389d5b5479ec/unattached.json",
+        "down"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "130aab78865c027c3148f09c2f900926207a9d03c367b8710460b2f5872eb9c9"
+    },
+    {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "mail02-profile-41dd8c8f-edge"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b0e5e85f4007e1818978f02d8323c9b05dc6b4a058727878b344e4a36806dabc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "ps",
+        "-q",
+        "--filter",
+        "label=com.docker.compose.project=mail02-profile-41dd8c8f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cfc9ae2010a8fd95af9b9fed7d1151c0e3a838296fb30324ba25f8a40b410e1c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "mail02-profile-41dd8c8f-postfix-1"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ffb8ff2d450ab1beb90729587202d20513cfb9c6bd9ab25d13ef6e91220fce16",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "cat",
+        "/proc/1/status"
+      ],
+      "exit": 0,
+      "stdout_sha256": "689ef0baa7c78a4e76726709bb9491e1b6a4d726a427ef15bfb5e886054cbc82",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "nft",
+        "-j",
+        "list",
+        "table",
+        "inet",
+        "drumee_mail_private"
+      ],
+      "exit": 0,
+      "stdout_sha256": "dfd67a9a7ad1b0ad7257e3dc688f4840c3b4ef7ef3820cd21211dc7fcbf29e79",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

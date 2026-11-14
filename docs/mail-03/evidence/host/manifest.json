@@ -1,0 +1,24 @@
+{
+  "contract": "drumee.mail03-public-evidence/1",
+  "synthetic_data_only": true,
+  "secrets_or_verifiers_matched": 0,
+  "protected_literals_tested": 146,
+  "files": {
+    "atomic-quota-result.json": "3a9fc6755799e6e7b47129e779687c1b476f95766dadd37651c78c361e0402c1",
+    "held-quota-result.json": "23f3503fd8690791f2bae2caab6ef1f1f4913239edaa82880be5786678592a48",
+    "identity-result.json": "22946275a457e4fb5de582149867cb12f5231dc14f4b427e310a2cb461ad13a6",
+    "mail03-accounts-result.json": "cabe29b59bacf72f93caca0b04060dc57764ffe03a837de08bf0c896e34e50cb",
+    "mail03-admin-result.json": "304b58d44e85a61e10c5c522c3baf6173e571537b4a2da0c885591428f45325f",
+    "mail03-cutpoints-result.json": "161fdf1bcd4e7c74161bb64a6a237f1b24ff13e59c4cbf68af47d0a9851aa91a",
+    "mail03-errors-result.json": "e02f7146adc6dad2d7489fc1906de60099cbaf3ae88a5cd799d4d89013902c4a",
+    "mail03-final-replay.json": "f2754944c6788b7da3de4e6e59cfd71ad373509a18de1a4d100c1ba6310c9ffd",
+    "mail03-purge-interruption-result.json": "43954787ff075e7f700df68073344de703ac44a2469b6b10430138e13e325fb0",
+    "mail03-purge-result.json": "4a078adbdfd48f12cfa604d3427230a15730eed922ee3d944ca481342ec2b560",
+    "mail03-quota-guards-result.json": "bb6bb52218da42d2f5b4709332ddb76b67813ac7e1f7d052621649c53f2d5e56",
+    "mail03-quota-result.json": "1267de160f67ab56dd19320099d529898063af4498a78c0a09e0c86e19e54fdd",
+    "mail03-rights-result.json": "3ab141ce342de0ca553c4a6e35a18fccf39ef3004ef0d64308d1889f0c4d37e2",
+    "mail03-session-result.json": "8f64e2f8741f35f99a2850bf0a0dafda255f3fe27d11554fa1f23c0a612407b3",
+    "mail03-tty-result.json": "3eab927337e5835d80aa684ae299c7932aa045f4aa168e6e62aa905ce57ace97",
+    "mail03-tx-result.json": "6ed2655cd65d2d4b8fdbafb6db1f1987342f0f31d48d247838ae31192ac20aa6"
+  }
+}

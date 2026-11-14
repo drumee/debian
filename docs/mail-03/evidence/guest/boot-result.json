@@ -1,0 +1,151 @@
+{
+  "status": "PASS_GUARDED_GUEST_REBOOT",
+  "checks": [
+    "guest-boot-id-changed",
+    "mail-owned-systemd-preflight-before-start",
+    "nonempty-local-queue-delivered-on-existing-storage",
+    "old-maildir-content-retained",
+    "registry-secrets-runtime-preflight"
+  ],
+  "before_queue_ids": [
+    "0AA3549BCF"
+  ],
+  "queued_message_imap_matches": 1,
+  "commands": [
+    {
+      "argv": [
+        "sudo",
+        "systemctl",
+        "is-active",
+        "mail02-profile-41dd8c8f.service"
+      ],
+      "exit": 0,
+      "stdout_sha256": "45df5ad5e0ecfa54d3226343e0e6857337494ba6e32f189d1174070665d8c659",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "preflight",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "05721705c01f7482a39f54f6f6c37e0c1543b627a503ec60253f7459e81efcff",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-profile-41dd8c8f",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/service/candidates/bd3a10e3e34000ed28efef0c194f399f7a8383d20a7597d06afbaf5b82de1ee7/compose.json",
+        "exec",
+        "-T",
+        "postfix",
+        "postqueue",
+        "-c",
+        "/config",
+        "-f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/client.py",
+        "imap",
+        "contact@oxymot.fr",
+        "boot-1383a0eb3e4343ff95c589082ef283ce-queued"
+      ],
+      "exit": 0,
+      "stdout_sha256": "3bd0c37a5a662b812082ddc25fc24f59cabe81134ece668442c7ef0b3557a856",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/client.py",
+        "imap",
+        "contact@oxymot.fr",
+        "boot-1383a0eb3e4343ff95c589082ef283ce-delivered"
+      ],
+      "exit": 0,
+      "stdout_sha256": "98e2b285fa1cafabba798a97a1340ed9eef1703e7df27884412f5959a5a4b582",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/service/durable/mailboxes,target=/data,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "-c",
+        "import pathlib,hashlib,json; r=pathlib.Path('/data'); print(json.dumps({str(p.relative_to(r)):hashlib.sha256(p.read_bytes()).hexdigest() for p in r.rglob('*') if p.is_file() and p.parent.name in ('cur','new')}))"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ed0bf0ff5a3c62a1d1152705b1b8a5aa2b1e5931344977f4a3fda9b3a641a1af",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-profile-41dd8c8f",
+        "-f",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/service/candidates/bd3a10e3e34000ed28efef0c194f399f7a8383d20a7597d06afbaf5b82de1ee7/compose.json",
+        "exec",
+        "-T",
+        "postfix",
+        "postqueue",
+        "-c",
+        "/config",
+        "-j"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

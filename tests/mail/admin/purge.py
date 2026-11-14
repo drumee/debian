@@ -1,0 +1,22 @@
+"""Guarded explicit purge on an independently copied, quiesced lab mailbox."""
+from common import *
+user='purge-'+uuid.uuid4().hex[:8]+'@oxymot.fr';passwords[user]='Purge-'+uuid.uuid4().hex;box=cli('mailbox','create',user,password=passwords[user],mutate=True)['data'];id=box['id'];tag='purge-retained-'+uuid.uuid4().hex;assert probe(action='send',recipient=user,tag=tag)['data_code']==250;wait_read(user,tag);cli('mailbox','delete',id,mutate=True)
+def lifecycle(verb):
+ r=run(['bash',str(repo/'bin/drumee-ctl'),'--profile','mail',verb,'--execute','--config',str(cfg)]);assert r.returncode==0,(verb,r.stdout.decode()[-300:])
+request=str(uuid.uuid4());opts=['--confirm-mailbox',id,'--backup-id','synthetic-retained']
+cli('mailbox','purge',id,opts=opts,request=request,expected='MAIL_PURGE_REFERENCED',mutate=True)
+lifecycle('stop');cli('mailbox','purge',id,opts=opts,request=request,expected='MAIL_NOT_FOUND',mutate=True)
+service=json.loads(cfg.read_text())['service'];backups=pathlib.Path(service['deployment']['backup_root']);backups.mkdir(mode=0o700,exist_ok=True)
+owner={'contract':'drumee.mail-backup-owner/1','service_id':service['deployment']['id'],'uid':os.getuid(),'gid':os.getgid()};(backups/'owner.json').write_text(json.dumps(owner));(backups/'owner.json').chmod(0o600)
+for directory in [backups/'mailboxes',backups/'mailboxes'/id,backups/'mailboxes'/id/'synthetic-retained']:directory.mkdir(mode=0o700,exist_ok=True)
+catalog=backups/'mailboxes'/id/'synthetic-retained';mailbox=root/'service/durable/mailboxes'/id
+r=run(['docker','run','--rm','--network','none','--read-only','--mount',f'type=bind,source={mailbox},target=/source,readonly','--mount',f'type=bind,source={catalog},target=/backup','--entrypoint','/bin/cp','sha256:ab41ba434fa20afd54f71f43fc31ad2aaa94260193a4e9b56cc0e5c971fb1a56','-a','/source','/backup/data']);assert r.returncode==0
+module=repo/'profiles/mail/.cache/consumer/node_modules/@drumee/infra-layer/capabilities/mail-service/purge.js';r=run(['node','-e','process.stdout.write(require(process.argv[1]).inventory.toString())',str(module)]);assert r.returncode==0;inventory_code='const inventory='+r.stdout.decode()+';console.log(JSON.stringify(inventory("/data")));'
+def inventory(path):
+ r=run(['docker','run','--rm','--network','none','--read-only','--mount',f'type=bind,source={path},target=/data,readonly','--entrypoint','node',p['compose']['services']['policy']['image'],'-e',inventory_code]);assert r.returncode==0;return json.loads(r.stdout)
+snapshot=inventory(mailbox);assert snapshot==inventory(catalog/'data');manifest={'contract':'drumee.mailbox-purge-backup/1','mailbox_id':id,'backup_id':'synthetic-retained','service_id':service['deployment']['id'],'snapshot':snapshot};file=catalog/'manifest.json';file.write_text(json.dumps(manifest));file.chmod(0o600)
+# A mismatched manifest must not journal an operation or touch either copy.
+invalid=dict(manifest,mailbox_id=str(uuid.uuid4()));file.write_text(json.dumps(invalid));cli('mailbox','purge',id,opts=opts,request=request,expected='MAIL_INTEGRITY_FAILURE',mutate=True);assert inventory(mailbox)==snapshot;assert inventory(catalog/'data')==snapshot;check('purge-live-missing-and-altered-proof-refused-source-preserved',{'source_digest':hashlib.sha256(json.dumps(snapshot,sort_keys=True).encode()).hexdigest()});file.write_text(json.dumps(manifest))
+before=state['revision'];result=cli('mailbox','purge',id,opts=opts,request=request,mutate=True);assert result['data']['purged'] and result['data']['retained_identity'];after=inventory(mailbox);assert set(after)<=set(['','home','home/.drumee-quota.lock','Maildir','Maildir/cur','Maildir/new','Maildir/tmp']);assert inventory(catalog/'data')==snapshot;assert cli('mailbox','purge',id,opts=opts,request=request,revision=before,mutate=True)==result;assert cli('status')['data']['transport_running']==0;check('verified-explicit-purge-retains-backup-uuid-inodes-and-receipt',{'mailbox_id':id,'remaining_entries':sorted(after),'backup_unchanged':True,'service_left_stopped':True})
+lifecycle('start');assert not probe(action='imap',user=user)['ok'];assert probe(action='rcpt',recipient=user)['rcpt_code']==550
+result={'status':'PASS_MAIL03_NATIVE_PURGE','checks':checks,'commands':commands,'last_revision':state['revision']};(root/'mail03-purge-result.json').write_text(json.dumps(result,indent=2));print(json.dumps({'status':result['status'],'checks':len(checks)}))

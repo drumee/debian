@@ -1,0 +1,360 @@
+{
+  "status": "PASS_MAIL03_QUOTA_TRANSITION_GUARDS",
+  "checks": [
+    {
+      "name": "unowned-defer-setting-refused-without-overwrite-or-new-quota",
+      "status": "PASS",
+      "observation": {
+        "applied_revision": 221,
+        "code": "MAIL_APPLY_INCOMPLETE",
+        "contract": "drumee.mail-cli/1",
+        "data": {
+          "admission": "closed",
+          "pending_operation": "17b6bb65-318d-436c-9aef-d86718a4a90a",
+          "phase": "applying"
+        },
+        "desired_revision": 222,
+        "ok": false,
+        "operation_id": "17b6bb65-318d-436c-9aef-d86718a4a90a",
+        "retryable": true
+      }
+    },
+    {
+      "name": "unsafe-native-quota-lock-refused-and-left-unchanged",
+      "status": "PASS",
+      "observation": {
+        "result": {
+          "applied_revision": 222,
+          "code": "MAIL_APPLY_INCOMPLETE",
+          "contract": "drumee.mail-cli/1",
+          "data": {
+            "admission": "closed",
+            "pending_operation": "1585ceba-c782-48a6-9cc8-5a14856bdc67",
+            "phase": "applying"
+          },
+          "desired_revision": 223,
+          "ok": false,
+          "operation_id": "1585ceba-c782-48a6-9cc8-5a14856bdc67",
+          "retryable": true
+        },
+        "lock": {
+          "ino": 28843622,
+          "uid": 5000,
+          "gid": 5000,
+          "mode": 420,
+          "size": 0,
+          "nlink": 1
+        }
+      }
+    },
+    {
+      "name": "same-intent-reconciliation-after-explicit-guard-repair",
+      "status": "PASS",
+      "observation": {
+        "applied_revision": 223,
+        "lock_inode_preserved": true
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "83d7148562a93266c0e26d6fa8f48c1ea58da6211c8148148672988c3b741c66",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "quota-guard-b3d0858a@oxymot.fr",
+        "--quota-bytes",
+        "2097152",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "220",
+        "--request-id",
+        "42d62d2b-01d7-4d0b-af92-26db0d4b0f3f",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d304f3396be1430ea282f177155601082711f0fd22f14bb18693945eb0c6408d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postconf",
+        "-c",
+        "/config",
+        "-h",
+        "defer_transports"
+      ],
+      "exit": 0,
+      "stdout_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postconf",
+        "-c",
+        "/config",
+        "-e",
+        "defer_transports=smtp"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "quota",
+        "quota-guard-b3d0858a@oxymot.fr",
+        "--bytes",
+        "1048576",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "221",
+        "--request-id",
+        "17b6bb65-318d-436c-9aef-d86718a4a90a"
+      ],
+      "exit": 7,
+      "stdout_sha256": "ddb3c9256e61628b43eb4519e22e07e214f0812761abd11470c2e97da83a267c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postconf",
+        "-c",
+        "/config",
+        "-h",
+        "defer_transports"
+      ],
+      "exit": 0,
+      "stdout_sha256": "74e7648eb32f4fc6e8bd6c4de4714b5a5825f7ae73d4ff0e32f5cdda45d0ab40",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postconf",
+        "-c",
+        "/config",
+        "-X",
+        "defer_transports"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d305f04bc87674b32cdc8d0907d4778f962349e243d633b649ef42b48d2ac341",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "5000:5000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges:true",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/service/durable/mailboxes/f2ab1de8-d661-4bc2-9320-fd24777244c1/home,target=/data",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const f=require('node:fs'),p='/data/.drumee-quota.lock';if(process.argv[1]==='bad')f.chmodSync(p,0o644);else if(process.argv[1]==='repair')f.chmodSync(p,0o600);const s=f.lstatSync(p);console.log(JSON.stringify({ino:s.ino,uid:s.uid,gid:s.gid,mode:s.mode&0o7777,size:s.size,nlink:s.nlink}));",
+        "bad"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fc1ac69ff2a70859f74117035fb938bc6187edc620a998293488681e0be612fb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "quota",
+        "quota-guard-b3d0858a@oxymot.fr",
+        "--bytes",
+        "2097152",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "222",
+        "--request-id",
+        "1585ceba-c782-48a6-9cc8-5a14856bdc67"
+      ],
+      "exit": 7,
+      "stdout_sha256": "ae9896f80597e183dba49fa1949f14a41ccea152ffa77a737782141a7f6e668f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "5000:5000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges:true",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/service/durable/mailboxes/f2ab1de8-d661-4bc2-9320-fd24777244c1/home,target=/data",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const f=require('node:fs'),p='/data/.drumee-quota.lock';if(process.argv[1]==='bad')f.chmodSync(p,0o644);else if(process.argv[1]==='repair')f.chmodSync(p,0o600);const s=f.lstatSync(p);console.log(JSON.stringify({ino:s.ino,uid:s.uid,gid:s.gid,mode:s.mode&0o7777,size:s.size,nlink:s.nlink}));",
+        "observe"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fc1ac69ff2a70859f74117035fb938bc6187edc620a998293488681e0be612fb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postconf",
+        "-c",
+        "/config",
+        "-h",
+        "defer_transports"
+      ],
+      "exit": 0,
+      "stdout_sha256": "4dc6408c681d22a3cafe4fe8d799b2ba01688ea111f76bf28b29063bde8d25a8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "5000:5000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges:true",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/service/durable/mailboxes/f2ab1de8-d661-4bc2-9320-fd24777244c1/home,target=/data",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const f=require('node:fs'),p='/data/.drumee-quota.lock';if(process.argv[1]==='bad')f.chmodSync(p,0o644);else if(process.argv[1]==='repair')f.chmodSync(p,0o600);const s=f.lstatSync(p);console.log(JSON.stringify({ino:s.ino,uid:s.uid,gid:s.gid,mode:s.mode&0o7777,size:s.size,nlink:s.nlink}));",
+        "repair"
+      ],
+      "exit": 0,
+      "stdout_sha256": "8e68ef57b0d014215f6b14ded43850283d03065b54d265f1c6cb6d98c5411e03",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6bc2e3fcb70795e57cad0eb392cd3a571ec65824455dc66f598296004fe97db9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postconf",
+        "-c",
+        "/config",
+        "-h",
+        "defer_transports"
+      ],
+      "exit": 0,
+      "stdout_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "last_revision": 223
+}

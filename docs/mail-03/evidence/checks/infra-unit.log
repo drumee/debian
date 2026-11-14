@@ -1,0 +1,2494 @@
+
+> @drumee/infra-layer@0.1.0-alpha.7-mail03.8 test
+> node --test test/unit/*.test.js
+
+TAP version 13
+# Subtest: application has one explicit loopback publication and no implicit infrastructure
+ok 1 - application has one explicit loopback publication and no implicit infrastructure
+  ---
+  duration_ms: 13.837301
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding 0.0.0.0
+ok 2 - application rejects noncanonical host binding 0.0.0.0
+  ---
+  duration_ms: 1.659084
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding ::
+ok 3 - application rejects noncanonical host binding ::
+  ---
+  duration_ms: 1.857779
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding ::1
+ok 4 - application rejects noncanonical host binding ::1
+  ---
+  duration_ms: 1.564984
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding 127.0.0.2
+ok 5 - application rejects noncanonical host binding 127.0.0.2
+  ---
+  duration_ms: 1.14819
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding 192.168.5.201
+ok 6 - application rejects noncanonical host binding 192.168.5.201
+  ---
+  duration_ms: 1.640907
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding localhost
+ok 7 - application rejects noncanonical host binding localhost
+  ---
+  duration_ms: 0.98037
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding ::ffff:127.0.0.1
+ok 8 - application rejects noncanonical host binding ::ffff:127.0.0.1
+  ---
+  duration_ms: 0.87089
+  type: 'test'
+  ...
+# Subtest: application rejects invalid ports, listener confusion, routes and hidden publications
+ok 9 - application rejects invalid ports, listener confusion, routes and hidden publications
+  ---
+  duration_ms: 51.549477
+  type: 'test'
+  ...
+# Subtest: application cannot borrow or relax legacy profile semantics
+ok 10 - application cannot borrow or relax legacy profile semantics
+  ---
+  duration_ms: 4.450116
+  type: 'test'
+  ...
+# Subtest: plugins are explicit immutable inventory without an alternate loader
+ok 11 - plugins are explicit immutable inventory without an alternate loader
+  ---
+  duration_ms: 5.787589
+  type: 'test'
+  ...
+# Subtest: application secrets select only declared references and retain consumer boundaries
+ok 12 - application secrets select only declared references and retain consumer boundaries
+  ---
+  duration_ms: 17.112339
+  type: 'test'
+  ...
+# Subtest: SMTP/DKIM compose unchanged, private and before an explicitly dependent application
+ok 13 - SMTP/DKIM compose unchanged, private and before an explicitly dependent application
+  ---
+  duration_ms: 85.969004
+  type: 'test'
+  ...
+# Subtest: application retains immutable image, resource, dependency and tamper guards
+ok 14 - application retains immutable image, resource, dependency and tamper guards
+  ---
+  duration_ms: 8.151322
+  type: 'test'
+  ...
+# (node:115888) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: application probe accepts health once and ignores a late error
+ok 15 - application probe accepts health once and ignores a late error
+  ---
+  duration_ms: 1.62689
+  type: 'test'
+  ...
+# Subtest: application probe rejects malformed, oversized and failed HTTP health
+ok 16 - application probe rejects malformed, oversized and failed HTTP health
+  ---
+  duration_ms: 1.189484
+  type: 'test'
+  ...
+# Subtest: application probe request/response errors stay failed after late success
+ok 17 - application probe request/response errors stay failed after late success
+  ---
+  duration_ms: 0.486381
+  type: 'test'
+  ...
+# Subtest: application probe timeout rejects once despite response and destroy errors
+ok 18 - application probe timeout rejects once despite response and destroy errors
+  ---
+  duration_ms: 0.735498
+  type: 'test'
+  ...
+# Subtest: application probe is inapplicable without an external gateway
+ok 19 - application probe is inapplicable without an external gateway
+  ---
+  duration_ms: 0.489753
+  type: 'test'
+  ...
+# Subtest: application SMTP client enforces STARTTLS, CA and server identity before SASL
+ok 20 - application SMTP client enforces STARTTLS, CA and server identity before SASL
+  ---
+  duration_ms: 978.325265
+  type: 'test'
+  ...
+# Subtest: IL-5.8 preserves exact composition bytes and diagnostic precedence from de4b34e
+ok 21 - IL-5.8 preserves exact composition bytes and diagnostic precedence from de4b34e
+  ---
+  duration_ms: 85.939538
+  type: 'test'
+  ...
+# Subtest: pure composition snapshots are identical for different runner owner IDs
+ok 22 - pure composition snapshots are identical for different runner owner IDs
+  ---
+  duration_ms: 26.780163
+  type: 'test'
+  ...
+# Subtest: composition is pure/deterministic, preserves private networks and orders persistent services
+ok 23 - composition is pure/deterministic, preserves private networks and orders persistent services
+  ---
+  duration_ms: 46.998187
+  type: 'test'
+  ...
+# Subtest: tampered plans, unsupported contracts and missing kernel composition fail closed
+ok 24 - tampered plans, unsupported contracts and missing kernel composition fail closed
+  ---
+  duration_ms: 36.490986
+  type: 'test'
+  ...
+# Subtest: duplicate durable resources and arbitrary mounts are rejected
+ok 25 - duplicate durable resources and arbitrary mounts are rejected
+  ---
+  duration_ms: 6.225987
+  type: 'test'
+  ...
+# Subtest: untrusted distribution fields/credentials and accessor input cannot execute
+ok 26 - untrusted distribution fields/credentials and accessor input cannot execute
+  ---
+  duration_ms: 8.570301
+  type: 'test'
+  ...
+# Subtest: full supplied kernel composition orders engine health, completed jobs, kernel readiness then gateway
+ok 27 - full supplied kernel composition orders engine health, completed jobs, kernel readiness then gateway
+  ---
+  duration_ms: 33.51541
+  type: 'test'
+  ...
+# Subtest: separate control-plane services retain private health, ownership and secret boundaries
+ok 28 - separate control-plane services retain private health, ownership and secret boundaries
+  ---
+  duration_ms: 37.05011
+  type: 'test'
+  ...
+# Subtest: duplicate service, invalid secret consumer, listener mismatch and missing dependency fail closed
+ok 29 - duplicate service, invalid secret consumer, listener mismatch and missing dependency fail closed
+  ---
+  duration_ms: 79.182172
+  type: 'test'
+  ...
+# Subtest: resource input order cannot change composition identity or fail its own verification
+ok 30 - resource input order cannot change composition identity or fail its own verification
+  ---
+  duration_ms: 26.420876
+  type: 'test'
+  ...
+# Subtest: distribution SQL accounts use independent infrastructure-owned secret references
+ok 31 - distribution SQL accounts use independent infrastructure-owned secret references
+  ---
+  duration_ms: 28.582024
+  type: 'test'
+  ...
+# Subtest: database account identities, references, secret types and duplicate ownership fail closed
+ok 32 - database account identities, references, secret types and duplicate ownership fail closed
+  ---
+  duration_ms: 11.019131
+  type: 'test'
+  ...
+# Subtest: DNS lifecycle rejects injected zone data before any filesystem change
+ok 33 - DNS lifecycle rejects injected zone data before any filesystem change
+  ---
+  duration_ms: 8.137414
+  type: 'test'
+  ...
+# Subtest: authoritative config maps wildcard addresses to BIND ACL any and never enables recursion implicitly
+ok 34 - authoritative config maps wildcard addresses to BIND ACL any and never enables recursion implicitly
+  ---
+  duration_ms: 2.712171
+  type: 'test'
+  ...
+# Subtest: DNS none, supplied example.com, effective example.com
+ok 35 - DNS none, supplied example.com, effective example.com
+  ---
+  duration_ms: 8.433285
+  type: 'test'
+  ...
+# Subtest: DNS none, supplied null, effective undefined
+ok 36 - DNS none, supplied null, effective undefined
+  ---
+  duration_ms: 5.750342
+  type: 'test'
+  ...
+# Subtest: DNS local, supplied example.com, effective example.com
+ok 37 - DNS local, supplied example.com, effective example.com
+  ---
+  duration_ms: 1.267481
+  type: 'test'
+  ...
+# Subtest: DNS local, supplied null, effective drumee.lan
+ok 38 - DNS local, supplied null, effective drumee.lan
+  ---
+  duration_ms: 1.607574
+  type: 'test'
+  ...
+# Subtest: DNS localhost, supplied example.com, effective localhost
+ok 39 - DNS localhost, supplied example.com, effective localhost
+  ---
+  duration_ms: 1.059345
+  type: 'test'
+  ...
+# Subtest: DNS localhost, supplied null, effective localhost
+ok 40 - DNS localhost, supplied null, effective localhost
+  ---
+  duration_ms: 1.09531
+  type: 'test'
+  ...
+# Subtest: an enabled hostname-dependent gateway rejects DNS none without a domain
+ok 41 - an enabled hostname-dependent gateway rejects DNS none without a domain
+  ---
+  duration_ms: 0.492354
+  type: 'test'
+  ...
+# Subtest: DNS, contract, endpoint and internal prefix errors have stable codes
+ok 42 - DNS, contract, endpoint and internal prefix errors have stable codes
+  ---
+  duration_ms: 11.195457
+  type: 'test'
+  ...
+# Subtest: localhost forces loopback publication; local DNS is a future prerequisite only
+ok 43 - localhost forces loopback publication; local DNS is a future prerequisite only
+  ---
+  duration_ms: 3.456088
+  type: 'test'
+  ...
+# Subtest: observed occupied ports and duplicate overlapping bindings block applicability
+ok 44 - observed occupied ports and duplicate overlapping bindings block applicability
+  ---
+  duration_ms: 12.115021
+  type: 'test'
+  ...
+# Subtest: public filesystem views cannot contain or be inside protected storage
+ok 45 - public filesystem views cannot contain or be inside protected storage
+  ---
+  duration_ms: 0.789217
+  type: 'test'
+  ...
+# Subtest: inputs are normalized without mutation; reordered equivalent declarations have equal revisions and bytes
+ok 46 - inputs are normalized without mutation; reordered equivalent declarations have equal revisions and bytes
+  ---
+  duration_ms: 8.331432
+  type: 'test'
+  ...
+# Subtest: irrelevant supplied localhost domain never alters configuration revision
+ok 47 - irrelevant supplied localhost domain never alters configuration revision
+  ---
+  duration_ms: 1.847646
+  type: 'test'
+  ...
+# Subtest: planning has no filesystem/process/time/random dependencies
+ok 48 - planning has no filesystem/process/time/random dependencies
+  ---
+  duration_ms: 14.895341
+  type: 'test'
+  ...
+# Subtest: secrets and unknown observations are rejected without echoing their values
+ok 49 - secrets and unknown observations are rejected without echoing their values
+  ---
+  duration_ms: 0.796412
+  type: 'test'
+  ...
+# Subtest: accessors and cyclic input are rejected without executing getters
+ok 50 - accessors and cyclic input are rejected without executing getters
+  ---
+  duration_ms: 0.310671
+  type: 'test'
+  ...
+# Subtest: rendering is idempotent, preserves unrelated files and never activates
+ok 51 - rendering is idempotent, preserves unrelated files and never activates
+  ---
+  duration_ms: 59.028011
+  type: 'test'
+  ...
+# Subtest: render refuses unowned or edited destinations without truncating either file
+ok 52 - render refuses unowned or edited destinations without truncating either file
+  ---
+  duration_ms: 21.239311
+  type: 'test'
+  ...
+# Subtest: symlink output roots, artifact destinations, hardlinks and forged content are rejected
+ok 53 - symlink output roots, artifact destinations, hardlinks and forged content are rejected
+  ---
+  duration_ms: 17.995784
+  type: 'test'
+  ...
+# Subtest: state requires an observed functional probe and active revision, with no secret projection
+ok 54 - state requires an observed functional probe and active revision, with no secret projection
+  ---
+  duration_ms: 3.962091
+  type: 'test'
+  ...
+# Subtest: gateway descriptor is scoped, rootless, read-only and has no host networking
+ok 55 - gateway descriptor is scoped, rootless, read-only and has no host networking
+  ---
+  duration_ms: 1.050094
+  type: 'test'
+  ...
+# Subtest: TLS planning carries references only and rejects secret/public view overlap
+ok 56 - TLS planning carries references only and rejects secret/public view overlap
+  ---
+  duration_ms: 2.675856
+  type: 'test'
+  ...
+# Subtest: mount collisions and mixed external port authorities are explicitly unsupported
+ok 57 - mount collisions and mixed external port authorities are explicitly unsupported
+  ---
+  duration_ms: 0.740028
+  type: 'test'
+  ...
+# Subtest: atomic rendering rolls back owned files after a simulated rename failure
+ok 58 - atomic rendering rolls back owned files after a simulated rename failure
+  ---
+  duration_ms: 29.917327
+  type: 'test'
+  ...
+# Subtest: rendering cannot replace another instance's owned output
+ok 59 - rendering cannot replace another instance's owned output
+  ---
+  duration_ms: 13.055177
+  type: 'test'
+  ...
+# Subtest: malformed nested declarations return stable diagnostics instead of throwing
+ok 60 - malformed nested declarations return stable diagnostics instead of throwing
+  ---
+  duration_ms: 7.020706
+  type: 'test'
+  ...
+# Subtest: observer errors are diagnosed without leaking adapter error details
+ok 61 - observer errors are diagnosed without leaking adapter error details
+  ---
+  duration_ms: 0.945366
+  type: 'test'
+  ...
+# Subtest: A1-D1 pinned unchanged historical comparison accepts
+ok 62 - A1-D1 pinned unchanged historical comparison accepts
+  ---
+  duration_ms: 242.504688
+  type: 'test'
+  ...
+# Subtest: A1-D2 historical plus precisely approved additions accepts
+ok 63 - A1-D2 historical plus precisely approved additions accepts
+  ---
+  duration_ms: 60.119397
+  type: 'test'
+  ...
+# Subtest: A1-D3 single approved replacement subtree and additions accept
+ok 64 - A1-D3 single approved replacement subtree and additions accept
+  ---
+  duration_ms: 39.069689
+  type: 'test'
+  ...
+# Subtest: A1-D4 actual canonical Docker acceptance source passes the guard
+ok 65 - A1-D4 actual canonical Docker acceptance source passes the guard
+  ---
+  duration_ms: 48.512407
+  type: 'test'
+  ...
+# Subtest: A1-D5 removed historical assertion is refused
+ok 66 - A1-D5 removed historical assertion is refused
+  ---
+  duration_ms: 20.346489
+  type: 'test'
+  ...
+# Subtest: A1-D6 unauthorized expected-value change is refused
+ok 67 - A1-D6 unauthorized expected-value change is refused
+  ---
+  duration_ms: 14.836499
+  type: 'test'
+  ...
+# Subtest: A1-D7 reordered historical operations are refused
+ok 68 - A1-D7 reordered historical operations are refused
+  ---
+  duration_ms: 10.199469
+  type: 'test'
+  ...
+# Subtest: A1-D8 removed historical Docker invocation is refused
+ok 69 - A1-D8 removed historical Docker invocation is refused
+  ---
+  duration_ms: 12.795685
+  type: 'test'
+  ...
+# Subtest: A1-D9 modified historical Docker arguments are refused
+ok 70 - A1-D9 modified historical Docker arguments are refused
+  ---
+  duration_ms: 9.203613
+  type: 'test'
+  ...
+# Subtest: A1-D10 unapproved assertion insertion is refused
+ok 71 - A1-D10 unapproved assertion insertion is refused
+  ---
+  duration_ms: 12.693033
+  type: 'test'
+  ...
+# Subtest: A1-D11 unapproved Docker insertion is refused
+ok 72 - A1-D11 unapproved Docker insertion is refused
+  ---
+  duration_ms: 9.113926
+  type: 'test'
+  ...
+# Subtest: A1-D12 wrong replacement error code is refused
+ok 73 - A1-D12 wrong replacement error code is refused
+  ---
+  duration_ms: 6.903268
+  type: 'test'
+  ...
+# Subtest: A1-D13 replacement in another phase is refused
+ok 74 - A1-D13 replacement in another phase is refused
+  ---
+  duration_ms: 7.632097
+  type: 'test'
+  ...
+# Subtest: A1-D14 second historical assertion replacement is refused
+ok 75 - A1-D14 second historical assertion replacement is refused
+  ---
+  duration_ms: 7.80185
+  type: 'test'
+  ...
+# Subtest: A1-D15 missing authorized replacement is refused for final candidate
+ok 76 - A1-D15 missing authorized replacement is refused for final candidate
+  ---
+  duration_ms: 10.326983
+  type: 'test'
+  ...
+# Subtest: A1-D16 duplicate use of replacement authorization is refused
+ok 77 - A1-D16 duplicate use of replacement authorization is refused
+  ---
+  duration_ms: 7.936471
+  type: 'test'
+  ...
+# Subtest: A1-D17 approved addition cannot compensate for historical deletion
+ok 78 - A1-D17 approved addition cannot compensate for historical deletion
+  ---
+  duration_ms: 7.487253
+  type: 'test'
+  ...
+# Subtest: A1-D18 unexpected nested protected call changes are refused
+ok 79 - A1-D18 unexpected nested protected call changes are refused
+  ---
+  duration_ms: 4.913682
+  type: 'test'
+  ...
+# Subtest: A1-D19 removing one duplicate historical occurrence is refused
+ok 80 - A1-D19 removing one duplicate historical occurrence is refused
+  ---
+  duration_ms: 11.521581
+  type: 'test'
+  ...
+# Subtest: A1-D20 moving historical assertion to unrelated function is refused
+ok 81 - A1-D20 moving historical assertion to unrelated function is refused
+  ---
+  duration_ms: 6.843687
+  type: 'test'
+  ...
+# Subtest: additional historical spawn-removal and assertion-operator mutations are refused
+ok 82 - additional historical spawn-removal and assertion-operator mutations are refused
+  ---
+  duration_ms: 20.633184
+  type: 'test'
+  ...
+# Subtest: historical bytes cannot be replaced and diagnostics stay bounded
+ok 83 - historical bytes cannot be replaced and diagnostics stay bounded
+  ---
+  duration_ms: 5.788053
+  type: 'test'
+  ...
+# Subtest: A2 exact independent short-circuit mutations are rejected for all three assertion categories
+ok 84 - A2 exact independent short-circuit mutations are rejected for all three assertion categories
+  ---
+  duration_ms: 279.166867
+  type: 'test'
+  ...
+# Subtest: A2-D1 unchanged historical source is accepted in explicit historical mode
+ok 85 - A2-D1 unchanged historical source is accepted in explicit historical mode
+  ---
+  duration_ms: 50.05287
+  type: 'test'
+  ...
+# Subtest: A2-D2 closed addition-only source is accepted in its mode
+ok 86 - A2-D2 closed addition-only source is accepted in its mode
+  ---
+  duration_ms: 37.424279
+  type: 'test'
+  ...
+# Subtest: A2-D3 exact authorized A1 replacement is accepted once
+ok 87 - A2-D3 exact authorized A1 replacement is accepted once
+  ---
+  duration_ms: 37.641918
+  type: 'test'
+  ...
+# Subtest: A2-D4 false-and suppression is rejected
+ok 88 - A2-D4 false-and suppression is rejected
+  ---
+  duration_ms: 20.898691
+  type: 'test'
+  ...
+# Subtest: A2-D5 true-or suppression is rejected
+ok 89 - A2-D5 true-or suppression is rejected
+  ---
+  duration_ms: 23.31733
+  type: 'test'
+  ...
+# Subtest: A2-D6 dead conditional block is rejected
+ok 90 - A2-D6 dead conditional block is rejected
+  ---
+  duration_ms: 12.272601
+  type: 'test'
+  ...
+# Subtest: A2-D7 unexecuted ternary branch is rejected
+ok 91 - A2-D7 unexecuted ternary branch is rejected
+  ---
+  duration_ms: 22.665901
+  type: 'test'
+  ...
+# Subtest: A2-D8 early return before protected operation is rejected
+ok 92 - A2-D8 early return before protected operation is rejected
+  ---
+  duration_ms: 29.673464
+  type: 'test'
+  ...
+# Subtest: A2-D9 early throw before protected operation is rejected
+ok 93 - A2-D9 early throw before protected operation is rejected
+  ---
+  duration_ms: 15.040285
+  type: 'test'
+  ...
+# Subtest: A2-D10 protected operation moved into unused helper is rejected
+ok 94 - A2-D10 protected operation moved into unused helper is rejected
+  ---
+  duration_ms: 5.825006
+  type: 'test'
+  ...
+# Subtest: A2-D11 protected operation moved into unused callback is rejected
+ok 95 - A2-D11 protected operation moved into unused callback is rejected
+  ---
+  duration_ms: 5.235356
+  type: 'test'
+  ...
+# Subtest: A2-D12 discarded asynchronous invocation is rejected
+ok 96 - A2-D12 discarded asynchronous invocation is rejected
+  ---
+  duration_ms: 21.248947
+  type: 'test'
+  ...
+# Subtest: A2-D13 historical assertion deletion is rejected
+ok 97 - A2-D13 historical assertion deletion is rejected
+  ---
+  duration_ms: 12.912984
+  type: 'test'
+  ...
+# Subtest: A2-D14 unauthorized expected value change is rejected
+ok 98 - A2-D14 unauthorized expected value change is rejected
+  ---
+  duration_ms: 10.442774
+  type: 'test'
+  ...
+# Subtest: A2-D15 reordered historical operations are rejected
+ok 99 - A2-D15 reordered historical operations are rejected
+  ---
+  duration_ms: 9.621148
+  type: 'test'
+  ...
+# Subtest: A2-D16 unauthorized replacement is rejected
+ok 100 - A2-D16 unauthorized replacement is rejected
+  ---
+  duration_ms: 11.073954
+  type: 'test'
+  ...
+# Subtest: A2-D17 unapproved assertion is rejected
+ok 101 - A2-D17 unapproved assertion is rejected
+  ---
+  duration_ms: 13.20464
+  type: 'test'
+  ...
+# Subtest: A2-D18 unapproved Docker command is rejected
+ok 102 - A2-D18 unapproved Docker command is rejected
+  ---
+  duration_ms: 7.931213
+  type: 'test'
+  ...
+# Subtest: A2-D19 duplicate elsewhere cannot compensate for removed occurrence
+ok 103 - A2-D19 duplicate elsewhere cannot compensate for removed occurrence
+  ---
+  duration_ms: 7.310807
+  type: 'test'
+  ...
+# Subtest: A2-D20 changed enclosing conditional is rejected
+ok 104 - A2-D20 changed enclosing conditional is rejected
+  ---
+  duration_ms: 7.194699
+  type: 'test'
+  ...
+# Subtest: A2-D21 removing an invoked helper call is rejected
+ok 105 - A2-D21 removing an invoked helper call is rejected
+  ---
+  duration_ms: 23.542966
+  type: 'test'
+  ...
+# Subtest: A2-D22 approved addition relocated to unrelated context is rejected
+ok 106 - A2-D22 approved addition relocated to unrelated context is rejected
+  ---
+  duration_ms: 9.299332
+  type: 'test'
+  ...
+# Subtest: A2-D23 benign formatting outside protected calls preserves approved AST
+ok 107 - A2-D23 benign formatting outside protected calls preserves approved AST
+  ---
+  duration_ms: 24.592114
+  type: 'test'
+  ...
+# Subtest: A2-D24 actual unchanged canonical harness passes both barriers
+ok 108 - A2-D24 actual unchanged canonical harness passes both barriers
+  ---
+  duration_ms: 24.922237
+  type: 'test'
+  ...
+# Subtest: A2 fail-closed frame rejects changes to imports and function invocation ownership
+ok 109 - A2 fail-closed frame rejects changes to imports and function invocation ownership
+  ---
+  duration_ms: 33.569464
+  type: 'test'
+  ...
+# Subtest: hosted toolchain preparation refuses non-hosted execution before any mutation
+ok 110 - hosted toolchain preparation refuses non-hosted execution before any mutation
+  ---
+  duration_ms: 61.76407
+  type: 'test'
+  ...
+# Subtest: qualification ignores a hostile inherited PATH and fixes the child PATH
+ok 111 - qualification ignores a hostile inherited PATH and fixes the child PATH
+  ---
+  duration_ms: 8.034487
+  type: 'test'
+  ...
+# Subtest: qualification refuses an executable writable by another user
+ok 112 - qualification refuses an executable writable by another user
+  ---
+  duration_ms: 3.037885
+  type: 'test'
+  ...
+# Subtest: interruption reads only the private input for its own deployment
+ok 113 - interruption reads only the private input for its own deployment
+  ---
+  duration_ms: 2.165472
+  type: 'test'
+  ...
+# Subtest: interruption refuses symlink, hardlink, broad permissions and foreign root/project
+ok 114 - interruption refuses symlink, hardlink, broad permissions and foreign root/project
+  ---
+  duration_ms: 2.037682
+  type: 'test'
+  ...
+# Subtest: interruption refuses a FIFO without blocking and oversized input
+ok 115 - interruption refuses a FIFO without blocking and oversized input
+  ---
+  duration_ms: 11.823061
+  type: 'test'
+  ...
+# Subtest: pinned image validation preserves the supported reference and numeric suffix grammar
+ok 116 - pinned image validation preserves the supported reference and numeric suffix grammar
+  ---
+  duration_ms: 23.084426
+  type: 'test'
+  ...
+# Subtest: pinned images require the exact SHA256 digest and refuse control characters
+ok 117 - pinned images require the exact SHA256 digest and refuse control characters
+  ---
+  duration_ms: 11.63188
+  type: 'test'
+  ...
+# Subtest: malformed long image references cannot consume unbounded backtracking time
+ok 118 - malformed long image references cannot consume unbounded backtracking time
+  ---
+  duration_ms: 72.564265
+  type: 'test'
+  ...
+# Subtest: long valid image references remain accepted without adding a new size contract
+ok 119 - long valid image references remain accepted without adding a new size contract
+  ---
+  duration_ms: 3.804315
+  type: 'test'
+  ...
+# Subtest: durable journal chains phases and refuses sensitive arbitrary details
+ok 120 - durable journal chains phases and refuses sensitive arbitrary details
+  ---
+  duration_ms: 24.43455
+  type: 'test'
+  ...
+# Subtest: edited, missing or out-of-order journal entries fail closed
+ok 121 - edited, missing or out-of-order journal entries fail closed
+  ---
+  duration_ms: 7.968002
+  type: 'test'
+  ...
+# Subtest: lifecycle writers reject concurrent and stale locks without taking over
+ok 122 - lifecycle writers reject concurrent and stale locks without taking over
+  ---
+  duration_ms: 4.253731
+  type: 'test'
+  ...
+# Subtest: corrupt renewal schedule and arbitrary provider errors never expose values
+ok 123 - corrupt renewal schedule and arbitrary provider errors never expose values
+  ---
+  duration_ms: 1.273821
+  type: 'test'
+  ...
+# Subtest: configuration/image/schema/volume/secret changes have explicit compatibility classifications
+ok 124 - configuration/image/schema/volume/secret changes have explicit compatibility classifications
+  ---
+  duration_ms: 1.319186
+  type: 'test'
+  ...
+# Subtest: corrupt active pointer is rejected before any daemon request
+ok 125 - corrupt active pointer is rejected before any daemon request
+  ---
+  duration_ms: 1.165953
+  type: 'test'
+  ...
+# Subtest: active pointer parse failures retain the explicit corruption refusal
+ok 126 - active pointer parse failures retain the explicit corruption refusal
+  ---
+  duration_ms: 1.248179
+  type: 'test'
+  ...
+# Subtest: filesystem helpers reject a replaced symlink mount before invoking Docker
+ok 127 - filesystem helpers reject a replaced symlink mount before invoking Docker
+  ---
+  duration_ms: 0.931531
+  type: 'test'
+  ...
+# Subtest: a corrupted pre-existing rotation generation cannot be committed over a valid canonical secret
+ok 128 - a corrupted pre-existing rotation generation cannot be committed over a valid canonical secret
+  ---
+  duration_ms: 51.931574
+  type: 'test'
+  ...
+# Subtest: ordinal comparator preserves historical string ordering and duplicates
+ok 129 - ordinal comparator preserves historical string ordering and duplicates
+  ---
+  duration_ms: 2.19863
+  type: 'test'
+  ...
+# Subtest: preparation accepts reordered exact registry keys and refuses extra, missing and duplicate records
+ok 130 - preparation accepts reordered exact registry keys and refuses extra, missing and duplicate records
+  ---
+  duration_ms: 100.96176
+  type: 'test'
+  ...
+# Subtest: observed exposure comparison preserves order independence and binding multiplicity
+ok 131 - observed exposure comparison preserves order independence and binding multiplicity
+  ---
+  duration_ms: 0.951157
+  type: 'test'
+  ...
+# Subtest: command rejects NUL with its existing diagnostic
+ok 132 - command rejects NUL with its existing diagnostic
+  ---
+  duration_ms: 1.208827
+  type: 'test'
+  ...
+# Subtest: command rejects CR with its existing diagnostic
+ok 133 - command rejects CR with its existing diagnostic
+  ---
+  duration_ms: 0.936896
+  type: 'test'
+  ...
+# Subtest: command rejects LF with its existing diagnostic
+ok 134 - command rejects LF with its existing diagnostic
+  ---
+  duration_ms: 1.02413
+  type: 'test'
+  ...
+# Subtest: command retains accepted empty strings and other control characters
+ok 135 - command retains accepted empty strings and other control characters
+  ---
+  duration_ms: 16.629735
+  type: 'test'
+  ...
+# Subtest: entrypoint rejects NUL with its existing diagnostic
+ok 136 - entrypoint rejects NUL with its existing diagnostic
+  ---
+  duration_ms: 1.02708
+  type: 'test'
+  ...
+# Subtest: entrypoint rejects CR with its existing diagnostic
+ok 137 - entrypoint rejects CR with its existing diagnostic
+  ---
+  duration_ms: 1.153348
+  type: 'test'
+  ...
+# Subtest: entrypoint rejects LF with its existing diagnostic
+ok 138 - entrypoint rejects LF with its existing diagnostic
+  ---
+  duration_ms: 1.217628
+  type: 'test'
+  ...
+# Subtest: entrypoint retains accepted empty strings and other control characters
+ok 139 - entrypoint retains accepted empty strings and other control characters
+  ---
+  duration_ms: 3.818847
+  type: 'test'
+  ...
+# Subtest: readiness rejects NUL with its existing diagnostic
+ok 140 - readiness rejects NUL with its existing diagnostic
+  ---
+  duration_ms: 0.885046
+  type: 'test'
+  ...
+# Subtest: readiness rejects CR with its existing diagnostic
+ok 141 - readiness rejects CR with its existing diagnostic
+  ---
+  duration_ms: 0.783204
+  type: 'test'
+  ...
+# Subtest: readiness rejects LF with its existing diagnostic
+ok 142 - readiness rejects LF with its existing diagnostic
+  ---
+  duration_ms: 1.378847
+  type: 'test'
+  ...
+# Subtest: readiness retains accepted empty strings and other control characters
+ok 143 - readiness retains accepted empty strings and other control characters
+  ---
+  duration_ms: 3.497349
+  type: 'test'
+  ...
+# Subtest: environment rejects NUL with its existing diagnostic
+ok 144 - environment rejects NUL with its existing diagnostic
+  ---
+  duration_ms: 0.980316
+  type: 'test'
+  ...
+# Subtest: environment rejects CR with its existing diagnostic
+ok 145 - environment rejects CR with its existing diagnostic
+  ---
+  duration_ms: 0.850195
+  type: 'test'
+  ...
+# Subtest: environment rejects LF with its existing diagnostic
+ok 146 - environment rejects LF with its existing diagnostic
+  ---
+  duration_ms: 0.714558
+  type: 'test'
+  ...
+# Subtest: environment retains accepted empty strings and other control characters
+ok 147 - environment retains accepted empty strings and other control characters
+  ---
+  duration_ms: 3.672553
+  type: 'test'
+  ...
+# Subtest: mail lock is exclusive, preserves its inode and is released on process death
+ok 148 - mail lock is exclusive, preserves its inode and is released on process death
+  ---
+  duration_ms: 73.128181
+  type: 'test'
+  ...
+# Subtest: mail lock refuses a linked or unsafe lock without touching its target
+ok 149 - mail lock refuses a linked or unsafe lock without touching its target
+  ---
+  duration_ms: 2.086
+  type: 'test'
+  ...
+# Subtest: MAIL-01 structural/semantic examples retain their explicit acceptance boundaries
+ok 150 - MAIL-01 structural/semantic examples retain their explicit acceptance boundaries
+  ---
+  duration_ms: 10.707166
+  type: 'test'
+  ...
+# Subtest: Mail plan defaults, isolated composition, tamper and registry guards
+ok 151 - Mail plan defaults, isolated composition, tamper and registry guards
+  ---
+  duration_ms: 10.842233
+  type: 'test'
+  ...
+# Subtest: Originating author parser and Authentication-Results identity boundaries
+ok 152 - Originating author parser and Authentication-Results identity boundaries
+  ---
+  duration_ms: 2.104513
+  type: 'test'
+  ...
+# Subtest: Private acceptance uses canonical routing and an exact source packet filter before capability drop
+ok 153 - Private acceptance uses canonical routing and an exact source packet filter before capability drop
+  ---
+  duration_ms: 3.910977
+  type: 'test'
+  ...
+# Subtest: Declared DNS resolvers are sealed compose inputs rather than a runtime override
+ok 154 - Declared DNS resolvers are sealed compose inputs rather than a runtime override
+  ---
+  duration_ms: 10.73921
+  type: 'test'
+  ...
+# Subtest: mail verifiers require the qualified Argon2id format and parameters
+ok 155 - mail verifiers require the qualified Argon2id format and parameters
+  ---
+  duration_ms: 6.149909
+  type: 'test'
+  ...
+# Subtest: E1 normal attachment uses actual container ID and verifies endpoint/network relationship
+ok 156 - E1 normal attachment uses actual container ID and verifies endpoint/network relationship
+  ---
+  duration_ms: 17.21935
+  type: 'test'
+  ...
+# Subtest: E2 sandbox-less metadata is preserved as unsettled and never inspected as a container
+ok 157 - E2 sandbox-less metadata is preserved as unsettled and never inspected as a container
+  ---
+  duration_ms: 16.765715
+  type: 'test'
+  ...
+# Subtest: E3 missing referenced container remains a failure with original nonzero status
+ok 158 - E3 missing referenced container remains a failure with original nonzero status
+  ---
+  duration_ms: 3.462058
+  type: 'test'
+  ...
+# Subtest: E4 endpoint outside the declared namespace is explicitly unexpected
+ok 159 - E4 endpoint outside the declared namespace is explicitly unexpected
+  ---
+  duration_ms: 1.778819
+  type: 'test'
+  ...
+# Subtest: E5 unsettled endpoint cannot mask a foreign container or network
+ok 160 - E5 unsettled endpoint cannot mask a foreign container or network
+  ---
+  duration_ms: 4.181414
+  type: 'test'
+  ...
+# Subtest: E6 malformed endpoint metadata and inconsistent keys fail explicitly
+ok 161 - E6 malformed endpoint metadata and inconsistent keys fail explicitly
+  ---
+  duration_ms: 7.173304
+  type: 'test'
+  ...
+# Subtest: E7 genuine Docker failure escapes once without exposing raw diagnostics
+ok 162 - E7 genuine Docker failure escapes once without exposing raw diagnostics
+  ---
+  duration_ms: 1.677042
+  type: 'test'
+  ...
+# Subtest: E8/E11 required network absence fails; explicit creation/cleanup absence is permitted
+ok 163 - E8/E11 required network absence fails; explicit creation/cleanup absence is permitted
+  ---
+  duration_ms: 6.020767
+  type: 'test'
+  ...
+# Subtest: network object identity, isolation and actual membership cannot be substituted
+ok 164 - network object identity, isolation and actual membership cannot be substituted
+  ---
+  duration_ms: 18.182258
+  type: 'test'
+  ...
+# Subtest: E12 stale container identity and invalid object keys are rejected without fallback
+ok 165 - E12 stale container identity and invalid object keys are rejected without fallback
+  ---
+  duration_ms: 4.149639
+  type: 'test'
+  ...
+# Subtest: E9/E10 bounded readiness re-observes only unsettled metadata then validates resolution
+ok 166 - E9/E10 bounded readiness re-observes only unsettled metadata then validates resolution
+  ---
+  duration_ms: 6.624345
+  type: 'test'
+  ...
+# Subtest: unsettled deadline refuses permanently unresolved attachment and retains metadata
+ok 167 - unsettled deadline refuses permanently unresolved attachment and retains metadata
+  ---
+  duration_ms: 1.054455
+  type: 'test'
+  ...
+# Subtest: readiness never retries command failures, missing objects or ownership refusals
+ok 168 - readiness never retries command failures, missing objects or ownership refusals
+  ---
+  duration_ms: 0.563086
+  type: 'test'
+  ...
+# Subtest: secure loader loads only the actual canonical module and restores builtin/cache state
+ok 169 - secure loader loads only the actual canonical module and restores builtin/cache state
+  ---
+  duration_ms: 6.865644
+  type: 'test'
+  ...
+# Subtest: source strings, filenames, alternate source and invalid executors fail before substitution
+ok 170 - source strings, filenames, alternate source and invalid executors fail before substitution
+  ---
+  duration_ms: 0.719362
+  type: 'test'
+  ...
+# Subtest: separate module instances retain only their own command fixture and never fall back
+ok 171 - separate module instances retain only their own command fixture and never fall back
+  ---
+  duration_ms: 8.818875
+  type: 'test'
+  ...
+# Subtest: historical regression pins real alpha.3 source and fixture without executing either
+ok 172 - historical regression pins real alpha.3 source and fixture without executing either
+  ---
+  duration_ms: 56.77102
+  type: 'test'
+  ...
+# Subtest: historical source/fixture bytes and metadata reject substitution before parsing
+ok 173 - historical source/fixture bytes and metadata reject substitution before parsing
+  ---
+  duration_ms: 4.403152
+  type: 'test'
+  ...
+# Subtest: historical CLI preserves the invalid-object negative proof and rejects extra input nonzero
+ok 174 - historical CLI preserves the invalid-object negative proof and rejects extra input nonzero
+  ---
+  duration_ms: 204.139509
+  type: 'test'
+  ...
+# Subtest: F1-D1 exact single-network membership passes actual checkNetworks
+ok 175 - F1-D1 exact single-network membership passes actual checkNetworks
+  ---
+  duration_ms: 50.199245
+  type: 'test'
+  ...
+# Subtest: F1-D2 extra undeclared network is a fatal non-transient mismatch
+ok 176 - F1-D2 extra undeclared network is a fatal non-transient mismatch
+  ---
+  duration_ms: 4.213531
+  type: 'test'
+  ...
+# Subtest: F1-D3 matching owner cannot authorize an extra network
+ok 177 - F1-D3 matching owner cannot authorize an extra network
+  ---
+  duration_ms: 3.737026
+  type: 'test'
+  ...
+# Subtest: F1-D4 array and object declarations preserve legitimate multihoming
+ok 178 - F1-D4 array and object declarations preserve legitimate multihoming
+  ---
+  duration_ms: 8.027742
+  type: 'test'
+  ...
+# Subtest: F1-D5 incomplete declared multihoming is rejected
+ok 179 - F1-D5 incomplete declared multihoming is rejected
+  ---
+  duration_ms: 2.826386
+  type: 'test'
+  ...
+# Subtest: F1-D6 project inventory detects entirely disconnected running and stopped containers
+ok 180 - F1-D6 project inventory detects entirely disconnected running and stopped containers
+  ---
+  duration_ms: 10.16936
+  type: 'test'
+  ...
+# Subtest: F1-D7 not-yet-created service and empty preparation preserve absence contract
+ok 181 - F1-D7 not-yet-created service and empty preparation preserve absence contract
+  ---
+  duration_ms: 7.380178
+  type: 'test'
+  ...
+# Subtest: F1-D8 network names cannot substitute a different ID
+ok 182 - F1-D8 network names cannot substitute a different ID
+  ---
+  duration_ms: 2.566211
+  type: 'test'
+  ...
+# Subtest: F1-D9 endpoint ID mismatch is rejected
+ok 183 - F1-D9 endpoint ID mismatch is rejected
+  ---
+  duration_ms: 3.05662
+  type: 'test'
+  ...
+# Subtest: F1-D10 inventoried foreign ownership and service/name substitution are refused
+ok 184 - F1-D10 inventoried foreign ownership and service/name substitution are refused
+  ---
+  duration_ms: 17.348058
+  type: 'test'
+  ...
+# Subtest: F1-D11 sandbox-less endpoint cannot mask extra connectivity
+ok 185 - F1-D11 sandbox-less endpoint cannot mask extra connectivity
+  ---
+  duration_ms: 4.238241
+  type: 'test'
+  ...
+# Subtest: F1-D12 Docker inventory/inspection errors remain fatal
+ok 186 - F1-D12 Docker inventory/inspection errors remain fatal
+  ---
+  duration_ms: 1.978138
+  type: 'test'
+  ...
+# Subtest: F1-D13 stopped configured membership and Redis-style fresh endpoint recovery pass
+ok 187 - F1-D13 stopped configured membership and Redis-style fresh endpoint recovery pass
+  ---
+  duration_ms: 3.036422
+  type: 'test'
+  ...
+# Subtest: F1-D14 disconnect is invalid and reconnection restores exact membership
+ok 188 - F1-D14 disconnect is invalid and reconnection restores exact membership
+  ---
+  duration_ms: 3.115774
+  type: 'test'
+  ...
+# Subtest: F1-D15 service-specific declarations cannot use the project-wide union
+ok 189 - F1-D15 service-specific declarations cannot use the project-wide union
+  ---
+  duration_ms: 3.367342
+  type: 'test'
+  ...
+# Subtest: F1-D16 aliases, duplicate identities and inconsistent reverse attachments fail closed
+ok 190 - F1-D16 aliases, duplicate identities and inconsistent reverse attachments fail closed
+  ---
+  duration_ms: 7.198726
+  type: 'test'
+  ...
+# Subtest: E1-D1 historical unknown service role is an interpretable membership mismatch
+ok 191 - E1-D1 historical unknown service role is an interpretable membership mismatch
+  ---
+  duration_ms: 1.752066
+  type: 'test'
+  ...
+# Subtest: E1-D2 malformed declaration or attachment remains invalid data
+ok 192 - E1-D2 malformed declaration or attachment remains invalid data
+  ---
+  duration_ms: 11.465751
+  type: 'test'
+  ...
+# Subtest: E1-D3 structurally valid wrong network identity remains a mismatch
+ok 193 - E1-D3 structurally valid wrong network identity remains a mismatch
+  ---
+  duration_ms: 1.743837
+  type: 'test'
+  ...
+# Subtest: E1-D4 structurally valid wrong endpoint identity remains a mismatch
+ok 194 - E1-D4 structurally valid wrong endpoint identity remains a mismatch
+  ---
+  duration_ms: 1.677946
+  type: 'test'
+  ...
+# Subtest: E1-D5 undeclared connectivity stays non-transient
+ok 195 - E1-D5 undeclared connectivity stays non-transient
+  ---
+  duration_ms: 1.676728
+  type: 'test'
+  ...
+# Subtest: E1-D6 missing required membership stays non-transient
+ok 196 - E1-D6 missing required membership stays non-transient
+  ---
+  duration_ms: 2.425753
+  type: 'test'
+  ...
+# Subtest: E1-D7 exact declared multihoming remains valid
+ok 197 - E1-D7 exact declared multihoming remains valid
+  ---
+  duration_ms: 1.838903
+  type: 'test'
+  ...
+# Subtest: E1-D8 synthetic endpoint cannot become an accepted container
+ok 198 - E1-D8 synthetic endpoint cannot become an accepted container
+  ---
+  duration_ms: 1.632958
+  type: 'test'
+  ...
+# Subtest: E1-D9 ownership remains distinct from membership mismatch
+ok 199 - E1-D9 ownership remains distinct from membership mismatch
+  ---
+  duration_ms: 1.590736
+  type: 'test'
+  ...
+# Subtest: E1-D10 Docker failures are never remapped as validation errors
+ok 200 - E1-D10 Docker failures are never remapped as validation errors
+  ---
+  duration_ms: 1.516887
+  type: 'test'
+  ...
+# Subtest: E1-D11 mixed malformed attachment and wrong membership use deterministic metadata-first precedence
+ok 201 - E1-D11 mixed malformed attachment and wrong membership use deterministic metadata-first precedence
+  ---
+  duration_ms: 3.044066
+  type: 'test'
+  ...
+# Subtest: E1-D12 valid ordinary lifecycle observation preserves success
+ok 202 - E1-D12 valid ordinary lifecycle observation preserves success
+  ---
+  duration_ms: 2.232213
+  type: 'test'
+  ...
+# Subtest: fixed network program treats malformed or code-shaped stdin as data
+ok 203 - fixed network program treats malformed or code-shaped stdin as data
+  ---
+  duration_ms: 153.384988
+  type: 'test'
+  ...
+# Subtest: fixed network program requires a positive control and rejects accessible application
+ok 204 - fixed network program requires a positive control and rejects accessible application
+  ---
+  duration_ms: 183.697676
+  type: 'test'
+  ...
+# Subtest: patched address parser preserves the intended recipient for all three advisories
+ok 205 - patched address parser preserves the intended recipient for all three advisories
+  ---
+  duration_ms: 5.465899
+  type: 'test'
+  ...
+# Subtest: message generation retains MIME and DKIM signing without exposing the key
+ok 206 - message generation retains MIME and DKIM signing without exposing the key
+  ---
+  duration_ms: 46.991668
+  type: 'test'
+  ...
+# Subtest: real STARTTLS, authentication, pooled reuse and recipient failures preserve results
+ok 207 - real STARTTLS, authentication, pooled reuse and recipient failures preserve results
+  ---
+  duration_ms: 547.02562
+  type: 'test'
+  ...
+# Subtest: greeting timeout remains an explicit failure and closes connection state
+ok 208 - greeting timeout remains an explicit failure and closes connection state
+  ---
+  duration_ms: 153.589867
+  type: 'test'
+  ...
+# Subtest: descriptor rejects external URL before Docker or network access
+ok 209 - descriptor rejects external URL before Docker or network access
+  ---
+  duration_ms: 19.758488
+  type: 'test'
+  ...
+# Subtest: descriptor rejects metadata address before Docker or network access
+ok 210 - descriptor rejects metadata address before Docker or network access
+  ---
+  duration_ms: 16.234497
+  type: 'test'
+  ...
+# Subtest: descriptor rejects wrong loopback port before Docker or network access
+ok 211 - descriptor rejects wrong loopback port before Docker or network access
+  ---
+  duration_ms: 2.995026
+  type: 'test'
+  ...
+# Subtest: descriptor rejects wrong Host before Docker or network access
+ok 212 - descriptor rejects wrong Host before Docker or network access
+  ---
+  duration_ms: 2.97842
+  type: 'test'
+  ...
+# Subtest: descriptor rejects URL credentials before Docker or network access
+ok 213 - descriptor rejects URL credentials before Docker or network access
+  ---
+  duration_ms: 6.623252
+  type: 'test'
+  ...
+# Subtest: descriptor rejects unexpected path/query before Docker or network access
+ok 214 - descriptor rejects unexpected path/query before Docker or network access
+  ---
+  duration_ms: 3.310276
+  type: 'test'
+  ...
+# Subtest: descriptor rejects encoded path before Docker or network access
+ok 215 - descriptor rejects encoded path before Docker or network access
+  ---
+  duration_ms: 3.966378
+  type: 'test'
+  ...
+# Subtest: descriptor rejects malformed URL before Docker or network access
+ok 216 - descriptor rejects malformed URL before Docker or network access
+  ---
+  duration_ms: 8.56522
+  type: 'test'
+  ...
+# Subtest: Docker container identity mismatch cannot start a network request
+ok 217 - Docker container identity mismatch cannot start a network request
+  ---
+  duration_ms: 15.374017
+  type: 'test'
+  ...
+# Subtest: Docker owner mismatch cannot start a network request
+ok 218 - Docker owner mismatch cannot start a network request
+  ---
+  duration_ms: 3.804977
+  type: 'test'
+  ...
+# Subtest: Docker missing owner mismatch cannot start a network request
+ok 219 - Docker missing owner mismatch cannot start a network request
+  ---
+  duration_ms: 3.562017
+  type: 'test'
+  ...
+# Subtest: Docker Compose project mismatch cannot start a network request
+ok 220 - Docker Compose project mismatch cannot start a network request
+  ---
+  duration_ms: 13.352635
+  type: 'test'
+  ...
+# Subtest: Docker gateway service mismatch cannot start a network request
+ok 221 - Docker gateway service mismatch cannot start a network request
+  ---
+  duration_ms: 3.204759
+  type: 'test'
+  ...
+# Subtest: Docker revision mismatch cannot start a network request
+ok 222 - Docker revision mismatch cannot start a network request
+  ---
+  duration_ms: 3.227078
+  type: 'test'
+  ...
+# Subtest: Docker published port mismatch cannot start a network request
+ok 223 - Docker published port mismatch cannot start a network request
+  ---
+  duration_ms: 3.098047
+  type: 'test'
+  ...
+# Subtest: Docker published address mismatch cannot start a network request
+ok 224 - Docker published address mismatch cannot start a network request
+  ---
+  duration_ms: 3.645002
+  type: 'test'
+  ...
+# Subtest: Docker extra publication mismatch cannot start a network request
+ok 225 - Docker extra publication mismatch cannot start a network request
+  ---
+  duration_ms: 3.64162
+  type: 'test'
+  ...
+# Subtest: owned gateway probes only fixed IP/path and expected hostname; labels do not prove loaded config
+ok 226 - owned gateway probes only fixed IP/path and expected hostname; labels do not prove loaded config
+  ---
+  duration_ms: 47.058157
+  type: 'test'
+  ...
+# Subtest: redirects are rejected and never followed
+ok 227 - redirects are rejected and never followed
+  ---
+  duration_ms: 10.358003
+  type: 'test'
+  ...
+# Subtest: connection failures are redacted
+ok 228 - connection failures are redacted
+  ---
+  duration_ms: 6.321643
+  type: 'test'
+  ...
+# Subtest: absolute probe deadline rejects a stalled response
+ok 229 - absolute probe deadline rejects a stalled response
+  ---
+  duration_ms: 3006.234186
+  type: 'test'
+  ...
+# Subtest: Docker errors are never copied into state
+ok 230 - Docker errors are never copied into state
+  ---
+  duration_ms: 2.900604
+  type: 'test'
+  ...
+# Subtest: readiness semantics: not running
+ok 231 - readiness semantics: not running
+  ---
+  duration_ms: 1.733659
+  type: 'test'
+  ...
+# Subtest: readiness semantics: healthy process only
+ok 232 - readiness semantics: healthy process only
+  ---
+  duration_ms: 1.108747
+  type: 'test'
+  ...
+# Subtest: readiness semantics: HTTP and matching label only
+ok 233 - readiness semantics: HTTP and matching label only
+  ---
+  duration_ms: 1.093457
+  type: 'test'
+  ...
+# Subtest: readiness semantics: unverified loaded configuration
+ok 234 - readiness semantics: unverified loaded configuration
+  ---
+  duration_ms: 1.2595
+  type: 'test'
+  ...
+# Subtest: readiness semantics: separate explicit attestations
+ok 235 - readiness semantics: separate explicit attestations
+  ---
+  duration_ms: 1.122846
+  type: 'test'
+  ...
+# Subtest: readiness semantics: label is not an attestation
+ok 236 - readiness semantics: label is not an attestation
+  ---
+  duration_ms: 1.498739
+  type: 'test'
+  ...
+# Subtest: HTTPS probes preserve certificate verification and use the declared SNI
+ok 237 - HTTPS probes preserve certificate verification and use the declared SNI
+  ---
+  duration_ms: 4.582579
+  type: 'test'
+  ...
+# Subtest: missing protected-delivery evidence and wrong loaded revision cannot produce full readiness
+ok 238 - missing protected-delivery evidence and wrong loaded revision cannot produce full readiness
+  ---
+  duration_ms: 2.016075
+  type: 'test'
+  ...
+# Subtest: a valid plan for a LAN/metadata binding is not an approved host-local observation target
+ok 239 - a valid plan for a LAN/metadata binding is not an approved host-local observation target
+  ---
+  duration_ms: 1.903717
+  type: 'test'
+  ...
+# Subtest: K1 E1 required R5 helper has explicit authorization
+ok 240 - K1 E1 required R5 helper has explicit authorization
+  ---
+  duration_ms: 3.889628
+  type: 'test'
+  ...
+# Subtest: K1 E2 actual npm inventory contains required helper
+ok 241 - K1 E2 actual npm inventory contains required helper
+  ---
+  duration_ms: 7.445702
+  type: 'test'
+  ...
+# Subtest: K1 E3 helper dependency closure includes filesystem and preparation
+ok 242 - K1 E3 helper dependency closure includes filesystem and preparation
+  ---
+  duration_ms: 5.075516
+  type: 'test'
+  ...
+# Subtest: K1 E4 existing internal modules remain explicitly approved
+ok 243 - K1 E4 existing internal modules remain explicitly approved
+  ---
+  duration_ms: 0.259908
+  type: 'test'
+  ...
+# Subtest: K1 E5 full normal inventory and bounded computed closure pass
+ok 244 - K1 E5 full normal inventory and bounded computed closure pass
+  ---
+  duration_ms: 5.418853
+  type: 'test'
+  ...
+# Subtest: K1 E6 unknown internal helper is refused
+ok 245 - K1 E6 unknown internal helper is refused
+  ---
+  duration_ms: 3.892703
+  type: 'test'
+  ...
+# Subtest: K1 E7 nested internal module is refused
+ok 246 - K1 E7 nested internal module is refused
+  ---
+  duration_ms: 4.100513
+  type: 'test'
+  ...
+# Subtest: K1 E8 missing required helper is refused
+ok 247 - K1 E8 missing required helper is refused
+  ---
+  duration_ms: 0.303183
+  type: 'test'
+  ...
+# Subtest: K1 E9 missing transitive dependency is refused
+ok 248 - K1 E9 missing transitive dependency is refused
+  ---
+  duration_ms: 1.468583
+  type: 'test'
+  ...
+# Subtest: K1 E10 packaged test fixture is refused
+ok 249 - K1 E10 packaged test fixture is refused
+  ---
+  duration_ms: 4.924576
+  type: 'test'
+  ...
+# Subtest: K1 E11 sensitive contents remain refused
+ok 250 - K1 E11 sensitive contents remain refused
+  ---
+  duration_ms: 6.699934
+  type: 'test'
+  ...
+# Subtest: K1 E12 undeclared external import remains refused
+ok 251 - K1 E12 undeclared external import remains refused
+  ---
+  duration_ms: 2.582842
+  type: 'test'
+  ...
+# Subtest: K1 E13 unexpected package path is refused
+ok 252 - K1 E13 unexpected package path is refused
+  ---
+  duration_ms: 3.901208
+  type: 'test'
+  ...
+# Subtest: K1 E14 filesystem presence cannot replace actual archive membership
+ok 253 - K1 E14 filesystem presence cannot replace actual archive membership
+  ---
+  duration_ms: 0.337364
+  type: 'test'
+  ...
+# Subtest: K1 E15 failed package assertion is fatal in a child process
+ok 254 - K1 E15 failed package assertion is fatal in a child process
+  ---
+  duration_ms: 34.651628
+  type: 'test'
+  ...
+# Subtest: SMTP serializer is a required actual archive member
+ok 255 - SMTP serializer is a required actual archive member
+  ---
+  duration_ms: 0.238551
+  type: 'test'
+  ...
+# Subtest: D1 assertion fields, non-enumerable message/stack and source survive the actual failed process
+ok 256 - D1 assertion fields, non-enumerable message/stack and source survive the actual failed process
+  ---
+  duration_ms: 68.811553
+  type: 'test'
+  ...
+# Subtest: D2 failure remains nonzero with concise human summary and restrictive artifact mode
+ok 257 - D2 failure remains nonzero with concise human summary and restrictive artifact mode
+  ---
+  duration_ms: 74.797074
+  type: 'test'
+  ...
+# Subtest: D3 nested cause retains original assertion
+ok 258 - D3 nested cause retains original assertion
+  ---
+  duration_ms: 67.614872
+  type: 'test'
+  ...
+# Subtest: D4 child assertion remains identifiable through parent reporting
+ok 259 - D4 child assertion remains identifiable through parent reporting
+  ---
+  duration_ms: 99.230528
+  type: 'test'
+  ...
+# Subtest: D5 asynchronous assertion is captured rather than swallowed
+ok 260 - D5 asynchronous assertion is captured rather than swallowed
+  ---
+  duration_ms: 50.739086
+  type: 'test'
+  ...
+# Subtest: D6 real trusted Docker failure remains distinct with command, nonzero status and stderr
+ok 261 - D6 real trusted Docker failure remains distinct with command, nonzero status and stderr
+  ---
+  duration_ms: 74.861627
+  type: 'test'
+  ...
+# Subtest: D7 redaction covers nested values, causes, stack, command/output and protected contexts
+ok 262 - D7 redaction covers nested values, causes, stack, command/output and protected contexts
+  ---
+  duration_ms: 49.529601
+  type: 'test'
+  ...
+# Subtest: D8 circular values, bigint, symbol, Buffer, Map, Set and undefined are safe
+ok 263 - D8 circular values, bigint, symbol, Buffer, Map, Set and undefined are safe
+  ---
+  duration_ms: 45.171575
+  type: 'test'
+  ...
+# Subtest: D9 large diagnostics remain bounded valid JSON with explicit truncation
+ok 264 - D9 large diagnostics remain bounded valid JSON with explicit truncation
+  ---
+  duration_ms: 506.789263
+  type: 'test'
+  ...
+# Subtest: D10 successful execution creates no failure artifact or artificial error
+ok 265 - D10 successful execution creates no failure artifact or artificial error
+  ---
+  duration_ms: 30.632898
+  type: 'test'
+  ...
+# Subtest: observer preserves original argv/options/receiver/stdin/timeout/return/error identity and executes once
+ok 266 - observer preserves original argv/options/receiver/stdin/timeout/return/error identity and executes once
+  ---
+  duration_ms: 34.209573
+  type: 'test'
+  ...
+# Subtest: real harness preserves all original assertions except the one owner-authorized F1 replacement
+ok 267 - real harness preserves all original assertions except the one owner-authorized F1 replacement
+  ---
+  duration_ms: 97.865032
+  type: 'test'
+  ...
+# Subtest: artifact directory ownership/permissions and exclusive trace prevent unsafe reuse
+ok 268 - artifact directory ownership/permissions and exclusive trace prevent unsafe reuse
+  ---
+  duration_ms: 5.124358
+  type: 'test'
+  ...
+# Subtest: S2 entry point observes the original rejected Promise and preserves its cause
+ok 269 - S2 entry point observes the original rejected Promise and preserves its cause
+  ---
+  duration_ms: 38.52574
+  type: 'test'
+  ...
+# Subtest: S2 cleanup rejection finishes cleanup and retains the original primary assertion
+ok 270 - S2 cleanup rejection finishes cleanup and retains the original primary assertion
+  ---
+  duration_ms: 39.767699
+  type: 'test'
+  ...
+# Subtest: S2 diagnostic-write refusal cannot overwrite evidence or turn failure into success
+ok 271 - S2 diagnostic-write refusal cannot overwrite evidence or turn failure into success
+  ---
+  duration_ms: 30.479897
+  type: 'test'
+  ...
+# Subtest: S2 failure while closing diagnostic state is captured as a nonzero owned rejection
+ok 272 - S2 failure while closing diagnostic state is captured as a nonzero owned rejection
+  ---
+  duration_ms: 32.416996
+  type: 'test'
+  ...
+# Subtest: E1 D1/D16 unauthorized caller gets no active-state or runtime-identity details
+ok 273 - E1 D1/D16 unauthorized caller gets no active-state or runtime-identity details
+  ---
+  duration_ms: 26.953132
+  type: 'test'
+  ...
+# Subtest: E1 D2 absent caller context is refused before state observation
+ok 274 - E1 D2 absent caller context is refused before state observation
+  ---
+  duration_ms: 17.706836
+  type: 'test'
+  ...
+# Subtest: E1 D3/D23 authorized unknown runtime revision is identity failure before eligibility
+ok 275 - E1 D3/D23 authorized unknown runtime revision is identity failure before eligibility
+  ---
+  duration_ms: 19.757844
+  type: 'test'
+  ...
+# Subtest: E1 D8 authorized wrong runtime service retains identity refusal
+ok 276 - E1 D8 authorized wrong runtime service retains identity refusal
+  ---
+  duration_ms: 21.49791
+  type: 'test'
+  ...
+# Subtest: E1 D24 missing journal scope precedes an identity defect
+ok 277 - E1 D24 missing journal scope precedes an identity defect
+  ---
+  duration_ms: 27.842125
+  type: 'test'
+  ...
+# Subtest: E1 D24 unknown journal service refuses authority without runtime details
+ok 278 - E1 D24 unknown journal service refuses authority without runtime details
+  ---
+  duration_ms: 22.647431
+  type: 'test'
+  ...
+# Subtest: E1 D24 authorized valid identity without failed-target eligibility remains refused
+ok 279 - E1 D24 authorized valid identity without failed-target eligibility remains refused
+  ---
+  duration_ms: 18.902921
+  type: 'test'
+  ...
+# Subtest: E1 D4/D5 correct scoped identity still reaches recreation and final strict readiness
+ok 280 - E1 D4/D5 correct scoped identity still reaches recreation and final strict readiness
+  ---
+  duration_ms: 50.630665
+  type: 'test'
+  ...
+# Subtest: E1 D18 actual Docker adapter inspection failure is neither authority nor identity refusal
+ok 281 - E1 D18 actual Docker adapter inspection failure is neither authority nor identity refusal
+  ---
+  duration_ms: 21.719019
+  type: 'test'
+  ...
+# Subtest: E1 D21 healthy ordinary activation remains strict and can return no-op
+ok 282 - E1 D21 healthy ordinary activation remains strict and can return no-op
+  ---
+  duration_ms: 68.499031
+  type: 'test'
+  ...
+# Subtest: E1 D17/D22 ordinary recovery invocations cannot inherit rollback admission
+ok 283 - E1 D17/D22 ordinary recovery invocations cannot inherit rollback admission
+  ---
+  duration_ms: 23.913912
+  type: 'test'
+  ...
+# Subtest: A2 effectiveness extra: actual refusal passes; unsafe success and unrelated failure fail the process
+ok 284 - A2 effectiveness extra: actual refusal passes; unsafe success and unrelated failure fail the process
+  ---
+  duration_ms: 155.752243
+  type: 'test'
+  ...
+# Subtest: A2 effectiveness missing: actual refusal passes; unsafe success and unrelated failure fail the process
+ok 285 - A2 effectiveness missing: actual refusal passes; unsafe success and unrelated failure fail the process
+  ---
+  duration_ms: 143.721239
+  type: 'test'
+  ...
+# Subtest: A2 effectiveness identity: actual refusal passes; unsafe success and unrelated failure fail the process
+ok 286 - A2 effectiveness identity: actual refusal passes; unsafe success and unrelated failure fail the process
+  ---
+  duration_ms: 120.016782
+  type: 'test'
+  ...
+# Subtest: A2 effectiveness malformed: actual refusal passes; unsafe success and unrelated failure fail the process
+ok 287 - A2 effectiveness malformed: actual refusal passes; unsafe success and unrelated failure fail the process
+  ---
+  duration_ms: 136.642706
+  type: 'test'
+  ...
+# Subtest: A2 effectiveness foreign: actual refusal passes; unsafe success and unrelated failure fail the process
+ok 288 - A2 effectiveness foreign: actual refusal passes; unsafe success and unrelated failure fail the process
+  ---
+  duration_ms: 124.035491
+  type: 'test'
+  ...
+# Subtest: A2 effectiveness command: actual refusal passes; unsafe success and unrelated failure fail the process
+ok 289 - A2 effectiveness command: actual refusal passes; unsafe success and unrelated failure fail the process
+  ---
+  duration_ms: 101.825122
+  type: 'test'
+  ...
+# Subtest: two competing processes: the second render is explicitly rejected while the first owns the lock
+ok 290 - two competing processes: the second render is explicitly rejected while the first owns the lock
+  ---
+  duration_ms: 86.817345
+  type: 'test'
+  ...
+# Subtest: interrupted writer leaves a stale lock; no PID/time-based takeover occurs
+ok 291 - interrupted writer leaves a stale lock; no PID/time-based takeover occurs
+  ---
+  duration_ms: 74.017891
+  type: 'test'
+  ...
+# Subtest: crash after individual replacement is not crash-atomic and cannot silently overwrite the mixed revision
+ok 292 - crash after individual replacement is not crash-atomic and cannot silently overwrite the mixed revision
+  ---
+  duration_ms: 63.704121
+  type: 'test'
+  ...
+# Subtest: corrupt manifest refuses recovery, preserves artifacts and unrelated files, and releases its own lock
+ok 293 - corrupt manifest refuses recovery, preserves artifacts and unrelated files, and releases its own lock
+  ---
+  duration_ms: 78.159087
+  type: 'test'
+  ...
+# Subtest: destination symlink replacement during staging fails before a commit
+ok 294 - destination symlink replacement during staging fails before a commit
+  ---
+  duration_ms: 19.696541
+  type: 'test'
+  ...
+# Subtest: destination hardlink replacement during staging fails before a commit
+ok 295 - destination hardlink replacement during staging fails before a commit
+  ---
+  duration_ms: 33.965277
+  type: 'test'
+  ...
+# Subtest: destination edited replacement during staging fails before a commit
+ok 296 - destination edited replacement during staging fails before a commit
+  ---
+  duration_ms: 27.721631
+  type: 'test'
+  ...
+# Subtest: a symlink or pre-existing stale lock is never followed or removed
+ok 297 - a symlink or pre-existing stale lock is never followed or removed
+  ---
+  duration_ms: 3.09357
+  type: 'test'
+  ...
+# Subtest: R4-01 valid operational attachment remains accepted
+ok 298 - R4-01 valid operational attachment remains accepted
+  ---
+  duration_ms: 15.875939
+  type: 'test'
+  ...
+# Subtest: R4-02 exact restarting target admits only pre-recreation authorization
+ok 299 - R4-02 exact restarting target admits only pre-recreation authorization
+  ---
+  duration_ms: 2.768533
+  type: 'test'
+  ...
+# Subtest: R4-03 authorized restarting target is never operationally ready
+ok 300 - R4-03 authorized restarting target is never operationally ready
+  ---
+  duration_ms: 3.432261
+  type: 'test'
+  ...
+# Subtest: R4-04 complete replacement is operationally valid
+ok 301 - R4-04 complete replacement is operationally valid
+  ---
+  duration_ms: 4.093401
+  type: 'test'
+  ...
+# Subtest: R4-05 undeclared extra network is never authorized for recovery
+ok 302 - R4-05 undeclared extra network is never authorized for recovery
+  ---
+  duration_ms: 1.845403
+  type: 'test'
+  ...
+# Subtest: R4-06 foreign owner is refused
+ok 303 - R4-06 foreign owner is refused
+  ---
+  duration_ms: 1.79833
+  type: 'test'
+  ...
+# Subtest: R4-07 exact snapshot rejects substituted ID/name/revision/image/state
+ok 304 - R4-07 exact snapshot rejects substituted ID/name/revision/image/state
+  ---
+  duration_ms: 17.174052
+  type: 'test'
+  ...
+# Subtest: R4-08 wrong service is refused
+ok 305 - R4-08 wrong service is refused
+  ---
+  duration_ms: 2.227193
+  type: 'test'
+  ...
+# Subtest: R4-09 wrong project is refused
+ok 306 - R4-09 wrong project is refused
+  ---
+  duration_ms: 2.140935
+  type: 'test'
+  ...
+# Subtest: R4-10 Docker command failure is fatal
+ok 307 - R4-10 Docker command failure is fatal
+  ---
+  duration_ms: 1.34953
+  type: 'test'
+  ...
+# Subtest: R4-11 disappearance/substitution and duplicate authorization fail
+ok 308 - R4-11 disappearance/substitution and duplicate authorization fail
+  ---
+  duration_ms: 1.49414
+  type: 'test'
+  ...
+# Subtest: R4-12 final missing required membership refuses readiness and authorization
+ok 309 - R4-12 final missing required membership refuses readiness and authorization
+  ---
+  duration_ms: 3.539097
+  type: 'test'
+  ...
+# Subtest: R4-13 final extra membership refuses readiness
+ok 310 - R4-13 final extra membership refuses readiness
+  ---
+  duration_ms: 11.100611
+  type: 'test'
+  ...
+# Subtest: R4-14 duplicate role resolving to same network is not multihoming
+ok 311 - R4-14 duplicate role resolving to same network is not multihoming
+  ---
+  duration_ms: 12.310432
+  type: 'test'
+  ...
+# Subtest: R4-15 recovery cannot select a one-off job or omit an inventoried resource
+ok 312 - R4-15 recovery cannot select a one-off job or omit an inventoried resource
+  ---
+  duration_ms: 1.865205
+  type: 'test'
+  ...
+# Subtest: R4-16 ordinary pre-creation behavior remains compatible
+ok 313 - R4-16 ordinary pre-creation behavior remains compatible
+  ---
+  duration_ms: 0.939895
+  type: 'test'
+  ...
+# Subtest: R4 restart exemption cannot accept non-restarting or nonempty invalid endpoint
+ok 314 - R4 restart exemption cannot accept non-restarting or nonempty invalid endpoint
+  ---
+  duration_ms: 2.300758
+  type: 'test'
+  ...
+# Subtest: R4 rollback authorization requires verified failed/active candidate identity before network admission
+ok 315 - R4 rollback authorization requires verified failed/active candidate identity before network admission
+  ---
+  duration_ms: 10.564307
+  type: 'test'
+  ...
+# Subtest: R5 E1-E4 authorized volatile-state rollback admits the exact target, recreates and finishes strict ready
+ok 316 - R5 E1-E4 authorized volatile-state rollback admits the exact target, recreates and finishes strict ready
+  ---
+  duration_ms: 79.240445
+  type: 'test'
+  ...
+# Subtest: R5 E7 strict readiness still refuses the actual restart-backoff metadata
+ok 317 - R5 E7 strict readiness still refuses the actual restart-backoff metadata
+  ---
+  duration_ms: 19.991744
+  type: 'test'
+  ...
+# Subtest: R5 E8 undeclared attachment refuses rollback before recreation
+ok 318 - R5 E8 undeclared attachment refuses rollback before recreation
+  ---
+  duration_ms: 97.321298
+  type: 'test'
+  ...
+# Subtest: R5 E9 foreign owner refuses rollback before recreation
+ok 319 - R5 E9 foreign owner refuses rollback before recreation
+  ---
+  duration_ms: 35.374571
+  type: 'test'
+  ...
+# Subtest: R5 E10 wrong project refuses rollback before recreation
+ok 320 - R5 E10 wrong project refuses rollback before recreation
+  ---
+  duration_ms: 37.871515
+  type: 'test'
+  ...
+# Subtest: R5 E11 authorized wrong-service identity cannot replace journal target
+ok 321 - R5 E11 authorized wrong-service identity cannot replace journal target
+  ---
+  duration_ms: 26.653242
+  type: 'test'
+  ...
+# Subtest: R5 E12 wrong network ID refuses before recreation
+ok 322 - R5 E12 wrong network ID refuses before recreation
+  ---
+  duration_ms: 27.310143
+  type: 'test'
+  ...
+# Subtest: R5 E12 incorrect container ID refuses before recreation
+ok 323 - R5 E12 incorrect container ID refuses before recreation
+  ---
+  duration_ms: 19.451882
+  type: 'test'
+  ...
+# Subtest: R5 E13 legitimate owner labels cannot authorize wrong canonical name
+ok 324 - R5 E13 legitimate owner labels cannot authorize wrong canonical name
+  ---
+  duration_ms: 37.415097
+  type: 'test'
+  ...
+# Subtest: R5 E14 duplicate plausible service targets fail closed
+ok 325 - R5 E14 duplicate plausible service targets fail closed
+  ---
+  duration_ms: 19.640789
+  type: 'test'
+  ...
+# Subtest: R5 E15 an unverified candidate fails before recreation
+ok 326 - R5 E15 an unverified candidate fails before recreation
+  ---
+  duration_ms: 16.235561
+  type: 'test'
+  ...
+# Subtest: R5 E16 unauthorized rollback cannot reach admission
+ok 327 - R5 E16 unauthorized rollback cannot reach admission
+  ---
+  duration_ms: 17.352172
+  type: 'test'
+  ...
+# Subtest: R5 E17 recover true alone retains the strict normal activation preflight
+ok 328 - R5 E17 recover true alone retains the strict normal activation preflight
+  ---
+  duration_ms: 16.73961
+  type: 'test'
+  ...
+# Subtest: R5 failed-service evidence is mandatory rather than inferred from labels
+ok 329 - R5 failed-service evidence is mandatory rather than inferred from labels
+  ---
+  duration_ms: 23.753807
+  type: 'test'
+  ...
+# Subtest: R5 E19 recreation failure remains fatal and never writes a successful active event
+ok 330 - R5 E19 recreation failure remains fatal and never writes a successful active event
+  ---
+  duration_ms: 30.229205
+  type: 'test'
+  ...
+# Subtest: R5 E20 missing final membership fails after recreation
+ok 331 - R5 E20 missing final membership fails after recreation
+  ---
+  duration_ms: 37.86092
+  type: 'test'
+  ...
+# Subtest: R5 E21 extra final attachment fails after recreation
+ok 332 - R5 E21 extra final attachment fails after recreation
+  ---
+  duration_ms: 44.935486
+  type: 'test'
+  ...
+# Subtest: R5 E22 unhealthy recreated service is refused
+ok 333 - R5 E22 unhealthy recreated service is refused
+  ---
+  duration_ms: 33.680855
+  type: 'test'
+  ...
+# Subtest: R5 configured exposure stays exact when live restart ports are empty
+ok 334 - R5 configured exposure stays exact when live restart ports are empty
+  ---
+  duration_ms: 19.95741
+  type: 'test'
+  ...
+# Subtest: R5 live exposure cannot expand beyond configured bindings
+ok 335 - R5 live exposure cannot expand beyond configured bindings
+  ---
+  duration_ms: 16.425559
+  type: 'test'
+  ...
+# Subtest: R5 authoritative inspection, not initial snapshot, decides narrow restarting eligibility
+ok 336 - R5 authoritative inspection, not initial snapshot, decides narrow restarting eligibility
+  ---
+  duration_ms: 16.798138
+  type: 'test'
+  ...
+# Subtest: R5 endpoint conflict is not an empty-endpoint accommodation
+ok 337 - R5 endpoint conflict is not an empty-endpoint accommodation
+  ---
+  duration_ms: 19.691158
+  type: 'test'
+  ...
+# Subtest: R5 direct internal rollback wrapper cannot evade compatibility checks
+ok 338 - R5 direct internal rollback wrapper cannot evade compatibility checks
+  ---
+  duration_ms: 21.774315
+  type: 'test'
+  ...
+# Subtest: R5 failed candidate revision cannot substitute another source identity
+ok 339 - R5 failed candidate revision cannot substitute another source identity
+  ---
+  duration_ms: 25.516842
+  type: 'test'
+  ...
+# Subtest: R5 E18 unrelated restarting service cannot inherit failed-service endpoint permission
+ok 340 - R5 E18 unrelated restarting service cannot inherit failed-service endpoint permission
+  ---
+  duration_ms: 24.050122
+  type: 'test'
+  ...
+# Subtest: R5 changed configured bindings or mounts at authoritative reinspection cannot be substituted
+ok 341 - R5 changed configured bindings or mounts at authoritative reinspection cannot be substituted
+  ---
+  duration_ms: 32.664505
+  type: 'test'
+  ...
+# Subtest: R5 mount observation ordering is irrelevant while every record remains exact
+ok 342 - R5 mount observation ordering is irrelevant while every record remains exact
+  ---
+  duration_ms: 55.291835
+  type: 'test'
+  ...
+# Subtest: R5 mount field changes, removals, additions and multiplicity differences still refuse
+ok 343 - R5 mount field changes, removals, additions and multiplicity differences still refuse
+  ---
+  duration_ms: 112.276249
+  type: 'test'
+  ...
+# Subtest: real-adapter empty infrastructure roles coexist with a required application role
+ok 344 - real-adapter empty infrastructure roles coexist with a required application role
+  ---
+  duration_ms: 6.590291
+  type: 'test'
+  ...
+# Subtest: only the empty string maps to the already absent role
+ok 345 - only the empty string maps to the already absent role
+  ---
+  duration_ms: 4.187762
+  type: 'test'
+  ...
+# Subtest: a required application role cannot be omitted, emptied or changed
+ok 346 - a required application role cannot be omitted, emptied or changed
+  ---
+  duration_ms: 3.77433
+  type: 'test'
+  ...
+# Subtest: authorization is mandatory before any role equivalence is considered
+ok 347 - authorization is mandatory before any role equivalence is considered
+  ---
+  duration_ms: 1.003016
+  type: 'test'
+  ...
+# Subtest: application: owner/project/name/image/image-ID/revision/service differences still refuse
+ok 348 - application: owner/project/name/image/image-ID/revision/service differences still refuse
+  ---
+  duration_ms: 2.97217
+  type: 'test'
+  ...
+# Subtest: mail: owner/project/name/image/image-ID/revision/service differences still refuse
+ok 349 - mail: owner/project/name/image/image-ID/revision/service differences still refuse
+  ---
+  duration_ms: 2.640078
+  type: 'test'
+  ...
+# Subtest: dkim: owner/project/name/image/image-ID/revision/service differences still refuse
+ok 350 - dkim: owner/project/name/image/image-ID/revision/service differences still refuse
+  ---
+  duration_ms: 2.758138
+  type: 'test'
+  ...
+# Subtest: configured and live extra exposure remain refused
+ok 351 - configured and live extra exposure remain refused
+  ---
+  duration_ms: 1.56309
+  type: 'test'
+  ...
+# Subtest: declared mount source and write-permission differences still refuse
+ok 352 - declared mount source and write-permission differences still refuse
+  ---
+  duration_ms: 1.765819
+  type: 'test'
+  ...
+# Subtest: secrets require explicit first-install authorization; repeated execution preserves bytes/fingerprint
+ok 353 - secrets require explicit first-install authorization; repeated execution preserves bytes/fingerprint
+  ---
+  duration_ms: 33.969111
+  type: 'test'
+  ...
+# Subtest: corrupt/missing existing data fails closed and is never regenerated
+ok 354 - corrupt/missing existing data fails closed and is never regenerated
+  ---
+  duration_ms: 65.697139
+  type: 'test'
+  ...
+# Subtest: world-readable secret or store permissions and unrelated ownership are rejected
+ok 355 - world-readable secret or store permissions and unrelated ownership are rejected
+  ---
+  duration_ms: 10.942781
+  type: 'test'
+  ...
+# Subtest: concurrent/interrupted secret creation cannot take over or generate replacement credentials
+ok 356 - concurrent/interrupted secret creation cannot take over or generate replacement credentials
+  ---
+  duration_ms: 2.15209
+  type: 'test'
+  ...
+# Subtest: explicit rotation requires fingerprint CAS and consumer transition; failed rotation retains old state
+ok 357 - explicit rotation requires fingerprint CAS and consumer transition; failed rotation retains old state
+  ---
+  duration_ms: 30.674407
+  type: 'test'
+  ...
+# Subtest: consumer projections are narrow, exclusive and private; path/symlink/hardlink escape fails
+ok 358 - consumer projections are narrow, exclusive and private; path/symlink/hardlink escape fails
+  ---
+  duration_ms: 20.273976
+  type: 'test'
+  ...
+# Subtest: all declared secret types validate; imported relay/DNS credentials are never invented
+ok 359 - all declared secret types validate; imported relay/DNS credentials are never invented
+  ---
+  duration_ms: 481.027498
+  type: 'test'
+  ...
+# Subtest: weak imported keys and accessor references are rejected without executing getters
+ok 360 - weak imported keys and accessor references are rejected without executing getters
+  ---
+  duration_ms: 17.365593
+  type: 'test'
+  ...
+# Subtest: secret projection cannot overwrite a competing destination created after validation
+ok 361 - secret projection cannot overwrite a competing destination created after validation
+  ---
+  duration_ms: 10.339291
+  type: 'test'
+  ...
+# Subtest: weak RSA fixtures cannot enter any key type or replace an existing generation
+ok 362 - weak RSA fixtures cannot enter any key type or replace an existing generation
+  ---
+  duration_ms: 68.201768
+  type: 'test'
+  ...
+# Subtest: two independent secret creators preserve a single committed fingerprint
+ok 363 - two independent secret creators preserve a single committed fingerprint
+  ---
+  duration_ms: 53.873596
+  type: 'test'
+  ...
+# Subtest: lint debt never permits a new, moved or duplicate diagnostic
+ok 364 - lint debt never permits a new, moved or duplicate diagnostic
+  ---
+  duration_ms: 2.233072
+  type: 'test'
+  ...
+# Subtest: lint catches undefined identifiers, unreachable flow and unsafe finally
+ok 365 - lint catches undefined identifiers, unreachable flow and unsafe finally
+  ---
+  duration_ms: 168.770073
+  type: 'test'
+  ...
+# Subtest: lint includes tests and treats newly unused variables as regressions
+ok 366 - lint includes tests and treats newly unused variables as regressions
+  ---
+  duration_ms: 12.956522
+  type: 'test'
+  ...
+# Subtest: quality workflow is valid, read-only, explicit and fail-closed
+ok 367 - quality workflow is valid, read-only, explicit and fail-closed
+  ---
+  duration_ms: 34.663943
+  type: 'test'
+  ...
+# Subtest: Dependabot is scoped, periodic and never configures automatic merge
+ok 368 - Dependabot is scoped, periodic and never configures automatic merge
+  ---
+  duration_ms: 2.066081
+  type: 'test'
+  ...
+# Subtest: contract v2 integrates independently composable services; validation/planning deterministic, redacted and pure
+ok 369 - contract v2 integrates independently composable services; validation/planning deterministic, redacted and pure
+  ---
+  duration_ms: 26.606754
+  type: 'test'
+  ...
+# Subtest: v1 retains exact behavior; version combinations/new fields cannot be silently dropped
+ok 370 - v1 retains exact behavior; version combinations/new fields cannot be silently dropped
+  ---
+  duration_ms: 4.442587
+  type: 'test'
+  ...
+# Subtest: v2 DNS none supplied example.com
+ok 371 - v2 DNS none supplied example.com
+  ---
+  duration_ms: 2.724149
+  type: 'test'
+  ...
+# Subtest: v2 DNS none supplied null
+ok 372 - v2 DNS none supplied null
+  ---
+  duration_ms: 2.173485
+  type: 'test'
+  ...
+# Subtest: v2 DNS local supplied example.com
+ok 373 - v2 DNS local supplied example.com
+  ---
+  duration_ms: 2.496228
+  type: 'test'
+  ...
+# Subtest: v2 DNS local supplied null
+ok 374 - v2 DNS local supplied null
+  ---
+  duration_ms: 2.637912
+  type: 'test'
+  ...
+# Subtest: v2 DNS localhost supplied example.com
+ok 375 - v2 DNS localhost supplied example.com
+  ---
+  duration_ms: 2.17402
+  type: 'test'
+  ...
+# Subtest: v2 DNS localhost supplied null
+ok 376 - v2 DNS localhost supplied null
+  ---
+  duration_ms: 1.158152
+  type: 'test'
+  ...
+# Subtest: malformed v2 nested values and duplicate durable ownership yield diagnostics without throwing
+ok 377 - malformed v2 nested values and duplicate durable ownership yield diagnostics without throwing
+  ---
+  duration_ms: 17.812724
+  type: 'test'
+  ...
+# Subtest: v2 planning never invokes filesystem mutation, lifecycle execution, current time or randomness
+ok 378 - v2 planning never invokes filesystem mutation, lifecycle execution, current time or randomness
+  ---
+  duration_ms: 5.002738
+  type: 'test'
+  ...
+# Subtest: Nginx plus DB does not pull DNS, Redis, SMTP or ACME and preserves canonical v1 Nginx bytes
+ok 379 - Nginx plus DB does not pull DNS, Redis, SMTP or ACME and preserves canonical v1 Nginx bytes
+  ---
+  duration_ms: 4.005088
+  type: 'test'
+  ...
+# Subtest: external database/cache generate endpoint prerequisites, never managed containers or init jobs
+ok 380 - external database/cache generate endpoint prerequisites, never managed containers or init jobs
+  ---
+  duration_ms: 0.908114
+  type: 'test'
+  ...
+# Subtest: unsupported/open/injected/exposed resources and secret-consumer violations fail closed
+ok 381 - unsupported/open/injected/exposed resources and secret-consumer violations fail closed
+  ---
+  duration_ms: 7.541005
+  type: 'test'
+  ...
+# Subtest: DNS port observations and serial preparation prevent conflict/implicit overwrite
+ok 382 - DNS port observations and serial preparation prevent conflict/implicit overwrite
+  ---
+  duration_ms: 34.794485
+  type: 'test'
+  ...
+# Subtest: v2 rendering is safe/idempotent and never creates secrets or starts services
+ok 383 - v2 rendering is safe/idempotent and never creates secrets or starts services
+  ---
+  duration_ms: 81.955074
+  type: 'test'
+  ...
+# Subtest: v2 explicit observer reports ready only with each mandatory evidence
+ok 384 - v2 explicit observer reports ready only with each mandatory evidence
+  ---
+  duration_ms: 32.213455
+  type: 'test'
+  ...
+# Subtest: v2 missing observed_revision evidence fails readiness
+ok 385 - v2 missing observed_revision evidence fails readiness
+  ---
+  duration_ms: 10.947689
+  type: 'test'
+  ...
+# Subtest: v2 missing resource_present evidence fails readiness
+ok 386 - v2 missing resource_present evidence fails readiness
+  ---
+  duration_ms: 9.869238
+  type: 'test'
+  ...
+# Subtest: v2 missing configuration_valid evidence fails readiness
+ok 387 - v2 missing configuration_valid evidence fails readiness
+  ---
+  duration_ms: 10.756343
+  type: 'test'
+  ...
+# Subtest: v2 missing loaded_configuration evidence fails readiness
+ok 388 - v2 missing loaded_configuration evidence fails readiness
+  ---
+  duration_ms: 6.915698
+  type: 'test'
+  ...
+# Subtest: v2 missing running evidence fails readiness
+ok 389 - v2 missing running evidence fails readiness
+  ---
+  duration_ms: 7.134102
+  type: 'test'
+  ...
+# Subtest: v2 missing protocol_functional evidence fails readiness
+ok 390 - v2 missing protocol_functional evidence fails readiness
+  ---
+  duration_ms: 7.377433
+  type: 'test'
+  ...
+# Subtest: v2 missing dependencies_satisfied evidence fails readiness
+ok 391 - v2 missing dependencies_satisfied evidence fails readiness
+  ---
+  duration_ms: 7.336888
+  type: 'test'
+  ...
+# Subtest: v2 missing pending_activation evidence fails readiness
+ok 392 - v2 missing pending_activation evidence fails readiness
+  ---
+  duration_ms: 7.705153
+  type: 'test'
+  ...
+# Subtest: v2 diagnostics redact observer exceptions and arbitrary metadata
+ok 393 - v2 diagnostics redact observer exceptions and arbitrary metadata
+  ---
+  duration_ms: 12.249506
+  type: 'test'
+  ...
+# Subtest: v2 invalid plan cannot invoke observer
+ok 394 - v2 invalid plan cannot invoke observer
+  ---
+  duration_ms: 8.217074
+  type: 'test'
+  ...
+# Subtest: external accounts accept full addresses and opaque names without widening internal identifiers
+ok 395 - external accounts accept full addresses and opaque names without widening internal identifiers
+  ---
+  duration_ms: 1.517056
+  type: 'test'
+  ...
+# Subtest: external secret bytes preserve supported separators and reject unrepresentable bytes without normalization
+ok 396 - external secret bytes preserve supported separators and reject unrepresentable bytes without normalization
+  ---
+  duration_ms: 0.562799
+  type: 'test'
+  ...
+# Subtest: external-only import/projection preserves bytes, ACLs and private modes; legacy submission stays restricted
+ok 397 - external-only import/projection preserves bytes, ACLs and private modes; legacy submission stays restricted
+  ---
+  duration_ms: 31.582543
+  type: 'test'
+  ...
+# Subtest: legacy submission rejects every control byte and whitespace exactly as before
+ok 398 - legacy submission rejects every control byte and whitespace exactly as before
+  ---
+  duration_ms: 10.423296
+  type: 'test'
+  ...
+# Subtest: external SMTP contract separates provider accounts, legacy submission and consumer authority
+ok 399 - external SMTP contract separates provider accounts, legacy submission and consumer authority
+  ---
+  duration_ms: 12.629732
+  type: 'test'
+  ...
+# Subtest: D1/D6 fixed Docker selection ignores hostile caller PATH and options.env
+ok 400 - D1/D6 fixed Docker selection ignores hostile caller PATH and options.env
+  ---
+  duration_ms: 47.547232
+  type: 'test'
+  ...
+# Subtest: D5 substituted OpenSSL cannot approve the previously reproduced unrelated CA
+ok 401 - D5 substituted OpenSSL cannot approve the previously reproduced unrelated CA
+  ---
+  duration_ms: 461.592641
+  type: 'test'
+  ...
+# Subtest: D1 issuer uses genuine OpenSSL while an earlier PATH substitute would fail
+ok 402 - D1 issuer uses genuine OpenSSL while an earlier PATH substitute would fail
+  ---
+  duration_ms: 193.485712
+  type: 'test'
+  ...
+# Subtest: D7 real ss observes a live socket without executing its PATH substitute
+ok 403 - D7 real ss observes a live socket without executing its PATH substitute
+  ---
+  duration_ms: 17.547844
+  type: 'test'
+  ...
+# Subtest: D8 child environment drops arbitrary secrets, loaders and caller Docker/SSL settings
+ok 404 - D8 child environment drops arbitrary secrets, loaders and caller Docker/SSL settings
+  ---
+  duration_ms: 22.350082
+  type: 'test'
+  ...
+# Subtest: qualification rejects writable symlink entry ancestors even with a safe target
+ok 405 - qualification rejects writable symlink entry ancestors even with a safe target
+  ---
+  duration_ms: 0.689591
+  type: 'test'
+  ...
+# Subtest: qualification selects npm beside the verified current interpreter without PATH fallback
+ok 406 - qualification selects npm beside the verified current interpreter without PATH fallback
+  ---
+  duration_ms: 0.889682
+  type: 'test'
+  ...
+# Subtest: explicit ACME client is rehashed before a later authorized invocation
+ok 407 - explicit ACME client is rehashed before a later authorized invocation
+  ---
+  duration_ms: 22.919328
+  type: 'test'
+  ...
+# Subtest: internal resolver has no public package subpath export
+ok 408 - internal resolver has no public package subpath export
+  ---
+  duration_ms: 0.798447
+  type: 'test'
+  ...
+# Subtest: local CA/leaf have correct SAN, separate keys, persistent trust and no activation
+ok 409 - local CA/leaf have correct SAN, separate keys, persistent trust and no activation
+  ---
+  duration_ms: 479.665064
+  type: 'test'
+  ...
+# Subtest: provided certificates reject wrong SAN, mismatched key, expired validity, broken chain and unsafe key mode
+ok 410 - provided certificates reject wrong SAN, mismatched key, expired validity, broken chain and unsafe key mode
+  ---
+  duration_ms: 235.141708
+  type: 'test'
+  ...
+# Subtest: corrupt issuer state never recreates CA; failed renewal preserves the prepared certificate
+ok 411 - corrupt issuer state never recreates CA; failed renewal preserves the prepared certificate
+  ---
+  duration_ms: 404.54897
+  type: 'test'
+  ...
+# Subtest: ACME refuses private hostnames, unauthorized operations and failed issuance without mutation
+ok 412 - ACME refuses private hostnames, unauthorized operations and failed issuance without mutation
+  ---
+  duration_ms: 120.350798
+  type: 'test'
+  ...
+# Subtest: ACME issuer-boundary success validates actual certificate/key/chain; failed renewal preserves keys and leaf
+ok 413 - ACME issuer-boundary success validates actual certificate/key/chain; failed renewal preserves keys and leaf
+  ---
+  duration_ms: 228.476386
+  type: 'test'
+  ...
+1..413
+# tests 413
+# suites 0
+# pass 413
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3659.766544

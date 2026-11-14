@@ -1,0 +1,246 @@
+{
+  "status": "PASS_MAIL03_FROZEN_NATIVE_REPLAY",
+  "results": [
+    {
+      "script": "native.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/native.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:18:52.406031+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-admin-result.json",
+      "checks": 9,
+      "log_sha256": "1c121f0e30d2e9648be1e4b594eba490fbb96e5f21f87255d5dfc1209e80932a"
+    },
+    {
+      "script": "terminal.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/terminal.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:21:07.367456+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-tty-result.json",
+      "checks": 3,
+      "log_sha256": "183e76357978127488ac549ab92a40b751327e76aa1fb942bd08d43dfef3748f"
+    },
+    {
+      "script": "errors.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/errors.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:21:24.066084+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-errors-result.json",
+      "checks": 4,
+      "log_sha256": "697324b92231492b46f30668f229ae7d85e0038efcd89df8cbd02e9a132e3056"
+    },
+    {
+      "script": "sessions.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/sessions.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:22:00.637478+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-session-result.json",
+      "checks": 2,
+      "log_sha256": "7f0378ceebbf2c96af086209981f4dfc1547fa2cf25de17ea2c556961c8f91b3"
+    },
+    {
+      "script": "rights.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/rights.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:23:05.432643+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-rights-result.json",
+      "checks": 4,
+      "log_sha256": "57105bc49ccc30af987a72c58e07d2faaa4d2b610dec3846754d29b8e3d590cc"
+    },
+    {
+      "script": "accounts.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/accounts.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:25:25.319384+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-accounts-result.json",
+      "checks": 8,
+      "log_sha256": "ce108f38248c8e8602fa1f0958a49cb5409331e3eeb2d0756d3190f09794f1e7"
+    },
+    {
+      "script": "transactions.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/transactions.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:30:36.555257+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-tx-result.json",
+      "checks": 8,
+      "log_sha256": "236e156c4d0873b288a33c85db198c55b6121b68edb2b499b38efbc4d5e0c0f2"
+    },
+    {
+      "script": "quota.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/quota.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:33:05.900128+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-quota-result.json",
+      "checks": 3,
+      "log_sha256": "8229d084e4fef8741ebe25435d41c19d955c513b96d60d7643f77d57b64f15e0"
+    },
+    {
+      "script": "../quota-native.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/quota-native.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures",
+        "/home/lab/work/mail03-administration/mail03-infra/test/mail-service"
+      ],
+      "started_at": "2026-11-14T09:33:53.738466+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "atomic-quota-result.json",
+      "checks": 8,
+      "log_sha256": "6321c4ea8fb74c0077891c163b75f15ae57f948c92abf454c68ac00906b2d125"
+    },
+    {
+      "script": "purge.py",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin/purge.py",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm",
+        "/home/lab/work/mail03-administration/runs/source-fixtures"
+      ],
+      "started_at": "2026-11-14T09:34:44.297434+00:00",
+      "exit": 0,
+      "status": "PASS",
+      "report": "mail03-purge-result.json",
+      "checks": 2,
+      "log_sha256": "ffcf1c96d9b440f8528c0f977c98331e37d16c9a666c6b778d9cd6e782ac6006"
+    }
+  ],
+  "sources_unchanged": true,
+  "source_sha256": {
+    "terminal.py": "c9fdf16aff06a30ba470e9133f14a23ef709965808c7a266e8a0ac3783a527c1",
+    "probe.py": "6f089c9e5ad3d3be977ce86348b35c02d892fc455777dbd1c4796c74a03b7ad1",
+    "errors.py": "bebc59f9ff60f204c88d6b0a14a632c4278dbe8b7a993866944764c138613167",
+    "rights.py": "bfc1905bb90f428f0ff01c6c1036c1df1c07fdf29d96ad5b3b81b81bdf0623d8",
+    "purge.py": "bddcc1f8f990133eeec78b63abb2d507ffe3b4a943d0007ed4daa2d46f50e65f",
+    "model.test.py": "5b40c246e732be03598275456a9662c0add1b85b6fe67a240ac4fe02ee7aa532",
+    "common.py": "9cfa49f521a6292d70058376b65eb990f7436bc4015fb51022a6afd70ac41f82",
+    "quota.py": "fb75f9efee8ac43ca2852cb419b852ab9b9ccb76a681850dc3be8b3e0d145295",
+    "accounts.py": "229c9db00d14e8657486c915bc5706bdd37cb0a8f349ffe28d1dd54f25ad68ae",
+    "transactions.py": "ec96fb9db0b97b5f3e53fe40bfa6402f79acd205e93ea0d6d9d54820408022ec",
+    "storage.test.py": "5f0ff08cb54598b0609ad3533d1da0688174204bdf4c79e79f368296b70ee4c3",
+    ".gitignore": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b",
+    "run-all.py": "d51e9552be12473ed48fbd72bbd9af0928669c5034d028521e94dad468697d8c",
+    "password.test.py": "e0c1b1affc734a7733296b455cfd7831f33417f781205c6dc724927e65a8c559",
+    "session-probe.py": "9be18537e72cb150208f308c37cc265869c925b3b632d41a5d5538bbcba73fae",
+    "native.py": "549f6f21eca60c73ad525bbe8dffaef28c45b0ed69eaee7d5b61b90bd4f8e112",
+    "sessions.py": "aaa3901b51172a4a0ae00cf5c0ed01ad821d996972f4f4db5601062cf403380f"
+  },
+  "engine_receipt": {
+    "acquisition": "local-unpublished-archive",
+    "revision": "1b60818f4f60cc6b54976184dbd6f0585b717a68",
+    "sha256": "37753b445400cbced8e60fc24ef9b69f9b2eeddc6f5f85ac5e64e0bdb32496fb",
+    "integrity": "sha512-lcvOHSQi9iH4A6fnDka7e8jGP9S1g3ZHR2Zs7+wHC3rpGBkdq6u8V/nXZYK8GfK1UYFzArVyRUko/t9fzG4Z8A==",
+    "files": {
+      "LICENSE": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "capabilities/tls/acme.js": "5dc9ac5ffe58409db5614bbb2cab52e4db6b80c2e70540abe2de1623da959fc6",
+      "lifecycle/activation.js": "8bf7d44cbc7997dd9f04f9650debf0ca155caa221ce49e85b4dd317f564293ff",
+      "lifecycle/composition.js": "a53b9ef2398dd7e53eef7290bff92208378216fcf5e3ff2949ad0b4858055c3d",
+      "lib/contracts-v2.js": "d7bef76996f62e8d45c62f70fd6706499175cf56cc0b22bf5e1847e2ee4bc7cd",
+      "lib/diagnostics.js": "902ac905c2f5cd33a10b51e454affdd9749de148d758be063d1c16d149da908e",
+      "lifecycle/docker.js": "9648b460636cb8ddbfe980abc9e09887437058251d69de9e45813c73e7528406",
+      "lifecycle/external-gateway.js": "ec5239586f65289584d1a4d1b11e40aa8de48103f1b9162a4b5163383f00b6e5",
+      "lib/filesystem-safety.js": "ace4ad1c9bc8031a9fd2ad9b8d6a9bb6c3687bc22f78e626648534780fd35f03",
+      "capabilities/database/index.js": "8787cae326c6449c115cbf5e8ec1cd2d48005254df5c903f545f777d3db3e8b5",
+      "capabilities/dns/index.js": "a42c4f892fc68f66e2e9e0d15c42e314424641f0e0201013dbb089152e68d269",
+      "capabilities/http/nginx/index.js": "38cb9406d19d5aaaf9650be4348a4c33547fe636ad30dcb54001e55f64a973ad",
+      "capabilities/mail-service/index.js": "794f3c6cc61cdc24c40295ebcd1c8b46ac3937aabfecc3bde7c81ae8aebbf80d",
+      "capabilities/mail/index.js": "2deaf9f877fd18794bfd89dabdb77efffda4822e669c743899a7935d3a31c5b2",
+      "capabilities/redis/index.js": "93db0bceca084bbc3af4660204914e4cc43e161a1cca1985587c93a163aa8631",
+      "capabilities/secrets/index.js": "a5fd4c392efbbb8b4d7d1d5fd3967a6e10b07d3772e4ef3b6aa7108a57883694",
+      "capabilities/tls/index.js": "06da31cc1d5ca925753304d7172bfc9275ba5e0be1a16ed44b1fbda6c18ad12c",
+      "lib/index.js": "423baec15372da4bff1ff94c89524796b176702402f990dabe792cf75942fe40",
+      "lifecycle/index.js": "a929808d4ac234eae398b3c13ad7a00f37dd6c873147e1cb3f73f5fd090f6e74",
+      "lifecycle/journal.js": "93d712a626e5f3deb91804518640bcef5267d139871d0fa509ce4d57d186cd0a",
+      "capabilities/mail-service/lock.js": "a3ba33045b20c0e3040505e42ec575602281efa95cfaf92b0877f4742add9f26",
+      "internal/network-readiness.js": "cabb4f7279454bb61f1f5ed4254a3a99b875657408165d6d3e19a57af89945ee",
+      "adapters/docker/nginx.js": "b9b4d70bb5747a2805cd318bbd12cf7afa83647d3268b1c775f913a92fabcfd8",
+      "lib/plan-v2.js": "069acac18ab76a4a03334c7cb9d06e95c9a9c9d8af7384070508df15a48e7cd1",
+      "lib/plan.js": "2cb7526564bf26b2a1debc114828c46a2e16e7c959a70b279e2bf10e086e35b2",
+      "capabilities/mail-service/policy.js": "096b674243fd36f116d42377e16b8a90d06316bae80f6d596a77d9c87ff23cff",
+      "lifecycle/preparation.js": "c08092c8cf6dd24d52a4d9b7343fa23ac5cdc9aa85e3504301f4e2549bb77113",
+      "capabilities/mail-service/purge.js": "5911e0a55a998ef43a7b0047fa93ad5c7d90997369b5a85d13969bb9dad31e1a",
+      "lifecycle/recovery.js": "574c54c1db3f00167a473b9279f183c4e59e1d39b93733b093b4977d9e15a2ac",
+      "capabilities/mail-service/render.js": "9790c3148ce3980eb8a6a1d4a98f51bb60f464ba75903c5d1514eafa91ddcc58",
+      "lib/rendering.js": "945bf6abfa44f4b1ad5844eefb21a7dac78372d527a83700fa8ca5605bb8d840",
+      "adapters/docker/resources.js": "a7c9f2a2521524850bfb3ccc9c999e3531ffd909c2284d33f000a3b997784efa",
+      "internal/rollback-authorization.js": "ecd10fa602b9eaa7af6b3d91bf604d377ee0f92407fdad8a88ce217980179996",
+      "capabilities/http/nginx/routes.js": "00eabe7a099cd48a4da43994b9437b93e5ab5e01501c372bfc22328a6c717dc2",
+      "adapters/docker/services.js": "83193f603c84172d2ea7287d8ef641d01fc02fff42b1427d7da02df1381d1cfc",
+      "lib/smtp-auth.js": "c64632ccd15a366ce12b55a25c716067dacd2fe2ba356d86880e3adad08ffab9",
+      "lib/spec.js": "0205c3b982856f37eec4a2888b9eb839d38e69b9687823d4d7d9dadc835e1020",
+      "lib/state-v2.js": "0df56ab6f5fb4c862da98f468549fff615d1e9a09f952e291336cbb76caf7c38",
+      "lib/state.js": "9f8e23a2287599a9614ddf5a181725696cdebabe0132eb72502f5d70218735ef",
+      "internal/system-tools.js": "6d890b8aa08f93326b57216779c8ed792c1cd8a91a5ff4f751914da2bdc3d7e2",
+      "lifecycle/transitions.js": "5759269e9fe511fb69d5f5b31fbd52cc3fe53e2c8c5f810c6c08d2cf27caf764",
+      "capabilities/mail-service/validation.js": "6bd4d646e99890d2e381e6cd7a86ef708f469b9ff12ae37598132ead158355a0",
+      "lib/validation.js": "f71a90005e1a742c7dde024cc67b0eb1a1436bfaa991bfb2fea633ebe6cee1cd",
+      "package.json": "fcb4b200ba44f9eb4af1347e745a7301552c7492dad5a5de586ca562a4d4ddf4",
+      "capabilities/mail-service/schema.json": "9c4483b02698d4903126a9f27fe4147a1bdb5d0a0e3a6adaff84f8a8bc25f565",
+      "CHANGELOG.md": "bb4f155bfebc1415e8be7b5e237b80c77ac2014f8741b3e6fe515fe478ffced4",
+      "PROVENANCE.md": "9e338b0e61432bad92328c8c2649cc28ee18193140f5b852fedddecd09c3765d",
+      "README.md": "0a8d88cc1365b08ade67bf371c1a39d4f5df2e5b451f8869ee44102ea7230fe3",
+      "capabilities/docker/Dockerfile.services": "7d8750840f4baf9f6592c0a160252f8aae0271c15bb083f2aa070e6779a29fad",
+      "capabilities/mail-service/index.d.ts": "f0b420b74586931386f17e6da9280aa06d1a20afd9ef66cd51c86d26c73a9e37",
+      "index.d.ts": "e625fb10e140bd44edf4933319b30d4019bb722aa15f336204a1a25275c70bbc",
+      "lifecycle/index.d.ts": "eb19c680376d062a5c67ef8e33dd84deb9db2a9d68a8d040308a452243ad915b"
+    }
+  }
+}

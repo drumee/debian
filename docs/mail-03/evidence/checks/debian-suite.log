@@ -1,0 +1,364 @@
+
+[1;36m── 1. Shell syntax (bash -n)[0m
+  [1;32mPASS[0m admin/build.sh
+  [1;32mPASS[0m admin/opt/drumee/schemas/patch.sh
+  [1;32mPASS[0m bin/drumee-ctl
+  [1;32mPASS[0m bin/drumee-plugin
+  [1;32mPASS[0m bootstrap/build.sh
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/entrypoint/app
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/entrypoint/converter
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/entrypoint/dns
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/entrypoint/infra
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/entrypoint/lib.sh
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/entrypoint/mail
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/entrypoint/schemas
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/entrypoint/web
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/healthcheck/app
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/healthcheck/converter
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/healthcheck/dns
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/healthcheck/mail
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/healthcheck/web
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/schemas/init
+  [1;32mPASS[0m build-all.sh
+  [1;32mPASS[0m builder/build.sh
+  [1;32mPASS[0m caddy/build.sh
+  [1;32mPASS[0m deploy/docker/entrypoint.sh
+  [1;32mPASS[0m deploy/docker/infra-init-entrypoint.sh
+  [1;32mPASS[0m deploy/docker/populate-entrypoint.sh
+  [1;32mPASS[0m deploy/docker/wireguard-entrypoint.sh
+  [1;32mPASS[0m docker/build-role.sh
+  [1;32mPASS[0m docker/drumee-apt-source.sh
+  [1;32mPASS[0m docker/publish-roles.sh
+  [1;32mPASS[0m docs/sync-mirror.sh
+  [1;32mPASS[0m infra/build.sh
+  [1;32mPASS[0m infra/debian/config
+  [1;32mPASS[0m infra/sample.sh
+  [1;32mPASS[0m infra/var/lib/drumee/utils/functions.sh
+  [1;32mPASS[0m infra/var/lib/drumee/wireguard/bootstrap.sh
+  [1;32mPASS[0m keyring/build.sh
+  [1;32mPASS[0m meta/build.sh
+  [1;32mPASS[0m meta/make-control.sh
+  [1;32mPASS[0m node-runtime/build.sh
+  [1;32mPASS[0m roles/build.sh
+  [1;32mPASS[0m schemas-patch/bin/patch-from-manifest.sh
+  [1;32mPASS[0m schemas-patch/build.sh
+  [1;32mPASS[0m schemas-patch/patch.sh
+  [1;32mPASS[0m schemas-patch/update-changelog.sh
+  [1;32mPASS[0m schemas/build.sh
+  [1;32mPASS[0m schemas/make-seed.sh
+  [1;32mPASS[0m scripts/apt-repo-local.sh
+  [1;32mPASS[0m scripts/build-images-local.sh
+  [1;32mPASS[0m scripts/build-minimal-kernel.sh
+  [1;32mPASS[0m scripts/build-seed.sh
+  [1;32mPASS[0m scripts/check-packaging.sh
+  [1;32mPASS[0m scripts/check-seed.sh
+  [1;32mPASS[0m scripts/check-versions.sh
+  [1;32mPASS[0m scripts/containers.sh
+  [1;32mPASS[0m scripts/debian.sh
+  [1;32mPASS[0m scripts/deploy-apt-repo.sh
+  [1;32mPASS[0m scripts/dev-down.sh
+  [1;32mPASS[0m scripts/dev-up.sh
+  [1;32mPASS[0m scripts/lib/apt-repo.sh
+  [1;32mPASS[0m scripts/publish-apt.sh
+  [1;32mPASS[0m scripts/publish-images.sh
+  [1;32mPASS[0m scripts/publish-pool.sh
+  [1;32mPASS[0m scripts/publish-site.sh
+  [1;32mPASS[0m scripts/release-status.sh
+  [1;32mPASS[0m scripts/seed-check-entrypoint.sh
+  [1;32mPASS[0m scripts/seed-entrypoint.sh
+  [1;32mPASS[0m server/build.sh
+  [1;32mPASS[0m server/update-changelog.sh
+  [1;32mPASS[0m server/usr/share/drumee/admin/acme.cron.sh
+  [1;32mPASS[0m server/usr/share/drumee/admin/admin.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/clean-temp-files.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/create-doc-preview.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/db-patch-scan.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/make-zip.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/mfs-copy-dir.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/mfs-copy-node.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/smsfactor.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/soffice.sh
+  [1;32mPASS[0m server/usr/share/drumee/bin/swap-mfs.sh
+  [1;32mPASS[0m server/usr/share/drumee/sbin/log-history.sh
+  [1;32mPASS[0m server/usr/share/drumee/sbin/log-rotate.sh
+  [1;32mPASS[0m server/var/lib/drumee/postinstall/patch.sh
+  [1;32mPASS[0m static/build.sh
+  [1;32mPASS[0m static/update-changelog.sh
+  [1;32mPASS[0m target/usr/share/acme/acme.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/ali_cdn.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/ali_dcdn.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/apache.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/cleverreach.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/consul.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/cpanel_uapi.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/docker.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/dovecot.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/exim4.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/fritzbox.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/gcore_cdn.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/gitlab.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/haproxy.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/keychain.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/kong.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/lighttpd.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/mailcow.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/myapi.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/mydevil.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/mysqld.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/nginx.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/openmediavault.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/opensshd.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/openstack.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/panos.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/peplink.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/proxmoxve.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/pureftpd.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/qiniu.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/routeros.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/ssh.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/strongswan.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/synology_dsm.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/truenas.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/unifi.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/vault.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/vault_cli.sh
+  [1;32mPASS[0m target/usr/share/acme/deploy/vsftpd.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_1984hosting.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_acmedns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_acmeproxy.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_active24.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ad.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ali.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_alviy.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_anx.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_artfiles.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_arvan.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_aurora.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_autodns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_aws.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_azion.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_azure.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_bookmyname.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_bunny.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_cf.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_clouddns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_cloudns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_cn.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_conoha.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_constellix.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_cpanel.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_curanet.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_cyon.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_da.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ddnss.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_desec.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_df.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dgon.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dnsexit.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dnshome.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dnsimple.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dnsservices.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_doapi.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_domeneshop.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dp.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dpi.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dreamhost.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_duckdns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_durabledns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dyn.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dynu.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_dynv6.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_easydns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_edgedns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_euserv.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_exoscale.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_fornex.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_freedns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_gandi_livedns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_gcloud.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_gcore.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_gd.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_geoscaling.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_googledomains.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_he.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_hetzner.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_hexonet.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_hostingde.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_huaweicloud.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_infoblox.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_infomaniak.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_internetbs.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_inwx.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ionos.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ionos_cloud.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ipv64.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ispconfig.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_jd.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_joker.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_kappernet.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_kas.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_kinghost.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_knot.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_la.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_leaseweb.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_lexicon.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_limacity.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_linode.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_linode_v4.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_loopia.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_lua.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_maradns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_me.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_miab.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_misaka.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_myapi.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_mydevil.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_mydnsjp.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_mythic_beasts.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_namecheap.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_namecom.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_namesilo.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_nanelo.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_nederhost.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_neodigit.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_netcup.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_netlify.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_nic.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_njalla.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_nm.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_nsd.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_nsone.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_nsupdate.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_nw.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_oci.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_omglol.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_one.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_online.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_openprovider.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_openstack.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_opnsense.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ovh.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_pdns.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_pleskxml.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_pointhq.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_porkbun.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_rackcorp.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_rackspace.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_rage4.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_rcode0.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_regru.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_scaleway.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_schlundtech.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_selectel.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_selfhost.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_servercow.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_simply.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_tele3.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_tencent.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_timeweb.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_transip.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_udr.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_ultra.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_unoeuro.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_variomedia.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_veesp.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_vercel.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_vscale.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_vultr.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_websupport.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_west_cn.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_world4you.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_yandex360.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_yc.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_zilore.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_zone.sh
+  [1;32mPASS[0m target/usr/share/acme/dnsapi/dns_zonomi.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/aws_ses.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/bark.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/callmebotWhatsApp.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/cqhttp.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/dingtalk.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/discord.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/feishu.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/gotify.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/ifttt.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/mail.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/mailgun.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/mattermost.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/ntfy.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/pop.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/postmark.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/pushbullet.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/pushover.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/sendgrid.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/slack.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/slack_app.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/smtp.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/teams.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/telegram.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/weixin_work.sh
+  [1;32mPASS[0m target/usr/share/acme/notify/xmpp.sh
+  [1;32mPASS[0m tests/config-parity.sh
+  [1;32mPASS[0m tests/demo-stack.sh
+  [1;32mPASS[0m tests/e2e-local.sh
+  [1;32mPASS[0m tests/native/control-deps.sh
+  [1;32mPASS[0m tests/native/dns-zone-config.sh
+  [1;32mPASS[0m tests/native/install-verify.sh
+  [1;32mPASS[0m tests/native/lifecycle-remote.sh
+  [1;32mPASS[0m tests/native/make-seed.sh
+  [1;32mPASS[0m tests/native/upgrade-reconfigure.sh
+  [1;32mPASS[0m tests/native/verify-debconf-bridge.sh
+  [1;32mPASS[0m tests/run-all.sh
+  [1;32mPASS[0m tests/smoke-config.sh
+  [1;32mPASS[0m tests/smoke-container.sh
+  [1;32mPASS[0m tests/wireguard/probe-port.sh
+  [1;32mPASS[0m tests/wizard-install.sh
+  [1;32mPASS[0m ui/build.sh
+  [1;32mPASS[0m ui/update-changelog.sh
+  [1;32mPASS[0m utils/env.sh
+  [1;32mPASS[0m utils/functions.sh
+  [1;32mPASS[0m bootstrap/usr/lib/drumee/schemas/populate.js
+
+[1;36m── 2. Renderer parses[0m
+  [1;32mPASS[0m config/render.mjs (node --check)
+
+[1;36m── 3. Config smoke suite (10 assertions)[0m
+  [1;32mPASS[0m smoke-config.sh
+
+[1;36m── 4. Version drift guard[0m
+  [1;32mPASS[0m release manifest matches changelogs
+
+[1;36m── 5. End-to-end render from example config[0m
+  [1;32mPASS[0m render: validate
+  [1;32mPASS[0m render: all (.env + compose + install.conf)
+  [1;32mPASS[0m out/.env produced
+  [1;32mPASS[0m out/docker-compose.yml produced
+  [1;32mPASS[0m out/install.conf produced
+
+[1;36m── 6. Generated compose validity[0m
+  [1;32mPASS[0m docker compose config -q
+
+[1;36m── 7. Operator CLI guards[0m
+  [1;32mPASS[0m drumee-ctl usage guard
+
+[1;36m── 8. Installer wizard (render-only)[0m
+  [1;32mPASS[0m wizard-install.sh
+
+[1;36m── 9. Native channel packaging metadata[0m
+  [1;32mPASS[0m native/control-deps.sh
+
+[1;36m── 10. Channel parity — one fact, one place[0m
+  [1;32mPASS[0m config-parity.sh
+
+[1;36m── 11. CI baseline regressions[0m
+  [1;32mPASS[0m immutable parent, shell arguments, seed command and retention guards
+
+[1;36m── 12. Mail native immutable base[0m
+  [1;32mPASS[0m OCI manifest, image config, layers and locked FROM guards
+
+[1;36m── 13. Mail administration public state and secret input[0m
+  [1;32mPASS[0m administrative semantics and stable identities
+  [1;32mPASS[0m bounded exact password descriptors
+  [1;32mPASS[0m SQLite journal, descriptor locks and target preservation
+
+[1m== 336 passed, 0 failed ==[0m

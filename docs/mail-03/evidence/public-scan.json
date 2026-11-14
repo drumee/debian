@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "private_key_or_verifier_patterns_matched": 0,
+  "known_host_protected_forms_tested": 152,
+  "known_host_protected_forms_matched": 0,
+  "guest_export_protected_literals_tested": 103,
+  "guest_export_secrets_or_verifiers_matched": 0,
+  "secret_producing_output_fingerprints_omitted": true
+}
