@@ -47,4 +47,18 @@ for boundary in ('validated','staged','committed-before-native-apply','applied-b
   replay=run(args,pass_fds=());value=json.loads(replay.stdout);assert value==result;assert replay.returncode==(130 if boundary=='validated' else 0);assert not (root/'service/durable/registry/public/admission-closed').exists();check('external-kill-'+boundary+'-reconcile-same-receipt',{'base':revision,'target':observed['target'],'phase_before':observed['phase'],'phase_after':final['phase'],'revision':state['revision']})
  finally:
   if child.poll() is None:os.killpg(child.pid,signal.SIGKILL);child.wait(timeout=10)
+id=str(uuid.uuid4());revision=state['revision'];args=command('mailbox','quota',user,['--bytes','5242880'],id,revision);child=subprocess.Popen(args,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True);paused=False
+try:
+ for _ in range(60000):
+  row=operation(id)
+  if row and row['result'] and matching_bridge(child.pid,'release'):
+   os.killpg(child.pid,signal.SIGSTOP);r=run(['docker','pause',project+'-policy-1']);assert r.returncode==0;paused=True;os.killpg(child.pid,signal.SIGCONT);break
+  if child.poll() is not None:raise AssertionError('missed native release failure boundary')
+  time.sleep(.002)
+ else:raise TimeoutError('release failure synchronization')
+ child.wait(timeout=60);value=json.loads(child.stdout.read());assert child.returncode==7 and value['code']=='MAIL_APPLY_INCOMPLETE';assert (root/'service/durable/registry/public/admission-closed').exists();assert operation(id)['phase']=='applying';check('native-release-failure-returns-incomplete-with-durable-receipt-and-barrier',value)
+finally:
+ if paused:assert run(['docker','unpause',project+'-policy-1']).returncode==0
+ if child.poll() is None:os.killpg(child.pid,signal.SIGKILL);child.wait(timeout=10)
+resumed=cli('reconcile',opts=['--execute']);state['revision']=resumed['applied_revision'];assert operation(id)['phase']=='applied';assert not (root/'service/durable/registry/public/admission-closed').exists();check('dependency-repair-releases-same-durable-generation',{'applied_revision':state['revision']})
 result={'status':'PASS_MAIL03_NATIVE_TRANSACTIONS','checks':checks,'commands':commands,'last_revision':state['revision']};(root/'mail03-tx-result.json').write_text(json.dumps(result,indent=2));print(json.dumps({'status':result['status'],'checks':len(checks)}))
