@@ -115,3 +115,28 @@ The complete writer69ba692310186c3733fc632dc03f48d29afaeb0c file inventory is
 explicitly pinned in checkpoint-compatibility.json for format1. Unknown writer
 inventories refuse. Current-writer snapshots must match the current inventory.
 The observed failure and byte-preserving correction are retained in evidence.
+
+## Non-destructive abort before activation
+
+```sh
+bin/drumee-ctl --profile mail recovery-abort --config CONFIG \
+  --manifest-sha256 TRUSTED_MANIFEST_SHA256 --target-uuid REPLACEMENT_UUID --execute
+```
+
+Abort is available only before the release boundary. It retains every target
+entry, marks the target fenced/aborted and preserves the operation receipt. A
+retry of that aborted target refuses; use a new authorized empty target for a
+new restore. To return to the original source, retain the aborted target, mount
+the original storage at its canonical logical root and run recovery-resume-source
+against the latest checkpoint matching that source's capture operation. The
+aborted operation must identify that exact source UUID/device/inode/owner.
+A previously released copy cannot use this shortcut: stop/fence it, preserve its
+new accepted responsibility and reconcile per recipient before any rollback.
+
+Recovery errors use structured `drumee.mail-recovery/1` results: exit0 success,
+2 invalid usage,5 authorization/target refusal,6 lock/dependency failure,
+7 recovery-state conflict and8 integrity/storage/schema refusal. Existing mailbox,
+alias/account and lifecycle command contracts remain unchanged. An accepted
+start request is not protocol readiness: check native status and verified TLS/AUTH
+before releasing producers. The fixture retains the initial premature postqueue
+flush exit69 and uses a bounded native-readiness observation on replay.

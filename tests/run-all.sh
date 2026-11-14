@@ -83,6 +83,7 @@ run "SQLite journal, descriptor locks and target preservation" "python3 tests/ma
 
 hdr "14. Cold mail checkpoint archive boundaries"
 run "exact metadata, integrity, schema, occupied target and link refusals" "python3 tests/mail/checkpoint.test.py"
+run "recovery command authorization and exact option sets" "python3 tests/mail/checkpoint-cli.test.py"
 
 printf '\n\033[1m== %d passed, %d failed ==\033[0m\n' "$pass" "$fail"
 [ "$fail" = 0 ]
