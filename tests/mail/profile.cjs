@@ -14,12 +14,12 @@ test("mail profile uses the closed locked package inventory and detects corrupti
   finally { fs.unlinkSync(extra); }
   assert.equal(typeof api().planMailService, "function");
 });
-test("mail profile renderer and operator dispatch remain distinct from Team and administrative MAIL-03 verbs", () => {
+test("mail profile renderer and administration dispatch remain distinct from Team", () => {
   const example = path.resolve(__dirname, "../../config/drumee.mail.example.json");
   const result = spawnSync(process.execPath, [path.resolve(__dirname, "../../config/render.mjs"), "validate", "--config", example], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr); assert.equal(JSON.parse(result.stdout).distribution.profile, "mail");
   const admin = spawnSync("bash", [path.resolve(__dirname, "../../bin/drumee-ctl"), "--profile", "mail", "mail"], { encoding: "utf8" });
-  assert.equal(admin.status, 1); assert.equal(JSON.parse(admin.stdout).code, "MAIL_ADMINISTRATION_RESERVED_FOR_MAIL03");
+  assert.equal(admin.status, 0); assert.match(admin.stdout, /mailbox\|alias\|account/);
   const unsafe = structuredClone(require(example)); unsafe.extra = true;
   assert.throws(() => require(profile + "/config.cjs").validate(unsafe), /MAIL_PROFILE_INVALID/);
 });
