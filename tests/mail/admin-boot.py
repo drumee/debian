@@ -12,7 +12,7 @@ def row(id):
 if mode=='stage':
  user='boot-'+uuid.uuid4().hex[:8]+'@oxymot.fr';passwords[user]='Boot-'+uuid.uuid4().hex;cli('mailbox','create',user,password=passwords[user],mutate=True);tag='boot-preserved-'+uuid.uuid4().hex;assert probe(action='send',recipient=user,tag=tag)['data_code']==250;wait_read(user,tag)
  rendered=run(['bash',str(repo/'bin/drumee-ctl'),'--profile','mail','boot-unit','--config',str(cfg)]);assert rendered.returncode==0;file=root/unit;file.write_text(json.loads(rendered.stdout)['unit']);assert run(['sudo','install','-m','0644',str(file),'/etc/systemd/system/'+unit]).returncode==0;assert run(['sudo','systemctl','daemon-reload']).returncode==0;assert run(['sudo','systemctl','enable','--now',unit]).returncode==0
- assert comp('stop','dovecot').returncode==0;queued=tag+'-queued';accepted=probe(action='send',recipient=user,tag=queued);assert accepted['data_code']==250;assert run(['docker','exec',project+'-postfix-1','postsuper','-c','/config','-h',accepted['queue_id']]).returncode==0;assert comp('start','dovecot').returncode==0
+ assert comp('stop','dovecot').returncode==0;queued='boot-queued-'+uuid.uuid4().hex;accepted=probe(action='send',recipient=user,tag=queued);assert accepted['data_code']==250;assert run(['docker','exec',project+'-postfix-1','postsuper','-c','/config','-h',accepted['queue_id']]).returncode==0;assert comp('start','dovecot').returncode==0
  id=str(uuid.uuid4());revision=state['revision'];args=['bash',str(repo/'bin/drumee-ctl'),'--profile','mail','mail','mailbox','quota',user,'--bytes','2097152','--config',str(cfg),'--json','--execute','--if-revision',str(revision),'--request-id',id];child=subprocess.Popen(args,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
  try:
   for _ in range(60000):

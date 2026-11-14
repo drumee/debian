@@ -1,0 +1,459 @@
+{
+  "status": "PASS_HELD_LMTP_QUOTA_CHANGE",
+  "checks": [
+    {
+      "name": "rcpt-before-data-old-writer-resolved-before-new-quota-success",
+      "status": "PASS",
+      "observation": {
+        "writer": {
+          "writer_result": 250,
+          "writer_finished_monotonic": 29974.476710755,
+          "unrelated_imap": "OK"
+        },
+        "new_limit": 1048576,
+        "used_at_success": 1200443,
+        "over_quota_at_success": true,
+        "applied_revision": 62
+      }
+    },
+    {
+      "name": "data-in-progress-old-writer-resolved-before-new-quota-success",
+      "status": "PASS",
+      "observation": {
+        "writer": {
+          "writer_result": 250,
+          "writer_finished_monotonic": 30006.329367136,
+          "unrelated_imap": "OK"
+        },
+        "new_limit": 1048576,
+        "used_at_success": 1200443,
+        "over_quota_at_success": true,
+        "applied_revision": 64
+      }
+    },
+    {
+      "name": "fits-new-limit-old-writer-resolved-before-new-quota-success",
+      "status": "PASS",
+      "observation": {
+        "writer": {
+          "writer_result": 250,
+          "writer_finished_monotonic": 30039.404120741,
+          "unrelated_imap": "OK"
+        },
+        "new_limit": 1048576,
+        "used_at_success": 400443,
+        "over_quota_at_success": false,
+        "applied_revision": 66
+      }
+    },
+    {
+      "name": "target-imap-append-old-writer-resolved-before-new-quota-success",
+      "status": "PASS",
+      "observation": {
+        "writer": {
+          "writer_result": "disconnected",
+          "writer_finished_monotonic": 30072.324578432,
+          "unrelated_imap": "OK"
+        },
+        "new_limit": 1048576,
+        "used_at_success": 0,
+        "over_quota_at_success": false,
+        "applied_revision": 68
+      }
+    },
+    {
+      "name": "busy-quota-drain-refuses-success-and-retains-old-applied-state",
+      "status": "PASS",
+      "observation": {
+        "applied_revision": 69,
+        "code": "MAIL_APPLY_INCOMPLETE",
+        "contract": "drumee.mail-cli/1",
+        "data": {
+          "admission": "closed",
+          "pending_operation": "f0333fe9-41b5-4db5-8d41-f6799cf23b5b",
+          "phase": "applying"
+        },
+        "desired_revision": 70,
+        "ok": false,
+        "operation_id": "f0333fe9-41b5-4db5-8d41-f6799cf23b5b",
+        "retryable": true
+      }
+    },
+    {
+      "name": "busy-drain-reconcile-old-writer-resolved-before-new-quota-success",
+      "status": "PASS",
+      "observation": {
+        "writer": {
+          "writer_result": 250,
+          "writer_finished_monotonic": 30114.750924032,
+          "unrelated_imap": "OK"
+        },
+        "new_limit": 1048576,
+        "used_at_success": 1200443,
+        "over_quota_at_success": true,
+        "applied_revision": 70
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c249f226456bcc5833e2bcac02c0771a7237967864f8cad0b9270847bd76c29c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "quota-reader-26b102de@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "59",
+        "--request-id",
+        "292691f0-3235-4f07-b859-8b1607ba2b99",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ef125495c5c0b137f335e1e1d6e70155f1e4a79b22bddec5b7f3b9957e303002",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "quota-transition-e952b9cb@oxymot.fr",
+        "--quota-bytes",
+        "2097152",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "60",
+        "--request-id",
+        "add49c9c-446e-409a-8f7f-ce9c2fefd180",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d96be60a7c33d145bfe2f6e2ed4cdac9914ed82d3ba0ea1768587df3cc6e35bd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "show",
+        "quota-transition-e952b9cb@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "2ad9f56918480ca6cc4d8cbcb936b7764bda9a35b1b30939e05818769191eaa2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e76acc38ecf76b01cc7c9d1113ecaf614a11b23401b5fa2f17191b1fe3dccb92",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "quota-transition-5c963679@oxymot.fr",
+        "--quota-bytes",
+        "2097152",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "62",
+        "--request-id",
+        "07a45484-0654-4c59-b32f-c4a0ff31ea20",
+        "--password-fd",
+        "4"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9c7623d3f950a1c156cc97257d0981fb8a96d4c971e7a6899cad9499aea40ef3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "show",
+        "quota-transition-5c963679@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "0d7fa0704a530fe471eac43e2edf21c84df24a4702787978facf9e6ec10d828b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "bcb8e847f3a6455cc885d201c266dc0e4b94529dcfac7a58897781c4e0ab6050",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "quota-transition-9ca781f8@oxymot.fr",
+        "--quota-bytes",
+        "2097152",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "64",
+        "--request-id",
+        "649ca5f6-45bc-4964-9f3d-cffaef3c1f41",
+        "--password-fd",
+        "4"
+      ],
+      "exit": 0,
+      "stdout_sha256": "3d4b8861fd0e20afdf0b34a5bc52e0c73e819e1828b3f56bfcbdc2e517526eea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "show",
+        "quota-transition-9ca781f8@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6cf42a90deaa2045bc773557e60eb03ab86ecaef521a1bfe2ccfaf6614687eed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "quota-transition-a13bf65b@oxymot.fr",
+        "--quota-bytes",
+        "2097152",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "66",
+        "--request-id",
+        "2ea99fa4-6144-402b-9178-d7098787052d",
+        "--password-fd",
+        "4"
+      ],
+      "exit": 0,
+      "stdout_sha256": "28169cb5de7cb7d16e5fb45d839c8d10254dc13074b021b02b86ee3dbd240cbd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "show",
+        "quota-transition-a13bf65b@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "da618e5197374b8b61adcbcf8781c0ef586b8feaf7f3ad024c35d659b379f66b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "quota-transition-8ee82e7f@oxymot.fr",
+        "--quota-bytes",
+        "2097152",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "68",
+        "--request-id",
+        "5e64ce6f-8f8b-4349-b3e1-27b37f576692",
+        "--password-fd",
+        "4"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e12c1682493b6f55cd68b0ef8b907f676ea5013fb4af8c55eb1b7f0a613a9329",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d5f61309a281c3dd0b7ab5b7dd92dc07e646f166960de06a28fafd49499bf5be",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "show",
+        "quota-transition-8ee82e7f@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "31fad724251a17794274bae1692830221c04e148911b4e4a21d7c46dae16649a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d07609d66201a5d1fae6be298f3d8a83191650be9aecdc49991752daf5787644",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "last_revision": 70
+}

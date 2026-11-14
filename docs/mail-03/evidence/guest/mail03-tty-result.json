@@ -1,0 +1,75 @@
+{
+  "status": "PASS_MAIL03_NATIVE_TTY",
+  "checks": [
+    {
+      "name": "masked-tty-mismatch-restores-terminal",
+      "status": "PASS",
+      "observation": {
+        "exit": 2,
+        "output_sha256": "08941495d45029e9f8693a4c1bd11be55f40f410a5129530c32949e3013dd743",
+        "secret_in_output": false
+      }
+    },
+    {
+      "name": "masked-tty-cancel-restores-terminal",
+      "status": "PASS",
+      "observation": {
+        "exit": 130,
+        "output_sha256": "ca58e70c641d64d48eefd0b266113730a668c9304a0e9aea4cbf4ddc2c0b816c",
+        "secret_in_output": false
+      }
+    },
+    {
+      "name": "masked-tty-valid-restores-terminal",
+      "status": "PASS",
+      "observation": {
+        "exit": 0,
+        "output_sha256": "13187e4ff447b0d043b77b931592785a7fa24e6dba776d863e5a18a75fae8c72",
+        "secret_in_output": false
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7650d09dfb68de8a9e0ad3e92981e3792988c474e05b89bddab8d018f3bb7618",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "72c0898711b6853a8570935d3e23daa2c8191d9638c8aef813d092ab60128ad6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

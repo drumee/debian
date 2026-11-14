@@ -1,0 +1,312 @@
+{
+  "status": "PASS_MAIL03_NATIVE_QUOTA_CHANGE",
+  "checks": [
+    {
+      "name": "quota-increase-effective-and-exact-observed-bytes",
+      "status": "PASS",
+      "observation": {
+        "used_bytes": 1203184,
+        "quota_bytes": 2097152
+      }
+    },
+    {
+      "name": "quota-decrease-below-use-retains-data-tempfails-lmtp",
+      "status": "PASS",
+      "observation": {
+        "quota": {
+          "address": "second@oxymot.fr",
+          "advisory": true,
+          "created_at": null,
+          "credential_generation": 2,
+          "deleted": false,
+          "id": "22222222-2222-4222-8222-222222222222",
+          "imap_enabled": true,
+          "messages": 5,
+          "modified_at": "2026-11-14T09:07:10.818689+00:00",
+          "observed_at": "2026-11-14T09:07:31.191Z",
+          "over_quota": true,
+          "quota_bytes": 1048576,
+          "receive_enabled": true,
+          "submission_enabled": false,
+          "used_bytes": 1203184
+        },
+        "queue": {
+          "queue_name": "deferred",
+          "queue_id": "8D42C1B61F1A",
+          "arrival_time": 1794647252,
+          "message_size": 431,
+          "forced_expire": false,
+          "sender": "outside@dest.invalid",
+          "recipients": [
+            {
+              "address": "mbx-22222222-2222-4222-8222-222222222222@local.invalid",
+              "delay_reason": "host mail.oxymot.fr[/run/mail-sockets/lmtp] said: 452 4.2.2 <mbx-22222222-2222-4222-8222-222222222222@local.invalid> Quota exceeded (mailbox for user is full) (in reply to RCPT TO command)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "quota-space-release-drains-same-accepted-message",
+      "status": "PASS",
+      "observation": {
+        "queue_id": "8D42C1B61F1A",
+        "delivered_matches": 1
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e9528992fe7346b28118aba84d5e47750eb1165eb225f86db1c36e6b59693dec",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "quota",
+        "second@oxymot.fr",
+        "--bytes",
+        "2097152",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "212",
+        "--request-id",
+        "6de9e704-f1a9-4ecc-9e4d-ee9edd56b680"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c74d871dc5ce8caace7d1cff364fa75d399ec5395066fc414175d168528baa6a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-3087174e-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-qblxe20q/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "40b9a8153f1011f18165646235b643d03e618362d32b0062e94bf2a6ec471985",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "show",
+        "second@oxymot.fr",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "df519a0181bbfa0dc90a85dbc11a77bc3b5d0995f7d6a3b98306fdaeadae3ec6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "quota",
+        "second@oxymot.fr",
+        "--bytes",
+        "1048576",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "213",
+        "--request-id",
+        "b17ff329-85ac-4d6d-bf7a-870e0d7507b7"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7c1121fb54f330e191e8a7c6268501b2c9d2eb40a743e8ec6bee2620fde40343",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-3087174e-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-qblxe20q/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "adf88cea17dced1f480ae80d6db45e278f3690585f88f31e0bbd9b9ad9a6fc70",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-3087174e-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-qblxe20q/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e2006522c49d4fe420ace92318785ec7ec21e1219e216ab133f2169a7c7fc1da",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postqueue",
+        "-c",
+        "/config",
+        "-j"
+      ],
+      "exit": 0,
+      "stdout_sha256": "3a534d95befe73a08968ad59307279ea129fca119d18fd9d5e06ea04b44a982a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-3087174e-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-qblxe20q/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f68f1ab467c65b0afd276674a79c09df03050906dcdc58e0f70fe7a94d153a9c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postqueue",
+        "-c",
+        "/config",
+        "-f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-3087174e-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-qblxe20q/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d59f89b1574fff38cd6cc0a385401f87f89d56319ea377a66eb4ed94e02b3145",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-3087174e-postfix-1",
+        "postqueue",
+        "-c",
+        "/config",
+        "-j"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "last_revision": 214
+}

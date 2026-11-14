@@ -1,0 +1,59 @@
+
+> @drumee/infra-layer@0.1.0-alpha.7-mail03.8 lint
+> node tooling/lint.cjs
+
+
+/tmp/mail03-infra/adapters/docker/nginx.js
+  4:11  warning  'spec' is assigned a value but never used  no-unused-vars
+
+/tmp/mail03-infra/capabilities/database/index.js
+  2:7  warning  'S' is assigned a value but never used  no-unused-vars
+
+/tmp/mail03-infra/capabilities/dns/index.js
+  22:76  warning  '_' is defined but never used  no-unused-vars
+
+/tmp/mail03-infra/capabilities/redis/index.js
+  26:75  warning  '_' is defined but never used  no-unused-vars
+
+/tmp/mail03-infra/lib/plan-v2.js
+   3:25   warning  'cidr' is assigned a value but never used  no-unused-vars
+  58:112  warning  '_' is defined but never used              no-unused-vars
+
+/tmp/mail03-infra/lib/rendering.js
+  67:64  warning  '_' is defined but never used  no-unused-vars
+
+/tmp/mail03-infra/lifecycle/activation.js
+  5:7  warning  'crypto' is assigned a value but never used  no-unused-vars
+
+/tmp/mail03-infra/lifecycle/composition.js
+  120:15  warning  'name' is assigned a value but never used  no-unused-vars
+
+/tmp/mail03-infra/lifecycle/external-gateway.js
+  42:96  warning  '_' is defined but never used  no-unused-vars
+  42:99  warning  Empty block statement          no-empty
+
+/tmp/mail03-infra/lifecycle/journal.js
+  12:95  warning  '_' is defined but never used  no-unused-vars
+
+/tmp/mail03-infra/lifecycle/preparation.js
+  15:90  warning  '_' is defined but never used  no-unused-vars
+  21:82  warning  '_' is defined but never used  no-unused-vars
+
+/tmp/mail03-infra/lifecycle/transitions.js
+  12:108  warning  '_' is defined but never used  no-unused-vars
+  15:180  warning  '_' is defined but never used  no-unused-vars
+  54:168  warning  '_' is defined but never used  no-unused-vars
+  84:73   warning  '_' is defined but never used  no-unused-vars
+  89:69   warning  '_' is defined but never used  no-unused-vars
+
+/tmp/mail03-infra/test/application/run.js
+   7:7    warning  'api' is assigned a value but never used  no-unused-vars
+  11:535  warning  '_' is defined but never used             no-unused-vars
+  11:538  warning  Empty block statement                     no-empty
+
+/tmp/mail03-infra/test/unit/composition.test.js
+  25:41  warning  Expected to return a value in getter 'contract_version'  getter-return
+
+✖ 23 problems (0 errors, 23 warnings)
+
+{"errors":0,"visible_warnings":23,"baseline_entries":65,"new_findings":0}

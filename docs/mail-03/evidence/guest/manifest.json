@@ -1,0 +1,33 @@
+{
+  "contract": "drumee.mail03-public-evidence/1",
+  "synthetic_data_only": true,
+  "secrets_or_verifiers_matched": 0,
+  "protected_literals_tested": 103,
+  "files": {
+    "atomic-quota-result.json": "6e21a3d1daa899827a8398c602ff2cbcef819207ff34032b0b6f5d7725778104",
+    "boot-prefix-before.json": "52767c65c95e1a62da845971881600e6366b9c2fdd332cb517bffc73a2bb7fec",
+    "boot-prefix-failure.log": "3300a1d60b4e75883640e3ecbb51ac5d7369e269672adaa888fc20982a64deee",
+    "boot-prefix-observation.json": "11f4149244017a779a6a2bc296aa8c140052bdb556bc8ed8b506dcd8c07e7ea6",
+    "boot-result.json": "19ded466aa7f615b94f8d7fd25b74649a26141f53def425510b9365d2fde8020",
+    "debian-runtime-source-sha256.json": "5e17f207221518d3ff367e26cb9261de981d08827d8fadfb0eb58bcbbadb2f86",
+    "held-quota-failure-mail03-6.json": "7dbcce950519c63f0d0958e07e0f9bb4a61f2ba4030ea9c4f759531f172c35c1",
+    "held-quota-result.json": "519370d65d8a0ead5f981f77efbd1373425ea4c4e8456d3a2b40900e9a6555e1",
+    "mail03-accounts-result.json": "c1922cfa8ab120f006764988edae67cee584e2700a0d4221d9d40a3bca6c5243",
+    "mail03-admin-result.json": "2b7e80205ca307e87c3b76f422596bd22b5cce6285ee122446ef860c7d3617af",
+    "mail03-boot-result.json": "90b48417c6b3551c8a2a968a169ef67be7c25e159c0831712d72a6f38cfea604",
+    "mail03-cutpoints-result.json": "9d155cf192b3f356b48e1a443964c274bb9589a709052dfa6b8b2c8870b4b4e8",
+    "mail03-errors-result.json": "7cfd8dedfde96f7d67e206221bd78d4f22b1f11c5f8cd40fd693addfec3480ab",
+    "mail03-final-replay.json": "bb35c9bda243acb7ee4069364943d877d95c51f9421886a8fd17c58dbf7eec47",
+    "mail03-purge-interruption-result.json": "9ac8d06577ec5f30ae3e76597e0e2da978bc0d4dba93199ae4ace3a3ab58a0f4",
+    "mail03-purge-result.json": "191d05e90d6a2b10066205ec90c139ea4332d5e4147a38dfc011ada00efdb560",
+    "mail03-quota-guards-result.json": "f16e3585971e078ab9302106bb4a67f76c0108e3f85aed1f73d1a13291464b3f",
+    "mail03-quota-result.json": "11f9a07880d3e586a25afd76c950f23e0eed8b13deae413b41476d1243206d52",
+    "mail03-rights-result.json": "d60fd0055da264572f7844df233014a310b76a2ef1235a6024a85886c8481573",
+    "mail03-session-result.json": "6ab409293e5f83f6bc1b8c222fafd8d511a2266eadeae2ef6e252dc9954a5987",
+    "mail03-tty-result.json": "44952b218a6b9bbb6254ec7db99391d94aa8bc24f75b3f137849aec426674396",
+    "mail03-tx-result.json": "8e8dfd50c8f76327dcd59a9fbff37c177a43263ceada05e6d07800aa3ac71a10",
+    "private-pre-reboot-result.json": "fc6776d61edd41bb47d4ce3d04770958381ce9d40b6c2fbcb8c2898b8dd059a5",
+    "private-result.json": "fc3a09abdc6860ac0453adad25f43661882f20a0a07b6cb81f7702e6532bd2e5",
+    "software-guest.json": "ab6b57f7e04bfeeb4f6cdfe21a2563b90a8e1009298f8a4036d9cb315adecb93"
+  }
+}

@@ -127,6 +127,24 @@ native reconciliation verifies and erases the remaining subset. This is explicit
 a crash-state fixture, not a replacement-storage restore qualification. It verifies
 the retained backup is unchanged and leaves services stopped before a separate start.
 
+## Supplementary final-package transport profile
+
+Use a distinct fresh profile created with the final acquired package, before any
+administrative credential mutation. TLS fixtures intentionally use bootstrap
+credentials and require an unchanged same-version prepared candidate. Preserve
+the administration profile separately. In the fresh profile run sequentially:
+
+```sh
+python3 -B tests/mail/tls-native.py PROFILE SOURCE INFRA/test/mail-service
+python3 -B tests/mail/tls-extra.py PROFILE SOURCE INFRA/test/mail-service
+python3 -B tests/mail/identity-controls.py PROFILE
+python3 -B tests/mail/protocol-native.py PROFILE SOURCE INFRA/test/mail-service
+python3 -B tests/mail/auth-gate-native.py PROFILE SOURCE
+```
+
+These assert 5 TLS generation, 6 expiration/mandatory TLS, 63 identity, 26 protocol
+and 3 authentication-gate outage/recovery controls with the native services.
+
 ## Guest reboot and independent private clients
 
 Only inside the disposable qualification VM, after the native replay:
@@ -144,6 +162,10 @@ sudo systemctl reboot --no-block
 python3 -B tests/mail/boot-native.py PROFILE SOURCE /absolute/infra/test/mail-service verify
 python3 -B tests/mail/private-network.py PROFILE SOURCE /absolute/infra/test/mail-service
 ```
+
+Use disjoint Message-IDs: IMAP HEADER search matches substrings. The first
+fixture failed its old-message count because its queued ID extended the old ID;
+its failure is retained and the corrected whole reboot scenario was replayed.
 
 The first reboot retains an interrupted operation, closed admission and a held
 accepted message. Ordinary startup refuses incomplete security state; explicit

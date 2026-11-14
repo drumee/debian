@@ -1,0 +1,33 @@
+{
+  "generated_configurations_equal": true,
+  "artifact_sha256": [
+    "272cb2fca0376ba027843f7c441a0bc264eea6f04ce1b3d6269659ccebb3aa11",
+    "272cb2fca0376ba027843f7c441a0bc264eea6f04ce1b3d6269659ccebb3aa11"
+  ],
+  "implementation_changed": true,
+  "keys": [
+    "private-input.nft",
+    "main.cf",
+    "master.cf",
+    "dovecot.conf",
+    "opendkim.conf",
+    "key-table",
+    "signing-table",
+    "private-sources",
+    "tls-policy",
+    "postfix-entrypoint.sh",
+    "dovecot-entrypoint.sh"
+  ],
+  "archive_members": [
+    52,
+    52
+  ],
+  "changed_6_to_8": [
+    "package/capabilities/mail-service/index.js",
+    "package/package.json",
+    "package/CHANGELOG.md"
+  ],
+  "native_image": "sha256:ab41ba434fa20afd54f71f43fc31ad2aaa94260193a4e9b56cc0e5c971fb1a56",
+  "quota_module_sha256": "01fec4a55d42add0d62b939216bec57869513b2dab6b55c83ae51c93dd22f4c5",
+  "native_source_diff": []
+}

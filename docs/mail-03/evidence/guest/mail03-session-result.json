@@ -1,0 +1,217 @@
+{
+  "status": "PASS_MAIL03_NATIVE_SESSIONS",
+  "checks": [
+    {
+      "name": "rotation-revokes-held-smtp-and-target-imap-preserves-unrelated",
+      "status": "PASS",
+      "observation": {
+        "accepted_before_change": true,
+        "mail_after_change": 421,
+        "data_after_change": 421,
+        "target_imap_after_change": "disconnected",
+        "unrelated_imap_after_change": "OK"
+      }
+    },
+    {
+      "name": "rotation-preserves-final-250-message-and-rejects-old-password",
+      "status": "PASS",
+      "observation": {
+        "matches": 1
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "69a6436b745411b33e1b399d022c8312a36673e36da4954bc6f5eaa974cd3429",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "session-a4e4af11@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "81",
+        "--request-id",
+        "38150185-6666-44cd-af0d-f25cb21c6928",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e973d67b12e05117ae66099949c7ffc9bf73d8a4341ea6cbdc0d120f7a0a9ad1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "session-1a538c9b@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "82",
+        "--request-id",
+        "c5a8c600-8d23-4210-8995-8e0fa0628a7c",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "435b283618df2ce8d02c9d3b9f05437c60450460ce32853facf49a91f9b588b4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "enable",
+        "session-a4e4af11@oxymot.fr",
+        "--scope",
+        "submission",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "83",
+        "--request-id",
+        "53226f78-bebd-48db-9592-5ddc5f25461d"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1fdd60971cfe74af50efc5f14f0ce932f6f3ff3cc3252870655ffdee9c92b316",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "password",
+        "session-a4e4af11@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "84",
+        "--request-id",
+        "06f6df6b-8f03-41ec-8f91-0a0bdb99e62e",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "64b7b13c08eaabd1eac496315ae8b02b87a11c2a8e3630a5afcba57d279c00c5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "0d7219784d109a01a6b4a45dfd8ee9f404461bcb9005baf32f2c9a488345c0a7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "931648df5dd3240c1a253b8148ea610ac6f21cbf9f4d82b40b63074d90a5f239",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9a4831b30fad4aa6dff81fe98c19e6accbbce7fb43bff15cadbd4c3119a1f990",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "last_revision": 85
+}

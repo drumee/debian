@@ -1,0 +1,212 @@
+{
+  "status": "PASS_MAIL03_PENDING_GUEST_REBOOT",
+  "checks": [
+    {
+      "name": "reboot-retains-pending-intent-and-closed-admission",
+      "status": "PASS",
+      "observation": {
+        "applied_revision": 141,
+        "code": "OK",
+        "contract": "drumee.mail-cli/1",
+        "data": {
+          "admission": "closed",
+          "native_generation": 141,
+          "pending_operation": "df225879-9581-4b14-afb2-179e00eb3de1",
+          "transport_running": 0
+        },
+        "desired_revision": 142,
+        "ok": true
+      }
+    },
+    {
+      "name": "reconcile-after-reboot-preserves-queue-and-mailbox-without-generation-rollback",
+      "status": "PASS",
+      "observation": {
+        "queue_id": "14A1D49BCF",
+        "applied_revision": 142,
+        "queued_matches": 1,
+        "old_matches": 1
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f9b3b4a21990b8cacee2321526be5766eb2d4b14c8d75792759d2023beff7c3a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f9b3b4a21990b8cacee2321526be5766eb2d4b14c8d75792759d2023beff7c3a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "8289c99dc3d116e607c5fac748444c8991f349f6a3c274a0ec1c70ec0d23c3f2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "postqueue",
+        "-c",
+        "/config",
+        "-j"
+      ],
+      "exit": 0,
+      "stdout_sha256": "70eb68f29a09e515b3fe3f32fd0f93e091d1709316fb75859cb5667a108e09dc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "postsuper",
+        "-c",
+        "/config",
+        "-H",
+        "14A1D49BCF"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "cb96a7b04be6b96559d7fc4956cee5f22e1cb5d2001c616d31cebb6021b6bd3a"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "postqueue",
+        "-c",
+        "/config",
+        "-f"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "5826bdb994099d7a7bd3b3826469cd952babfbf18a520a50a4d08c33f0e3c951",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "5826bdb994099d7a7bd3b3826469cd952babfbf18a520a50a4d08c33f0e3c951",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "exec",
+        "mail02-profile-41dd8c8f-postfix-1",
+        "postqueue",
+        "-c",
+        "/config",
+        "-j"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "sudo",
+        "systemctl",
+        "reset-failed",
+        "mail02-profile-41dd8c8f.service"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "sudo",
+        "systemctl",
+        "start",
+        "mail02-profile-41dd8c8f.service"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

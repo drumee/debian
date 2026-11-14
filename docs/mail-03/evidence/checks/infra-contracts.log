@@ -1,0 +1,158 @@
+
+> @drumee/infra-layer@0.1.0-alpha.7-mail03.8 test:contracts
+> node --test test/unit/application-contract.test.js test/unit/composition.test.js test/unit/distribution-isolation.test.js
+
+TAP version 13
+# Subtest: application has one explicit loopback publication and no implicit infrastructure
+ok 1 - application has one explicit loopback publication and no implicit infrastructure
+  ---
+  duration_ms: 8.830258
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding 0.0.0.0
+ok 2 - application rejects noncanonical host binding 0.0.0.0
+  ---
+  duration_ms: 0.985613
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding ::
+ok 3 - application rejects noncanonical host binding ::
+  ---
+  duration_ms: 1.078855
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding ::1
+ok 4 - application rejects noncanonical host binding ::1
+  ---
+  duration_ms: 0.904001
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding 127.0.0.2
+ok 5 - application rejects noncanonical host binding 127.0.0.2
+  ---
+  duration_ms: 0.628743
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding 192.168.5.201
+ok 6 - application rejects noncanonical host binding 192.168.5.201
+  ---
+  duration_ms: 0.965643
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding localhost
+ok 7 - application rejects noncanonical host binding localhost
+  ---
+  duration_ms: 0.604652
+  type: 'test'
+  ...
+# Subtest: application rejects noncanonical host binding ::ffff:127.0.0.1
+ok 8 - application rejects noncanonical host binding ::ffff:127.0.0.1
+  ---
+  duration_ms: 0.527522
+  type: 'test'
+  ...
+# Subtest: application rejects invalid ports, listener confusion, routes and hidden publications
+ok 9 - application rejects invalid ports, listener confusion, routes and hidden publications
+  ---
+  duration_ms: 6.004093
+  type: 'test'
+  ...
+# Subtest: application cannot borrow or relax legacy profile semantics
+ok 10 - application cannot borrow or relax legacy profile semantics
+  ---
+  duration_ms: 3.253429
+  type: 'test'
+  ...
+# Subtest: plugins are explicit immutable inventory without an alternate loader
+ok 11 - plugins are explicit immutable inventory without an alternate loader
+  ---
+  duration_ms: 3.953683
+  type: 'test'
+  ...
+# Subtest: application secrets select only declared references and retain consumer boundaries
+ok 12 - application secrets select only declared references and retain consumer boundaries
+  ---
+  duration_ms: 14.794168
+  type: 'test'
+  ...
+# Subtest: SMTP/DKIM compose unchanged, private and before an explicitly dependent application
+ok 13 - SMTP/DKIM compose unchanged, private and before an explicitly dependent application
+  ---
+  duration_ms: 29.938255
+  type: 'test'
+  ...
+# Subtest: application retains immutable image, resource, dependency and tamper guards
+ok 14 - application retains immutable image, resource, dependency and tamper guards
+  ---
+  duration_ms: 3.994266
+  type: 'test'
+  ...
+# Subtest: composition is pure/deterministic, preserves private networks and orders persistent services
+ok 15 - composition is pure/deterministic, preserves private networks and orders persistent services
+  ---
+  duration_ms: 18.302608
+  type: 'test'
+  ...
+# Subtest: tampered plans, unsupported contracts and missing kernel composition fail closed
+ok 16 - tampered plans, unsupported contracts and missing kernel composition fail closed
+  ---
+  duration_ms: 18.800082
+  type: 'test'
+  ...
+# Subtest: duplicate durable resources and arbitrary mounts are rejected
+ok 17 - duplicate durable resources and arbitrary mounts are rejected
+  ---
+  duration_ms: 3.887832
+  type: 'test'
+  ...
+# Subtest: untrusted distribution fields/credentials and accessor input cannot execute
+ok 18 - untrusted distribution fields/credentials and accessor input cannot execute
+  ---
+  duration_ms: 5.606211
+  type: 'test'
+  ...
+# Subtest: full supplied kernel composition orders engine health, completed jobs, kernel readiness then gateway
+ok 19 - full supplied kernel composition orders engine health, completed jobs, kernel readiness then gateway
+  ---
+  duration_ms: 11.133879
+  type: 'test'
+  ...
+# Subtest: separate control-plane services retain private health, ownership and secret boundaries
+ok 20 - separate control-plane services retain private health, ownership and secret boundaries
+  ---
+  duration_ms: 20.051931
+  type: 'test'
+  ...
+# Subtest: duplicate service, invalid secret consumer, listener mismatch and missing dependency fail closed
+ok 21 - duplicate service, invalid secret consumer, listener mismatch and missing dependency fail closed
+  ---
+  duration_ms: 41.501734
+  type: 'test'
+  ...
+# Subtest: resource input order cannot change composition identity or fail its own verification
+ok 22 - resource input order cannot change composition identity or fail its own verification
+  ---
+  duration_ms: 15.873743
+  type: 'test'
+  ...
+# Subtest: distribution SQL accounts use independent infrastructure-owned secret references
+ok 23 - distribution SQL accounts use independent infrastructure-owned secret references
+  ---
+  duration_ms: 18.147668
+  type: 'test'
+  ...
+# Subtest: database account identities, references, secret types and duplicate ownership fail closed
+ok 24 - database account identities, references, secret types and duplicate ownership fail closed
+  ---
+  duration_ms: 5.71341
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 198.249103

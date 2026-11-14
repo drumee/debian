@@ -1,0 +1,127 @@
+{
+  "status": "PASS_NATIVE_AUTH_GATE_OUTAGE",
+  "checks": [
+    {
+      "name": "known-credential-imap-before-policy-outage",
+      "status": "PASS"
+    },
+    {
+      "name": "new-imap-authentication-refuses-policy-outage",
+      "status": "PASS"
+    },
+    {
+      "name": "same-credential-imap-after-policy-recovery",
+      "status": "PASS"
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-c9bx6vqz/auth-gate-fixture,target=/private,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "-B",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "69bb90f2862c51dab8f261bfe1d850224af6bae4bce02ec1be80ee1b44923e25",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-profile-bc48c72c",
+        "-f",
+        "/tmp/mail02-profile-c9bx6vqz/service/candidates/ef9493c45b77f0f4586b4b586feb687d64f4fa507c66f9f0bb6a46b811320dfc/compose.json",
+        "stop",
+        "policy"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "2c5458305da71241a69f122b5023dece42f7bffe4ebbcd785a35c4c08c879b6b"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-c9bx6vqz/auth-gate-fixture,target=/private,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "-B",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "931648df5dd3240c1a253b8148ea610ac6f21cbf9f4d82b40b63074d90a5f239",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "compose",
+        "-p",
+        "mail02-profile-bc48c72c",
+        "-f",
+        "/tmp/mail02-profile-c9bx6vqz/service/candidates/ef9493c45b77f0f4586b4b586feb687d64f4fa507c66f9f0bb6a46b811320dfc/compose.json",
+        "start",
+        "policy"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "86d0499bc8292dc10fe2449fa0365efbb8029c7a427708451f2feb948c497d77"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-c9bx6vqz/auth-gate-fixture,target=/private,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "-B",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "69bb90f2862c51dab8f261bfe1d850224af6bae4bce02ec1be80ee1b44923e25",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

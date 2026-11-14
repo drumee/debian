@@ -1,0 +1,651 @@
+{
+  "status": "PASS_MAIL03_NATIVE_TRANSACTIONS",
+  "checks": [
+    {
+      "name": "concurrent-cas-one-winner-no-last-write-wins",
+      "status": "PASS",
+      "observation": [
+        {
+          "applied_revision": 206,
+          "code": "MAIL_REVISION_CONFLICT",
+          "contract": "drumee.mail-cli/1",
+          "data": {},
+          "desired_revision": 206,
+          "ok": false,
+          "operation_id": "d51804e3-b136-4f73-ad58-d6c2774cb84f",
+          "retryable": false
+        },
+        {
+          "applied_revision": 206,
+          "changed": true,
+          "code": "OK",
+          "contract": "drumee.mail-cli/1",
+          "data": {
+            "address": "tx-f17931d4@oxymot.fr",
+            "created_at": "2026-11-14T09:04:27.885899+00:00",
+            "credential_generation": 2,
+            "deleted": false,
+            "id": "b1a1737d-08f1-4aca-8460-e5128f1151e4",
+            "imap_enabled": false,
+            "modified_at": "2026-11-14T09:04:43.368201+00:00",
+            "quota_bytes": 1073741824,
+            "receive_enabled": true,
+            "submission_enabled": false
+          },
+          "desired_revision": 206,
+          "ok": true,
+          "operation_id": "149748c1-4127-4351-86f7-63b916d627c9"
+        }
+      ]
+    },
+    {
+      "name": "external-kill-validated-reconcile-same-receipt",
+      "status": "PASS",
+      "observation": {
+        "base": 207,
+        "target": 208,
+        "phase_before": "validated",
+        "phase_after": "aborted",
+        "revision": 207
+      }
+    },
+    {
+      "name": "external-kill-staged-reconcile-same-receipt",
+      "status": "PASS",
+      "observation": {
+        "base": 207,
+        "target": 209,
+        "phase_before": "staged",
+        "phase_after": "applied",
+        "revision": 209
+      }
+    },
+    {
+      "name": "external-kill-committed-before-native-apply-reconcile-same-receipt",
+      "status": "PASS",
+      "observation": {
+        "base": 209,
+        "target": 210,
+        "phase_before": "applying",
+        "phase_after": "applied",
+        "revision": 210
+      }
+    },
+    {
+      "name": "applied-db-durable-before-admission-release",
+      "status": "PASS",
+      "observation": {
+        "target": 211,
+        "phase": "applying",
+        "admission": "closed"
+      }
+    },
+    {
+      "name": "external-kill-applied-before-release-reconcile-same-receipt",
+      "status": "PASS",
+      "observation": {
+        "base": 210,
+        "target": 211,
+        "phase_before": "applying",
+        "phase_after": "applied",
+        "revision": 211
+      }
+    },
+    {
+      "name": "native-release-failure-returns-incomplete-with-durable-receipt-and-barrier",
+      "status": "PASS",
+      "observation": {
+        "applied_revision": 212,
+        "code": "MAIL_APPLY_INCOMPLETE",
+        "contract": "drumee.mail-cli/1",
+        "data": {
+          "admission": "closed",
+          "pending_operation": "4dae92ca-8d98-4c42-9b31-6b8f39691a5e",
+          "phase": "applying"
+        },
+        "desired_revision": 212,
+        "ok": false,
+        "operation_id": "4dae92ca-8d98-4c42-9b31-6b8f39691a5e",
+        "retryable": true
+      }
+    },
+    {
+      "name": "dependency-repair-releases-same-durable-generation",
+      "status": "PASS",
+      "observation": {
+        "applied_revision": 212
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9f86cf6507d4cb2d9091bf984b1450994f383b0dc716371f3a88519bed71a6b1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "tx-f17931d4@oxymot.fr",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "204",
+        "--request-id",
+        "7c5bc5e8-6d1e-4a16-981e-3500cb475bfc",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b5d75e7f0fda4aeb5e57e9f0b502599b31d263d4a6e36433e132ea41b36555ba",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "disable",
+        "tx-f17931d4@oxymot.fr",
+        "--scope",
+        "imap",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "205",
+        "--request-id",
+        "149748c1-4127-4351-86f7-63b916d627c9"
+      ],
+      "exit": 0,
+      "stdout_sha256": "02581e6e1e39a4828416de0a0d161897ba52db1aec9c3c523cddb999031c9f28",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "disable",
+        "tx-f17931d4@oxymot.fr",
+        "--scope",
+        "receive",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "205",
+        "--request-id",
+        "d51804e3-b136-4f73-ad58-d6c2774cb84f"
+      ],
+      "exit": 4,
+      "stdout_sha256": "e72c6d06bd40470485db360fd540e01dfb88841049e986011c55ea6cab6321a4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f4e9bf72e1a28811e10ac4f6b49379fba983efd7376a09310fb9bb04784d53b4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "update",
+        "tx-f17931d4@oxymot.fr",
+        "--receive",
+        "true",
+        "--imap",
+        "true",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "206",
+        "--request-id",
+        "a1348fa9-419b-464b-bb78-161740729cf2"
+      ],
+      "exit": 0,
+      "stdout_sha256": "cb6823cc56464ccd9aaaf252a780643473f453860454ca5d6417ee70443d604d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "disable",
+        "tx-f17931d4@oxymot.fr",
+        "--scope",
+        "receive",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "207",
+        "--request-id",
+        "d416d534-5c40-485d-bfd9-04431ca162d2"
+      ],
+      "exit": 7,
+      "stdout_sha256": "c298c62c02b471ff26b0aa3e9c26b32f431c87b56f0999a15d5d800e5a301c59",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 130,
+      "stdout_sha256": "34772338c2224fd891b50f0d2d71465a4e0a3d2221f493199899d2b7944631da",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fef37c50b84b75cb8fcfc91ba4f015427e43b457dc1152f5a9df69ca643ea495",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "lost-22347443@oxymot.fr",
+        "--password-fd",
+        "3",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "207",
+        "--request-id",
+        "e13a97e3-4afe-445f-8a01-9be9c4a0378a"
+      ],
+      "exit": 130,
+      "stdout_sha256": "34772338c2224fd891b50f0d2d71465a4e0a3d2221f493199899d2b7944631da",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "disable",
+        "tx-f17931d4@oxymot.fr",
+        "--scope",
+        "receive",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "207",
+        "--request-id",
+        "7efe9a2f-bb08-4312-ac28-da5500d6f18f"
+      ],
+      "exit": 7,
+      "stdout_sha256": "20e957eaa470781b7399a36af7f0fabc4b550233e305c559ada8e48fb0aec481",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1377777f7e8ba580ad21b5fe1a68d6e0daf9628950ea88f81c230de5bb97a0c5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c5702dc04b8291f1439f02a99ce6f1c5e89162065397dc28d3f5ca2e403cfa49",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "quota",
+        "tx-f17931d4@oxymot.fr",
+        "--bytes",
+        "2097152",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "207",
+        "--request-id",
+        "0155ce18-b58e-4b43-a3ee-209d98a2d1b2"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1377777f7e8ba580ad21b5fe1a68d6e0daf9628950ea88f81c230de5bb97a0c5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "disable",
+        "tx-f17931d4@oxymot.fr",
+        "--scope",
+        "receive",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "209",
+        "--request-id",
+        "a01fd028-0a82-45a4-9f52-76fc40ce8244"
+      ],
+      "exit": 7,
+      "stdout_sha256": "b038d41ede3317603886ef15ff080a6b5aa671bf50e8617c56489a03e1676bb5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "536d34cdd42d60dfa7f269184b4a9f736cc94ba6a31f1b3900713652ddde5dd4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f76f6971cfaf90011d513468e1c820f31435ac25e33ed9158d51a60cff0be588",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "quota",
+        "tx-f17931d4@oxymot.fr",
+        "--bytes",
+        "3145728",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "209",
+        "--request-id",
+        "ad1b7466-04cb-4389-8ed1-f7a59090abc9"
+      ],
+      "exit": 0,
+      "stdout_sha256": "536d34cdd42d60dfa7f269184b4a9f736cc94ba6a31f1b3900713652ddde5dd4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-3087174e-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-qblxe20q/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail02-profile-pw34479y/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "931648df5dd3240c1a253b8148ea610ac6f21cbf9f4d82b40b63074d90a5f239",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "disable",
+        "tx-f17931d4@oxymot.fr",
+        "--scope",
+        "receive",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "210",
+        "--request-id",
+        "f178c78f-4eb1-4110-b7dd-4af877663048"
+      ],
+      "exit": 7,
+      "stdout_sha256": "2d03c997513ec70dd2465ecba57097dd13e26e27d036b02ab098bc906aada0aa",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "20f3b0d172ad43d0156d3c90c7c6788086e4fe90549359f859ac62202fc8d3f8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ad96cbe1fa169aecdc4bc7e88842de764e96e84a01121698b763333c77fef2e3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "quota",
+        "tx-f17931d4@oxymot.fr",
+        "--bytes",
+        "4194304",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "210",
+        "--request-id",
+        "6008f847-8d8c-46d8-b85f-92b599410210"
+      ],
+      "exit": 0,
+      "stdout_sha256": "20f3b0d172ad43d0156d3c90c7c6788086e4fe90549359f859ac62202fc8d3f8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "pause",
+        "mail02-profile-3087174e-policy-1"
+      ],
+      "exit": 0,
+      "stdout_sha256": "07e0452f9f9596d96cb3636d3d4922aa43ffac7e09b4276ac54c751237ed8d13",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "unpause",
+        "mail02-profile-3087174e-policy-1"
+      ],
+      "exit": 0,
+      "stdout_sha256": "07e0452f9f9596d96cb3636d3d4922aa43ffac7e09b4276ac54c751237ed8d13",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/tmp/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "reconcile",
+        "--execute",
+        "--config",
+        "/tmp/mail02-profile-pw34479y/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9b6ef6253e640c77d1d5687a16a544e192fc9b73e15de56f5b0f44ad4d35709b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "last_revision": 212
+}

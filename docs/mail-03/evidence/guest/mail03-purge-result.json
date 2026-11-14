@@ -1,0 +1,532 @@
+{
+  "status": "PASS_MAIL03_NATIVE_PURGE",
+  "checks": [
+    {
+      "name": "purge-live-missing-and-altered-proof-refused-source-preserved",
+      "status": "PASS",
+      "observation": {
+        "source_digest": "99fabd104ef0a2c2d23af1fab675b6050936e666d00b75a9c35b2ff6035556e7"
+      }
+    },
+    {
+      "name": "verified-explicit-purge-retains-backup-uuid-inodes-and-receipt",
+      "status": "PASS",
+      "observation": {
+        "mailbox_id": "07064644-6e4f-436f-a867-6addadd6833e",
+        "remaining_entries": [
+          "",
+          "Maildir",
+          "Maildir/cur",
+          "Maildir/new",
+          "Maildir/tmp",
+          "home",
+          "home/.drumee-quota.lock"
+        ],
+        "backup_unchanged": true,
+        "service_left_stopped": true
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e7bc66822cd69a3bd4610622b0a5b9b98eee9155685110a40eacdab63062b545",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "create",
+        "purge-42fc48b5@oxymot.fr",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "124",
+        "--request-id",
+        "9e93f9a0-3e05-4f3c-9890-a627fc713166",
+        "--password-fd",
+        "3"
+      ],
+      "exit": 0,
+      "stdout_sha256": "40c45b37cd7c278440967f43a2f9f0d14ff18480c4607d6e12f3fb249a58d420",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "53f8806ee8535731bddbb61cff5db331529226f132bec70f7322301d5391bc9a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fdcd89e63b306128e1f39fa02ca4c0247b4c47db827df548dcfd198ebe91f47e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "delete",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "125",
+        "--request-id",
+        "2d8092a3-ec76-4040-b37f-b09b85fa4059"
+      ],
+      "exit": 0,
+      "stdout_sha256": "35dc220d80a2917df9dc609eb3c1ab9493c8c591b818100a52d2afd755dd2d42",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "purge",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--confirm-mailbox",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--backup-id",
+        "synthetic-retained",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "126",
+        "--request-id",
+        "0b539222-7449-4b59-a5af-59ceee9cb0f6"
+      ],
+      "exit": 4,
+      "stdout_sha256": "f5a4f0c55b1441497d6328c18bbef93afbe66002728bcf788d7ecc5ee3e2638f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "stop",
+        "--execute",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "86fa358e000a9aad2709c77e98ec9666d8c81d8d8b560303bafe0eaf85b747f0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "purge",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--confirm-mailbox",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--backup-id",
+        "synthetic-retained",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "126",
+        "--request-id",
+        "0b539222-7449-4b59-a5af-59ceee9cb0f6"
+      ],
+      "exit": 3,
+      "stdout_sha256": "b9830c4f67b45cf0dd6660feadd924c41b5ee53a5f00ce02ed2daec4972ca529",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/service/durable/mailboxes/07064644-6e4f-436f-a867-6addadd6833e,target=/source,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/backups/mailboxes/07064644-6e4f-436f-a867-6addadd6833e/synthetic-retained,target=/backup",
+        "--entrypoint",
+        "/bin/cp",
+        "sha256:ab41ba434fa20afd54f71f43fc31ad2aaa94260193a4e9b56cc0e5c971fb1a56",
+        "-a",
+        "/source",
+        "/backup/data"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "node",
+        "-e",
+        "process.stdout.write(require(process.argv[1]).inventory.toString())",
+        "/home/lab/work/mail03-administration/mail03-debian/profiles/mail/.cache/consumer/node_modules/@drumee/infra-layer/capabilities/mail-service/purge.js"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ceb407ce65ee063ebe6130c431310b75d0a7740306a4b5ba54a8a6e2ced09829",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/service/durable/mailboxes/07064644-6e4f-436f-a867-6addadd6833e,target=/data,readonly",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const inventory=function inventory(root){\n const fs=require(\"node:fs\"),path=require(\"node:path\"),crypto=require(\"node:crypto\"),entries=Object.create(null),links=new Map();let count=0;\n function hash(file){const h=crypto.createHash(\"sha256\"),fd=fs.openSync(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW),buffer=Buffer.alloc(65536);try{let n;while((n=fs.readSync(fd,buffer,0,buffer.length,null)))h.update(buffer.subarray(0,n));return h.digest(\"hex\");}finally{fs.closeSync(fd);}}\n function visit(relative){\n  if(++count>100000)throw Error(\"MAIL_INTEGRITY_FAILURE\");\n  const file=path.join(root,relative),s=fs.lstatSync(file,{bigint:true});\n  if((!s.isDirectory()&&!s.isFile())||s.uid!==5000n||s.gid!==5000n||(s.mode&0o022n)!==0n||(s.mode&0o7000n)!==0n||s.isFile()&&(s.mode&0o111n)!==0n)throw Error(\"MAIL_STORAGE_UNSAFE\");\n  const e={type:s.isDirectory()?\"directory\":\"file\",uid:Number(s.uid),gid:Number(s.gid),mode:Number(s.mode&0o7777n),mtime_ns:String(s.mtimeNs)};entries[relative]=e;\n  if(s.isDirectory()){for(const name of fs.readdirSync(file).sort())visit(relative?relative+\"/\"+name:name);}\n  else{e.size=Number(s.size);e.sha256=hash(file);const key=s.dev+\":\"+s.ino;if(!links.has(key))links.set(key,[]);links.get(key).push({relative,nlink:Number(s.nlink)});}\n }\n visit(\"\");\n for(const group of links.values())for(const value of group){if(value.nlink!==group.length)throw Error(\"MAIL_STORAGE_UNSAFE\");if(group.length>1)entries[value.relative].link_group=group.map(x=>x.relative).sort()[0];}\n return entries;\n};console.log(JSON.stringify(inventory(\"/data\")));"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9da153538d2768365d7a8848d689c6f5b82a21e7b0f6ae8c77f59ac5e3a3174e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/backups/mailboxes/07064644-6e4f-436f-a867-6addadd6833e/synthetic-retained/data,target=/data,readonly",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const inventory=function inventory(root){\n const fs=require(\"node:fs\"),path=require(\"node:path\"),crypto=require(\"node:crypto\"),entries=Object.create(null),links=new Map();let count=0;\n function hash(file){const h=crypto.createHash(\"sha256\"),fd=fs.openSync(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW),buffer=Buffer.alloc(65536);try{let n;while((n=fs.readSync(fd,buffer,0,buffer.length,null)))h.update(buffer.subarray(0,n));return h.digest(\"hex\");}finally{fs.closeSync(fd);}}\n function visit(relative){\n  if(++count>100000)throw Error(\"MAIL_INTEGRITY_FAILURE\");\n  const file=path.join(root,relative),s=fs.lstatSync(file,{bigint:true});\n  if((!s.isDirectory()&&!s.isFile())||s.uid!==5000n||s.gid!==5000n||(s.mode&0o022n)!==0n||(s.mode&0o7000n)!==0n||s.isFile()&&(s.mode&0o111n)!==0n)throw Error(\"MAIL_STORAGE_UNSAFE\");\n  const e={type:s.isDirectory()?\"directory\":\"file\",uid:Number(s.uid),gid:Number(s.gid),mode:Number(s.mode&0o7777n),mtime_ns:String(s.mtimeNs)};entries[relative]=e;\n  if(s.isDirectory()){for(const name of fs.readdirSync(file).sort())visit(relative?relative+\"/\"+name:name);}\n  else{e.size=Number(s.size);e.sha256=hash(file);const key=s.dev+\":\"+s.ino;if(!links.has(key))links.set(key,[]);links.get(key).push({relative,nlink:Number(s.nlink)});}\n }\n visit(\"\");\n for(const group of links.values())for(const value of group){if(value.nlink!==group.length)throw Error(\"MAIL_STORAGE_UNSAFE\");if(group.length>1)entries[value.relative].link_group=group.map(x=>x.relative).sort()[0];}\n return entries;\n};console.log(JSON.stringify(inventory(\"/data\")));"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9da153538d2768365d7a8848d689c6f5b82a21e7b0f6ae8c77f59ac5e3a3174e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "purge",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--confirm-mailbox",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--backup-id",
+        "synthetic-retained",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "126",
+        "--request-id",
+        "0b539222-7449-4b59-a5af-59ceee9cb0f6"
+      ],
+      "exit": 8,
+      "stdout_sha256": "10f8d78bc1ad72995a0de6e86a67edec553ab1d479c3fc2f0579ab585fa6ffd8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/service/durable/mailboxes/07064644-6e4f-436f-a867-6addadd6833e,target=/data,readonly",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const inventory=function inventory(root){\n const fs=require(\"node:fs\"),path=require(\"node:path\"),crypto=require(\"node:crypto\"),entries=Object.create(null),links=new Map();let count=0;\n function hash(file){const h=crypto.createHash(\"sha256\"),fd=fs.openSync(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW),buffer=Buffer.alloc(65536);try{let n;while((n=fs.readSync(fd,buffer,0,buffer.length,null)))h.update(buffer.subarray(0,n));return h.digest(\"hex\");}finally{fs.closeSync(fd);}}\n function visit(relative){\n  if(++count>100000)throw Error(\"MAIL_INTEGRITY_FAILURE\");\n  const file=path.join(root,relative),s=fs.lstatSync(file,{bigint:true});\n  if((!s.isDirectory()&&!s.isFile())||s.uid!==5000n||s.gid!==5000n||(s.mode&0o022n)!==0n||(s.mode&0o7000n)!==0n||s.isFile()&&(s.mode&0o111n)!==0n)throw Error(\"MAIL_STORAGE_UNSAFE\");\n  const e={type:s.isDirectory()?\"directory\":\"file\",uid:Number(s.uid),gid:Number(s.gid),mode:Number(s.mode&0o7777n),mtime_ns:String(s.mtimeNs)};entries[relative]=e;\n  if(s.isDirectory()){for(const name of fs.readdirSync(file).sort())visit(relative?relative+\"/\"+name:name);}\n  else{e.size=Number(s.size);e.sha256=hash(file);const key=s.dev+\":\"+s.ino;if(!links.has(key))links.set(key,[]);links.get(key).push({relative,nlink:Number(s.nlink)});}\n }\n visit(\"\");\n for(const group of links.values())for(const value of group){if(value.nlink!==group.length)throw Error(\"MAIL_STORAGE_UNSAFE\");if(group.length>1)entries[value.relative].link_group=group.map(x=>x.relative).sort()[0];}\n return entries;\n};console.log(JSON.stringify(inventory(\"/data\")));"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9da153538d2768365d7a8848d689c6f5b82a21e7b0f6ae8c77f59ac5e3a3174e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/backups/mailboxes/07064644-6e4f-436f-a867-6addadd6833e/synthetic-retained/data,target=/data,readonly",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const inventory=function inventory(root){\n const fs=require(\"node:fs\"),path=require(\"node:path\"),crypto=require(\"node:crypto\"),entries=Object.create(null),links=new Map();let count=0;\n function hash(file){const h=crypto.createHash(\"sha256\"),fd=fs.openSync(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW),buffer=Buffer.alloc(65536);try{let n;while((n=fs.readSync(fd,buffer,0,buffer.length,null)))h.update(buffer.subarray(0,n));return h.digest(\"hex\");}finally{fs.closeSync(fd);}}\n function visit(relative){\n  if(++count>100000)throw Error(\"MAIL_INTEGRITY_FAILURE\");\n  const file=path.join(root,relative),s=fs.lstatSync(file,{bigint:true});\n  if((!s.isDirectory()&&!s.isFile())||s.uid!==5000n||s.gid!==5000n||(s.mode&0o022n)!==0n||(s.mode&0o7000n)!==0n||s.isFile()&&(s.mode&0o111n)!==0n)throw Error(\"MAIL_STORAGE_UNSAFE\");\n  const e={type:s.isDirectory()?\"directory\":\"file\",uid:Number(s.uid),gid:Number(s.gid),mode:Number(s.mode&0o7777n),mtime_ns:String(s.mtimeNs)};entries[relative]=e;\n  if(s.isDirectory()){for(const name of fs.readdirSync(file).sort())visit(relative?relative+\"/\"+name:name);}\n  else{e.size=Number(s.size);e.sha256=hash(file);const key=s.dev+\":\"+s.ino;if(!links.has(key))links.set(key,[]);links.get(key).push({relative,nlink:Number(s.nlink)});}\n }\n visit(\"\");\n for(const group of links.values())for(const value of group){if(value.nlink!==group.length)throw Error(\"MAIL_STORAGE_UNSAFE\");if(group.length>1)entries[value.relative].link_group=group.map(x=>x.relative).sort()[0];}\n return entries;\n};console.log(JSON.stringify(inventory(\"/data\")));"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9da153538d2768365d7a8848d689c6f5b82a21e7b0f6ae8c77f59ac5e3a3174e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "purge",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--confirm-mailbox",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--backup-id",
+        "synthetic-retained",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "126",
+        "--request-id",
+        "0b539222-7449-4b59-a5af-59ceee9cb0f6"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c812ddc0b0f09f6b1d87db55cc5e17415ca028a42860d003b2b7d376fc01ea77",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/service/durable/mailboxes/07064644-6e4f-436f-a867-6addadd6833e,target=/data,readonly",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const inventory=function inventory(root){\n const fs=require(\"node:fs\"),path=require(\"node:path\"),crypto=require(\"node:crypto\"),entries=Object.create(null),links=new Map();let count=0;\n function hash(file){const h=crypto.createHash(\"sha256\"),fd=fs.openSync(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW),buffer=Buffer.alloc(65536);try{let n;while((n=fs.readSync(fd,buffer,0,buffer.length,null)))h.update(buffer.subarray(0,n));return h.digest(\"hex\");}finally{fs.closeSync(fd);}}\n function visit(relative){\n  if(++count>100000)throw Error(\"MAIL_INTEGRITY_FAILURE\");\n  const file=path.join(root,relative),s=fs.lstatSync(file,{bigint:true});\n  if((!s.isDirectory()&&!s.isFile())||s.uid!==5000n||s.gid!==5000n||(s.mode&0o022n)!==0n||(s.mode&0o7000n)!==0n||s.isFile()&&(s.mode&0o111n)!==0n)throw Error(\"MAIL_STORAGE_UNSAFE\");\n  const e={type:s.isDirectory()?\"directory\":\"file\",uid:Number(s.uid),gid:Number(s.gid),mode:Number(s.mode&0o7777n),mtime_ns:String(s.mtimeNs)};entries[relative]=e;\n  if(s.isDirectory()){for(const name of fs.readdirSync(file).sort())visit(relative?relative+\"/\"+name:name);}\n  else{e.size=Number(s.size);e.sha256=hash(file);const key=s.dev+\":\"+s.ino;if(!links.has(key))links.set(key,[]);links.get(key).push({relative,nlink:Number(s.nlink)});}\n }\n visit(\"\");\n for(const group of links.values())for(const value of group){if(value.nlink!==group.length)throw Error(\"MAIL_STORAGE_UNSAFE\");if(group.length>1)entries[value.relative].link_group=group.map(x=>x.relative).sort()[0];}\n return entries;\n};console.log(JSON.stringify(inventory(\"/data\")));"
+      ],
+      "exit": 0,
+      "stdout_sha256": "649fad692cbb0ef15d5499fbce0aa281824a481b54774242ec6207483caac39f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/backups/mailboxes/07064644-6e4f-436f-a867-6addadd6833e/synthetic-retained/data,target=/data,readonly",
+        "--entrypoint",
+        "node",
+        "sha256:d0a16be756b6ec6658aecb8b7bcf87fa6c7d0d7fcc6ca53ad14bb49a4c90bdd7",
+        "-e",
+        "const inventory=function inventory(root){\n const fs=require(\"node:fs\"),path=require(\"node:path\"),crypto=require(\"node:crypto\"),entries=Object.create(null),links=new Map();let count=0;\n function hash(file){const h=crypto.createHash(\"sha256\"),fd=fs.openSync(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW),buffer=Buffer.alloc(65536);try{let n;while((n=fs.readSync(fd,buffer,0,buffer.length,null)))h.update(buffer.subarray(0,n));return h.digest(\"hex\");}finally{fs.closeSync(fd);}}\n function visit(relative){\n  if(++count>100000)throw Error(\"MAIL_INTEGRITY_FAILURE\");\n  const file=path.join(root,relative),s=fs.lstatSync(file,{bigint:true});\n  if((!s.isDirectory()&&!s.isFile())||s.uid!==5000n||s.gid!==5000n||(s.mode&0o022n)!==0n||(s.mode&0o7000n)!==0n||s.isFile()&&(s.mode&0o111n)!==0n)throw Error(\"MAIL_STORAGE_UNSAFE\");\n  const e={type:s.isDirectory()?\"directory\":\"file\",uid:Number(s.uid),gid:Number(s.gid),mode:Number(s.mode&0o7777n),mtime_ns:String(s.mtimeNs)};entries[relative]=e;\n  if(s.isDirectory()){for(const name of fs.readdirSync(file).sort())visit(relative?relative+\"/\"+name:name);}\n  else{e.size=Number(s.size);e.sha256=hash(file);const key=s.dev+\":\"+s.ino;if(!links.has(key))links.set(key,[]);links.get(key).push({relative,nlink:Number(s.nlink)});}\n }\n visit(\"\");\n for(const group of links.values())for(const value of group){if(value.nlink!==group.length)throw Error(\"MAIL_STORAGE_UNSAFE\");if(group.length>1)entries[value.relative].link_group=group.map(x=>x.relative).sort()[0];}\n return entries;\n};console.log(JSON.stringify(inventory(\"/data\")));"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9da153538d2768365d7a8848d689c6f5b82a21e7b0f6ae8c77f59ac5e3a3174e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "mailbox",
+        "purge",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--confirm-mailbox",
+        "07064644-6e4f-436f-a867-6addadd6833e",
+        "--backup-id",
+        "synthetic-retained",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json",
+        "--execute",
+        "--if-revision",
+        "126",
+        "--request-id",
+        "0b539222-7449-4b59-a5af-59ceee9cb0f6"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c812ddc0b0f09f6b1d87db55cc5e17415ca028a42860d003b2b7d376fc01ea77",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "mail",
+        "status",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "737d60e7e9987aea493df2e0386821205c4d67e4affdd22ca01d56583561fd98",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "bash",
+        "/home/lab/work/mail03-administration/mail03-debian/bin/drumee-ctl",
+        "--profile",
+        "mail",
+        "start",
+        "--execute",
+        "--config",
+        "/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/config.json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9c4cff543a21690b0df5b59aaf55c84886531688b30401bd00ee3cc0b8fcb201",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "931648df5dd3240c1a253b8148ea610ac6f21cbf9f4d82b40b63074d90a5f239",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "mail02-profile-41dd8c8f-edge",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/source-fixtures/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/mail03-debian/tests/mail/admin,target=/lab,readonly",
+        "--mount",
+        "type=bind,source=/home/lab/work/mail03-administration/runs/mail02-profile-wan0o3jm/admin-probe,target=/private,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/probe.py"
+      ],
+      "exit": 0,
+      "stdout_sha256": "0cf1f4b87960912352fb7d71267061a0270dfbd324159b587937add0d562d399",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "last_revision": 127
+}

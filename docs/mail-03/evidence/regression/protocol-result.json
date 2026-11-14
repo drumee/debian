@@ -1,0 +1,940 @@
+{
+  "status": "PASS_NATIVE_PROTOCOL_NEGATIVES",
+  "checks": [
+    {
+      "name": "edge-anonymous-relay-refused",
+      "status": "PASS",
+      "observation": {
+        "rcpt_code": 554,
+        "auth_advertised": false
+      }
+    },
+    {
+      "name": "plaintext-mail-requires-starttls",
+      "status": "PASS",
+      "observation": {
+        "mail_code": 530
+      }
+    },
+    {
+      "name": "verified-tls-without-auth-refused",
+      "status": "PASS",
+      "observation": {
+        "mail_code": 530
+      }
+    },
+    {
+      "name": "smtp-ineligible-or-wrong-password-ghost",
+      "status": "PASS",
+      "observation": {
+        "code": 535
+      }
+    },
+    {
+      "name": "smtp-ineligible-or-wrong-password-oxymotion",
+      "status": "PASS",
+      "observation": {
+        "code": 535
+      }
+    },
+    {
+      "name": "smtp-ineligible-or-wrong-password-contact@oxymot.fr",
+      "status": "PASS",
+      "observation": {
+        "code": 535
+      }
+    },
+    {
+      "name": "smtp-ineligible-or-wrong-password-hello@oxymot.fr",
+      "status": "PASS",
+      "observation": {
+        "code": 535
+      }
+    },
+    {
+      "name": "sasl-authorization-identity-impersonation-refused",
+      "status": "PASS",
+      "observation": {
+        "code": 535
+      }
+    },
+    {
+      "name": "imap-ineligible-ghost",
+      "status": "PASS",
+      "observation": {
+        "authenticated": false
+      }
+    },
+    {
+      "name": "imap-ineligible-oxymotion",
+      "status": "PASS",
+      "observation": {
+        "authenticated": false
+      }
+    },
+    {
+      "name": "imap-ineligible-hello@oxymot.fr",
+      "status": "PASS",
+      "observation": {
+        "authenticated": false
+      }
+    },
+    {
+      "name": "imap-list-and-absolute-shared-namespace-isolation",
+      "status": "PASS",
+      "observation": {
+        "foreign_listed": false,
+        "foreign_namespaces_selectable": false
+      }
+    },
+    {
+      "name": "internal-recipient-and-orcpt-cannot-bypass-rcpt-validation",
+      "status": "PASS",
+      "observation": {
+        "internal_rcpt_code": 550,
+        "unknown_with_orcpt_code": 550
+      }
+    },
+    {
+      "name": "mx-auth-remains-absent-after-starttls",
+      "status": "PASS",
+      "observation": {
+        "auth_advertised": false
+      }
+    },
+    {
+      "name": "authenticated-application-null-envelope-refused",
+      "status": "PASS",
+      "observation": {
+        "code": 550
+      }
+    },
+    {
+      "name": "native-tls11-refused-587",
+      "status": "PASS",
+      "observation": {
+        "native_tls_alert": "TLSV1_ALERT_PROTOCOL_VERSION"
+      }
+    },
+    {
+      "name": "native-tls11-refused-465",
+      "status": "PASS",
+      "observation": {
+        "native_tls_alert": "TLSV1_ALERT_PROTOCOL_VERSION"
+      }
+    },
+    {
+      "name": "native-tls11-refused-993",
+      "status": "PASS",
+      "observation": {
+        "native_tls_alert": "TLSV1_ALERT_PROTOCOL_VERSION"
+      }
+    },
+    {
+      "name": "plaintext-imap-not-listening",
+      "status": "PASS",
+      "observation": {
+        "plaintext_imap_listener": false
+      }
+    },
+    {
+      "name": "control-network-refuses-policy-10001",
+      "status": "PASS",
+      "observation": {
+        "reachable": false
+      }
+    },
+    {
+      "name": "control-network-refuses-policy-10002",
+      "status": "PASS",
+      "observation": {
+        "reachable": false
+      }
+    },
+    {
+      "name": "control-network-refuses-policy-10003",
+      "status": "PASS",
+      "observation": {
+        "reachable": false
+      }
+    },
+    {
+      "name": "control-network-refuses-policy-10004",
+      "status": "PASS",
+      "observation": {
+        "reachable": false
+      }
+    },
+    {
+      "name": "control-network-refuses-opendkim-8891",
+      "status": "PASS",
+      "observation": {
+        "reachable": false
+      }
+    },
+    {
+      "name": "unix-auth-lmtp-not-mounted-in-client",
+      "status": "PASS",
+      "observation": {
+        "auth_mounted": false,
+        "lmtp_mounted": false
+      }
+    },
+    {
+      "name": "loopback-anonymous-relay-refused",
+      "status": "PASS",
+      "observation": {
+        "rcpt_code": 554,
+        "auth_advertised": false
+      }
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "mail02-profile-bc48c72c-policy-1"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d71f2ff7da6d26be3221c6ff929e28f2a440e1fb66de2b378ad01a970bf97b18",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "inspect",
+        "mail02-profile-bc48c72c-opendkim-1"
+      ],
+      "exit": 0,
+      "stdout_sha256": "0cca343828fead87d1ced699a53dfc65e556b0d447ce9691aab29034dd70496c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.10",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=edge-anonymous-relay-refused",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "baea7c031042e788b18c6f08fa3e3680d181818b2576dde1574c5286ced9cf6b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.11",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=plaintext-mail-requires-starttls",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c3e96bc4beb09a48826c0b0bd6ea93cf65e6a174c8132614f12f48f3a5e31f17",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.12",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=verified-tls-without-auth-refused",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "686f666a2e351916d1798f20fa35fe78fd264db6db47856bf7d80dc9fed4f5be",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.13",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=smtp-ineligible-or-wrong-password-ghost",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "9a7ccfd0fee3610317aea9161d4edffedad060e41a0d8b1d2fbaa78471c9e8f1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.14",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=smtp-ineligible-or-wrong-password-oxymotion",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "47c3bd874eaa4dfef1dd24acffc6837e2877b8b915823a8ea5f6c891457f8dd5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.15",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=smtp-ineligible-or-wrong-password-contact@oxymot.fr",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ec72ef89dce81907ddfe04b83e23e5af1f72f0db5dc33c8d485e4bfb59bf57b6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.16",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=smtp-ineligible-or-wrong-password-hello@oxymot.fr",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c2231e51aaf7d639fc56c96ff6ba2f98b4fb0533374e25d6598bdc04766c8a02",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.17",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=sasl-authorization-identity-impersonation-refused",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "4aed9b303f9e8385646b3f98b6cb71db6a49cfab3c34082d948fdd3d2635525f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.18",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=imap-ineligible-ghost",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1dd2f0533ef4f4fc21520fda48a002eca499bb9d6bc56659eb3d9d25a5639baf",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.19",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=imap-ineligible-oxymotion",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1840075d629f6f00fa12f038e8c9daa8cc4c8fe474c7a6b55a1af44191e87f3f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.20",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=imap-ineligible-hello@oxymot.fr",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "13c04e6acc0daefb5e88e0016476299f23322c18ef054b0ad0ecd724efef49dc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.21",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=imap-list-and-absolute-shared-namespace-isolation",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "3f84738d8255e7f6b9dfeb0db4ac9bde3a0e5323a2ee1b237c8668eac61c4d78",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.22",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=internal-recipient-and-orcpt-cannot-bypass-rcpt-validation",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b05ce09cc99c59e6e72ed8d86b131a4a5f4a33a2442f7afd102ab2c8b6ab3ee2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.23",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=mx-auth-remains-absent-after-starttls",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "80ef71dd23add48beccbb29cebf67cd9d33046bdeb9880d56c49e00423696190",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.24",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=authenticated-application-null-envelope-refused",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1ba49bca7f376f1eeb726f5116ff940f16a107cd6f2edca39b7e6a1601f757e3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.25",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=native-tls11-refused-587",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "48f4bec56215225769f2e55cc56d62b10720817a2e2a0599f9e3eb374138f878",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.26",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=native-tls11-refused-465",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d96f2e8e196f7c59dc0eb3b7bfd42028ad2892033c203fbad96dcc3c4531ac13",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.27",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=native-tls11-refused-993",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d508cd424bc74149d11931147cc108776efafe567fba265cf086133cc31b4afc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.28",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=plaintext-imap-not-listening",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "01a45e3c314f7df306017cd957b5bd3c8d0b7d4948be4330195542dc1eb71d3f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.29",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=control-network-refuses-policy-10001",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "0318b9294a496412812be0fcb1db9470becc476b79e39a6555b36b0615d24dc9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.30",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=control-network-refuses-policy-10002",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6a920eb26588a30d1915d2b6d1546504111b013cf955294213bd75bc89680118",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.31",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=control-network-refuses-policy-10003",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "de8daf330e6442cb149ef4e849fa2536cf33e63389c401e75c66d18661c4834d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.32",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=control-network-refuses-policy-10004",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d5f321417ebbf54a019c42de3998d04479494a8b810603cbb8c1e225f4836e74",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.33",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=control-network-refuses-opendkim-8891",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e4e4df6bfd1a8ded00d84e3cba7c875829ace00660988bb4ef426dded54f023b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "mail02-profile-bc48c72c-edge",
+        "--ip",
+        "10.243.47.34",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=unix-auth-lmtp-not-mounted-in-client",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "normal",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ae3f54d2cc6bd47e9b94fa9d5d04debd0966ed1a602ce17e7cdc4c561825dc6d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "container:mail02-profile-bc48c72c-postfix-1",
+        "--user",
+        "1000:1000",
+        "--env",
+        "MAIL02_ONLY_CASE=loopback-anonymous-relay-refused",
+        "--mount",
+        "type=bind,source=/tmp/mail02-native-6l6ef3sr/keys,target=/keys,readonly",
+        "--mount",
+        "type=bind,source=/tmp/mail03-infra/test/mail-service,target=/lab,readonly",
+        "--entrypoint",
+        "python3",
+        "sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8",
+        "/lab/protocol-check.py",
+        "loopback",
+        "{\"policy-10001\": [\"192.168.128.4\", 10001], \"policy-10002\": [\"192.168.128.4\", 10002], \"policy-10003\": [\"192.168.128.4\", 10003], \"policy-10004\": [\"192.168.128.4\", 10004], \"opendkim-8891\": [\"192.168.128.5\", 8891]}"
+      ],
+      "exit": 0,
+      "stdout_sha256": "bbf73c97fe977501d14afa418b4faa26b9f6ee60e131a09befbfa20109fca486",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

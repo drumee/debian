@@ -113,7 +113,8 @@ socket volume. The entire local queue (including hold/defer/bounce/trace) must b
 empty and unresolved-deliveries metadata absent/empty. Resolve responsibility
 before maintenance; never delete queue items to satisfy this prerequisite.
 
-The retained backup catalog is outside live Maildirs, owned by the same operator:
+The retained backup catalog uses `service.deployment.backup_root`, outside live
+Maildirs and owned by the same operator:
 
 * backup_root/owner.json (0600): drumee.mail-backup-owner/1, service_id, uid, gid.
 * backup_root/mailboxes/UUID/BACKUP_ID (0700): independent `data` copy of that

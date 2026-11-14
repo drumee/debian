@@ -1,0 +1,18 @@
+{
+  "base": "465d4e91553edd204b1e3b5ace9ad64791235403",
+  "final": "1b60818f4f60cc6b54976184dbd6f0585b717a68",
+  "command": "npm run test:integration",
+  "same_environment": true,
+  "status": "FAIL_HISTORICAL_UNCHANGED",
+  "same_failed_test_names": true,
+  "failed_test_names": [
+    "real BIND9 serves declared A/SOA/TXT over UDP and TCP, NXDOMAIN and no unintended recursion",
+    "BIND9 restart and recreation preserve zone serial and TSIG fingerprint",
+    "controlled relay verifies STARTTLS trust and authenticates outbound to an isolated capture alias",
+    "BIND9 zone change explicitly advances serial and serves declared AAAA records without selecting container addresses"
+  ],
+  "logs": {
+    "infra-baseline-integration.log": "f5f24a030bdb2c87e21bdf3ee5d524cbe1d409de8989cbd2277df4c464d5e509",
+    "infra-final-integration.log": "de9405be696468b09cb1e635fb6c063e351136da5dbc3bf69557baf41e1903df"
+  }
+}

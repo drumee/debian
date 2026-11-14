@@ -1,0 +1,10 @@
+{
+  "bin/drumee-ctl": "216462f19d8961ec6387b12203c116413dd22e54",
+  "profiles/mail/admin/main.py": "2130c1d6bcdf5f7d897d3c33278018f7e2511721",
+  "profiles/mail/admin/model.py": "216462f19d8961ec6387b12203c116413dd22e54",
+  "profiles/mail/admin/storage.py": "216462f19d8961ec6387b12203c116413dd22e54",
+  "profiles/mail/lifecycle.cjs": "7c89c55327babfd2437cd7edd0a43b2bc41b807f",
+  "profiles/mail/lifecycle.py": "",
+  "profiles/mail/operator.js": "797234e44bad6b14e9f607581ef77f5d25081f73",
+  "profiles/mail/infra-source-lock.json": "fc17d6b508703f0c304f63869d4e48ab3dfd2064"
+}
