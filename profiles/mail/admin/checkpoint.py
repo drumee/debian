@@ -9,11 +9,12 @@ sys.path.insert(0,str(pathlib.Path(__file__).parent))
 from storage import atomic,encode,private_read,safe_directory,service_lock,syncdir,check_runtime
 from model import Refusal,refuse
 BASE=pathlib.Path(__file__).parents[1]
+LOCK_FD=None
 HELPER='sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8'
 ENV={'PATH':'/usr/bin:/bin','LANG':'C','LC_ALL':'C','HOME':'/'}
 
 def run(args,data=None):
- p=subprocess.run([str(x) for x in args],input=data,capture_output=True,env=ENV,timeout=600)
+ p=subprocess.run([str(x) for x in args],input=data,capture_output=True,env=ENV,timeout=600,pass_fds=(() if LOCK_FD is None else (LOCK_FD,)))
  if p.returncode:refuse('MAIL_CHECKPOINT_DEPENDENCY_FAILED')
  return p.stdout
 
@@ -44,7 +45,7 @@ def worker(action,archive,root=None,metadata=None,expected=None):
  if image!=HELPER:refuse('MAIL_IMAGE_IDENTITY_MISMATCH')
  args=['/usr/bin/docker','run','--rm','-i','--network','none','--read-only','--cap-drop','ALL','--cap-add','DAC_OVERRIDE','--cap-add','CHOWN','--cap-add','FOWNER','--security-opt','no-new-privileges:true','--memory','536870912','--pids-limit','32','--mount','type=bind,source='+str(BASE/'admin/checkpoint_worker.py')+',target=/worker.py,readonly','--mount','type=bind,source='+str(archive)+',target=/archive'+('' if action=='capture' else ',readonly')]
  if root:args+=['--mount','type=bind,source='+str(root)+',target='+('/source,readonly' if action in ('capture','quiet') else '/target')]
- p=subprocess.run([*args,'--entrypoint','python3',HELPER,'-B','/worker.py'],input=encode(dict(action=action,metadata=metadata,expected=expected)).encode(),capture_output=True,env=ENV,timeout=600)
+ p=subprocess.run([*args,'--entrypoint','python3',HELPER,'-B','/worker.py'],input=encode(dict(action=action,metadata=metadata,expected=expected)).encode(),capture_output=True,env=ENV,timeout=600,pass_fds=(() if LOCK_FD is None else (LOCK_FD,)))
  try:result=json.loads(p.stdout)
  except ValueError:refuse('MAIL_CHECKPOINT_DEPENDENCY_FAILED')
  if p.returncode or not result.get('ok'):refuse(result.get('code','MAIL_CHECKPOINT_INVALID'))
@@ -70,11 +71,18 @@ def runtime_files():
 
 def capture(a,cfg,root):
  check_runtime(root);mount_id=mount(root);no_writers(root) if (root/'recovery-fence.json').exists() else None
- if (root/'recovery-fence.json').exists():refuse('MAIL_RECOVERY_ALREADY_FENCED')
+ if (root/'recovery-fence.json').exists():
+  old=jsonfile(root/'recovery-fence.json')
+  if old.get('phase')!='released' or {k:old.get(k) for k in ('device','inode')}!=ident(root):refuse('MAIL_RECOVERY_ALREADY_FENCED')
  run(['/usr/bin/node',BASE/'lifecycle.cjs','preflight','--config',a.config])
  # Stop every native role; no automatic restart or writer remains.
  run(['/usr/bin/node',BASE/'lifecycle.cjs','stop','--config',a.config,'--execute'])
  no_writers(root);worker('quiet',BASE,root);meta=database(root,True)
+ previous_journal=root.parent/('.mail-restore-'+hashlib.sha256(str(root).encode()).hexdigest()+'.json')
+ if previous_journal.exists():
+  previous=jsonfile(previous_journal)
+  if previous.get('target')==ident(root) and previous.get('phase')=='validated-held' and jsonfile(root/'recovery-fence.json').get('phase')=='released':
+   previous['phase']='released';write(previous_journal,previous)
  for name in ('admission-closed',):
   if (root/'durable/registry/public'/name).exists():refuse('MAIL_RECOVERY_REQUIRED')
  for name,allowed in [('tls-intent.json',('applied','rolled-back')),('quota-drain.json',('released',))]:
@@ -113,6 +121,15 @@ def restore(a,cfg,root):
  if root.stat().st_dev==m['source_identity']['device'] or a.target_uuid==m['source_uuid']:refuse('MAIL_RESTORE_SOURCE_TARGET_ALIAS')
  journal=root.parent/('.mail-restore-'+hashlib.sha256(str(root).encode()).hexdigest()+'.json')
  if journal.exists():
+  prior=jsonfile(journal)
+  if prior.get('phase')=='released' and prior.get('target')!=ident(root):
+   if list(root.iterdir()):refuse('MAIL_RESTORE_TARGET_OCCUPIED')
+   history=journal.with_name(journal.stem+'-history-'+prior['checkpoint']+'-'+prior['target_uuid']+'.json')
+   if history.exists():
+    if jsonfile(history)!=prior:refuse('MAIL_RESOURCE_IDENTITY_MISMATCH')
+   else:write(history,prior)
+   journal.unlink();syncdir(journal.parent)
+ if journal.exists():
   j=jsonfile(journal)
   if j['checkpoint']!=a.manifest_sha256 or j['target']!=ident(root) or j['target_uuid']!=a.target_uuid:refuse('MAIL_RESTORE_TARGET_UNAUTHORIZED')
  else:
@@ -121,15 +138,17 @@ def restore(a,cfg,root):
  stage=root/'.restore-stage'
  if j['phase']=='allocated':
   if stage.exists():
-   os.rename(stage,root/('.restore-interrupted-'+str(uuid.uuid4())));syncdir(root)
+   name='.restore-interrupted-'+str(uuid.uuid4());j.setdefault('retained_stages',[]).append(name);write(journal,j);os.rename(stage,root/name);syncdir(root)
   stage.mkdir(mode=0o700);worker('extract',archive,stage,expected=a.manifest_sha256);j['phase']='verified';write(journal,j)
  if j['phase']=='verified':
+  worker('verify-promotion',archive,root,expected=a.manifest_sha256,metadata={'retained_stages':j.get('retained_stages',[])})
   # Rename-only promotion, resumable after interruption; never replace any
   # pre-existing target entry. The journal binds this exact mounted inode.
-  for p in sorted(stage.iterdir()):
+  for p in sorted(stage.iterdir()) if stage.exists() else []:
    if (root/p.name).exists() or (root/p.name).is_symlink():refuse('MAIL_RESTORE_TARGET_OCCUPIED')
    os.rename(p,root/p.name);syncdir(root);syncdir(stage)
-  stage.rmdir();j['phase']='promoted';write(journal,j)
+  if stage.exists():stage.rmdir()
+  j['phase']='promoted';write(journal,j)
  if j['phase']=='promoted':
   if database(root)['applied_revision']!=m['generation']:refuse('MAIL_GENERATION_INCOHERENT')
   # Explicit new authority identity, preserving schema/state/revision/nonce.
@@ -156,17 +175,20 @@ def release(a,cfg,root):
  write(root/'recovery-fence.json',dict(fence,phase='released',**ident(root)))
  try:run(['/usr/bin/node',BASE/'lifecycle.cjs','preflight','--config',root/'recovery-config.json'])
  except Refusal:write(root/'recovery-fence.json',fence);raise
+ j['phase']='released';write(journal,j)
  return dict(checkpoint=a.manifest_sha256,phase='released',queue_held=True,automatic_start=False)
 
 START=time.monotonic()
 def main():
+ global LOCK_FD
  resource.setrlimit(resource.RLIMIT_CORE,(0,0));os.umask(0o077)
  p=argparse.ArgumentParser();p.add_argument('operation',choices=['backup','restore','recovery-release']);p.add_argument('--config',required=True);p.add_argument('--archive');p.add_argument('--manifest-sha256');p.add_argument('--target-uuid');p.add_argument('--execute',action='store_true');a=p.parse_args()
  if not a.execute:refuse('MAIL_NOT_AUTHORIZED')
  if a.operation!='recovery-release' and not a.archive:refuse('MAIL_USAGE')
  cfg=jsonfile(a.config);root=pathlib.Path(cfg['service']['deployment']['root']);deployment=cfg['service']['deployment']
  if (os.getuid(),os.getgid())!=(deployment['owner_uid'],deployment['owner_gid']):refuse('MAIL_OPERATOR_IDENTITY_MISMATCH')
- with service_lock(root):
+ with service_lock(root) as fd:
+  LOCK_FD=fd
   data=capture(a,cfg,root) if a.operation=='backup' else restore(a,cfg,root) if a.operation=='restore' else release(a,cfg,root)
  print(json.dumps(dict(contract='drumee.mail-recovery/1',ok=True,code='OK',data=data)))
 if __name__=='__main__':

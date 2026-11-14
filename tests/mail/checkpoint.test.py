@@ -29,4 +29,12 @@ class Checkpoint(unittest.TestCase):
  def test_escaping_link_rejected_at_capture(self):
   (self.source/'foreign').symlink_to('../outside')
   with self.assertRaisesRegex(ValueError,'LINK_UNSAFE'):worker.inventory(self.source)
+ def test_interrupted_promotion_is_verified_before_resume(self):
+  stage=self.target/'.restore-stage';stage.mkdir(mode=0o700);worker.extract(self.archive,self.result['manifest_sha256'],stage)
+  os.rename(stage/'generation-1',self.target/'generation-1')
+  self.assertTrue(worker.verify_promotion(self.archive,self.result['manifest_sha256'],self.target,[])['verified'])
+ def test_permission_change_in_stage_refuses_without_repair(self):
+  stage=self.target/'.restore-stage';stage.mkdir(mode=0o700);worker.extract(self.archive,self.result['manifest_sha256'],stage);p=stage/'generation-1'/'record';p.chmod(0o644)
+  with self.assertRaisesRegex(ValueError,'METADATA'):worker.verify_promotion(self.archive,self.result['manifest_sha256'],self.target,[])
+  self.assertEqual(p.stat().st_mode&0o777,0o644);self.assertEqual(p.read_bytes(),b'synthetic-state')
 if __name__=='__main__':unittest.main()

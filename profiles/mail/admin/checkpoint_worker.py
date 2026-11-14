@@ -3,7 +3,7 @@
 Manifests and payloads are private: they include hashes of credential material.
 Only aggregate receipts may leave the protected checkpoint directory.
 """
-import hashlib,json,os,pathlib,stat,sys,tarfile
+import hashlib,json,os,pathlib,resource,sqlite3,stat,sys,tarfile
 
 def digest(path):
  h=hashlib.sha256()
@@ -84,6 +84,16 @@ def verify(archive_root,expected):
     if target.is_absolute() or '..' in target.parts or m.linkname!=v['target']:raise ValueError('MAIL_CHECKPOINT_MEMBER_UNSAFE')
    else:raise ValueError('MAIL_CHECKPOINT_MEMBER_UNSAFE')
   if seen!=set(manifest['entries']):raise ValueError('MAIL_CHECKPOINT_INCOMPLETE')
+  if 'root' in manifest['metadata']:
+   try:
+    registry=json.load(tar.extractfile('durable/registry/public/current.json'))
+    db=sqlite3.connect(':memory:');db.deserialize(tar.extractfile('durable/operator-state/admin/registry.sqlite3').read());db.execute('PRAGMA trusted_schema=OFF')
+    if db.execute('PRAGMA integrity_check').fetchall()!=[('ok',)]:raise ValueError('MAIL_CHECKPOINT_INTEGRITY_FAILURE')
+    meta={k:json.loads(v) for k,v in db.execute('SELECT key,value FROM meta')}
+    if meta['applied_revision']!=meta['desired_revision'] or meta['applied_revision']!=registry['generation'] or meta['applied_revision']!=manifest['metadata']['generation'] or meta['owner']!=manifest['metadata']['owner'] or db.execute("SELECT count(*) FROM operations WHERE phase NOT IN ('applied','aborted')").fetchone()[0]:raise ValueError('MAIL_GENERATION_INCOHERENT')
+    if manifest['entries']['durable/registry/private/current']['target']!='generation-'+str(registry['generation']):raise ValueError('MAIL_GENERATION_INCOHERENT')
+    db.close()
+   except (sqlite3.Error,KeyError,TypeError):raise ValueError('MAIL_CHECKPOINT_SCHEMA_INCOMPATIBLE')
  return manifest
 
 def extract(archive_root,expected,target):
@@ -112,13 +122,33 @@ def extract(archive_root,expected,target):
  if inventory(target)!=manifest['entries']:raise ValueError('MAIL_CHECKPOINT_METADATA_MISMATCH')
  return dict(entries=len(manifest['entries']),verified=True)
 
+def verify_promotion(archive_root,expected,target,retained):
+ m=verify(archive_root,expected);target=pathlib.Path(target);stage=target/'.restore-stage';entries=m['entries'];tops={pathlib.PurePosixPath(x).parts[0] for x in entries if x!='.'}
+ if {p.name for p in target.iterdir()}-tops-{'.restore-stage'}-set(retained):raise ValueError('MAIL_RESTORE_TARGET_OCCUPIED')
+ if not ({p.name for p in stage.iterdir()} if stage.exists() else set())<=tops:raise ValueError('MAIL_CHECKPOINT_INCOMPLETE')
+ actual={'.':inventory_root(target)}
+ for name in tops:
+  left=target/name;right=stage/name
+  present=lambda p:p.exists() or p.is_symlink()
+  if present(left)==present(right):raise ValueError('MAIL_RESTORE_TARGET_OCCUPIED')
+  actual.update({name if k=='.' else name+'/'+k:v for k,v in inventory(left if present(left) else right).items()})
+ # Promotion changes the enclosing root's mtime; no stored data metadata changes.
+ actual['.']['mtime_ns']=entries['.']['mtime_ns']
+ if actual!=entries:raise ValueError('MAIL_CHECKPOINT_METADATA_MISMATCH')
+ return {'verified':True}
+
+def inventory_root(p):
+ s=p.lstat();return dict(uid=s.st_uid,gid=s.st_gid,mode=stat.S_IMODE(s.st_mode),mtime_ns=s.st_mtime_ns,kind='directory')
+
 if __name__=='__main__':
  try:
+  resource.setrlimit(resource.RLIMIT_CORE,(0,0))
   a={'action':'quiet'} if len(sys.argv)==3 and sys.argv[1]=='--quiet-host' else json.load(sys.stdin)
   if a['action']=='quiet':result=quiet(sys.argv[2] if len(sys.argv)==3 else '/source')
   elif a['action']=='capture':result=capture('/source','/archive',a['metadata'])
   elif a['action']=='verify':m=verify('/archive',a['expected']);result={'metadata':m['metadata'],'entries':len(m['entries'])}
   elif a['action']=='extract':result=extract('/archive',a['expected'],'/target')
+  elif a['action']=='verify-promotion':result=verify_promotion('/archive',a['expected'],'/target',a.get('metadata',{}).get('retained_stages',[]))
   else:raise ValueError('MAIL_USAGE')
   print(json.dumps({'ok':True,'data':result}))
  except (OSError,ValueError,KeyError,tarfile.TarError) as e:
