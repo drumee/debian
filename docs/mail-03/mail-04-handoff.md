@@ -3,7 +3,14 @@
 Use the incremental draft PRs [Debian15](https://github.com/drumee/debian/pull/15)
 and [Infra39](https://github.com/drumee/infra-layer/pull/39), based on unmerged
 MAIL-02 drafts13/38. Final verdict, artifact receipts and evidence are in
-qualification.md; incomplete scenarios are not acceptance evidence.
+[qualification.md](qualification.md). MAIL-03 qualifies isolated administration:
+51 main assertions pass on the host and Docker 26 guest, with additional quota
+transition, syscall interruption, purge recovery, reboot and private-network
+proofs. The final unpublished engine producer is
+`1b60818f4f60cc6b54976184dbd6f0585b717a68`; acquire only the 52-member source lock.
+Images and the native quota module remain those qualified by MAIL-02. Required
+Infra and Debian hosted gates pass; the four unchanged historical general Infra
+integration failures remain explicitly documented.
 
 MAIL-04 owns real application integration: independent Ghost transaction-only and
 Oxymotion submission accounts, restricted exact envelope/header grants, protected

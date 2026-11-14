@@ -1,0 +1,18 @@
+{
+  "debian_sha": "f96eeb1badd9828b81ee61f5b73d188acc72baec",
+  "shellcheck": "0.11.0",
+  "shellcheck_action": "00b27aa7cb85167568cb48a3838b75f4265f2bca",
+  "shellcheck_severity": "warning",
+  "shellcheck_statuscode": 0,
+  "packaging": "PASS",
+  "debian_suite": {
+    "pass": 336,
+    "fail": 0
+  },
+  "profile_contracts": {
+    "pass": 5,
+    "fail": 0
+  },
+  "packaging_toolchain_image_config_id": "sha256:2a96bd19eac5b76f4930e550d8a34d16ede5e791cad461e8c526d3a19b2d5eeb",
+  "packaging_base_manifest": "sha256:020c0d20b9880058cbe785a9db107156c3c75c2ac944a6aa7ab59f2add76a7bd"
+}

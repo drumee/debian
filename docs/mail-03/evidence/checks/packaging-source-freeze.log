@@ -1,0 +1,16 @@
+Packaging invariants - /qual/mail03-reference
+
+ok    no git clone / REPO_BASE in any Dockerfile
+ok    every FROM is pinned by digest
+ok    no curl piped into bash/sh/gpg
+ok    apt-get update always paired with its install
+ok    --no-install-recommends used throughout
+ok    no npm install -g
+ok    no build tooling in runtime images
+ok    Drumee packages always pinned
+ok    mutual exclusion and version anchor declared on every role
+ok    no hardcoded component version in any control file
+ok    Architecture matches the payload
+ok    release-manifest.yaml present
+
+All invariants hold.

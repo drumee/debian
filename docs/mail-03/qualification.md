@@ -1,6 +1,6 @@
 # MAIL-03 administration qualification
 
-Status: **MAIL-03_BLOCKED pending final-reference CI.**
+Status: **MAIL-03_QUALIFIED for isolated administration.**
 The results below qualify isolated administration only. No publication, merge,
 production operation, public exposure or real-recipient SMTP was performed.
 `SMTP_RECOVERY_UNQUALIFIED` remains for coordinated Oxy-form restoration and for
@@ -14,6 +14,12 @@ The qualified MAIL-02 parents remain unmodified draft PRs:
 | --- | --- | --- |
 | Infra Layer | PR38 `465d4e91553edd204b1e3b5ace9ad64791235403` | [Draft PR39](https://github.com/drumee/infra-layer/pull/39), target `feat/mail-02-service` |
 | Debian | PR13 `ad1c7be3c0a6860fb1cfa58918d79cd026828a95` | [Draft PR15](https://github.com/drumee/debian/pull/15), target `feat/mail-02-profile`; depends on PR39 |
+
+The Debian runtime/test source freeze is `f96eeb1badd9828b81ee61f5b73d188acc72baec`.
+Its lint, packaging, suite and minimal-application-contract jobs all pass on both
+push and PR runs, with unchanged gates. The closure commit changes only this
+dossier and public evidence; its final SHA/check links are recorded in PR15 and
+the delivery after checking the final runs. No runtime rebuild is needed.
 
 Both MAIL-03 branches are `feat/mail-03-admin`. No later parent changes were
 replaced. The incremental diffs are relative to those parents, not main.
@@ -81,8 +87,8 @@ exit/status and observed evidence, without credential material.
 | New IMAP authentication during policy outage; same credential recovery | PASS, 3 controls | `regression/auth-gate-result.json`; `tests/mail/auth-gate-native.py PROFILE SOURCE` |
 | Debian suite / profile contracts | PASS, 336 / 5 | `checks/debian-suite.log`, `profile-contract.log`; `bash tests/run-all.sh`, `node --test tests/mail/profile.cjs` |
 | Infra unit / contracts / lint / audit / packed consumer | PASS, 413 units, no new lint diagnostics or vulnerabilities | `checks/infra-*.log`; unchanged required gates; 52 package members, zero production dependencies |
-| ShellCheck 0.11.0 and packaging | PASS at code freeze; final hosted pending | `checks/shellcheck-action-output.txt` (statuscode=0), packaging log; identical workflow thresholds/scopes |
-| Final hosted required jobs | BLOCKED pending Debian final tip | Infra [43578050009](https://github.com/drumee/infra-layer/actions/runs/43578050009) PASS; final Debian links recorded at delivery |
+| ShellCheck 0.11.0 and packaging | PASS locally and in both hosted runs | `checks/shellcheck-source-freeze-output.txt` (statuscode=0), `checks/packaging-source-freeze.log`; identical workflow thresholds/scopes |
+| Final hosted required jobs | PASS | Infra [43578050009](https://github.com/drumee/infra-layer/actions/runs/43578050009); Debian [43586215307](https://github.com/drumee/debian/actions/runs/43586215307) and [43586212402](https://github.com/drumee/debian/actions/runs/43586212402); final documentation-only tip rechecked at delivery |
 | Historical general Infra integration suite | FAIL, same 4 on parent and final | `checks/infra-baseline-integration.log`, `infra-final-integration.log`; explanation below |
 | Coordinated Oxy-form and autonomous replacement-storage restore | UNQUALIFIED, separate lot | No restoration claim, ledger/dedup reset or exactly-once delivery claim |
 

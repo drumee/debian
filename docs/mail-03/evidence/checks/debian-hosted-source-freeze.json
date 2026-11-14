@@ -1,0 +1,72 @@
+[
+  {
+    "run_id": 43586215307,
+    "head_sha": "f96eeb1badd9828b81ee61f5b73d188acc72baec",
+    "url": "https://github.com/drumee/debian/actions/runs/43586215307",
+    "jobs": [
+      {
+        "id": 132421142743,
+        "name": "minimal-application-contract",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/drumee/debian/actions/runs/43586215307/job/132421142743"
+      },
+      {
+        "id": 132421142819,
+        "name": "packaging",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/drumee/debian/actions/runs/43586215307/job/132421142819"
+      },
+      {
+        "id": 132421142878,
+        "name": "lint",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/drumee/debian/actions/runs/43586215307/job/132421142878"
+      },
+      {
+        "id": 132421142883,
+        "name": "suite",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/drumee/debian/actions/runs/43586215307/job/132421142883"
+      }
+    ]
+  },
+  {
+    "run_id": 43586212402,
+    "head_sha": "f96eeb1badd9828b81ee61f5b73d188acc72baec",
+    "url": "https://github.com/drumee/debian/actions/runs/43586212402",
+    "jobs": [
+      {
+        "id": 132421134230,
+        "name": "lint",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/drumee/debian/actions/runs/43586212402/job/132421134230"
+      },
+      {
+        "id": 132421134420,
+        "name": "packaging",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/drumee/debian/actions/runs/43586212402/job/132421134420"
+      },
+      {
+        "id": 132421134423,
+        "name": "suite",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/drumee/debian/actions/runs/43586212402/job/132421134423"
+      },
+      {
+        "id": 132421134436,
+        "name": "minimal-application-contract",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/drumee/debian/actions/runs/43586212402/job/132421134436"
+      }
+    ]
+  }
+]
