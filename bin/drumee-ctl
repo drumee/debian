@@ -23,6 +23,12 @@ if [ "${1:-}" = --profile ]; then
     *) echo 'error: unsupported profile' >&2; exit 1 ;;
   esac
   shift 2
+  # Replace the shell for administrative input: inherited FDs and TTY signals
+  # reach the SQLite authority directly, without an intermediate sync waiter.
+  if [ "$DRUMEE_SELECTED_PROFILE" = mail ] && [ "${1:-}" = mail ]; then
+    shift
+    exec /usr/bin/env -i PATH=/usr/bin:/bin LANG=C LC_ALL=C HOME=/ /usr/bin/python3 -I "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/profiles/mail/admin/main.py" "$@"
+  fi
   exec node "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/profiles/${DRUMEE_SELECTED_PROFILE}/operator.js" "$@"
 fi
 

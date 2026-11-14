@@ -16,6 +16,14 @@ class PasswordTests(unittest.TestCase):
    try:
     with self.assertRaises(Refusal):read_fd(fd)
    finally:os.close(fd)
+ def test_writable_and_path_only_descriptors_are_refused(self):
+  with tempfile.TemporaryDirectory() as root:
+   p=pathlib.Path(root)/'secret';p.write_bytes(b'x'*16);p.chmod(0o600)
+   for flag in (os.O_RDWR,os.O_WRONLY,os.O_PATH):
+    fd=os.open(p,flag)
+    try:
+     with self.assertRaises(Refusal):read_fd(fd)
+    finally:os.close(fd)
  def test_pipe_and_link_refusals(self):
   a,b=os.pipe();os.write(b,b'y'*16);os.close(b);self.assertEqual(read_fd(a),b'y'*16)
   with tempfile.TemporaryDirectory() as root:

@@ -1,5 +1,5 @@
 """Secret input is bounded, descriptor based, and never part of an operation intent."""
-import os,stat,termios
+import os,stat,termios,fcntl
 from model import refuse
 
 def validate(data):
@@ -12,6 +12,8 @@ def read_fd(fd):
  if not 3<=fd<=128:refuse('MAIL_SECRET_INPUT_UNSAFE')
  try:s=os.fstat(fd)
  except OSError:refuse('MAIL_SECRET_INPUT_UNSAFE')
+ flags=fcntl.fcntl(fd,fcntl.F_GETFL)
+ if flags&os.O_ACCMODE!=os.O_RDONLY or flags&getattr(os,'O_PATH',0) or flags&os.O_NONBLOCK:refuse('MAIL_SECRET_INPUT_UNSAFE')
  if s.st_uid!=os.getuid() or not (stat.S_ISREG(s.st_mode) or stat.S_ISFIFO(s.st_mode)) or stat.S_IMODE(s.st_mode)!=0o600 or (stat.S_ISREG(s.st_mode) and s.st_nlink!=1):refuse('MAIL_SECRET_INPUT_UNSAFE')
  # /proc identifies a symlink-opened regular FD even when the final path is safe.
  if stat.S_ISREG(s.st_mode):

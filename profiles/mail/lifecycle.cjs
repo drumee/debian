@@ -9,6 +9,13 @@ function readPrivate(file) {
   return fs.readFileSync(file);
 }
 const { api } = require("./consumer.cjs");
+function administration(config,cfg) {
+  const file=path.join(cfg.service.deployment.root,"durable/operator-state/admin/registry.sqlite3");
+  if(!fs.existsSync(file))return null;
+  const result=require("node:child_process").spawnSync("/usr/bin/python3",["-I",path.join(__dirname,"admin/main.py"),"status","--config",config,"--json"],{env:{PATH:"/usr/bin:/bin",LANG:"C",LC_ALL:"C",HOME:"/"},encoding:"utf8",timeout:30000,maxBuffer:65536});
+  try { const value=JSON.parse(result.stdout);return value.ok?{available:true,desired_revision:value.desired_revision,applied_revision:value.applied_revision,...value.data}:{available:false,code:value.code}; }
+  catch { return {available:false,code:"MAIL_RECOVERY_REQUIRED"}; }
+}
 function run(argv) {
   const operation = argv.shift(), opts = {};
   for (let i = 0; i < argv.length; i++) {
@@ -36,8 +43,14 @@ function run(argv) {
     if (cfg.acceptance === true && (prepared.compose.networks.edge.internal !== !cfg.acceptance_private_listener || binding !== !!cfg.acceptance_private_listener)) throw Error("MAIL_PROFILE_STATE_MISMATCH");
     return prepared;
   };
-  if (operation === "doctor") return M.observeMailService(loadState(), { authorized: true, ...cfg.monitoring });
-  if (operation === "status") return M.operateMailService(loadState(), "status", { authorized: true });
+  if (operation === "doctor") {
+    const value=M.observeMailService(loadState(), { authorized: true, ...cfg.monitoring }),managed=administration(opts.config,cfg);
+    if(managed){value.administration=managed;if(!managed.available||managed.pending_operation){value.healthy=false;if(!value.alerts.some(x=>x.code==="MAIL_GENERATION_INCOMPLETE"))value.alerts.push({code:"MAIL_GENERATION_INCOMPLETE",source:"administrative-journal"});}}
+    return value;
+  }
+  if (operation === "status") {
+    const value=M.operateMailService(loadState(), "status", { authorized: true }),managed=administration(opts.config,cfg);if(managed)value.administration=managed;return value;
+  }
   if (operation === "preflight") return M.operateMailService(loadState(), "preflight", { authorized: true });
   if (!opts.execute) throw Error("MAIL_EXECUTION_AUTHORIZATION_REQUIRED");
   if (operation === "install") {

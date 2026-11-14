@@ -76,5 +76,10 @@ run "immutable parent, shell arguments, seed command and retention guards" "pyth
 hdr "12. Mail native immutable base"
 run "OCI manifest, image config, layers and locked FROM guards" "python3 tests/mail/native-base.test.py"
 
+hdr "13. Mail administration public state and secret input"
+run "administrative semantics and stable identities" "python3 tests/mail/admin/model.test.py"
+run "bounded exact password descriptors" "python3 tests/mail/admin/password.test.py"
+run "SQLite journal, descriptor locks and target preservation" "python3 tests/mail/admin/storage.test.py"
+
 printf '\n\033[1m== %d passed, %d failed ==\033[0m\n' "$pass" "$fail"
 [ "$fail" = 0 ]

@@ -28,7 +28,7 @@ def projection(s,generation):
  aliases=[{k:a[k] for k in ('address','mailbox_id','receive_enabled')} for a in s['aliases'] if not a['deleted']]
  accounts=[{k:a[k] for k in ('id','enabled','credential_generation','envelope_from','header_from')}|({'dsn_mailbox_id':a['dsn_mailbox']} if a.get('dsn_native') else {}) for a in s['accounts'] if not a['deleted']]
  return dict(contract='drumee.mail-registry/1',generation=generation,mailboxes=boxes,aliases=aliases,accounts=accounts)
-def mutate(original,family,verb,selector,opts,domains,default_quota):
+def mutate(original,family,verb,selector,opts,domains,default_quota,public_mx=True):
  s=copy.deepcopy(original);data=None
  def reserved(addr):
   if addr in s['reserved'] or any(x['address']==addr for x in s['mailboxes']+s['aliases']):refuse('MAIL_ADDRESS_CONFLICT')
@@ -64,17 +64,19 @@ def mutate(original,family,verb,selector,opts,domains,default_quota):
      if a['mailbox_id']==data['id']:a['deleted']=True;retire_grants(a['address'])
    else:refuse('MAIL_USAGE')
  elif family=='alias':
-  addr=local(selector);data=next((a for a in s['aliases'] if a['address']==addr and not a['deleted']),None)
+  addr=local(selector);data=next((a for a in s['aliases'] if a['address']==addr and (verb=='delete' or not a['deleted'])),None)
   if verb=='create':
    reserved(addr);box=find(s,'mailbox',opts['mailbox']);data=dict(address=addr,mailbox_id=box['id'],receive_enabled=True,deleted=False);s['aliases'].append(data)
   else:
    if data is None:refuse('MAIL_NOT_FOUND')
    if verb=='delete':data['deleted']=True;retire_grants(addr)
    elif verb=='update':
-    if 'mailbox' in opts:data['mailbox_id']=find(s,'mailbox',opts['mailbox'])['id']
+    if 'mailbox' in opts:
+     destination=find(s,'mailbox',opts['mailbox'])['id']
+     if destination!=data['mailbox_id']:retire_grants(addr)
+     data['mailbox_id']=destination
     if 'receive' in opts:data['receive_enabled']=opts['receive']
    else:refuse('MAIL_USAGE')
-  if verb in ('delete','update') and addr.split('@')[0] in ('postmaster','abuse') and (data['deleted'] or not data['receive_enabled']):refuse('MAIL_VALIDATION')
  elif family=='account':
   if not re.fullmatch(r'[a-z][a-z0-9-]{0,62}',selector or ''):refuse('MAIL_VALIDATION')
   if verb=='create':
@@ -102,11 +104,24 @@ def mutate(original,family,verb,selector,opts,domains,default_quota):
   if a['enabled'] and family=='account' and a is data and verb in ('create','update','enable'):
    dsn=next((b for b in s['mailboxes'] if b['id']==a['dsn_mailbox']),None)
    if not dsn or dsn['deleted'] or not dsn['receive_enabled']:refuse('MAIL_DEPENDENCY_UNAVAILABLE')
-  for addr in (a['envelope_from']+a['header_from'] if family=='account' and a is data and verb in ('create','update','enable') else []):
+  if family=='account' and a is data and verb in ('create','update','enable'):
+   for addr in a['header_from']:
+    if addr in s['reserved'] or any(x['address']==addr and x.get('deleted') for x in s['mailboxes']+s['aliases']):refuse('MAIL_VALIDATION')
+  for addr in (a['envelope_from'] if family=='account' and a is data and verb in ('create','update','enable') else []):
    box=next((b for b in s['mailboxes'] if b['address']==addr),None)
    alias=next((b for b in s['aliases'] if b['address']==addr and not b['deleted']),None)
    target=box or (find(s,'mailbox',alias['mailbox_id']) if alias else None)
-   if not target or target['deleted'] or not target['receive_enabled']:refuse('MAIL_VALIDATION')
+   if not target or target['deleted'] or not target['receive_enabled'] or target['id']!=a['dsn_mailbox']:refuse('MAIL_VALIDATION')
+ if public_mx:
+  def routable(state,addr):
+   box=next((b for b in state['mailboxes'] if b['address']==addr),None)
+   alias=next((a for a in state['aliases'] if a['address']==addr and not a['deleted'] and a['receive_enabled']),None)
+   if alias:box=next((b for b in state['mailboxes'] if b['id']==alias['mailbox_id']),None)
+   return box is not None and not box['deleted'] and box['receive_enabled']
+  for domain in domains:
+   for role in ('postmaster','abuse'):
+    addr=role+'@'+domain
+    if routable(original,addr) and not routable(s,addr):refuse('MAIL_DOMAIN_IN_USE')
  # Repeated desired flags are no-ops, including account credential generations.
  if family=='account' and verb in ('enable','disable','delete'):
   old=find(original,family,selector,True)
