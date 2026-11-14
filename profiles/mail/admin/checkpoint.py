@@ -70,7 +70,7 @@ def runtime_files():
  return {str(p.relative_to(BASE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}
 
 def capture(a,cfg,root):
- check_runtime(root);mount_id=mount(root);no_writers(root) if (root/'recovery-fence.json').exists() else None
+ safe_directory(root);check_runtime(root);mount_id=mount(root)
  if (root/'recovery-fence.json').exists():
   old=jsonfile(root/'recovery-fence.json')
   if old.get('phase')!='released' or {k:old.get(k) for k in ('device','inode')}!=ident(root):refuse('MAIL_RECOVERY_ALREADY_FENCED')
@@ -136,6 +136,7 @@ def restore(a,cfg,root):
   if list(root.iterdir()):refuse('MAIL_RESTORE_TARGET_OCCUPIED')
   j=dict(contract='drumee.mail-restore-operation/1',checkpoint=a.manifest_sha256,target=ident(root),target_uuid=a.target_uuid,phase='allocated');write(journal,j)
  stage=root/'.restore-stage'
+ if j['phase']=='released':refuse('MAIL_RESTORE_ALREADY_RELEASED')
  if j['phase']=='allocated':
   if stage.exists():
    name='.restore-interrupted-'+str(uuid.uuid4());j.setdefault('retained_stages',[]).append(name);write(journal,j);os.rename(stage,root/name);syncdir(root)
