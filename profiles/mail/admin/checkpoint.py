@@ -184,18 +184,35 @@ def release(a,cfg,root):
  j['phase']='released';write(journal,j)
  return dict(checkpoint=a.manifest_sha256,phase='released',queue_held=True,automatic_start=False)
 
+def resume_source(a,cfg,root):
+ if not a.archive or not a.manifest_sha256:refuse('MAIL_USAGE')
+ archive=safe_directory(a.archive);m=worker('verify',archive,expected=a.manifest_sha256)['metadata'];fence=jsonfile(root/'recovery-fence.json')
+ if fence.get('phase')!='captured' or m.get('fence',{}).get('operation_id')!=fence.get('operation_id') or m.get('source_identity')!=ident(root) or m.get('source_uuid')!=mount(root) or m.get('owner')!=jsonfile(root/'owner.json') or m.get('root')!=str(root) or not compatible_writer(m.get('distribution_files')) or m.get('source_lock')!=json.loads((BASE/'infra-source-lock.json').read_text()):refuse('MAIL_RESTORE_TARGET_UNAUTHORIZED')
+ journal=root.parent/('.mail-restore-'+hashlib.sha256(str(root).encode()).hexdigest()+'.json')
+ if journal.exists():
+  current=jsonfile(journal)
+  if current.get('phase')!='released' or current.get('target')!=ident(root):refuse('MAIL_RECOVERY_REQUIRED')
+ no_writers(root)
+ if database(root)['applied_revision']!=m['generation']:refuse('MAIL_GENERATION_INCOHERENT')
+ worker('quiet',BASE,root)
+ write(root/'recovery-fence.json',dict(fence,phase='released',checkpoint=a.manifest_sha256,origin='source-resume',**ident(root)))
+ try:run(['/usr/bin/node',BASE/'lifecycle.cjs','preflight','--config',root/'recovery-config.json'])
+ except Refusal:write(root/'recovery-fence.json',fence);raise
+ write(root/'durable/operator-state'/('source-resume-'+a.manifest_sha256+'.json'),dict(checkpoint=a.manifest_sha256,source=ident(root),source_uuid=m['source_uuid'],at=time.time()))
+ return dict(checkpoint=a.manifest_sha256,phase='source-released',automatic_start=False,queue_disposition='unchanged',responsibility='source')
+
 START=time.monotonic()
 def main():
  global LOCK_FD
  resource.setrlimit(resource.RLIMIT_CORE,(0,0));os.umask(0o077)
- p=argparse.ArgumentParser();p.add_argument('operation',choices=['backup','restore','recovery-release']);p.add_argument('--config',required=True);p.add_argument('--archive');p.add_argument('--manifest-sha256');p.add_argument('--target-uuid');p.add_argument('--execute',action='store_true');a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('operation',choices=['backup','restore','recovery-release','recovery-resume-source']);p.add_argument('--config',required=True);p.add_argument('--archive');p.add_argument('--manifest-sha256');p.add_argument('--target-uuid');p.add_argument('--execute',action='store_true');a=p.parse_args()
  if not a.execute:refuse('MAIL_NOT_AUTHORIZED')
  if a.operation!='recovery-release' and not a.archive:refuse('MAIL_USAGE')
  cfg=jsonfile(a.config);root=pathlib.Path(cfg['service']['deployment']['root']);deployment=cfg['service']['deployment']
  if (os.getuid(),os.getgid())!=(deployment['owner_uid'],deployment['owner_gid']):refuse('MAIL_OPERATOR_IDENTITY_MISMATCH')
  with service_lock(root) as fd:
   LOCK_FD=fd
-  data=capture(a,cfg,root) if a.operation=='backup' else restore(a,cfg,root) if a.operation=='restore' else release(a,cfg,root)
+  data=capture(a,cfg,root) if a.operation=='backup' else restore(a,cfg,root) if a.operation=='restore' else release(a,cfg,root) if a.operation=='recovery-release' else resume_source(a,cfg,root)
  print(json.dumps(dict(contract='drumee.mail-recovery/1',ok=True,code='OK',data=data)))
 if __name__=='__main__':
  try:main()

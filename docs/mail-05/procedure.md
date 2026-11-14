@@ -39,7 +39,23 @@ Unix sockets/FIFOs are ephemeral. Hard links, xattrs/ACLs and unsafe symlinks re
 rather than being silently weakened. Numeric UID/GID, modes, mtimes and all regular
 file hashes are retained in the private manifest. Public output contains only
 aggregate counts and whole-archive/manifest integrity values. The source remains
-fenced; do not restart it while its copy can assume responsibility.
+fenced. To finish a routine cold backup without activating any copy, explicitly
+verify/resume that same source:
+
+```sh
+bin/drumee-ctl --profile mail recovery-resume-source --config CONFIG \
+  --archive PRIVATE_CHECKPOINT_DIRECTORY \
+  --manifest-sha256 TRUSTED_MANIFEST_SHA256 --execute
+bin/drumee-ctl --profile mail start --config LOGICAL_ROOT/recovery-config.json --execute
+```
+
+This verifies the source UUID/device/inode, capture operation, generation,
+archive, software and absence of writers, then preflights the original seals.
+It does not transplant identities, start daemons or change held-message status.
+The source retains responsibility. Before subsequently restoring its archive,
+stop/fence and preserve the current source, including messages accepted since
+capture. Never resume it while its copy can assume responsibility. Multi-host
+fencing is an operator precondition, not a distributed lease supplied by this CLI.
 
 Preserve the original device without modifying its captured files. Stop/remove
 only the stopped mail containers if necessary to release old mount references;
@@ -86,3 +102,16 @@ copy an older queue over either instance, purge held data, or activate both copi
 A rollback implementation and uncertain-message reconciliation need native evidence
 before they can be declared qualified. Coordinated Oxy-form recovery remains
 SMTP_RECOVERY_UNQUALIFIED.
+
+## Read-only validation of checkpointed WAL databases
+
+SQLite3.46.1 cannot inspect the WAL-mode serialized database with deserialize
+(`unable to open database file`), even after a clean TRUNCATE checkpoint. The
+validator instead copies the exact database bytes to a protected temporary
+directory in the network-less helper’s /dev/shm and opens it read-only. It never
+patches the database header or the archive. The helper’s64MiB shared-memory limit
+bounds this tested path; larger authority databases require capacity qualification.
+The complete writer69ba692310186c3733fc632dc03f48d29afaeb0c file inventory is
+explicitly pinned in checkpoint-compatibility.json for format1. Unknown writer
+inventories refuse. Current-writer snapshots must match the current inventory.
+The observed failure and byte-preserving correction are retained in evidence.
