@@ -64,6 +64,14 @@ Rename keeps the original address as a receiving-only alias by default; `reject`
 retires it. The new primary is the only IMAP login. Old sender grants are removed
 until explicitly granted again. There is no filesystem move or message copy.
 
+Quota transitions wait for old local-delivery contexts and revoke affected IMAP
+writers before publishing the limit. A busy writer returns incomplete with the
+old applied revision; reconcile after it completes. A smaller quota can already
+be below the bytes committed by that old transaction, which success reports as
+over_quota:true. It must not report success before those bytes are accounted.
+Postfix may retire existing SMTP sessions gracefully during this maintenance;
+unrelated IMAP sessions remain usable. See the quota section in recovery.md.
+
 ## Protected input
 
 Interactive mode presents the public change at the locked revision and asks for

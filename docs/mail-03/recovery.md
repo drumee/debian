@@ -70,6 +70,40 @@ same-storage recovery, not backup restoration. Accepted queues remain owned by
 the accepting instance; pending/uncertain deliveries require receiver evidence,
 not automatic resubmission. Exactly-once delivery is not promised.
 
+## Quota changes with active writers
+
+Quota changes additionally write a protected `quota-drain.json` intent under
+operator-state. Postfix temporarily defers LMTP dispatch and gracefully retires
+its old queue manager and delivery agents. Affected IMAP sessions are revoked;
+unrelated IMAP reads remain usable. The engine waits for old LMTP recipient
+contexts to finish and verifies the native UUID writer locks are free before
+changing the complete userdb projection. It then probes both primary/internal
+UUID limits and restores local dispatch before reporting native apply complete.
+There is no Dovecot reload or forced termination of an active LMTP writer.
+
+A slow existing LMTP transaction produces bounded MAIL_APPLY_INCOMPLETE (7),
+closed admission and a retained pending request. The old applied quota remains
+in force. Allow that accepted transaction to complete, then reconcile the same
+request. Its final successful receipt can report over_quota:true if the now
+committed data exceeds the newly requested smaller limit; it must already include
+those bytes. Future growth refuses until space is available. Never cancel a queue
+item or reset accounting to make the change succeed. Postfix sessions may retire
+gracefully during this quota maintenance; password-only changes do not use it.
+
+For operator investigation, inspect only these nonsecret fields:
+
+```sh
+jq '{contract,phase,from,to,mailbox_ids}' \
+  /absolute/owned/service/durable/operator-state/quota-drain.json
+```
+
+Phases are draining, waiting, restoring and released. A foreign defer_transports
+setting or unsafe native quota-lock inode refuses without repairing/overwriting
+it. Repair only the proven owned lab/target resource, preserve all data and the
+pending intent, then use `mail reconcile`. Reboot may clear the temporary runtime
+defer setting; the persistent barrier/intent still requires the same guarded drain
+on reconciliation. This is same-storage recovery, not backup restoration.
+
 ## Explicit purge maintenance
 
 Delete first and retain messages by default. Purge is a separate single-UUID
