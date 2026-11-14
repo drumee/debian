@@ -42,11 +42,14 @@ def interrupt(args,destination,predicate=lambda:True):
     continue
    tasks.add(who);sig=os.WSTOPSIG(status)
    if sig==(signal.SIGTRAP|0x80):
-    regs=Registers();trace(12,who,0,ctypes.byref(regs))
+    regs=Registers()
+    try:trace(12,who,0,ctypes.byref(regs))
+    except ProcessLookupError:tasks.discard(who);continue
     if regs.orig_rax in (82,264,316) and regs.rax==0:
      target=string(who,regs.rsi if regs.orig_rax==82 else regs.r10)
      if target==str(destination) and predicate():hit=True;os.killpg(pid,signal.SIGKILL);break
-   trace(24,who,0,0 if sig in (signal.SIGTRAP,signal.SIGSTOP,signal.SIGTRAP|0x80) else sig)
+   try:trace(24,who,0,0 if sig in (signal.SIGTRAP,signal.SIGSTOP,signal.SIGTRAP|0x80) else sig)
+   except ProcessLookupError:tasks.discard(who)
   assert hit,'syscall boundary was not observed'
  finally:
   try:os.killpg(pid,signal.SIGKILL)
