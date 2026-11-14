@@ -81,5 +81,8 @@ run "administrative semantics and stable identities" "python3 tests/mail/admin/m
 run "bounded exact password descriptors" "python3 tests/mail/admin/password.test.py"
 run "SQLite journal, descriptor locks and target preservation" "python3 tests/mail/admin/storage.test.py"
 
+hdr "14. Cold mail checkpoint archive boundaries"
+run "exact metadata, integrity, schema, occupied target and link refusals" "python3 tests/mail/checkpoint.test.py"
+
 printf '\n\033[1m== %d passed, %d failed ==\033[0m\n' "$pass" "$fail"
 [ "$fail" = 0 ]

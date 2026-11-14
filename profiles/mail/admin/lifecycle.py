@@ -2,7 +2,10 @@
 import json,os,pathlib,subprocess,sys
 from storage import private_read,service_lock
 from model import Refusal
-args=sys.argv[1:];script=str(pathlib.Path(__file__).parents[1]/'lifecycle.cjs');command=['/usr/bin/node',script,*args]
+args=sys.argv[1:]
+if args and args[0] in ('backup','restore','recovery-release'):
+ os.execve('/usr/bin/python3',['/usr/bin/python3','-I',str(pathlib.Path(__file__).with_name('checkpoint.py')),*args],{'PATH':'/usr/bin:/bin','LANG':'C','LC_ALL':'C','HOME':'/'})
+script=str(pathlib.Path(__file__).parents[1]/'lifecycle.cjs');command=['/usr/bin/node',script,*args]
 try:
  if args and args[0] in ('install','start','stop','restart') and '--config' in args:
   cfg=json.loads(private_read(args[args.index('--config')+1]));root=cfg['service']['deployment']['root']
