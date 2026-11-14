@@ -11,7 +11,7 @@ function readPrivate(file) {
 const { api } = require("./consumer.cjs");
 function administration(config,cfg) {
   const file=path.join(cfg.service.deployment.root,"durable/operator-state/admin/registry.sqlite3");
-  if(!fs.existsSync(file))return null;
+  if(!fs.existsSync(file))return fs.existsSync(path.dirname(file))||fs.existsSync(path.dirname(file)+"-bootstrap.json")?{available:false,code:"MAIL_RESOURCE_IDENTITY_MISMATCH"}:null;
   const result=require("node:child_process").spawnSync("/usr/bin/python3",["-I",path.join(__dirname,"admin/main.py"),"status","--config",config,"--json"],{env:{PATH:"/usr/bin:/bin",LANG:"C",LC_ALL:"C",HOME:"/"},encoding:"utf8",timeout:30000,maxBuffer:65536});
   try { const value=JSON.parse(result.stdout);return value.ok?{available:true,desired_revision:value.desired_revision,applied_revision:value.applied_revision,...value.data}:{available:false,code:value.code}; }
   catch { return {available:false,code:"MAIL_RECOVERY_REQUIRED"}; }

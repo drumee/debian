@@ -122,7 +122,10 @@ def finish(db,row,cfg,fd):
   state=json.loads(row['state']);family=intent['family'];obj=None
   if family in ('mailbox','account'):obj=find(state,family,intent['options']['to'] if intent['verb']=='rename' else intent['selector'],True) if intent['verb']!='create' else next(x for x in state['mailboxes' if family=='mailbox' else 'accounts'] if x.get('address',x['id'])==intent['selector'])
   elif family=='alias':obj=next(x for x in state['aliases'] if x['address']==intent['selector'])
-  result=envelope(db,operation_id=row['id'],changed=True,desired_revision=target,applied_revision=target,data=sanitize(obj))
+  data=sanitize(obj)
+  if family=='alias' and intent['verb']=='update' and 'mailbox' in intent['options']:
+   old=next(x for x in db.get('applied_state')['aliases'] if x['address']==intent['selector']);data.update(old_mailbox_id=old['mailbox_id'],new_mailbox_id=obj['mailbox_id'])
+  result=envelope(db,operation_id=row['id'],changed=True,desired_revision=target,applied_revision=target,data=data)
   if family=='mailbox' and intent['verb']=='quota':result['data'].update(bridge('usage',cfg,{'id':obj['id']},fd))
   db.begin();db.put('applied_revision',target);db.put('applied_state',state);db.db.execute("UPDATE operations SET result=? WHERE id=?",(encode(result),row['id']));db.commit()
   try:bridge('purge-finish' if purge else 'release',cfg,native,fd)
@@ -176,9 +179,11 @@ def execute(a,opts):
   if not a.execute:refuse('MAIL_NOT_AUTHORIZED')
   if a.if_revision is None or a.request_id is None:
    if not sys.stdin.isatty():refuse('MAIL_USAGE')
-   with open('/dev/tty','r+') as tty:
-    tty.write('Apply '+encode({'family':a.family,'verb':a.verb,'selector':a.selector,'options':{k:v for k,v in opts.items() if k!='password_fd'}})+' at revision '+str(revision)+'? Type yes: ');tty.flush()
-    if tty.readline().strip()!='yes':refuse('MAIL_CANCELLED')
+   # CPython's update-mode text stream requires seekability; a controlling TTY
+   # is not seekable. Separate read/write handles also keep confirmation bounded.
+   with open('/dev/tty','w') as writer,open('/dev/tty','r') as reader:
+    writer.write('Apply '+encode({'family':a.family,'verb':a.verb,'selector':a.selector,'options':{k:v for k,v in opts.items() if k!='password_fd'}})+' at revision '+str(revision)+'? Type yes: ');writer.flush()
+    if reader.readline(32).strip()!='yes':refuse('MAIL_CANCELLED')
    a.if_revision=revision;a.request_id=str(uuid.uuid4())
   try:
    if str(uuid.UUID(a.request_id))!=a.request_id:refuse('MAIL_USAGE')

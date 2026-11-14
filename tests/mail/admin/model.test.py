@@ -17,4 +17,10 @@ class ModelTests(unittest.TestCase):
   self.op('mailbox','create','contact@oxymot.fr');self.op('account','create','ghost',envelope_from=['contact@oxymot.fr'],header_from=['contact@oxymot.fr'],dsn_mailbox='contact@oxymot.fr');self.assertFalse(self.s['accounts'][0]['enabled']);self.op('account','enable','ghost');self.assertTrue(self.s['accounts'][0]['enabled']);self.op('mailbox','disable','contact@oxymot.fr',scope='receive');self.assertEqual(self.s['accounts'][0]['credential_generation'],2)
  def test_rename_retires_explicit_sender_grants(self):
   self.op('mailbox','create','contact@oxymot.fr');self.op('account','create','ghost',envelope_from=['contact@oxymot.fr'],header_from=['contact@oxymot.fr'],dsn_mailbox='contact@oxymot.fr');self.op('mailbox','rename','contact@oxymot.fr',to='new@oxymot.fr',old_address='reject');a=self.s['accounts'][0];self.assertFalse(a['enabled']);self.assertEqual(a['envelope_from'],[])
+ def test_alias_repoint_revokes_previous_owners_grants(self):
+  first=self.op('mailbox','create','contact@oxymot.fr');second=self.op('mailbox','create','second@oxymot.fr');self.op('alias','create','hello@oxymot.fr',mailbox=first['id']);self.op('account','create','ghost',envelope_from=['hello@oxymot.fr'],header_from=['hello@oxymot.fr'],dsn_mailbox=first['id']);self.op('account','enable','ghost');self.op('alias','update','hello@oxymot.fr',mailbox=second['id']);self.assertEqual(self.s['aliases'][0]['mailbox_id'],second['id']);self.assertFalse(self.s['accounts'][0]['enabled']);self.assertEqual(self.s['accounts'][0]['header_from'],[])
+ def test_public_role_and_dsn_routes_are_guarded(self):
+  self.op('mailbox','create','contact@oxymot.fr');self.op('mailbox','create','second@oxymot.fr');self.op('alias','create','postmaster@oxymot.fr',mailbox='contact@oxymot.fr')
+  with self.assertRaises(Refusal):self.op('alias','delete','postmaster@oxymot.fr')
+  with self.assertRaises(Refusal):self.op('account','create','ghost',envelope_from=['second@oxymot.fr'],header_from=['second@oxymot.fr'],dsn_mailbox='contact@oxymot.fr')
 if __name__=='__main__':unittest.main()

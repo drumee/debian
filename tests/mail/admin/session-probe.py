@@ -7,20 +7,20 @@ class IMAP(imaplib.IMAP4_SSL):
  def _create_socket(self,timeout):return ctx.wrap_socket(socket.create_connection(('dovecot',993),timeout),server_hostname='mail.oxymot.fr')
 def imap(user):
  s=IMAP('dovecot',993,ssl_context=ctx,timeout=30);s.authenticate('PLAIN',lambda _:b'\0'+user.encode()+b'\0'+pw[user].encode());s.select('INBOX');return s
-user=r['user'];other=r['other'];first=smtp(user);data=smtp(user);accepted=smtp(user);target=imap(user);unrelated=imap(other)
-assert data.mail(user)[0]==250 and data.rcpt(user)[0]==250
+user=r['user'];other=r['other'];auth=r.get('auth',user);sender=r.get('sender',user);first=smtp(auth);data=smtp(auth);accepted=smtp(auth);target=imap(user);unrelated=imap(other)
+assert data.mail(sender)[0]==250 and data.rcpt(user)[0]==250
 assert data.docmd('DATA')[0]==354
-assert accepted.sendmail(user,[user],('From: '+user+'\r\nMessage-ID: <'+r['tag']+'@fixture.invalid>\r\n\r\n'+r['tag']+'\r\n').encode())=={}
+assert accepted.sendmail(sender,[user],('From: '+sender+'\r\nMessage-ID: <'+r['tag']+'@fixture.invalid>\r\n\r\n'+r['tag']+'\r\n').encode())=={}
 (private/'session-ready').write_text('accepted-250-and-held-before-MAIL-and-final-DATA')
 for _ in range(1200):
  if (private/'session-release').exists():break
  time.sleep(.1)
 else:raise TimeoutError('release not observed')
 out={'accepted_before_change':True}
-try:out['mail_after_change']=first.mail(user)[0]
+try:out['mail_after_change']=first.mail(sender)[0]
 except (smtplib.SMTPException,OSError):out['mail_after_change']='disconnected'
 try:
- data.send(('From: '+user+'\r\n\r\nunaccepted\r\n.\r\n').encode());out['data_after_change']=data.getreply()[0]
+ data.send(('From: '+sender+'\r\n\r\nunaccepted\r\n.\r\n').encode());out['data_after_change']=data.getreply()[0]
 except (smtplib.SMTPException,OSError):out['data_after_change']='disconnected'
 try:out['target_imap_after_change']=target.noop()[0]
 except (imaplib.IMAP4.error,OSError):out['target_imap_after_change']='disconnected'
