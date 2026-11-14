@@ -1,0 +1,11 @@
+"""Frozen CLI/native replay. Private fixtures are never copied into evidence."""
+import pathlib,subprocess,sys,json,hashlib,datetime
+repo=pathlib.Path(__file__).resolve().parents[3];scripts=pathlib.Path(__file__).resolve().parent;root=pathlib.Path(sys.argv[1]);source=pathlib.Path(sys.argv[2]);infra=pathlib.Path(sys.argv[3]);frozen={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in scripts.iterdir() if p.is_file()};results=[]
+cases=[('native.py','mail03-admin-result.json'),('terminal.py','mail03-tty-result.json'),('errors.py','mail03-errors-result.json'),('sessions.py','mail03-session-result.json'),('rights.py','mail03-rights-result.json'),('accounts.py','mail03-accounts-result.json'),('transactions.py','mail03-tx-result.json'),('quota.py','mail03-quota-result.json'),('../quota-native.py','atomic-quota-result.json'),('purge.py','mail03-purge-result.json')]
+for script,report in cases:
+ args=[sys.executable,'-B',str((scripts/script).resolve()),str(root),str(source)]+([str(infra/'test/mail-service')] if script.startswith('../') else [])
+ started=datetime.datetime.now(datetime.timezone.utc).isoformat();process=subprocess.run(args,capture_output=True,timeout=1500);log=root/('final-'+pathlib.Path(script).stem+'.log');log.write_bytes(process.stdout+process.stderr)
+ value=json.loads((root/report).read_text()) if (root/report).exists() else {};good=process.returncode==0 and value.get('status','').startswith('PASS');results.append({'script':script,'command':args,'started_at':started,'exit':process.returncode,'status':'PASS' if good else 'FAIL','report':report,'checks':len(value.get('checks',[])),'log_sha256':hashlib.sha256(log.read_bytes()).hexdigest()});print(json.dumps(results[-1]),flush=True)
+ if not good:break
+unchanged=frozen=={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in scripts.iterdir() if p.is_file()};value={'status':'PASS_MAIL03_FROZEN_NATIVE_REPLAY' if len(results)==len(cases) and all(x['status']=='PASS' for x in results) and unchanged else 'FAIL_MAIL03_FROZEN_NATIVE_REPLAY','results':results,'sources_unchanged':unchanged,'source_sha256':frozen,'engine_receipt':json.loads((repo/'profiles/mail/infra-source-lock.json').read_text())};(root/'mail03-final-replay.json').write_text(json.dumps(value,indent=2));print(value['status'],flush=True)
+raise SystemExit(0 if value['status'].startswith('PASS') else 1)
