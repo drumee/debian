@@ -213,7 +213,9 @@ def execute(a,opts):
   else:
    nextstate,obj=mutate(state,a.family,a.verb,selector,public_opts,service['domains'],service['delivery']['default_quota_bytes'],service['listeners']['smtp25']['enabled'])
   if nextstate==state:
-   result=envelope(db,operation_id=a.request_id,changed=False,data=obj);db.db.execute('INSERT INTO operations VALUES(?,?,?,?,?,?,?,?,?)',(a.request_id,encoded,revision,revision,'applied',encode(state),db.get('secret_file'),encode(result),os.getuid()));return result
+   data=sanitize(obj)
+   if a.family=='alias' and a.verb=='update' and 'mailbox' in public_opts:data.update(old_mailbox_id=obj['mailbox_id'],new_mailbox_id=obj['mailbox_id'])
+   result=envelope(db,operation_id=a.request_id,changed=False,data=data);db.db.execute('INSERT INTO operations VALUES(?,?,?,?,?,?,?,?,?)',(a.request_id,encoded,revision,revision,'applied',encode(state),db.get('secret_file'),encode(result),os.getuid()));return result
   if a.verb!='purge':bridge('available',cfgfile,lock_fd=fd)
   needs_password=a.verb in ('create','password') and a.family in ('mailbox','account')
   password=(read_fd(a.password_fd) if a.password_fd is not None else read_tty()) if needs_password else None
@@ -229,7 +231,7 @@ def execute(a,opts):
   return finish(db,db.operation(a.request_id),cfgfile,fd)
 
 def main(argv):
- a=None
+ a=None;json_requested='--json' in argv
  try:
   a,opts=parse(argv)
   for name in os.listdir('/proc/self/fd'):
@@ -251,7 +253,7 @@ def main(argv):
     values=dict(db.db.execute("SELECT key,value FROM meta WHERE key IN ('desired_revision','applied_revision')"));pending=db.db.execute("SELECT id,phase FROM operations WHERE phase NOT IN ('applied','aborted') ORDER BY target LIMIT 1").fetchone();result.update({k:json.loads(v) for k,v in values.items()})
     if pending:result.setdefault('operation_id',pending[0]);result.setdefault('data',{}).update(phase=pending[1],pending_operation=pending[0],admission='closed' if (root/'durable/registry/public/admission-closed').exists() else 'open')
    except (OSError,ValueError,KeyError,sqlite3.Error,Refusal):pass
- if a and a.json:print(encode(result))
+ if json_requested:print(encode(result))
  else:print(result['code']+' '+encode(result.get('data',{})))
  return code
 if __name__=='__main__':

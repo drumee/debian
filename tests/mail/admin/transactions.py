@@ -42,6 +42,7 @@ for boundary in ('validated','staged','committed-before-native-apply','applied-b
   assert observed is not None;child.wait(timeout=10)
   if boundary=='applied-before-release':
    assert (root/'service/durable/registry/public/admission-closed').exists();assert not probe(action='imap',user=user)['ok'];check('applied-db-durable-before-admission-release',{'target':observed['target'],'phase':observed['phase'],'admission':'closed'})
+  cli('mailbox','disable',user,opts=['--scope','receive'],mutate=True,expected='MAIL_RECOVERY_REQUIRED')
   result=cli('reconcile',opts=['--execute'],expected='MAIL_CANCELLED' if boundary=='validated' else 'OK');state['revision']=cli('status')['applied_revision'];final=operation(id);assert final['phase']==('aborted' if boundary=='validated' else 'applied')
   replay=run(args,pass_fds=());value=json.loads(replay.stdout);assert value==result;assert replay.returncode==(130 if boundary=='validated' else 0);assert not (root/'service/durable/registry/public/admission-closed').exists();check('external-kill-'+boundary+'-reconcile-same-receipt',{'base':revision,'target':observed['target'],'phase_before':observed['phase'],'phase_after':final['phase'],'revision':state['revision']})
  finally:
