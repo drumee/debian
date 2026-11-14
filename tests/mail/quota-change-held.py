@@ -1,4 +1,4 @@
-"""Quota shrink across an already active LMTP DATA transaction, lab only."""
+"""Historical mail03.6 failure reproduction; corrected contract: quota-transition-native.py."""
 import sys,pathlib
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent/'admin'))
 from common import *
