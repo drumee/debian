@@ -24,6 +24,17 @@ in CLI output are not capacity reservations. New runtimes, image/module bytes,
 filesystems, network topology, credential scheme or projection/reconciliation
 mechanisms require relevant native requalification.
 
+Runtime quota changes additionally defer local Postfix dispatch and drain old
+recipient contexts before publishing a limit. This fixes the observed mail03.6
+stale-LMTP admission failure without changing the qualified image/module. Busy
+drains retain closed admission and require the same request's reconciliation;
+they never kill an active LMTP writer. Include quota-drain intent with the other
+operator state in any future restore design. A successful shrink below bytes
+already committed by an old transaction reports over_quota:true. Applications
+must tolerate graceful SMTP session retirement during this quota maintenance;
+unrelated IMAP reads remain usable. Password-only changes retain their scoped
+generation-revocation behavior.
+
 `SMTP_RECOVERY_UNQUALIFIED` remains independently for coordinated Oxy-form state
 and for autonomous queue/registry/SQLite/verifiers/Maildir/IMAP/TLS/DKIM restore on
 replacement storage. Same-storage interruption/reboot and verified purge backup
