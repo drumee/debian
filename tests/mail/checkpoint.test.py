@@ -1,5 +1,5 @@
 """Archive boundary tests use synthetic bytes only; no service qualification claim."""
-import hashlib,importlib.util,json,os,pathlib,socket,tarfile,tempfile,unittest
+import hashlib,importlib.util,json,os,pathlib,socket,sqlite3,tarfile,tempfile,unittest
 worker_path=pathlib.Path(__file__).resolve().parents[2]/'profiles/mail/admin/checkpoint_worker.py'
 spec=importlib.util.spec_from_file_location('checkpoint_worker',worker_path);worker=importlib.util.module_from_spec(spec);spec.loader.exec_module(worker)
 class Checkpoint(unittest.TestCase):
@@ -37,4 +37,20 @@ class Checkpoint(unittest.TestCase):
   stage=self.target/'.restore-stage';stage.mkdir(mode=0o700);worker.extract(self.archive,self.result['manifest_sha256'],stage);p=stage/'generation-1'/'record';p.chmod(0o644)
   with self.assertRaisesRegex(ValueError,'METADATA'):worker.verify_promotion(self.archive,self.result['manifest_sha256'],self.target,[])
   self.assertEqual(p.stat().st_mode&0o777,0o644);self.assertEqual(p.read_bytes(),b'synthetic-state')
+ def test_checkpointed_wal_database_verified_without_rewriting_its_bytes(self):
+  self.native_sqlite(False)
+ def test_incoherent_database_generation_refused_before_extract(self):
+  self.native_sqlite(True)
+ def native_sqlite(self,incoherent):
+  directory=self.source/'durable/operator-state/admin';directory.mkdir(parents=True,mode=0o700);file=directory/'registry.sqlite3';owner={'contract':'drumee.mail-owner/1','id':'synthetic'}
+  db=sqlite3.connect(file);db.execute('PRAGMA journal_mode=WAL');db.executescript('CREATE TABLE meta(key TEXT,value TEXT);CREATE TABLE operations(phase TEXT);')
+  db.executemany('INSERT INTO meta VALUES(?,?)',[(k,json.dumps(v)) for k,v in {'owner':owner,'desired_revision':1,'applied_revision':1}.items()]);db.commit();db.execute('PRAGMA wal_checkpoint(TRUNCATE)');db.close();file.chmod(0o600)
+  self.assertEqual(file.read_bytes()[18:20],b'\x02\x02')
+  public=self.source/'durable/registry/public';public.mkdir(parents=True);(public/'current.json').write_text(json.dumps({'generation':1}));private=self.source/'durable/registry/private';private.mkdir();(private/'generation-1').mkdir();(private/'current').symlink_to('generation-1')
+  destination=self.base/'native-archive';destination.mkdir();original=worker.digest(file);receipt=worker.capture(self.source,destination,dict(self.metadata,root='/synthetic/mail',owner=owner,generation=2 if incoherent else 1))
+  if incoherent:
+   with self.assertRaisesRegex(ValueError,'GENERATION_INCOHERENT'):worker.extract(destination,receipt['manifest_sha256'],self.target)
+   self.assertEqual(list(self.target.iterdir()),[])
+  else:self.assertEqual(worker.verify(destination,receipt['manifest_sha256'])['metadata']['generation'],1)
+  self.assertEqual(worker.digest(file),original)
 if __name__=='__main__':unittest.main()

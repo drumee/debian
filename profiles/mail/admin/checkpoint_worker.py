@@ -3,7 +3,7 @@
 Manifests and payloads are private: they include hashes of credential material.
 Only aggregate receipts may leave the protected checkpoint directory.
 """
-import hashlib,json,os,pathlib,resource,sqlite3,stat,sys,tarfile
+import hashlib,json,os,pathlib,resource,sqlite3,stat,sys,tarfile,tempfile
 
 def digest(path):
  h=hashlib.sha256()
@@ -87,12 +87,15 @@ def verify(archive_root,expected):
   if 'root' in manifest['metadata']:
    try:
     registry=json.load(tar.extractfile('durable/registry/public/current.json'))
-    db=sqlite3.connect(':memory:');db.deserialize(tar.extractfile('durable/operator-state/admin/registry.sqlite3').read());db.execute('PRAGMA trusted_schema=OFF')
-    if db.execute('PRAGMA integrity_check').fetchall()!=[('ok',)]:raise ValueError('MAIL_CHECKPOINT_INTEGRITY_FAILURE')
-    meta={k:json.loads(v) for k,v in db.execute('SELECT key,value FROM meta')}
-    if meta['applied_revision']!=meta['desired_revision'] or meta['applied_revision']!=registry['generation'] or meta['applied_revision']!=manifest['metadata']['generation'] or meta['owner']!=manifest['metadata']['owner'] or db.execute("SELECT count(*) FROM operations WHERE phase NOT IN ('applied','aborted')").fetchone()[0]:raise ValueError('MAIL_GENERATION_INCOHERENT')
-    if manifest['entries']['durable/registry/private/current']['target']!='generation-'+str(registry['generation']):raise ValueError('MAIL_GENERATION_INCOHERENT')
-    db.close()
+    with tempfile.TemporaryDirectory(dir='/dev/shm') as temporary:
+     file=pathlib.Path(temporary)/'registry.sqlite3';file.write_bytes(tar.extractfile('durable/operator-state/admin/registry.sqlite3').read());file.chmod(0o600);db=sqlite3.connect('file:'+str(file)+'?mode=ro',uri=True)
+     try:
+      db.execute('PRAGMA trusted_schema=OFF')
+      if db.execute('PRAGMA integrity_check').fetchall()!=[('ok',)]:raise ValueError('MAIL_CHECKPOINT_INTEGRITY_FAILURE')
+      meta={k:json.loads(v) for k,v in db.execute('SELECT key,value FROM meta')}
+      if meta['applied_revision']!=meta['desired_revision'] or meta['applied_revision']!=registry['generation'] or meta['applied_revision']!=manifest['metadata']['generation'] or meta['owner']!=manifest['metadata']['owner'] or db.execute("SELECT count(*) FROM operations WHERE phase NOT IN ('applied','aborted')").fetchone()[0]:raise ValueError('MAIL_GENERATION_INCOHERENT')
+      if manifest['entries']['durable/registry/private/current']['target']!='generation-'+str(registry['generation']):raise ValueError('MAIL_GENERATION_INCOHERENT')
+     finally:db.close()
    except (sqlite3.Error,KeyError,TypeError):raise ValueError('MAIL_CHECKPOINT_SCHEMA_INCOMPATIBLE')
  return manifest
 

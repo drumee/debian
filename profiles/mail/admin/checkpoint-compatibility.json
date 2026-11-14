@@ -1,0 +1,25 @@
+{
+  "contract": "drumee.mail-checkpoint-readers/1",
+  "writers": [
+    {
+      "revision": "69ba692310186c3733fc632dc03f48d29afaeb0c",
+      "distribution_files": {
+        "admin/bridge.cjs": "8bad0adfb3a2aa8d0125feb79adf003c711db88b8dabf7d03bf18539765cf42b",
+        "admin/checkpoint.py": "9de66894001e384af176dd810342f5f0fb89f6dd84f13b0f8f3bf2f69375a356",
+        "admin/checkpoint_worker.py": "eba12b2154a125e591c8b9f8bec51241860d5fd841a0f8874e2c193e8c5de266",
+        "admin/lifecycle.py": "8211704dabd40549aeeff75ae36b68ef3852ac480cd0cfaee2f3aafd81346753",
+        "admin/main.py": "d8c64ec6efb6ffe1e067a6025f28109c20762d0bed2c4b8518375feebd9c24c9",
+        "admin/model.py": "d220b2df3d1adc298fd71cf95536064dc353e0e09704f3afde0fba203ad75f09",
+        "admin/password.py": "d14103f67880807a5238f78368967dd67918ff25985874283cb70b292643e4f4",
+        "admin/restore-seal.cjs": "8319039c24c8af8ab29c0fd4fec0c70481de8b9e601a480aafbd029896b9a8e4",
+        "admin/runtime-lock.json": "6fccedc2fbebe45c12043bc19609daa35e05bd90efeba3627c8ac64f66219091",
+        "admin/storage.py": "a00eebc0a3e30ae4c1e9d1c9e79e8e5a0ba517e140aac58149da6eabcb1cdc1c",
+        "config.cjs": "ad7dc562301aed727e3b3bef344b4d32662bc6ae0318ea6a88b77548fb780b5a",
+        "consumer.cjs": "2e3cc57ac4f425de49282b3b08c1fda8825d486bdc5272dcd86f140895f60ed2",
+        "lifecycle.cjs": "6b552985584158dd0c0740422d09a09a961b2c6edceefc502da763cbfbb73bcf",
+        "operator.js": "4236a2927bc9cdefd7cd89ebcb61a204d41c4ce4e0552b9376869efe9c57bc6e"
+      },
+      "reason": "Cold checkpoint format1; corrected read-only WAL validation does not alter captured payload bytes."
+    }
+  ]
+}

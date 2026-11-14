@@ -69,6 +69,11 @@ def runtime_files():
  files=[p for p in (BASE/'admin').iterdir() if p.is_file() and p.suffix in ('.py','.cjs','.json')]+[BASE/n for n in ('lifecycle.cjs','config.cjs','operator.js','consumer.cjs')]
  return {str(p.relative_to(BASE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}
 
+def compatible_writer(observed):
+ if observed==runtime_files():return True
+ approved=json.loads((BASE/'admin/checkpoint-compatibility.json').read_text())
+ return approved.get('contract')=='drumee.mail-checkpoint-readers/1' and any(x['distribution_files']==observed for x in approved['writers'])
+
 def capture(a,cfg,root):
  safe_directory(root);check_runtime(root);mount_id=mount(root)
  if (root/'recovery-fence.json').exists():
@@ -116,7 +121,7 @@ def restore(a,cfg,root):
   if not stat.S_ISREG(st.st_mode) or st.st_uid!=os.getuid() or stat.S_IMODE(st.st_mode)!=0o600 or st.st_nlink!=1:refuse('MAIL_STORAGE_UNSAFE')
  finally:os.close(fd)
  verified=worker('verify',archive,expected=a.manifest_sha256);m=verified['metadata']
- if m['root']!=str(root) or m['uid']!=os.getuid() or m['gid']!=os.getgid() or m['owner']['id']!=cfg['service']['deployment']['id'] or m['owner']['project']!=cfg['service']['deployment']['project'] or m['source_lock']!=json.loads((BASE/'infra-source-lock.json').read_text()) or m['helper_image']!=HELPER or m.get('distribution_files')!=runtime_files():refuse('MAIL_CHECKPOINT_ARTIFACT_MISMATCH')
+ if m['root']!=str(root) or m['uid']!=os.getuid() or m['gid']!=os.getgid() or m['owner']['id']!=cfg['service']['deployment']['id'] or m['owner']['project']!=cfg['service']['deployment']['project'] or m['source_lock']!=json.loads((BASE/'infra-source-lock.json').read_text()) or m['helper_image']!=HELPER or not compatible_writer(m.get('distribution_files')):refuse('MAIL_CHECKPOINT_ARTIFACT_MISMATCH')
  mount(root,a.target_uuid);safe_directory(root);check_runtime(root);no_writers(root)
  if root.stat().st_dev==m['source_identity']['device'] or a.target_uuid==m['source_uuid']:refuse('MAIL_RESTORE_SOURCE_TARGET_ALIAS')
  journal=root.parent/('.mail-restore-'+hashlib.sha256(str(root).encode()).hexdigest()+'.json')
