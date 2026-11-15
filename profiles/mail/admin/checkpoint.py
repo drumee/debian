@@ -10,7 +10,7 @@ from storage import atomic,encode,private_read,safe_directory,service_lock,syncd
 from model import Refusal,refuse
 BASE=pathlib.Path(__file__).parents[1]
 LOCK_FD=None
-HELPER='sha256:36afa984f1187ff7fef17356fa7ead13af9a756681ac4a0c234a58fdc38f47e8'
+HELPER='sha256:e5825aad42bc58632a89ec7950adbe76f1f658ac301b173ca7bbbf198c96078b'
 ENV={'PATH':'/usr/bin:/bin','LANG':'C','LC_ALL':'C','HOME':'/'}
 
 def run(args,data=None):
@@ -66,7 +66,7 @@ def database(root,checkpoint=False):
  finally:db.close()
 
 def runtime_files():
- files=[p for p in (BASE/'admin').iterdir() if p.is_file() and p.suffix in ('.py','.cjs','.json')]+[BASE/n for n in ('lifecycle.cjs','config.cjs','operator.js','consumer.cjs')]
+ files=[p for p in (BASE/'admin').iterdir() if p.is_file() and p.suffix in ('.py','.cjs','.json')]+[BASE/n for n in ('lifecycle.cjs','config.cjs','operator.js','consumer.cjs','private-activation.cjs')]
  return {str(p.relative_to(BASE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}
 
 def compatible_writer(observed):
@@ -102,6 +102,13 @@ def capture(a,cfg,root):
   out=inputs/field;atomic(out,private_read(path));restored[field]=str(out)
  for n,item in enumerate(restored['secret_sources']):
   out=inputs/('secret-'+str(n));atomic(out,private_read(item['file']));item['file']=str(out)
+ if cfg.get('private_activation'):
+  # Keep the exact source approval as evidence, never as replacement authority.
+  # The root-owned reference is validated by the same reader as normal start.
+  code='const fs=require("fs"),c=JSON.parse(fs.readFileSync(process.argv[1]));require(process.argv[2]).read(c);process.stdout.write(fs.readFileSync(c.private_activation.file));'
+  evidence=run(['/usr/bin/node','-e',code,a.config,BASE/'private-activation.cjs'])
+  if hashlib.sha256(evidence).hexdigest()!=cfg['private_activation']['sha256']:refuse('MAIL_PRIVATE_APPROVAL_MISMATCH')
+  atomic(inputs/'private-approval-evidence.json',evidence)
  write(root/'recovery-config.json',restored)
  fence=dict(contract='drumee.mail-recovery-fence/1',phase='captured',operation_id=str(uuid.uuid4()),source_device=root.stat().st_dev,source_inode=root.stat().st_ino)
  write(root/'recovery-fence.json',fence)
@@ -112,7 +119,18 @@ def capture(a,cfg,root):
  metadata=dict(root=str(root),source_uuid=mount_id,source_identity=ident(root),uid=os.getuid(),gid=os.getgid(),generation=meta['applied_revision'],owner=jsonfile(root/'owner.json'),fence=fence,source_lock=json.loads((BASE/'infra-source-lock.json').read_text()),distribution_files=runtime_files(),helper_image=HELPER,captured_at=time.time())
  result=worker('capture',archive,root,metadata=metadata);syncdir(archive);return dict(**result,generation=metadata['generation'],source_fenced=True,archive=str(archive))
 
+def replacement_reference(a,cfg):
+ if not cfg.get('private_activation'):
+  if a.private_approval or a.private_approval_sha256:refuse('MAIL_USAGE')
+  return None
+ if not a.private_approval or not a.private_approval_sha256:refuse('MAIL_PRIVATE_REPLACEMENT_APPROVAL_REQUIRED')
+ if len(a.private_approval_sha256)!=64 or any(c not in '0123456789abcdef' for c in a.private_approval_sha256):refuse('MAIL_USAGE')
+ p=pathlib.Path(a.private_approval)
+ if not p.is_absolute() or p.resolve()!=p:refuse('MAIL_USAGE')
+ return {'file':str(p),'sha256':a.private_approval_sha256}
+
 def restore(a,cfg,root):
+ replacement=replacement_reference(a,cfg)
  if not a.manifest_sha256 or len(a.manifest_sha256)!=64 or not a.target_uuid:refuse('MAIL_USAGE')
  archive=safe_directory(a.archive);private_read(archive/'manifest.json')
  fd=os.open(archive/'payload.tar',os.O_RDONLY|os.O_NOFOLLOW)
@@ -136,10 +154,10 @@ def restore(a,cfg,root):
    journal.unlink();syncdir(journal.parent)
  if journal.exists():
   j=jsonfile(journal)
-  if j['checkpoint']!=a.manifest_sha256 or j['target']!=ident(root) or j['target_uuid']!=a.target_uuid:refuse('MAIL_RESTORE_TARGET_UNAUTHORIZED')
+  if j.get('private_approval')!=replacement or j['checkpoint']!=a.manifest_sha256 or j['target']!=ident(root) or j['target_uuid']!=a.target_uuid:refuse('MAIL_RESTORE_TARGET_UNAUTHORIZED')
  else:
   if list(root.iterdir()):refuse('MAIL_RESTORE_TARGET_OCCUPIED')
-  j=dict(contract='drumee.mail-restore-operation/1',checkpoint=a.manifest_sha256,target=ident(root),target_uuid=a.target_uuid,source_identity=m['source_identity'],source_uuid=m['source_uuid'],source_owner=m['owner'],phase='allocated');write(journal,j)
+  j=dict(private_approval=replacement,contract='drumee.mail-restore-operation/1',checkpoint=a.manifest_sha256,target=ident(root),target_uuid=a.target_uuid,source_identity=m['source_identity'],source_uuid=m['source_uuid'],source_owner=m['owner'],phase='allocated');write(journal,j)
  stage=root/'.restore-stage'
  if j['phase']=='released':refuse('MAIL_RESTORE_ALREADY_RELEASED')
  if j['phase']=='aborted':refuse('MAIL_RESTORE_ABORTED')
@@ -164,8 +182,12 @@ def restore(a,cfg,root):
    v['directory']={'dev':directory.stat().st_dev,'ino':directory.stat().st_ino};v['database']={'dev':(directory/'registry.sqlite3').stat().st_dev,'ino':(directory/'registry.sqlite3').stat().st_ino}
   write(directory/'owner.json',marker);write(allocation,record)
   fence=dict(m['fence'],phase='restoring',checkpoint=a.manifest_sha256);write(root/'recovery-fence.json',fence)
-  out=run(['/usr/bin/node',BASE/'admin/restore-seal.cjs',str(root),a.manifest_sha256]);result=json.loads(out)
+  args=['/usr/bin/node',BASE/'admin/restore-seal.cjs',str(root),a.manifest_sha256]
+  if replacement:args.extend([replacement['file'],replacement['sha256']])
+  out=run(args);result=json.loads(out)
   if not result.get('ok'):refuse(result.get('code','MAIL_RECOVERY_REQUIRED'))
+  if replacement:
+   recovery=jsonfile(root/'recovery-config.json');recovery['private_activation']=replacement;write(root/'recovery-config.json',recovery)
   j['phase']='sealed';write(journal,j)
  if j['phase']=='sealed':
   # Hold ALL queue entries offline before any daemon/listener can start.
@@ -216,11 +238,11 @@ START=time.monotonic()
 def main():
  global LOCK_FD
  resource.setrlimit(resource.RLIMIT_CORE,(0,0));os.umask(0o077)
- p=argparse.ArgumentParser();p.add_argument('operation',choices=['backup','restore','recovery-release','recovery-resume-source','recovery-abort']);p.add_argument('--config',required=True);p.add_argument('--archive');p.add_argument('--manifest-sha256');p.add_argument('--target-uuid');p.add_argument('--execute',action='store_true');a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('operation',choices=['backup','restore','recovery-release','recovery-resume-source','recovery-abort']);p.add_argument('--config',required=True);p.add_argument('--archive');p.add_argument('--manifest-sha256');p.add_argument('--target-uuid');p.add_argument('--execute',action='store_true');p.add_argument('--private-approval');p.add_argument('--private-approval-sha256');a=p.parse_args()
  if not a.execute:refuse('MAIL_NOT_AUTHORIZED')
  supplied={k for k in ('archive','manifest_sha256','target_uuid') if getattr(a,k) is not None}
  required={'backup':{'archive'},'restore':{'archive','manifest_sha256','target_uuid'},'recovery-release':{'manifest_sha256'},'recovery-resume-source':{'archive','manifest_sha256'},'recovery-abort':{'manifest_sha256','target_uuid'}}
- if supplied!=required[a.operation]:refuse('MAIL_USAGE')
+ if supplied!=required[a.operation] or a.operation!='restore' and (a.private_approval or a.private_approval_sha256):refuse('MAIL_USAGE')
  cfg=jsonfile(a.config);root=pathlib.Path(cfg['service']['deployment']['root']);deployment=cfg['service']['deployment']
  if a.archive:
   archive=pathlib.Path(a.archive)

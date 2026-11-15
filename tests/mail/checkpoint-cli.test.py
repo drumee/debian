@@ -11,4 +11,7 @@ class CLI(unittest.TestCase):
   cases=[['backup','--archive','/unused','--manifest-sha256','a'*64],['restore','--archive','/unused'],['recovery-release','--manifest-sha256','a'*64,'--target-uuid','unused'],['recovery-abort','--manifest-sha256','a'*64,'--target-uuid','unused','--archive','/unused'],['recovery-resume-source','--archive','/unused','--manifest-sha256','a'*64,'--target-uuid','unused']]
   for args in cases:
    code,value=self.call([*args,'--execute']);self.assertEqual((code,value['code']),(2,'MAIL_USAGE'))
+ def test_private_replacement_approval_is_restore_only(self):
+  for op,options in [('backup',['--archive','/unused']),('recovery-release',['--manifest-sha256','a'*64]),('recovery-resume-source',['--archive','/unused','--manifest-sha256','a'*64])]:
+   code,value=self.call([op,*options,'--private-approval','/unapproved','--private-approval-sha256','b'*64,'--execute']);self.assertEqual((code,value['code']),(2,'MAIL_USAGE'))
 if __name__=='__main__':unittest.main()

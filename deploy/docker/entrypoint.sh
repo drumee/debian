@@ -73,7 +73,7 @@ JSON
 CONFD=/etc/drumee/conf.d
 mkdir -p "$CONFD"
 cat > "$CONFD/drumee.json" <<JSON
-{ "arch": "pod", "sys_languages": ["en","fr","km","ru","zh"], "quota": { "watermark": "Infinity" } }
+{ "arch": "pod", "sys_languages": ["en","fr","km","ru","zh"], "forceDefaultLanguage": true, "quota": { "watermark": "Infinity" } }
 JSON
 cat > "$CONFD/myDrumee.json" <<JSON
 { "arch": "single", "sys_languages": ["en","fr","km","ru","zh"],

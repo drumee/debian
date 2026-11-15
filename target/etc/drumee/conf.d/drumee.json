@@ -1,6 +1,7 @@
 {
 	"arch":"pod",
 	"sys_languages":["en", "fr", "km", "ru", "zh"],
+	"forceDefaultLanguage": true,
     "quota":{
         "watermark": "Infinity"
     }
