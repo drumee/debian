@@ -147,3 +147,7 @@ The explicit minimal-kernel profile is under IL-4 qualification and is currently
 See [the qualification report](docs/minimal-kernel-il4.md) and
 [pinned input inventory](profiles/minimal-kernel/README.md). This does not change
 existing Team release channels or provide a production installer with test accounts.
+
+## License
+
+AGPL-3.0 — see [LICENSE](LICENSE).
