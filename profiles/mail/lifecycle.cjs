@@ -26,7 +26,7 @@ function run(argv) {
   if (!["validate", "plan", "install", "start", "stop", "restart", "status", "doctor", "backup", "restore", "preflight", "boot-unit"].includes(operation) || !opts.config) throw Error("MAIL_CLI_USAGE");
   const cfg = require("./config.cjs").validate(JSON.parse(fs.readFileSync(opts.config)));
   if (cfg.distribution?.profile !== "mail") throw Error("MAIL_PROFILE_REQUIRED");
-  const M = api(), checked = M.validateMailService(cfg.service);
+  const M = api(), checked = M.validateMailService(cfg.service), activation = require("./private-activation.cjs").read(cfg);
   if (!checked.valid) return { valid: false, diagnostics: checked.diagnostics };
   if (operation === "validate") return checked;
   if (operation === "boot-unit") return { unit: require("./boot-unit.cjs").render(opts.config, cfg) };
@@ -44,25 +44,25 @@ function run(argv) {
     return prepared;
   };
   if (operation === "doctor") {
-    const value=M.observeMailService(loadState(), { authorized: true, ...cfg.monitoring }),managed=administration(opts.config,cfg);
+    const value=M.observeMailService(loadState(), { authorized: true, activation, ...cfg.monitoring }),managed=administration(opts.config,cfg);
     if(managed){value.administration=managed;if(!managed.available||managed.pending_operation){value.healthy=false;if(!value.alerts.some(x=>x.code==="MAIL_GENERATION_INCOMPLETE"))value.alerts.push({code:"MAIL_GENERATION_INCOMPLETE",source:"administrative-journal"});}}
     return value;
   }
   if (operation === "status") {
-    const value=M.operateMailService(loadState(), "status", { authorized: true }),managed=administration(opts.config,cfg);if(managed)value.administration=managed;return value;
+    const value=M.operateMailService(loadState(), "status", { authorized: true, activation }),managed=administration(opts.config,cfg);if(managed)value.administration=managed;return value;
   }
-  if (operation === "preflight") return M.operateMailService(loadState(), "preflight", { authorized: true });
+  if (operation === "preflight") return M.operateMailService(loadState(), "preflight", { authorized: true, activation });
   if (!opts.execute) throw Error("MAIL_EXECUTION_AUTHORIZATION_REQUIRED");
   if (operation === "install") {
     const verifiers = JSON.parse(readPrivate(cfg.verifiers_file));
     const plan = M.planMailService(cfg.service, { registry: JSON.parse(readPrivate(cfg.registry_file)), secret_sources: cfg.secret_sources });
-    const prepared = M.prepareMailService(plan, { authorized: true, acceptance: cfg.acceptance === true, private_bind: cfg.acceptance_private_listener === true, verifiers });
+    const prepared = M.prepareMailService(plan, { authorized: true, activation, acceptance: cfg.acceptance === true, private_bind: cfg.acceptance_private_listener === true, verifiers });
     if (fs.existsSync(state)) {
       if (JSON.stringify(JSON.parse(fs.readFileSync(state))) !== JSON.stringify(prepared)) throw Error("MAIL_PREPARED_REVISION_CONFLICT");
     } else fs.writeFileSync(state, JSON.stringify(prepared), { mode: 0o600, flag: "wx" });
-    return M.operateMailService(prepared, "start", { authorized: true, acceptance: cfg.acceptance === true });
+    return M.operateMailService(prepared, "start", { authorized: true, activation, acceptance: cfg.acceptance === true });
   }
-  return M.operateMailService(loadState(), operation, { authorized: true, acceptance: cfg.acceptance === true });
+  return M.operateMailService(loadState(), operation, { authorized: true, activation, acceptance: cfg.acceptance === true });
 }
 try { console.log(JSON.stringify(run(process.argv.slice(2)))); }
 catch (error) { console.log(JSON.stringify({ ok: false, code: /^[A-Z0-9_]+$/.test(error.code || error.message) ? error.code || error.message : "MAIL_OPERATION_FAILED" })); process.exitCode = 1; }

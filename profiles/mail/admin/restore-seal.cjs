@@ -4,12 +4,13 @@
 const fs=require("node:fs"),path=require("node:path"),M=require("../consumer.cjs").api();
 try {
   const root=process.argv[2],checkpoint=process.argv[3],changed=new Map();
+  const activation=process.argv[4]?require("../private-activation.cjs").read({acceptance:false,private_activation:{file:process.argv[4],sha256:process.argv[5]}}):undefined;
   function walk(dir){for(const name of fs.readdirSync(dir)){const file=path.join(dir,name),s=fs.lstatSync(file);if(s.isDirectory())walk(file);else if(s.isFile()&&name==="prepared.json"){const p=JSON.parse(fs.readFileSync(file));if(p.contract==="drumee.mail-prepared/1")changed.set(file,p);}}}
   walk(root+"/candidates");
   // Every immutable candidate has its own seal; aliases in journals/requests are
   // updated from that exact candidate, never synthesized from current JSON.
   const replacements=new Map();
-  for(const p of changed.values())replacements.set(p.revision,M.rebindMailServiceStorage(p,{authorized:true,checkpoint}));
+  for(const p of changed.values())replacements.set(p.revision,M.rebindMailServiceStorage(p,{authorized:true,checkpoint,activation}));
   function aliases(dir){for(const name of fs.readdirSync(dir)){const file=path.join(dir,name),s=fs.lstatSync(file);if(s.isDirectory())aliases(file);else if(s.isFile()&&name==="prepared.json"){const p=JSON.parse(fs.readFileSync(file));if(p.contract==="drumee.mail-prepared/1"){const next=replacements.get(p.revision);if(!next)throw Error("MAIL_PREPARED_TAMPERED");const fd=fs.openSync(file,"w",0o600);try{fs.writeFileSync(fd,JSON.stringify(next));fs.fsyncSync(fd);}finally{fs.closeSync(fd);}}}}}
   aliases(root+"/durable/operator-state");
   process.stdout.write(JSON.stringify({ok:true,candidates:replacements.size}));
