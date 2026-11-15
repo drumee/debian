@@ -1,6 +1,13 @@
 # MAIL-05 qualification matrix (frozen before recovery execution)
 
-**MAIL-05_BLOCKED** until every native recovery gate below has evidence.
+**Final result: MAIL-05_QUALIFIED** for the isolated standalone protocol and the
+exact native SHA/digest set recorded below and in the paired Oxymot dossier.
+SonarCloud and recovery-contracts pass at Oxymot
+`aab4b7cd58d388c69679a533a2907d86a43d0cc9`. Coordinated Oxy-form remains
+**SMTP_RECOVERY_UNQUALIFIED**.
+
+Frozen initial decision: MAIL-05_BLOCKED until every native recovery gate below
+had evidence. The initial-status column is retained as historical planning data.
 
 Dependencies: Debian PR16 d50cf30a287c829832e6748c5b6ffcd8d976fa9e;
 Infra PR39 1b60818f4f60cc6b54976184dbd6f0585b717a68;
@@ -69,10 +76,28 @@ contains the mapped native matrix, exact commands/source hashes, safe aggregate
 archive identities, SMTP/LMTP lost-ack duplicates, older-checkpoint recipient
 replay, final witness/retention and MAIL-06 handoff. The initial native interruption
 observation covers the verified stage; extraction/promotion/sealing/hold are
-explicitly supplemental, not inferred from it. MAIL-05 remains blocked while
-the source security gate is unresolved. The supplemental native matrix now passes:
+explicitly supplemental, not inferred from it. The initial source security gate
+block is subsequently resolved at Oxymot aab4b7c. The supplemental native matrix now passes:
 SIGKILL during extraction, partial promotion, sealing and offline hold, exact
 checkpoint resume, abort of the never-activated copy, then one original-source
 delivery. Its driver is Oxymot4e39d6f2fac38ba243fae3a182d5a7c60641d745;
 checkpoint9 SHA25679945069fdeaca0a66d83f32ddaa9862bdee5f509963bca35f24031641223ed3. Oxy-form
 stays SMTP_RECOVERY_UNQUALIFIED; no merge/publication/production action follows.
+
+
+## Final fixture-security closure
+
+The exact tested Debian writer/reader and all 52 producer members remain unchanged.
+The paired Oxymot correction removes the five backtracking regexes, validates and
+bounds quota rounds, and validates the entire bounded tar before making an
+exclusive private copy. GNU tar 1.35 omits the caller-selected entry from that copy;
+no input TarInfo object is passed to an archive writer or extracted to disk.
+All required source gates pass with zero Sonar new/accepted issues or annotations.
+Ten adversarial tests and six read-only controls in the original Docker26 guest
+verify all 37 durable witness IDs, observer imports, unchanged 20/2 quota rounds,
+byte-identical negative fixture and pinned-client imports. No original service or
+queue is changed by these fixture compatibility tests; no full native rerun on the
+fixture remediation commit is claimed. Earlier blocked snapshots remain historical.
+The paired source/compatibility/gate receipts and MAIL-06 handoff are authoritative
+for this final isolated decision. Production installation, release and migration
+remain separate authorized work; Oxy-form stays SMTP_RECOVERY_UNQUALIFIED.
