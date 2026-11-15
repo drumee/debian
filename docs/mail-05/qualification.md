@@ -39,3 +39,40 @@ Unit archive tests and rendering checks are supporting evidence, not protocol
 qualification. Never infer recipient receipt from an application's HTTP success.
 Never promise exactly-once delivery. Coordinated Oxy-form file/ledger/key recovery
 remains **SMTP_RECOVERY_UNQUALIFIED**, irrespective of the standalone verdict.
+
+## Recovered campaign on testbox (2026-11-15)
+
+The frozen initial statuses above are retained. Execution is on `testbox`, in
+QEMU guest `mail02-qualification` inside outer container `mail02-qualification-vm`;
+Docker26.1.5+dfsg1, kernel6.12.116+deb13-amd64. The local workstation only edits
+sources and controls SSH. Its reboot is never LIFE-02 proof.
+
+The guest retained `run`, `run2`, `final-run`, private archives/logs and all original
+and replacement filesystem images. The final campaign's phase-A PASS and first
+reboot, quota checks and checkpoints3/4 survived. After observing the exact queue,
+source inventories and source-resume fence, execution resumed at the failed
+startup-flush step rather than replaying account/message creation. The failure
+receipt remains preserved. The final current-writer roundtrip and second actual
+guest reboot pass, with original queue responsibility and IMAP metadata intact.
+
+Tested writer/reader remains7971ff231c1dd5109a973b8e7db24cbdf91f666a, producer
+cc33e55f1e30167bc685757b9f66e62539b75483 and archive SHA256
+3168ba3e91b696cfac9d6f6d7fbc098379ba69d9b32d6e9657ef388c03c6a365. Driver freeze
+is Oxymot487f52cf501f3e0331bd05997e40565f79261414. Final roundtrip payload SHA256
+is d2c642913f0f4a3d26aa8cb2573d4c9043d85ca1bfb8b21e8a212b273d43943d,
+applied generation16, replacement UUID d41edca7-6c91-4df9-8995-af0f8a4a62a6.
+All52 installed consumer members and current-writer/reader inventory equality
+are verified in the actual guest.
+
+The paired [Oxymot qualification](https://github.com/somanos/oxymot/blob/feat/mail-05-recovery/docs/mail-05/qualification.md)
+contains the mapped native matrix, exact commands/source hashes, safe aggregate
+archive identities, SMTP/LMTP lost-ack duplicates, older-checkpoint recipient
+replay, final witness/retention and MAIL-06 handoff. The initial native interruption
+observation covers the verified stage; extraction/promotion/sealing/hold are
+explicitly supplemental, not inferred from it. MAIL-05 remains blocked while
+the source security gate is unresolved. The supplemental native matrix now passes:
+SIGKILL during extraction, partial promotion, sealing and offline hold, exact
+checkpoint resume, abort of the never-activated copy, then one original-source
+delivery. Its driver is Oxymot4e39d6f2fac38ba243fae3a182d5a7c60641d745;
+checkpoint9 SHA25679945069fdeaca0a66d83f32ddaa9862bdee5f509963bca35f24031641223ed3. Oxy-form
+stays SMTP_RECOVERY_UNQUALIFIED; no merge/publication/production action follows.
