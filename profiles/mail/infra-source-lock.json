@@ -1,8 +1,8 @@
 {
   "acquisition": "local-unpublished-archive",
-  "revision": "6f91d81a58cdfc9f35a7413e2ff7db2e01b96b44",
-  "sha256": "6697673491919b83ed08ab478b8efde7d53a573cd55c89756f037d7a65fdac6d",
-  "integrity": "sha512-as3fZfX4txgHG1VkW5OP5fV9vef4GPlJP4A6UueZB3e9/H39RfDQn4U4b56LcFlaqnY+ipPSS3NvPh8HayHWrA==",
+  "revision": "003031fdb073bc57e65f4034251569e2fe7abe9a",
+  "sha256": "df3b7e3013b6af615ad590382ba2c8be28ba631c86ea85122b2a5cf4e579901c",
+  "integrity": "sha512-xWRZDB3uKS1N4LDFECuX5zLOJFNcXgzrz+BWbiXCQMZXiZBXSlSgVGyI24t6GiZgjvfVKxi2DnTuFj7/g8ZC9w==",
   "files": {
     "LICENSE": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
     "capabilities/tls/acme.js": "5dc9ac5ffe58409db5614bbb2cab52e4db6b80c2e70540abe2de1623da959fc6",
@@ -16,7 +16,7 @@
     "capabilities/database/index.js": "8787cae326c6449c115cbf5e8ec1cd2d48005254df5c903f545f777d3db3e8b5",
     "capabilities/dns/index.js": "a42c4f892fc68f66e2e9e0d15c42e314424641f0e0201013dbb089152e68d269",
     "capabilities/http/nginx/index.js": "38cb9406d19d5aaaf9650be4348a4c33547fe636ad30dcb54001e55f64a973ad",
-    "capabilities/mail-service/index.js": "b1a048bb393b298e16ff878191f1086e0a5909f328174c602e97d29fd9c0a47f",
+    "capabilities/mail-service/index.js": "bf57254bc82b56ea9b5cce3556c267a76a05f85d2c00f5525af5f95a4d46f0b5",
     "capabilities/mail/index.js": "2deaf9f877fd18794bfd89dabdb77efffda4822e669c743899a7935d3a31c5b2",
     "capabilities/redis/index.js": "93db0bceca084bbc3af4660204914e4cc43e161a1cca1985587c93a163aa8631",
     "capabilities/secrets/index.js": "a5fd4c392efbbb8b4d7d1d5fd3967a6e10b07d3772e4ef3b6aa7108a57883694",
