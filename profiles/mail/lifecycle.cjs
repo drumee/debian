@@ -54,6 +54,9 @@ function run(argv) {
   if (operation === "preflight") return M.operateMailService(loadState(), "preflight", { authorized: true, activation });
   if (!opts.execute) throw Error("MAIL_EXECUTION_AUTHORIZATION_REQUIRED");
   if (operation === "install") {
+    // Installation is bootstrap only. Existing administrative generations must
+    // be retained on rerun; changes use the guarded administration protocol.
+    if (fs.existsSync(state)) return M.operateMailService(loadState(), "start", { authorized: true, activation, acceptance: cfg.acceptance === true });
     const verifiers = JSON.parse(readPrivate(cfg.verifiers_file));
     const plan = M.planMailService(cfg.service, { registry: JSON.parse(readPrivate(cfg.registry_file)), secret_sources: cfg.secret_sources });
     const prepared = M.prepareMailService(plan, { authorized: true, activation, acceptance: cfg.acceptance === true, private_bind: cfg.acceptance_private_listener === true, verifiers });
